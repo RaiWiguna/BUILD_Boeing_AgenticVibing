@@ -3,7 +3,7 @@
 **Owner-role:** Backend/Replay
 
 **Packet induk:** [backend-session-replay-storage.md](../../packages/backend-session-replay-storage.md)
-**Status:** TARGET / belum diimplementasikan sebagai deliverable task. Inspeksi statis: 4 Oktober 2026.
+**Status per 4 Oktober 2026:** kontrak dan composition boundary BE-01 tersedia di source; dua suite target lulus dengan fixture/stub. Runtime diverifikasi hanya melalui `TestClient` dan SQLite sementara. Import/reducer replay, worker riil, domain review, dan validasi operasional tetap TARGET.
 
 [Indeks task](../README.md) · [Shared contracts](../../shared-contracts.md). Penyempurnaan C-01–C-08 dan aturan ownership/test pada indeks berlaku; ini dokumentasi, bukan hasil runtime.
 
@@ -52,7 +52,7 @@ BE memiliki DTO transport; SD memiliki DTO detector dan AI DTO assist. Port meng
 
 ## 6. Output yang harus diserahkan
 
-Replay DTO/ports yang dapat diimpor tanpa startup side effects; composition harness menggunakan fake ports untuk seluruh consumer. Existing synthetic callers tetap kompatibel.
+`backend/replay_contracts.py` menyediakan manifest/record `replay-1` dan nested types extra-forbid. `backend/ports.py` menyediakan source, public reader, private checkpoint reader, writer, detector/lifecycle, dan worker Protocol. `Session` dan `create_app` menerima dependency overrides; default synthetic tetap menjadi jalur caller lama. Composition harness menggunakan source, reader, detector, lifecycle, writer, worker, dan clock fakes.
 
 ## 7. Asumsi dan unknown
 
@@ -62,7 +62,7 @@ Replay DTO/ports yang dapat diimpor tanpa startup side effects; composition harn
 
 ## 8. Test dan kriteria lulus
 
-QA-02 memiliki test contract task ini. Seluruh command berikut adalah TARGET setelah test/runner dibuat; tidak dijalankan dalam penyusunan dokumentasi ini.
+Executable contract dan composition checks dibuat pada namespace Integration/QA untuk porsi minimum yang diminta task ini. Hasil di bawah berasal dari fixture sintetis, fake ports, TestClient, kredensial uji, clock tetap, dan SQLite sementara; bukan integrasi SD/AI riil.
 
 Tests mandiri (dependency luar memakai stub):
 
@@ -72,10 +72,10 @@ Tests mandiri (dependency luar memakai stub):
 | Negative | Extra field, nonfinite timestamp, private checkpoint request | Command sama | Payload invalid ditolak; public reader tidak mengeluarkan private state. |
 | Compatibility | Fake ports + current CreateSession/Command | Command sama | Synthetic default memakai wire existing; importing DTO tidak membuat DB/worker. |
 
-Integration checks (memerlukan implementation riil yang disebut pada §4):
+Composition check dengan external port stubs (tidak memerlukan implementasi riil SD/AI):
 
 | Test/check | Input/fixture | Cara menjalankan | Hasil yang wajib diperoleh |
 |---|---|---|---|
 | Composition | BE+SD+AI stub profile | `python -m pytest tests/integration/test_composition.py` | Orchestrator satu writer; domain/provider tidak mengimpor Session/Archive. |
 
-Task memenuhi kriteria teknis ketika output §6 tersedia dan assertions relevan di atas lulus dengan bukti command/fixture/version. Stub pass dilaporkan terpisah dari integration/provider riil; tidak menyatakan fidelity mitra atau validasi operasional.
+**Hasil 4 Oktober 2026:** `test_be_01.py` lulus (9 tests); `test_composition.py` lulus (2 tests). Composition mencakup route login/command, direct snapshot WebSocket dengan auth pesan pertama, role/baseline redaction, satu commit per command, dan branch restore tanpa penulisan/evaluasi synthetic sementara. Ini bukan integrasi provider/domain riil. Tidak ada replay reducer/import, proses worker, build paket, review pakar domain, atau validasi operasional yang diverifikasi.

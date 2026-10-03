@@ -1,4 +1,6 @@
 """Local single-process FastAPI application. WebSockets authenticate in the first message."""
+from __future__ import annotations
+
 import asyncio
 import copy
 import hashlib
@@ -6,15 +8,28 @@ import logging
 import os
 import secrets
 import time
+from collections.abc import Callable, Mapping, Sequence
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import Field
 
-from .models import (Acknowledgement, Assessment, Command, Contract, CreateSession, Role, SeatRequest)
+from .models import (
+    Acknowledgement,
+    Assessment,
+    Command,
+    Contract,
+    CreateSession,
+    Role,
+    SeatRequest,
+    SimulationConfig,
+)
+from .ports import CompositionOverrides, SessionWriter, WorkerRequest, WorkerResult
+from .replay_contracts import ReplayEventRecord, ReplaySourceManifest
 from .reporting import report_csv, report_html, session_report
 from .review import Review
 from .scenarios import CATALOGUE
@@ -33,10 +48,42 @@ class BranchRequest(Contract):
     at_ms: int = Field(ge=0)
 
 
+class _ArchivePublicReader:
+    """Project current archive rows to the public reader capability."""
+
+    def __init__(self, archive: Archive):
+        self._archive = archive
+
+    def metadata(self, source_session_id: str) -> dict | None:
+        return self._archive.metadata(source_session_id)
+
+    def frame(self, source_session_id: str, at_ms: int | None = None) -> dict | None:
+        stored = self._archive.frame(source_session_id, at_ms)
+        return copy.deepcopy(stored[0]) if stored else None
+
+    def events(self, source_session_id: str, after_ordinal: int = 0,
+               until_ms: int | None = None) -> list[dict]:
+        stored = self._archive.all_events(source_session_id)
+        return [event for event in stored if event["ordinal"] > after_ordinal
+                and (until_ms is None or event["sim_ms"] <= until_ms)]
+
+
 class Manager:
-    def __init__(self, archive: Archive, operator_key: str):
+    def __init__(self, archive: Archive, operator_key: str, *, ports: CompositionOverrides | None = None,
+                 wall_clock: Callable[[], float] = time.time,
+                 monotonic_clock: Callable[[], float] = time.perf_counter):
         self.archive = archive
         self.operator_key = operator_key
+        self.ports = ports or CompositionOverrides()
+        self.session_writer: SessionWriter = (
+            self.ports.session_writer_factory(archive)
+            if self.ports.session_writer_factory else archive
+        )
+        self.replay_event_source = self.ports.replay_event_source
+        self.replay_archive_reader = self.ports.replay_archive_reader or _ArchivePublicReader(archive)
+        self.worker_port = self.ports.worker
+        self.wall_clock = wall_clock
+        self.monotonic_clock = monotonic_clock
         self.sessions: dict[str, Session | Review] = {}
         self.tokens: dict[str, dict] = {}
         self.lock = asyncio.Lock()
@@ -46,12 +93,12 @@ class Manager:
     def mint(self, role: Role, label: str, session_id: str | None) -> str:
         token = secrets.token_urlsafe(32)
         self.tokens[hashlib.sha256(token.encode()).hexdigest()] = {
-            "role": role, "label": label, "session_id": session_id, "expires": time.time()+8*3600}
+            "role": role, "label": label, "session_id": session_id, "expires": self.wall_clock()+8*3600}
         return token
 
     def identity(self, token: str) -> dict:
         actor = self.tokens.get(hashlib.sha256(token.encode()).hexdigest())
-        if not actor or actor["expires"] < time.time():
+        if not actor or actor["expires"] < self.wall_clock():
             raise HTTPException(401, "Seat token missing or expired")
         return actor
 
@@ -70,11 +117,14 @@ class Manager:
         if id in self.sessions:
             result = copy.deepcopy(self.sessions[id].snapshot())
         else:
-            frame = self.archive.frame(id)
+            frame = self.replay_archive_reader.frame(id)
             if not frame:
                 raise HTTPException(404, "No recorded snapshot")
-            result = copy.deepcopy(frame[0])
-            result["status"] = self.archive.metadata(id)["status"]
+            result = copy.deepcopy(dict(frame))
+            metadata = self.replay_archive_reader.metadata(id)
+            if metadata is None:
+                raise HTTPException(404, "Session not found")
+            result["status"] = metadata["status"]
         # Assessment and response timings are personal evaluation data.
         if actor["role"] != Role.INSTRUCTOR:
             result["assessments"] = [e for e in result["assessments"] if e.get("actor") == actor["label"]]
@@ -90,13 +140,52 @@ class Manager:
             result["events"] = [e | {"message": "Runway alert", "evidence_event_ids": []}
                                 if e["type"].startswith("ALERT") else e for e in result["events"]]
         result["seat"] = {"role": actor["role"].value, "label": actor["label"]}
-        result["server_sent_utc_ms"] = int(time.time()*1000)
+        result["server_sent_utc_ms"] = int(self.wall_clock()*1000)
         return result
+
+    def new_session(self, scenario_id: str, seed: int = 42, config: SimulationConfig | None = None,
+                    condition: str = "flowlens", parent: dict | None = None,
+                    initialize: bool = True) -> Session:
+        return Session(
+            self.archive, scenario_id, seed, config, condition, parent,
+            detector=self.ports.detector,
+            lifecycle=self.ports.alert_lifecycle,
+            writer=self.session_writer,
+            audit_clock=self.wall_clock,
+            initialize=initialize,
+        )
+
+    def read_replay_source(
+        self, after_ordinal: int = 0, until_ms: int | None = None
+    ) -> tuple[ReplaySourceManifest, list[ReplayEventRecord]]:
+        """Read one injected source page without reducing or mutating session state."""
+        if self.replay_event_source is None:
+            raise RuntimeError("No replay event source is configured")
+        manifest = self.replay_event_source.manifest()
+        records = list(self.replay_event_source.read(after_ordinal, until_ms))
+        previous_ordinal = after_ordinal
+        for record in records:
+            if record.source_id != manifest.source_id or record.event.ordinal <= previous_ordinal:
+                raise ValueError("Replay source returned mismatched identity or nonordered event ordinals")
+            previous_ordinal = record.event.ordinal
+        return manifest, records
+
+    def read_public_frame(self, source_session_id: str, at_ms: int | None = None) -> Mapping[str, Any] | None:
+        return self.replay_archive_reader.frame(source_session_id, at_ms)
+
+    def read_public_events(self, source_session_id: str, after_ordinal: int = 0,
+                           until_ms: int | None = None) -> Sequence[Mapping[str, Any]]:
+        return self.replay_archive_reader.events(source_session_id, after_ordinal, until_ms)
+
+    def run_worker(self, request: WorkerRequest) -> WorkerResult:
+        if self.worker_port is None:
+            raise RuntimeError("No replay worker is configured")
+        return self.worker_port.process(request)
 
     async def clock(self):
         while True:
             async with self.lock:
-                wall = time.perf_counter()
+                wall = self.monotonic_clock()
                 for id, session in list(self.sessions.items()):
                     elapsed = wall-self.last.get(id, wall)
                     self.last[id] = wall
@@ -115,7 +204,9 @@ class Manager:
 
 
 def create_app(db_path: str | Path | None = None, operator_key: str | None = None,
-               run_clock: bool = True) -> FastAPI:
+               run_clock: bool = True, *, ports: CompositionOverrides | None = None,
+               wall_clock: Callable[[], float] = time.time,
+               monotonic_clock: Callable[[], float] = time.perf_counter) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         runtime = ROOT / "runtime"
@@ -128,7 +219,8 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             key = key_file.read_text(encoding="utf-8").strip()
             LOGGER.warning("Local operator key is stored at %s (paste into the operator login)", key_file)
         archive = Archive(db_path or runtime / "flowlens.sqlite3")
-        app.state.manager = Manager(archive, key)
+        app.state.manager = Manager(archive, key, ports=ports, wall_clock=wall_clock,
+                                    monotonic_clock=monotonic_clock)
         task = asyncio.create_task(app.state.manager.clock()) if run_clock else None
         yield
         if task:
@@ -191,7 +283,7 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
         async with manager().lock:
             if sum(s.status == "RUNNING" for s in manager().sessions.values()) >= 8:
                 raise HTTPException(409, "Pause another session before creating more lab sessions")
-            session = Session(manager().archive, payload.scenario_id, payload.seed, payload.config, payload.condition)
+            session = manager().new_session(payload.scenario_id, payload.seed, payload.config, payload.condition)
             manager().sessions[session.id] = session
             return session.metadata
 
@@ -301,12 +393,14 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             if not frame:
                 raise HTTPException(422, "No checkpoint at this time")
             metadata = frame[0]["metadata"]
-            from .models import SimulationConfig
-            child = Session(manager().archive, metadata["scenario"]["id"], metadata["seed"],
-                            SimulationConfig.model_validate(metadata["config"]), metadata["condition"],
-                            {"session_id": source_id, "requested_ms": payload.at_ms, "frame_ms": frame[0]["sim_ms"]})
-            child.restore(*frame, [e for e in manager().archive.all_events(source_id)
-                                  if e["ordinal"] <= frame[1]["event_ordinal"]])
+            child = manager().new_session(
+                metadata["scenario"]["id"], metadata["seed"],
+                SimulationConfig.model_validate(metadata["config"]), metadata["condition"],
+                {"session_id": source_id, "requested_ms": payload.at_ms, "frame_ms": frame[0]["sim_ms"]},
+                initialize=False,
+            )
+            child.restore(frame[0], frame[1], [e for e in manager().archive.all_events(source_id)
+                                              if e["ordinal"] <= frame[1]["event_ordinal"]])
             manager().sessions[child.id] = child
             return {"id": child.id, "parent": child.metadata["parent"],
                     "token": manager().mint(Role.INSTRUCTOR, actor["label"], child.id)}
@@ -334,7 +428,7 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             actor = manager().identity(credentials.get("token", ""))
             manager().access(id, actor)
             while True:
-                if actor["expires"] < time.time():
+                if actor["expires"] < manager().wall_clock():
                     await socket.close(code=4401)
                     return
                 await socket.send_json(manager().snapshot(id, actor))

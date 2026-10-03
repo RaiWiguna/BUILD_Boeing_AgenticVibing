@@ -2,15 +2,79 @@
 import copy
 import time
 import uuid
+from collections.abc import Callable, Mapping
 from typing import Any
 
 from .detection import detect, task_complexity
-from .models import CONFIG_VERSION, ENGINE_VERSION, Clearance, Command, Instruction, Role, SimulationConfig, Track
+from .models import (
+    CONFIG_VERSION,
+    ENGINE_VERSION,
+    Clearance,
+    Command,
+    Instruction,
+    Role,
+    SimulationConfig,
+    Track,
+)
+from .ports import AlertLifecyclePort, DetectorPort, SessionWriter
 from .scenarios import CATALOGUE, LAYOUT, scenario_config
 from .simulator import Simulator
 from .storage import Archive
 
 RANK = {"ADVISORY": 1, "WARNING": 2, "CRITICAL": 3, "DATA_DEGRADED": 0}
+
+
+class _LegacyAlertLifecycle:
+    """Compatibility adapter for the lifecycle behavior previously in evaluate()."""
+
+    def update(self, alerts: dict[str, dict], result: Mapping[str, Any], now_ms: int, emit_event) -> None:
+        seen = set()
+        for item in result["candidates"]:
+            key = item["key"]
+            seen.add(key)
+            alert = alerts.get(key)
+            if not alert or alert["status"] == "RESOLVED":
+                alert = {**item, "id": uuid.uuid4().hex[:12], "status": "ACTIVE",
+                         "created_ms": now_ms, "updated_ms": now_ms,
+                         "safe_since_ms": None, "pending_severity": None}
+                alerts[key] = alert
+                emit_event("ALERT_OPEN", item["reason"], alert_id=alert["id"], rule=item["rule"],
+                           severity=item["severity"], evidence_event_ids=item["evidence_event_ids"])
+            else:
+                old_severity = alert["severity"]
+                if RANK[item["severity"]] < RANK[old_severity]:
+                    if alert["pending_severity"] != item["severity"]:
+                        alert["safe_since_ms"] = now_ms
+                        alert["pending_severity"] = item["severity"]
+                    if now_ms-int(alert["safe_since_ms"]) < 3000:
+                        item = {**item, "severity": old_severity}
+                    else:
+                        alert["safe_since_ms"] = None
+                        alert["pending_severity"] = None
+                else:
+                    alert["safe_since_ms"] = None
+                    alert["pending_severity"] = None
+                alert.update(item, updated_ms=now_ms)
+                if old_severity != alert["severity"]:
+                    emit_event("ALERT_LEVEL", f"Alert level {old_severity} → {alert['severity']}",
+                               alert_id=alert["id"], severity=alert["severity"], rule=alert["rule"])
+
+        degraded = set(result["runway"]["degraded_ids"])
+        for key, alert in alerts.items():
+            if key in seen or alert["status"] == "RESOLVED":
+                continue
+            if set(alert["objects"]) & degraded and alert["rule"] != "TRACKING_DEGRADED":
+                alert["data_degraded"] = True
+                alert["safe_since_ms"] = None
+                alert["pending_severity"] = None
+                continue
+            if alert["safe_since_ms"] is None:
+                alert["safe_since_ms"] = now_ms
+            if now_ms-alert["safe_since_ms"] >= 3000:
+                alert["status"] = "RESOLVED"
+                alert["updated_ms"] = now_ms
+                emit_event("ALERT_RESOLVED", "Condition absent for three simulation seconds.",
+                           alert_id=alert["id"], rule=alert["rule"])
 
 
 class SessionError(Exception):
@@ -22,9 +86,15 @@ class SessionError(Exception):
 class Session:
     def __init__(self, archive: Archive, scenario_id: str, seed: int = 42,
                  config: SimulationConfig | None = None, condition: str = "flowlens",
-                 parent: dict | None = None):
+                 parent: dict | None = None, *, detector: DetectorPort | None = None,
+                 lifecycle: AlertLifecyclePort | None = None, writer: SessionWriter | None = None,
+                 audit_clock: Callable[[], float] = time.time, initialize: bool = True):
         self.id = uuid.uuid4().hex[:12]
         self.archive = archive
+        self.writer = writer or archive
+        self.detector = detector
+        self.lifecycle = lifecycle or _LegacyAlertLifecycle()
+        self.audit_clock = audit_clock
         self.scenario = CATALOGUE[scenario_id]
         self.config = config or scenario_config(self.scenario)
         self.seed = seed
@@ -51,8 +121,10 @@ class Session:
         self.metadata = {"id": self.id, "scenario": self.scenario.public(), "seed": seed,
                          "config": self.config.model_dump(), "condition": condition,
                          "engine_version": ENGINE_VERSION, "config_version": CONFIG_VERSION,
-                         "kind": "training", "parent": parent, "created_utc": time.time()}
-        self.archive.create(self.id, self.metadata)
+                         "kind": "training", "parent": parent, "created_utc": self.audit_clock()}
+        self.writer.create(self.id, self.metadata)
+        if not initialize:
+            return
         self.event("SESSION_CREATED", "Session created; synthetic data and unreviewed lab SOP.")
         self.issue("BAW123", Instruction.LAND, "27", "scenario")
         if self.scenario.variant not in {"unauthorized", "reciprocal"}:
@@ -72,7 +144,7 @@ class Session:
     def event(self, type: str, message: str, **fields) -> dict:
         self.event_ordinal += 1
         event = {"id": f"{self.id}:{self.event_ordinal}", "ordinal": self.event_ordinal,
-                 "sim_ms": self.now_ms, "audit_utc": time.time(), "type": type, "message": message, **fields}
+                 "sim_ms": self.now_ms, "audit_utc": self.audit_clock(), "type": type, "message": message, **fields}
         self.events.append(event)
         self.pending_events.append(event)
         return event
@@ -106,57 +178,18 @@ class Session:
 
     def evaluate(self) -> None:
         begin = time.perf_counter()
-        self.result = detect(self.tracks, self.clearances, self.now_ms, self.config, self.runway_open,
-                             list(self.simulator.mobiles), self.previous_tracks)
+        if self.detector is None:
+            self.result = detect(self.tracks, self.clearances, self.now_ms, self.config, self.runway_open,
+                                 list(self.simulator.mobiles), self.previous_tracks)
+        else:
+            self.result = dict(self.detector.evaluate(
+                self.tracks, self.clearances, self.now_ms, self.config, self.runway_open,
+                list(self.simulator.mobiles), self.previous_tracks,
+            ))
         self.detection_ms.append((time.perf_counter()-begin)*1000)
         if len(self.detection_ms) > 9000:
             self.detection_ms = self.detection_ms[-9000:]
-        seen = set()
-        for item in self.result["candidates"]:
-            key = item["key"]
-            seen.add(key)
-            alert = self.alerts.get(key)
-            if not alert or alert["status"] == "RESOLVED":
-                alert = {**item, "id": uuid.uuid4().hex[:12], "status": "ACTIVE",
-                         "created_ms": self.now_ms, "updated_ms": self.now_ms,
-                         "safe_since_ms": None, "pending_severity": None}
-                self.alerts[key] = alert
-                self.event("ALERT_OPEN", item["reason"], alert_id=alert["id"], rule=item["rule"],
-                           severity=item["severity"], evidence_event_ids=item["evidence_event_ids"])
-            else:
-                old_severity = alert["severity"]
-                if RANK[item["severity"]] < RANK[old_severity]:
-                    if alert["pending_severity"] != item["severity"]:
-                        alert["safe_since_ms"] = self.now_ms
-                        alert["pending_severity"] = item["severity"]
-                    if self.now_ms-int(alert["safe_since_ms"]) < 3000:
-                        item = {**item, "severity": old_severity}
-                    else:
-                        alert["safe_since_ms"] = None
-                        alert["pending_severity"] = None
-                else:
-                    alert["safe_since_ms"] = None
-                    alert["pending_severity"] = None
-                alert.update(item, updated_ms=self.now_ms)
-                if old_severity != alert["severity"]:
-                    self.event("ALERT_LEVEL", f"Alert level {old_severity} → {alert['severity']}",
-                               alert_id=alert["id"], severity=alert["severity"], rule=alert["rule"])
-        degraded = set(self.result["runway"]["degraded_ids"])
-        for key, alert in self.alerts.items():
-            if key in seen or alert["status"] == "RESOLVED":
-                continue
-            if set(alert["objects"]) & degraded and alert["rule"] != "TRACKING_DEGRADED":
-                alert["data_degraded"] = True
-                alert["safe_since_ms"] = None
-                alert["pending_severity"] = None
-                continue
-            if alert["safe_since_ms"] is None:
-                alert["safe_since_ms"] = self.now_ms
-            if self.now_ms-alert["safe_since_ms"] >= 3000:
-                alert["status"] = "RESOLVED"
-                alert["updated_ms"] = self.now_ms
-                self.event("ALERT_RESOLVED", "Condition absent for three simulation seconds.",
-                           alert_id=alert["id"], rule=alert["rule"])
+        self.lifecycle.update(self.alerts, self.result, self.now_ms, self.event)
 
     def advance(self, ticks: int = 1, persist: bool = True) -> None:
         for _ in range(ticks):
@@ -214,7 +247,7 @@ class Session:
 
     def execute(self, command: Command, role: Role, actor: str) -> dict:
         self.authorize(command, role)
-        prior = self.archive.command(self.id, command.command_id)
+        prior = self.writer.command(self.id, command.command_id)
         request = {"command": command.model_dump(mode="json"), "actor": actor, "role": role.value}
         if prior:
             if prior[0] != request:
@@ -327,7 +360,7 @@ class Session:
     def save(self, command=None):
         self.sequence += 1
         try:
-            self.archive.save(self.id, self.status, self.pending_events, self.snapshot(), self.checkpoint(), command)
+            self.writer.save(self.id, self.status, self.pending_events, self.snapshot(), self.checkpoint(), command)
             self.pending_events.clear()
         except Exception:
             self.status = "PAUSED"
