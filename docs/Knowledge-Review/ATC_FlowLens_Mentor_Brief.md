@@ -2,16 +2,17 @@
 
 ## Riset kondisi operasional ATC dan rencana pengembangan ATC FlowLens
 
-**Tanggal acuan riset:** 30 September 2026  
-**Tujuan dokumen:** naskah lisan, penjelasan istilah teknologi, persiapan tanya jawab, dan arahan pengembangan.
+- **Tanggal acuan riset:** 30 September 2026
+- **Tujuan dokumen:** naskah lisan, penjelasan istilah teknologi, persiapan tanya jawab, dan arahan pengembangan.
+- **Peran dokumen:** materi komunikasi untuk mentor, bukan spesifikasi software atau inventaris status source terkini.
 
-Dokumen ini merangkum [Laporan Riset Kondisi Operasional ATC dan Kelayakan ATC FlowLens](ATC_FlowLens_Operational_Reality_Research.md). Klaim tentang sistem nyata ditautkan ke sumber publiknya. Contoh angka pada demo FlowLens tetap berstatus simulasi. Ketiadaan bukti publik tidak boleh dibaca sebagai bukti bahwa suatu sistem tidak ada.
+Dokumen ini merangkum [Laporan Riset Kondisi Operasional ATC dan Kelayakan ATC FlowLens](ATC_FlowLens_Operational_Reality_Research.md). Klaim tentang sistem nyata ditautkan ke sumber publiknya. Contoh angka pada demo FlowLens tetap berstatus simulasi. Ketiadaan bukti publik tidak boleh dibaca sebagai bukti bahwa suatu sistem tidak ada. Untuk status source repository, lihat [Status Implementasi](../IMPLEMENTATION_STATUS.md).
 
 ## 1. Pesan utama
 
 **Posisi yang disarankan:** ATC FlowLens adalah simulator dan alat replay untuk membantu latihan dan debrief skenario runway. Sistem menampilkan hubungan antara pergerakan, instruksi, dan waktu berdasarkan data simulasi atau data berizin. FlowLens tidak mengeluarkan clearance, tidak menggantikan controller, dan belum divalidasi untuk operasi ATC nyata.
 
-**Status saat ini:** konsep dan MVP simulasi. Belum ada bukti bahwa FlowLens telah digunakan, diuji oleh controller, disertifikasi, atau terhubung ke sistem ATC nyata.
+**Status dalam briefing per 30 September 2026:** konsep dan MVP simulasi. Brief ini bukan audit source code. Belum ada bukti di dalamnya bahwa FlowLens telah digunakan, diuji oleh controller, disertifikasi, atau terhubung ke sistem ATC nyata.
 
 **Arah pengembangan:** mulai dari simulasi offline yang dapat dijelaskan; validasi bersama instruktur; riset dengan data mitra yang berizin; sandbox read-only bila ada kebutuhan dan sponsor; integrasi operasional hanya sebagai kemungkinan jangka panjang setelah persetujuan serta safety case yang sesuai.
 

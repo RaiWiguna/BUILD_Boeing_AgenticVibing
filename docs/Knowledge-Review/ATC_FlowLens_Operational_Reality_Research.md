@@ -2,7 +2,7 @@
 
 **Tanggal pemeriksaan sumber:** 30 September 2026  
 **Cakupan:** seluruh dokumen di folder docs dan sumber publik; source code proyek tidak diaudit  
-**Status produk untuk laporan ini:** konsep dan MVP simulasi, sesuai asumsi dalam brief. Tidak ada klaim bahwa FlowLens telah dipakai, diuji, disertifikasi, atau terhubung ke operasi ATC nyata.
+**Status produk dalam briefing yang menjadi acuan laporan (30 September 2026):** konsep dan MVP simulasi. Source code proyek tidak diaudit untuk laporan ini. Untuk inventaris repository yang lebih baru, lihat [Status Implementasi](../IMPLEMENTATION_STATUS.md); inspeksi statis tersebut juga bukan validasi runtime, domain, atau operasional. Laporan ini tidak menyatakan FlowLens telah dipakai, diuji, disertifikasi, atau terhubung ke operasi ATC nyata.
 
 ## Cara membaca dan batas riset
 

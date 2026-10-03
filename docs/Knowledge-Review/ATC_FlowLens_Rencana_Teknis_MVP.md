@@ -1,14 +1,14 @@
 # ATC FlowLens — Rencana Sistem, Riset, dan Pembangunan hingga MVP
 
-**Tanggal penyusunan:** 15 September 2026  
-**Versi dokumen:** 1.0  
-**Status:** spesifikasi dan rencana pembangunan; bukan laporan hasil implementasi  
-**Bahasa:** Indonesia  
-**Konteks:** BOEING BUILD — Aerospace & Defense / Advanced Technology and Innovation  
-**Target awal:** MVP simulasi keselamatan runway dan training ATC, kemudian pilot riset  
-**Pemilik keputusan domain yang direncanakan:** product/domain lead dengan review trainer ATC
+- **Tanggal penyusunan:** 15 September 2026
+- **Versi dokumen:** 1.0
+- **Status:** spesifikasi normatif untuk target MVP; bukan laporan hasil implementasi
+- **Bahasa:** Indonesia
+- **Konteks:** BOEING BUILD — Aerospace & Defense / Advanced Technology and Innovation
+- **Target awal:** MVP simulasi keselamatan runway dan training ATC, kemudian pilot riset
+- **Pemilik keputusan domain yang direncanakan:** product/domain lead dengan review trainer ATC
 
-> Dokumen ini menjelaskan apa yang direncanakan untuk dibuat, alasan pemilihannya, pendekatan teknis, pekerjaan yang diperlukan, serta cara memeriksa keberhasilannya. Pernyataan tentang fitur MVP adalah target. Dokumen ini tidak menyatakan fitur telah dibangun, diuji, disertifikasi, atau divalidasi dengan controller.
+> Dokumen ini menjelaskan tujuan, rancangan, dan kriteria penerimaan yang ditargetkan. Pernyataan fitur di sini adalah kebutuhan/rencana, bukan bukti implementasi. Untuk kondisi repository terkini lihat [Status Implementasi](../IMPLEMENTATION_STATUS.md); untuk peta otoritas seluruh dokumen lihat [docs README](../README.md). Dokumen ini tidak menyatakan fitur telah dibangun, diuji, disertifikasi, atau divalidasi dengan controller.
 
 ## Daftar isi
 
