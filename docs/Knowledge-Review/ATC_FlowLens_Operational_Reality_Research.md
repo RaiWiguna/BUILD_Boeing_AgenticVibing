@@ -1,8 +1,9 @@
 # Riset Kondisi Operasional ATC dan Kelayakan ATC FlowLens
 
-**Tanggal pemeriksaan sumber:** 30 September 2026  
-**Cakupan:** seluruh dokumen di folder docs dan sumber publik; source code proyek tidak diaudit  
-**Status produk dalam briefing yang menjadi acuan laporan (30 September 2026):** konsep dan MVP simulasi. Source code proyek tidak diaudit untuk laporan ini. Untuk inventaris repository yang lebih baru, lihat [Status Implementasi](../IMPLEMENTATION_STATUS.md); inspeksi statis tersebut juga bukan validasi runtime, domain, atau operasional. Laporan ini tidak menyatakan FlowLens telah dipakai, diuji, disertifikasi, atau terhubung ke operasi ATC nyata.
+**Tanggal pemeriksaan sumber utama:** 30 September 2026
+**Pembaruan evidence AI advisory dan aturan Indonesia:** 3 Oktober 2026
+**Cakupan:** seluruh dokumen di folder docs dan sumber publik; source code proyek tidak diaudit
+**Status produk menurut arahan pemilik (3 Oktober 2026):** tujuan jangka panjang adalah advisory berbukti untuk controller Tower/Ground runway; MVP yang dituju ialah replay simulator mitra secara offline dan kandidat opsi AI untuk evaluator. Belum ada komitmen mitra atau replay yang dikonfirmasi. Baseline sintetik boleh dipakai sementara, tetapi tidak memvalidasi fidelity operasi. Untuk inventaris repository, lihat [Status Implementasi](../IMPLEMENTATION_STATUS.md); inspeksi statis bukan validasi runtime, domain, atau operasional. Laporan ini tidak menyatakan FlowLens telah dipakai, diuji oleh ATCO, disertifikasi, atau terhubung ke operasi ATC nyata.
 
 ## Cara membaca dan batas riset
 
@@ -27,13 +28,24 @@ Laporan ini bukan audit akses jaringan, source code, SOP lokal yang tidak dipubl
 4. **[FAKTA]** Keberadaan data tidak sama dengan hak akses. Track surveillance, flight plan, clearance/strip, rekaman radio, event alert, dan posisi kendaraan umumnya berada di sistem pengelola layanan navigasi atau operator bandara. Dokumen publik tidak memberikan feed operasional Indonesia yang dapat langsung diambil FlowLens. Perlu kesepakatan, otorisasi, pemeriksaan keamanan dan privasi, interface yang disetujui, serta aturan retensi dan penggunaan. Contoh FAA SWIM menunjukkan akses data bisa diberikan kepada pelanggan yang terdaftar, sedangkan OpenSky membatasi penggunaan komersial maupun integrasi operasional tanpa izin tertulis. [FAA SWIM access](https://www.faa.gov/air_traffic/technology/swim/products/get_connected), [OpenSky Terms](https://opensky-network.org/about/terms-of-use)
 5. **[FAKTA]** ATC tetap memakai komunikasi suara untuk fungsi yang belum tersedia atau tidak cocok untuk datalink; CPDLC adalah saluran pelengkap pada operasi tertentu. Pembacaan dan konfirmasi readback clearance runway merupakan kontrol manusia/prosedur penting. ICAO menyatakan controller harus mendengarkan readback dan memperbaiki perbedaan. Transcript otomatis tidak boleh menjadi sumber clearance otoritatif tanpa konfirmasi petugas. [ICAO Doc 9870](https://www.icao.int/safety/RunwaySafety/Documents/ICAO_manual_prev_RI.pdf), [EUROCONTROL CPDLC di Maastricht UAC](https://www.eurocontrol.int/service/controller-pilot-datalink-communications-our-maastricht-uac)
 6. **[FAKTA]** Laporan KNKT atas runway incursion Adisutjipto pada 20 November 2013 mengidentifikasi taxi clearance yang disalahpahami, transfer control/communication, dan koordinasi Tower–Approach sebagai isu keselamatan pada kejadian itu. Ini contoh Indonesia yang kuat untuk desain skenario dan pertanyaan riset, tetapi tidak mengukur frekuensi masalah saat ini atau membuktikan workflow semua bandara. [KNKT, Runway Incursion Adisutjipto](https://knkt.go.id/Repo/Files/Laporan/Penerbangan/2013/PK-AXG%20%26%20PK-LBH%20Final%20Report.pdf)
-7. **[INFERENSI]** Posisi FlowLens paling realistis untuk hackathon dan adopsi awal adalah **simulator training serta replay/debrief berbasis skenario**, memakai data sintetik dan aturan deterministik. Langkah berikutnya dapat berupa riset dengan instruktur ATC. Dashboard awareness non-safety-critical atau analitik berbasis data mitra dapat dipertimbangkan sesudah ada kesepakatan data dan validasi pengguna. Integrasi real-time ke posisi controller adalah jalur jangka panjang yang belum dapat dibenarkan oleh bukti yang tersedia.
+7. **[INFERENSI]** Dengan tujuan produk baru, jalur yang paling dapat dipertanggungjawabkan adalah baseline sintetik berbasis sumber resmi → replay offline simulator mitra → evaluasi kandidat opsi bersama ATCO → studi shadow terisolasi → penilaian formal penggunaan operasional. Bukti publik mendukung pengkajian AI sebagai alat bantuan, tetapi tidak membuktikan bahwa FlowLens siap membantu controller live. Sampai mitra dan reviewer tersedia, klaim realistis/fidelity tetap belum tervalidasi.
 8. **[SIMULASI]** Contoh BAW123/ARFF-2, RWY 27, touchdown 42 detik, kendaraan clear 58 detik, dan overlap 16 detik berasal dari dokumen internal FlowLens. Angka tersebut bukan data pesawat, airport, clearance, atau hasil sensor nyata. Tampilan ilustrasi yang menamai situasi “high risk” juga bukan threshold yang telah dikalibrasi.
 9. **[BELUM TERVERIFIKASI]** Bukti publik yang memadai belum ditemukan untuk inventaris nasional yang menyatakan bandara mana di Indonesia memakai surface movement radar/A-SMGCS/RIMCAS, transponder kendaraan, electronic flight strips, RWSL, remote/digital tower, atau AI speech-to-text ATC operasional. Maka tingkat kematangan permukaan tidak diberi skor nasional atau per kelas bandara hanya berdasarkan ukuran atau status internasional.
 
 ### Positioning aman
 
-> **ATC FlowLens adalah simulator dan alat replay yang dapat menjelaskan hubungan gerak, instruksi, serta waktu pada skenario runway; sistem ini membantu latihan dan review, tidak mengeluarkan clearance, tidak menggantikan controller, dan belum divalidasi untuk operasi ATC nyata.**
+> **Arah produk:** ATC FlowLens ditujukan menjadi advisory berbukti bagi controller Tower/Ground runway; controller tetap memutuskan dan menerbitkan clearance. **MVP:** replay simulator secara offline dengan kandidat opsi AI untuk evaluasi. Baseline sintetik tidak membuktikan fidelity lapangan, dan FlowLens belum divalidasi untuk operasi ATC nyata.
+
+### Tahap produk dan status evidence
+
+| Tahap | Tujuan | Status/batas evidence |
+|---|---|---|
+| Baseline sintetik | Menguji alur replay, waktu, provenance, ketidakpastian, dan evidence-linked candidate options | Dapat dibangun tanpa akses site; hasil hanya berlaku pada fixture yang dibuat dan belum membuktikan fidelity operasi |
+| MVP replay simulator mitra | Mengulang event/audio simulator training berizin secara offline dan menghasilkan candidate options untuk evaluator | Target produk; per 3 Okt 2026 mitra belum dikonfirmasi. Memerlukan izin, interface/timebase, kualitas sumber, ground truth, dan batas retensi |
+| Review ATCO | Memeriksa kesesuaian workflow Tower/Ground runway, relevansi opsi, unsupported assumptions, serta trust/automation bias | Harus dilakukan dengan reviewer dan protocol yang sesuai; belum dilakukan |
+| Shadow/live advisory | Menilai potensi bantuan pada data lebih dekat ke operasi tanpa memengaruhi keputusan/controller | Tahap terpisah; perlu sponsor ANSP, pemilik data, penentuan intended-use/regulator, safety/human factors, cybersecurity dan data governance |
+
+Kata “buddy” adalah positioning produk, bukan klaim bahwa model memiliki kompetensi, tanggung jawab, atau kewenangan manusia. Kandidat opsi offline bukan clearance dan tidak boleh masuk ke command path.
 
 ## 2. Kondisi nyata ekosistem ATC/ATM dan bandara
 
@@ -377,19 +389,19 @@ Level berikut memakai kerangka yang diminta dalam brief dan **bukan standar ICAO
 
 | Prioritas | Fitur | Mengapa layak |
 |---|---|---|
-| 1 | Replay timeline dengan event source dan timestamp | Nilainya bisa diuji tanpa live feed; mendukung debrief dan penelusuran sumber. |
-| 2 | Scenario authoring dan instructor control | Memungkinkan skenario reproducible dan variasi terkontrol untuk pilot training. |
-| 3 | Synthetic aircraft/vehicle map + runway geometry | Memperjelas spatial/temporal relation dalam simulator tanpa menyiratkan surveillance nyata. |
-| 4 | Deterministic conflict window + explanation + assumptions | Mendemonstrasikan logika transparan dan mudah di-review; tampilkan rentang/asumsi. |
-| 5 | Data-quality / stale / synthetic indicator | Mengajarkan batas observability dan mencegah demo overconfidence. |
+| 1 | Replay timeline yang menjaga source event, timebase, dan timestamp | Mendukung penelusuran sumber dan dapat diuji tanpa live feed. |
+| 2 | Import offline simulator mitra dengan provenance/quality manifest | Mendekatkan MVP ke workflow training nyata setelah izin/interface tersedia. |
+| 3 | Scenario authoring dan synthetic baseline yang explicitly unvalidated | Memungkinkan kerja teknis repeatable sebelum akses mitra ada. |
+| 4 | Candidate options offline dengan evidence, uncertainty, dan review ATCO | Menguji bentuk advisory tanpa memasuki alur clearance/controller aktif. |
+| 5 | Data-quality / stale / missing/source indicator | Mencegah model menyamakan data hilang dengan keadaan clear atau pasti. |
 
 ### Lima fitur yang sebaiknya ditunda
 
-1. Automated real-time voice transcription/readback mismatch.
+1. Live VHF/audio transcription atau readback recommendation pada posisi controller.
 2. Live aircraft/vehicle tracking melalui integrasi ATC atau aggregator public.
 3. Workload score untuk controller atau fatigue indicator.
 4. Airport operations dashboard untuk active runway/dispatch decisions.
-5. AI recommendations, runway sequencing optimization dan operational ATC integration.
+5. Live AI advisory, runway sequencing optimization, safety-critical alerts, dan operational ATC integration; opsi AI offline replay tetap dievaluasi pada MVP.
 
 ### Fitur yang perlu dihapus dari klaim MVP
 
@@ -403,18 +415,18 @@ Level berikut memakai kerangka yang diminta dalam brief dan **bukan standar ICAO
 
 | Tahap | Fitur/data/pengguna | Validasi dan indikator sukses | Partner/risiko | Klaim yang belum boleh dibuat |
 |---|---|---|---|---|
-| 1. Hackathon MVP | Offline simulation; satu fictional airport layout; seeded aircraft/vehicle movement; clearance/event authored; deterministic interval logic; replay. Pengguna: tim dan juri demo. | Scenario repeatability, rule trace, timeline completeness, data quality labels, correct reset/seek. Bila ada trainer, review face validity. | Tidak memerlukan data live; risiko utama ialah simulasi menyerupai prosedur aktual padahal belum divalidasi. | No live ATC, no operational accuracy, no collision-prevention, no workload reduction. |
-| 2. Training/replay pilot | Skenario authoring, instructor console, replay/branch, bookmark, debrief report; manual verified events; peserta/instruktur di simulator training. | Usability, event comprehension, rule transparency, debrief completeness, reported workload after scenario (mis. NASA-TLX). Bandingkan dengan baseline training tasks; sample/design dinyatakan. | ATC school/training center dan qualified trainer; perlu ethics/consent dan review scenario. | Tidak menyatakan training outcome berlaku untuk controller line ops atau mengurangi safety events. |
-| 3. Pilot riset bersama | Tambah satu jenis authorized data (mis. simulator event log atau historical de-identified track); test data provenance, time alignment dan missingness. | Measure event retrieval/time, identification of missing data, explanation comprehension, false alert in curated ground truth, inter-rater agreement. | ANSP/airport/airline/research institution; data agreement, privacy, cyber dan access. | Tidak ada live decision-support atau generalisasi ke semua bandara. |
-| 4. Airport ops support sandbox | Read-only status board untuk non-safety-critical operational awareness dengan data mitra; explicit data health. | User acceptance, stale/failure handling, interface reliability, cyber/security review, documented roles and degraded mode. | Airport ops + ANSP + IT/CNS + regulator consultation; risiko automation bias dan ambiguous authority. | Jangan mengeluarkan clearance, runway-clear state, alert safety-critical atau rekomendasi dispatch. |
-| 5. Integrasi operasional potensial | Hanya jika use case diminta oleh ANSP/airport dan masuk approved system/change process; qualified data, interface, safety/human factors case. | Independent safety assessment, operational trials, human-in-loop validation, site acceptance, monitoring, periodic revalidation. | Authority, ANSP, airport, data owners, vendor and cybersecurity authority. | Tidak ada jadwal atau kepastian fase ini; no replacement controller/no guarantee. |
+| 1. Synthetic baseline | Satu runway, synthetic airport, seeded events/audio, deterministic replay, transcript/highlights dan candidate options offline. | Repeatability, time/evidence trace, source quality states; semua hasil berlabel synthetic dan bukan fidelity-validated. | Tidak ada partner yang dikonfirmasi; risiko scenario dianggap SOP/site-real. | Tidak ada klaim prosedur aktual, akurasi radio operasional, pencegahan collision atau pengurangan workload. |
+| 2. MVP partner replay | Import offline session simulator training mitra, candidate options hanya untuk evaluator. | Permission/provenance/timebase/coverage audit; event reference validity; source-specific metric dan negative findings. | Perlu training center/ANSP, data owner, agreement, retention dan security review. | Tidak ada output pada posisi controller aktif atau generalisasi lintas lokasi. |
+| 3. Review ATCO / research pilot | Reviewer ATCO membandingkan workflow, transcript/evidence, options, dan uncertainty terhadap replay ground truth. | Protocol, reviewer expertise, relevance/unsupported-assumption rates, task comprehension/usability dan sample limits. | Reviewer dan data belum tersedia; bukan approval regulator atau operational validation. | Tidak mengklaim recommendation safety/benefit atau readiness. |
+| 4. Shadow-mode research | Analisis paralel terisolasi pada data yang lebih dekat ke operasi; controller tidak menerima candidate output. | Intended-use/safety classification, cyber/security, data governance, failure/degraded behavior, monitoring dan independent evaluation. | Hanya atas sponsor/data/authority approval; live-source gate tersendiri. | Tidak memengaruhi layanan atau keputusan ATC. |
+| 5. Operational advisory proposal | Site-specific human-supervised decision support setelah research gates. | Formal safety/human-factors case, regulatory determination, independent validation, training, monitoring, revalidation dan change control. | Proyek tersendiri bersama ANSP, airport, authority, data owners dan supplier. | Tidak ada jadwal, approval, safety claim, atau komitmen yang diasumsikan. |
 
 ### Exit criteria yang disarankan
 
-- **Hackathon → training pilot:** instructor domain reviewer dapat menjelaskan setiap rule, model uncertainty dan simulated data status; tidak ada clearance rule yang tidak ditinjau.
-- **Training pilot → research pilot:** protocol, participants, measures, data rights, ground truth dan analysis predeclared; prototype di luar operational network.
-- **Research → ops sandbox:** sponsor tertulis, interface ownership, security assessment, safety classification/regulatory advice, degraded mode dan user training disepakati.
-- **Ops sandbox → operational proposal:** hanya setelah hasil evaluasi diterima oleh ANSP/authority dan semua assurance/change gates dipenuhi; ini bukan otomatis terjadi karena aplikasi bekerja di demo.
+- **Synthetic baseline → partner replay:** agreement/permission, approved export/interface, retention, source manifest, ground truth, clock alignment, dan data owner tersedia.
+- **Partner replay → ATCO review:** reviewer dan protocol disepakati; semua recommendation candidates dapat ditautkan pada evidence dan dinilai untuk unsupported assumptions.
+- **Replay research → shadow research:** sponsor tertulis, intended-use/regulatory assessment, interface ownership, safety/cyber/data assessment, degraded mode, dan monitoring disepakati; output tidak ditampilkan kepada controller.
+- **Shadow research → operational proposal:** ANSP/authority menerima hasil dan seluruh assurance/change gates dipenuhi; demo yang bekerja tidak otomatis memenuhi gate.
 
 ## 15. Risiko regulasi, keselamatan, cybersecurity, data dan adopsi
 
@@ -501,6 +513,8 @@ Level berikut memakai kerangka yang diminta dalam brief dan **bukan standar ICAO
 
 Tanggal akses sumber di bawah adalah 30 September 2026, kecuali bila tanggal dokumen dinyatakan terpisah. Sumber resmi dibedakan dari first-party provider/country reports; jumlah/coverage selalu mengikuti cakupan geografis dan tanggal sumber.
 
+Sumber tambahan E41–E46 diperiksa 3 Oktober 2026. Pemeriksaan ini memutakhirkan AI assurance/prosedur Indonesia yang relevan; ia bukan audit lengkap seluruh peraturan atau source code.
+
 ### Register sumber eksternal
 
 | ID | Sumber, tanggal/waktu | Kegunaan dan batas |
@@ -545,6 +559,12 @@ Tanggal akses sumber di bawah adalah 30 September 2026, kecuali bila tanggal dok
 | E38 | [NASA ASRS Database](https://asrs.arc.nasa.gov/search/database.html) | Voluntary confidential reports, exported data caveat and explicit non-validation warning. |
 | E39 | [FAA Terminal ATC Procedures](https://www.faa.gov/air_traffic/publications/atpubs/atc_html/chap3_section_7.html) | Example of U.S. taxi/runway crossing rules; comparative only. |
 | E40 | [EUROCONTROL OpenSky terms](https://opensky-network.org/about/terms-of-use) | Non-profit education/research license; written permission for commercial and operational use. |
+| E41 | [Kemenhub JDIH — PM 65/2017 Part 170](https://jdih.dephub.go.id/peraturan/detail?data=6GcuOvUrW6426aSdKT754z4a8bhQfAjxb4DsAYg4Z63e8mxq8ahNg4U4EqUfeEGx7Z8LOPTqFLas48gj5jeeo7MI4uPmZ0bPm8w4ZBIeSwfUOKHLkmCCVSTPT9kH3qiFwd7H1AMrDni5eoD36bepdytQmW), JDIH diperiksa 3 Okt 2026 | PM 65/2017 berstatus berlaku dan tercatat diubah PM 10/2022; dasar rules lalu lintas Indonesia. Applicability detail dan perubahan berikutnya harus dikonfirmasi sebelum pilot. |
+| E42 | [Kemenhub JDIH — PR 5 DJPU/2024, MOS CASR Part 170-01](https://jdih.dephub.go.id/peraturan-terjemahan/detail?data=LgllyaaumOsGHjhwAeLvgs8bT9Q2T34r38n0dQ9S0cWz8m0XPG44td58LOPTuyHJH04uTQM7nEotA4Ob9ZScczUG4jn24lpG3EZ4jn1og82BO6CjJ5HjhQGjLELEFy9LlGwY84ERx3ab4tKGGpQsQB4Dhw), JDIH diperiksa 3 Okt 2026 | Laman JDIH menyatakan efektif 20 Mar 2024 dan berlaku saat diperiksa; rujukan ATS Operational Procedures. SOP/LOA fasilitas tetap diperlukan. |
+| E43 | [EASA AI Concept Paper Issue 2 announcement](https://www.easa.europa.eu/en/newsroom-and-events/news/easa-publishes-artificial-intelligence-concept-paper-issue-2-guidance), 6 Mar 2024 | Concept/guidance untuk ML assistance dan human-AI teaming; EU context, bukan regulasi Indonesia atau approval FlowLens. |
+| E44 | [EASA AI publication register](https://www.easa.europa.eu/en/publication-types/artificial-intelligence), memeriksa 3 Okt 2026 | EASA menampilkan Proposed Issue 3 bertanggal 3 Jun 2026; statusnya masih proposed, bukan ketentuan final. |
+| E45 | [FAA Roadmap for Artificial Intelligence Safety Assurance](https://www.faa.gov/media/82891) | Prinsip incremental assurance, responsibility clarity, dan treat AI as tool; FAA menyatakan cakupan roadmap terkait aircraft/inflight systems, sehingga hanya comparative context untuk ATC Indonesia. |
+| E46 | [ICAO CNS SG/13-WP/20](https://www.icao.int/MID/Documents/2024/CNS%20SG13/CNS%20SG13-WP20.pdf), 2024 | Working paper membahas peluang AI pada ATM termasuk speech/readback; bukan Standard, SARPs, approved operational system, atau adoption evidence. |
 
 ### Sumber internal utama
 
@@ -564,7 +584,7 @@ Tanggal akses sumber di bawah adalah 30 September 2026, kecuali bila tanggal dok
 
 ### 1. Kalimat positioning FlowLens paling aman
 
-**ATC FlowLens adalah simulator dan alat replay untuk menjelaskan hubungan gerak, instruksi, serta waktu pada skenario runway; ia membantu latihan/debrief manusia, tidak mengeluarkan clearance, tidak menggantikan controller, dan belum divalidasi untuk operasi ATC nyata.**
+**Tujuan jangka panjang ATC FlowLens adalah advisory berbukti bagi controller Tower/Ground runway, dengan controller tetap memegang keputusan dan clearance. MVP ditujukan untuk replay offline simulator dan evaluasi candidate options. Baseline sintetik belum membuktikan fidelity operasi, dan FlowLens belum divalidasi atau disetujui untuk penggunaan ATC live.**
 
 ### 2. Lima fakta lapangan paling penting
 
@@ -576,27 +596,27 @@ Tanggal akses sumber di bawah adalah 30 September 2026, kecuali bila tanggal dok
 
 ### 3. Lima asumsi FlowLens yang harus diuji
 
-1. [ASUMSI] Training instructors/peserta membutuhkan scenario replay terintegrasi seperti yang diusulkan.
-2. [ASUMSI] Event timeline dan explanation memperbaiki pemahaman dibanding simulator/debrief baseline.
-3. [ASUMSI] Data model synthetic FlowLens cukup mewakili aircraft, vehicle, clearance dan runway state untuk tujuan latihan yang dipilih.
-4. [ASUMSI] Task-complexity indicator membantu trainer tanpa dianggap sebagai mental workload measurement.
-5. [ASUMSI] Institusi bersedia menyediakan simulator/log/rekaman yang tepat dengan hak dan perlindungan data yang jelas.
+1. [ASUMSI] Controller Tower/Ground membutuhkan advisory berbukti di atas workflow dan safety nets yang ada; hal ini belum diuji dengan pengguna target.
+2. [ASUMSI] Event timeline, explanation, dan candidate options memperbaiki pencarian/review evidence; perlu evaluasi komparatif.
+3. [ASUMSI] Synthetic FlowLens dapat mewakili sebagian aspek yang relevan sebelum diuji pada partner simulator; representativeness belum diketahui.
+4. [ASUMSI] Task-complexity indicator berguna tanpa disalahartikan sebagai pengukuran workload mental.
+5. [ASUMSI] Institusi bersedia menyediakan simulator/log/reviewer dengan hak, retention, dan perlindungan data yang dapat disepakati.
 
 ### 4. Lima fitur paling layak dikembangkan
 
-1. Replay timeline dengan event source, timestamp, seed dan branch.
-2. Scenario authoring serta instructor controls.
-3. Synthetic aircraft/vehicle map dengan geometri eksplisit.
-4. Deterministic conflict-window explanation dengan assumptions/uncertainty.
-5. Data-quality, stale/missing, manual dan synthetic markers.
+1. Offline replay timeline yang mempertahankan source event, timestamp, provenance, dan timebase.
+2. Import replay simulator mitra dengan izin dan manifest quality.
+3. Candidate options offline dengan rationale/evidence/unknown untuk review ATCO.
+4. Deterministic conflict-window explanation dengan asumsi dan uncertainty.
+5. Synthetic/stale/missing/manual/authorized-source labels yang tidak menyatakan data synthetic sebagai real.
 
 ### 5. Lima fitur yang sebaiknya ditunda
 
-1. Automated live voice transcription/readback mismatch.
+1. Live voice transcription/readback advisory pada posisi controller.
 2. Live track feed integration dari ATC/surveillance.
 3. Controller workload/fatigue scoring.
-4. Airport operations dashboard yang berdampak ke runway decisions.
-5. AI recommendation, sequencing optimization, safety-critical alert dan operational ATC integration.
+4. Airport operations dashboard yang mengubah atau memengaruhi runway decisions.
+5. Live AI recommendation, sequencing optimization, safety-critical alert, dan operational ATC integration tanpa assurance/approval tersendiri. Candidate options offline tetap termasuk target evaluasi replay.
 
 ### 6. Lima risiko terbesar jika FlowLens dipaksakan sebagai sistem operasional
 
@@ -608,6 +628,6 @@ Tanggal akses sumber di bawah adalah 30 September 2026, kecuali bila tanggal dok
 
 ### 7. Rekomendasi posisi produk
 
-Posisikan FlowLens sebagai **training simulator + replay/safety-learning tool** terlebih dahulu. Jalankan pilot bersama ATC training center/qualified instructor. Safety analytics dapat menyusul dengan event data yang disetujui. Airport operations support tetap sandbox/read-only; real-time ATC integration hanya mungkin melalui project formal dengan ANSP, airport operator, regulator, data owners dan approval yang sesuai.
+Posisikan FlowLens sebagai **jalur pengembangan menuju advisory Tower/Ground yang diawali replay offline**. Bangun baseline sintetik berbasis bukti; lanjutkan ke replay simulator mitra dan review ATCO saat izin/data tersedia; lalu pertimbangkan shadow-mode formal. Penggunaan yang terlihat atau berpengaruh pada posisi live hanya dapat dipertimbangkan melalui proyek tersendiri bersama ANSP, operator bandara, regulator, pemilik data, dan assurance yang sesuai. Bukti publik bukan approval dan tidak menetapkan readiness.
 
-**Kesimpulan:** fokus FlowLens sebaiknya membantu latihan dan rekonstruksi skenario dengan data yang benar-benar dipahami, bukan menjanjikan surveillance baru. Pilih bukti dan prosedur per fasilitas sebelum menyebut teknologi “sudah digunakan”, dan sebut keterbatasan data sebagai bagian dari desain produk.
+**Kesimpulan:** realisme MVP harus berasal dari replay simulator dan review manusia yang berizin, bukan dari tampilan yang tampak realistis. Sampai mitra/reviewer tersedia, hasil synthetic hanya menunjukkan perilaku pada fixture. Pilih bukti dan prosedur per fasilitas sebelum menyebut teknologi “sudah digunakan”; jangan menjanjikan kemampuan live, safety benefit, atau readiness dari riset publik saja.

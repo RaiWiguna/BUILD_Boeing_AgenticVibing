@@ -16,6 +16,7 @@ Dokumen ini mencatat apa yang tampak tersedia di source pada tanggal pemeriksaan
 | Frontend | `frontend/` memiliki konfigurasi Vite, entry point React, API helper, dan type TypeScript. | Belum menjadi dashboard: `main.tsx` mengimpor `App` dan `styles.css`, tetapi kedua modul tersebut tidak tersedia pada pemeriksaan ini. |
 | Penyajian UI | `backend/app.py` menyajikan bundle dari `frontend/dist`; direktori tersebut belum memiliki `index.html`. Tanpa hasil build, route `/` mengembalikan halaman instruksi dengan HTTP 503. | Belum dapat digunakan sebagai aplikasi web end-to-end dari kondisi bundle yang diperiksa. |
 | Test dan validasi manusia | Tidak ditemukan direktori `tests/` atau hasil test pada pemeriksaan ini. | Tidak ada klaim test lulus, review trainer, studi peserta, sertifikasi, atau manfaat keselamatan tervalidasi. |
+| AI advisory replay | Requirement target mencakup replay offline simulator mitra, transkripsi/evidence, dan kandidat opsi AI yang ditinjau evaluator. Baseline sintetik boleh dipakai sebelum akses mitra tersedia. | Tidak ada bukti source untuk worker ASR, kandidat opsi, audio store/replay review UI, atau adapter replay; belum ada mitra/replay berizin yang dikonfirmasi. Tidak ada domain review atau validasi operasional. |
 
 ## Arsitektur target yang didokumentasikan
 
@@ -25,9 +26,9 @@ Arsitektur tersebut adalah target spesifikasi. Rincian acceptance dan batas MVP 
 
 ## Batas produk yang berlaku
 
-- MVP menggunakan skenario sintetik dan ditujukan untuk training/replay; bukan integrasi live ATC.
-- FlowLens tidak menerbitkan clearance operasional dan tidak mengambil alih keputusan controller.
-- AI transkripsi/parsing komunikasi, koneksi surveillance operasional, sertifikasi, serta klaim pengurangan insiden belum menjadi hasil implementasi yang dibuktikan.
+- Arah produk jangka panjang adalah advisory berbukti bagi controller Tower/Ground runway; target MVP tetap replay offline, bukan live ATC.
+- FlowLens tidak menerbitkan clearance dan tidak mengambil alih keputusan controller.
+- Replay simulator mitra yang berizin menjadi target validasi fidelity. Baseline sintetik sementara tidak membuktikan realisme operasional. Transkripsi, kandidat opsi AI, adapter replay, dan UI review belum terbukti ada di source. Live integration, persetujuan/assurance, dan klaim manfaat keselamatan belum dicapai.
 - Indikator kompleksitas/workload adalah konteks eksperimen, bukan diagnosis kondisi mental atau ukuran fitness-for-duty.
 
 ## Memperbarui status

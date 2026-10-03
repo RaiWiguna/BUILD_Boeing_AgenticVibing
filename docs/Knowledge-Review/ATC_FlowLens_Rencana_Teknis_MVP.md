@@ -10,6 +10,8 @@
 
 > Dokumen ini menjelaskan tujuan, rancangan, dan kriteria penerimaan yang ditargetkan. Pernyataan fitur di sini adalah kebutuhan/rencana, bukan bukti implementasi. Untuk kondisi repository terkini lihat [Status Implementasi](../IMPLEMENTATION_STATUS.md); untuk peta otoritas seluruh dokumen lihat [docs README](../README.md). Dokumen ini tidak menyatakan fitur telah dibangun, diuji, disertifikasi, atau divalidasi dengan controller.
 
+> **Addendum requirement 3 Oktober 2026:** gunakan [AI Assist Buddy MVP Addendum](ATC_FlowLens_AI_Assist_Buddy_MVP_Prompt.md) untuk target AI advisory. Baseline produk kini bertahap: scenario sintetik berbasis bukti, MVP replay offline dari simulator mitra dengan kandidat opsi AI untuk evaluasi, lalu tujuan jangka panjang advisory Tower/Ground yang dikaji terpisah. Belum ada mitra/replay yang dikonfirmasi; baseline sintetik bukan bukti fidelity atau validasi operasional. Rencana ini tetap menjadi spesifikasi core simulator, runway dan session.
+
 ## Daftar isi
 
 1. [Tujuan, keputusan awal, dan cara membaca dokumen](#1-tujuan-keputusan-awal-dan-cara-membaca-dokumen)
@@ -37,9 +39,9 @@
 
 ### 1.1 Tujuan
 
-Mengubah konsep ATC FlowLens dalam docs menjadi spesifikasi yang cukup terperinci untuk memandu pembangunan sebuah MVP. MVP harus menunjukkan hubungan antara pergerakan, instruksi, waktu, dan kualitas informasi dalam skenario runway yang dapat direproduksi.
+Mengubah konsep ATC FlowLens dalam docs menjadi spesifikasi yang cukup terperinci untuk memandu pembangunan MVP Tower/Ground runway. MVP harus mereproduksi hubungan antara pergerakan, instruksi, komunikasi, waktu, dan kualitas sumber melalui replay offline simulator mitra. Sampai mitra tersedia, baseline sintetik berbasis sumber resmi dipakai untuk menguji alur teknis dan diberi status belum tervalidasi terhadap workflow lapangan.
 
-Hasil yang ditargetkan adalah sistem training yang dapat menjawab:
+Hasil bertahap yang ditargetkan adalah replay yang dapat membantu evaluator/controller menelaah:
 
 1. Apa yang sedang teramati pada runway?
 2. Apa yang mungkin terjadi berdasarkan informasi yang tersedia sekarang?
@@ -48,19 +50,21 @@ Hasil yang ditargetkan adalah sistem training yang dapat menjawab:
 5. Mengapa alert muncul atau berubah?
 6. Bagaimana peserta mengenali dan merespons keadaan tersebut?
 7. Bagaimana urutan kejadian dapat dipahami kembali setelah latihan?
+8. Opsi tindak lanjut apa yang layak dipertimbangkan berdasarkan evidence yang tersedia, dan apa yang masih unknown? Kandidat opsi ini hanya diuji offline dalam replay; ia bukan instruksi clearance.
 
 ### 1.2 Keputusan yang dipakai sebagai baseline
 
 | Aspek | Keputusan | Konsekuensi |
 |---|---|---|
-| Produk awal | Simulation-first training tool | Tidak memerlukan data ATC live untuk mencapai MVP |
-| Pengguna prioritas | Trainer dan peserta ATC | Fitur debriefing dan kendali instruktur menjadi kebutuhan inti |
-| Tahap lanjutan | Pilot riset setelah MVP | Hasil teknis dan hasil manusia dinilai terpisah |
+| Produk awal | Evidence-grounded Tower/Ground runway advisory, dikembangkan bertahap melalui simulator dan replay offline | Tujuan live adalah arah jangka panjang; bukan klaim kemampuan MVP |
+| MVP | Replay offline simulator mitra dengan kandidat opsi AI untuk evaluasi; baseline sintetik berbasis bukti bila akses belum tersedia | Tidak ada audio/feed produksi atau advisory di posisi live |
+| Pengguna prioritas | Controller Tower/Ground sebagai intended user; ATCO/instruktur/evaluator sebagai reviewer | Review domain dan workflow site-specific belum tersedia |
+| Tahap lanjutan | Validasi replay dengan mitra → studi shadow-mode terpisah → penilaian formal sebelum proposal operational use | Hasil teknis, domain, human factors, dan safety dinilai terpisah |
 | Tim/waktu | 3–4 orang, 6–8 minggu | Satu runway; feature creep dibatasi |
 | Pendekatan deteksi | Rule engine deterministik + geometri + interval waktu | Semua keputusan alert dapat ditelusuri |
-| AI komunikasi | Fase setelah inti MVP | Tidak ada klaim ASR atau parsing radio otomatis pada MVP |
-| Deployment | Satu server lokal, beberapa browser dalam LAN | Clock dan state dipusatkan; internet bukan dependensi latihan |
-| Data | Sintetik dengan seed, version, dan asumsi terdokumentasi | Repeatability dan evaluasi ground truth dimungkinkan |
+| AI komunikasi/advisory | Transcript dan evidence-linked candidate options dari replay offline | Unknown/uncertainty wajib terlihat; output tidak menjadi clearance atau severity safety |
+| Deployment | Pemrosesan replay lokal/offline; LAN hanya untuk lingkungan riset yang disetujui | Tidak ada koneksi ke posisi kontrol aktif dalam MVP |
+| Data | Replay simulator mitra yang diizinkan; synthetic baseline ber-seed sampai data mitra tersedia | Replay mitra dan review ATCO menjadi gate untuk klaim fidelity; synthetic ground truth hanya menilai perilaku pada scenario itu |
 | Geometri | Satu runway fisik dengan dua arah operasi | 09/27 merupakan resource fisik yang sama |
 | Model workload | Indikator kompleksitas tugas eksperimen | Tidak menilai kesehatan, fatigue, atau kemampuan individu |
 
@@ -154,16 +158,26 @@ Tanggal pemeriksaan sumber pada penyusunan ini adalah **15 September 2026**. Tan
 | E08 | FAA VMAT guide; tanggal publikasi laman tidak ditetapkan pada register ini | Kendaraan bertransponder menyediakan identitas dan lokasi bagi surface surveillance | Ground vehicle tracking sebagai input tersendiri | Tidak semua kendaraan atau sumber data tercakup |
 | E09 | NASA-TLX official resource | Enam dimensi digunakan untuk workload subjektif | Metode studi pengguna | Bukan model otomatis real-time atau diagnosis fatigue |
 | E10 | OpenSky terms; ketentuan aktif saat diperiksa | Penggunaan komersial dan operational REST API memerlukan kesepakatan tertulis sesuai ketentuannya | Menentukan batas adapter data | Akses publik tidak otomatis memberi izin produk komersial |
-| E11 | ATCO2 official data description | Tersedia training/test corpus; subset satu jam untuk riset ASR | Fase AI komunikasi | Akses dan lisensi setiap subset berbeda |
+| E11 | ATCO2 official data description | Tersedia training/test corpus; subset satu jam untuk riset ASR | Corpus opsional untuk studi berlisensi; bukan data default demo | Akses dan lisensi setiap subset berbeda |
 | E12 | AviationWeather Data API | METAR/TAF tersedia; CORS tidak diizinkan saat diperiksa | Pengayaan konteks cuaca melalui backend | Laporan cuaca bukan state runway berfrekuensi tinggi |
 | E13 | FAA RIM FY2025, dipublikasikan 1 Agustus 2026; DOT/FAA/TC-26/27 | Kajian hotspot dan geometri mendukung mitigasi incursion | Pengembangan scenario geometry | Tidak memberi package lengkap track–clearance–audio |
 | E14 | NASA ASRS database | Narasi laporan keselamatan dapat ditelusuri | Inspirasi hazard/komunikasi | Data laporan tidak menjadi denominator kejadian atau trajectory lengkap |
+| E15 | Kemenhub JDIH, PM 65/2017 Part 170, diubah PM 10/2022; status diperiksa 3 Okt 2026 | Rujukan Indonesia untuk air traffic rules | Modelkan istilah/peristiwa sesuai aturan yang berlaku | Bukan pengganti SOP/LOA site; cek amendemen dengan otoritas sebelum pilot |
+| E16 | PR 5 DJPU/2024, MOS CASR 170-01; JDIH menyatakan berlaku saat diperiksa 3 Okt 2026 | Rujukan prosedur operasional ATS Indonesia | Review scenario dan event communication | Versi/efektivitas tetap diverifikasi; tidak memuat semua SOP lokal |
+| E17 | AirNav, New JATSC/New ATMAS, 11 Sep 2026 | First-party description capability di JATSC | Konteks sistem nasional pada fasilitas yang disebut | Tidak membuktikan deployment menyeluruh, interface publik, atau hak akses FlowLens |
+| E18 | KNKT, Adisutjipto runway incursion; occurrence 20 Nov 2013/report 2014 | Kasus lokal untuk identifikasi urutan komunikasi/handoff | Inspirasi hazard scenario | Satu kasus; bukan prevalensi atau SOP kini |
+| E19 | EASA AI Concept Paper Issue 2, 6 Mar 2024 | Guidance konseptual Level 1/2, human-AI interaction, learning assurance | Prinsip human oversight/evaluation | Bukan regulasi Indonesia atau approval FlowLens |
+| E20 | EASA AI Concept Paper Proposed Issue 3, 3 Jun 2026 | Status daftar EASA masih “Proposed” saat diperiksa 3 Okt 2026 | Pantau perkembangan panduan | Draft/usulan, bukan persyaratan final atau approval |
+| E21 | FAA Roadmap for AI Safety Assurance | Prinsip incremental assurance dan peran AI sebagai tool | Pembanding pendekatan assurance | Yurisdiksi AS; bukan otorisasi ATC Indonesia |
+| E22 | ICAO CNS SG/13-WP/20, 2024 | Contoh usulan penerapan AI di ATM termasuk speech/readback | Research context | Working paper/meeting contribution, bukan ICAO standard atau authorization |
 
 Sumber untuk klaim E01–E04: [FAA FY2024](https://www.faa.gov/air_traffic/by_the_numbers/air-traffic-by-the-numbers-FY2024.pdf), [FAA Safety Briefing](https://www.faa.gov/sites/faa.gov/files/MarApr2025.pdf), [NTSB Austin](https://www.ntsb.gov/investigations/Pages/DCA23FA149.aspx), [NTSB LaGuardia](https://www.ntsb.gov/investigations/Pages/DCA26MA161.aspx).
 
 Sumber untuk E05–E09: [A-SMGCS service](https://www.eurocontrol.int/service/advanced-surface-movement-guidance-and-control-system), [A-SMGCS specification](https://www.eurocontrol.int/publication/eurocontrol-specification-smgcs-services), [Route-Based Detection](https://arxiv.org/abs/1304.6494), [DOT OIG audit](https://www.oig.dot.gov/library-item/46745?page=1), [FAA VMAT](https://www.faa.gov/airports/runway_safety/airfield_drivers/enhancing-surface-safety-guide-vehicle-movement-area), [NASA-TLX](https://www.nasa.gov/human-systems-integration-division/nasa-task-load-index-tlx/).
 
 Sumber untuk E10–E14: [OpenSky terms](https://opensky-network.org/about/terms-of-use), [ATCO2 data](https://atco2.org/data), [AviationWeather API](https://aviationweather.gov/data/api/), [RIM FY2025](https://rosap.ntl.bts.gov/view/dot/92844), [ASRS database](https://asrs.arc.nasa.gov/search/database.html).
+
+Sumber tambahan E15–E22 diperiksa pada **3 Oktober 2026**: [PM 65/2017 Part 170 dan status perubahan PM 10/2022](https://jdih.dephub.go.id/peraturan/detail?data=6GcuOvUrW6426aSdKT754z4a8bhQfAjxb4DsAYg4Z63e8mxq8ahNg4U4EqUfeEGx7Z8LOPTqFLas48gj5jeeo7MI4uPmZ0bPm8w4ZBIeSwfUOKHLkmCCVSTPT9kH3qiFwd7H1AMrDni5eoD36bepdytQmW), [PR 5 DJPU/2024 Part 170-01](https://jdih.dephub.go.id/peraturan-terjemahan/detail?data=LgllyaaumOsGHjhwAeLvgs8bT9Q2T34r38n0dQ9S0cWz8m0XPG44td58LOPTuyHJH04uTQM7nEotA4Ob9ZScczUG4jn24lpG3EZ4jn1og82BO6CjJ5HjhQGjLELEFy9LlGwY84ERx3ab4tKGGpQsQB4Dhw), [AirNav New JATSC/New ATMAS](https://www.airnavindonesia.co.id/berita-dan-siaran-pers/kunjungi-airnavindonesia-presiden-icao-tinjau-langsung-fasilitas-new-jatsc/), [KNKT Adisutjipto report](https://knkt.go.id/Repo/Files/Laporan/Penerbangan/2013/PK-AXG%20%26%20PK-LBH%20Final%20Report.pdf), [EASA Issue 2](https://www.easa.europa.eu/en/newsroom-and-events/news/easa-publishes-artificial-intelligence-concept-paper-issue-2-guidance), [EASA AI publication status](https://www.easa.europa.eu/en/publication-types/artificial-intelligence), [FAA AI Safety Assurance Roadmap](https://www.faa.gov/media/82891), and [ICAO CNS SG/13-WP/20](https://www.icao.int/MID/Documents/2024/CNS%20SG13/CNS%20SG13-WP20.pdf).
 
 ### 3.2 Yang sudah dan belum didukung evidence
 
@@ -187,7 +201,7 @@ Sumber untuk E10–E14: [OpenSky terms](https://opensky-network.org/about/terms-
 | ASDE-X / ASSC / surface awareness | Surface tracking dan safety context | Kandidat sumber/konsep pembanding | Bedakan surveillance capability dan training capability |
 | Simulator ATC | Latihan posisi kerja dan prosedur | FlowLens menargetkan subset runway training | Bandingkan scenario authoring, realism, assessment, dan biaya berdasarkan sumber yang dapat diakses |
 | Replay / safety analytics | Penyusunan timeline dan event review | Fokus output debriefing | Uji keterhubungan evidence dan kemudahan merekonstruksi kejadian |
-| AI ATC communication research | ASR, callsign, command entities | Fase berikutnya | Audit corpus, domain shift, critical-slot error, dan lisensi |
+| AI ATC communication/advisory research | ASR, callsign, command entities, candidate options | MVP memakai replay simulator mitra offline; synthetic baseline jika akses belum tersedia | Audit corpus, domain shift, critical-slot error, evidence support, reviewer relevance, dan lisensi |
 
 Kolom yang belum memiliki sumber atau evaluasi tetap ditandai **belum diverifikasi**. Harga, klaim vendor, atau kelengkapan implementasi bandara tidak diisi dengan perkiraan yang dipresentasikan sebagai fakta.
 
@@ -227,7 +241,7 @@ flowchart LR
     S --> D[(SQLite di disk server)]
 ```
 
-Satu laptop dapat menjalankan semua posisi untuk demo. Pilot menggunakan beberapa laptop di LAN yang sama. Tidak ada koneksi radar, radio operasional, atau vehicle hardware dalam MVP.
+Satu laptop dapat menjalankan scenario/replay baseline. MVP menargetkan impor offline dari simulator training mitra bila aksesnya disetujui; pemrosesan dapat dijalankan lokal atau dalam lingkungan mitra yang terisolasi. Tidak ada koneksi live ke radar, radio operasional, posisi kontrol, atau vehicle hardware dalam MVP.
 
 Yang dibuat mendekati situasi lapangan adalah pembagian tanggung jawab, sinkronisasi waktu, koordinasi, perubahan state, delayed response, dan keterbatasan data. Realisme tersebut tidak setara dengan simulasi ATC tersertifikasi.
 
@@ -281,6 +295,7 @@ Ground truth boleh dibuka pada debriefing instruktur/evaluator, dengan label yan
 | FR14 | JSON, CSV, printable HTML report | P1 | Export membuka dan memiliki manifest |
 | FR15 | Baseline experiment mode | P1 | Data/timing sama; tambahan explanation dibatasi |
 | FR16 | Offline install/run package | P0 untuk rilis lab | Runtime tidak bergantung internet |
+| FR17 | Replay-only AI candidate options dengan evidence, uncertainty, dan reviewer status | P0 | Hanya tampil dalam replay/evaluator review; tanpa command/clearance field; evidence yang kurang menghasilkan unknown |
 
 P0 wajib sebelum menyebut produk MVP teknis. P1 termasuk target rilis delapan minggu. Jika harus mencapai enam minggu, branching ditunda, sementara replay/evidence/data-quality handling tetap wajib.
 
@@ -291,7 +306,7 @@ P0 wajib sebelum menyebut produk MVP teknis. P1 termasuk target rilis delapan mi
 | Satu layout sintetik, satu runway, dua arah | Multi-runway, intersecting runway, airspace lengkap |
 | 3–5 aircraft, 1–2 vehicle | Airport-scale load atau semua jenis kendaraan |
 | Route-following sederhana | Full aerodynamics, braking, wake turbulence minima |
-| Struktur komunikasi dan readback simulasi | ASR, live VHF, auto clearance extraction |
+| Replay offline, transcript/evidence, dan kandidat opsi AI yang hanya untuk evaluasi | Live VHF/production feed, AI-issued clearance, rekomendasi di posisi kontrol aktif, official transcript, operational risk verdict |
 | Occupancy/conflict awareness | Jaminan collision avoidance |
 | Training SOP yang direview | Implementasi lengkap semua prosedur negara/bandara |
 | LAN lab dengan token posisi | Public SaaS/multi-tenant |
@@ -387,16 +402,16 @@ Dependency Python/npm dikunci saat scaffold. Release manifest menyertakan runtim
 
 | Kebutuhan | Sumber MVP | Metadata wajib | Pengayaan berikutnya |
 |---|---|---|---|
-| Layout | Synthetic layout | coordinate system, version, dimensions | Chart/geometri mitra yang diizinkan |
-| Aircraft | Truth simulator → observation adapter | ID, kind, sample/receive time, unit, source | Offline trajectory dataset |
-| Vehicle | Simulator tersendiri | ID, footprint, route, timestamps | Authorized vehicle/surface data |
-| Clearance | Structured commands/events | issuer, authority, target, issued/received time | Authorized strip/log dataset |
-| Communication | Script/input simulasi | channel, speaker, target, duration, relation | Recorded audio pada studi terpisah |
+| Layout | Synthetic evidence-based layout; site layout hanya dari mitra berizin | coordinate system, version, dimensions, source/permission | Geometri simulator/site mitra yang disetujui |
+| Aircraft | Replay simulator mitra offline; synthetic baseline sampai tersedia | ID, kind, sample/receive time, unit, source, timebase | Authorized trajectory/event export |
+| Vehicle | Replay simulator mitra atau synthetic fixture | ID, footprint, route, timestamps, source/coverage | Authorized vehicle/surface event export |
+| Clearance | Event simulator yang terekam; pisahkan dari inferred transcript | issuer, authority, target, issued/received time, source | Export log mitra dengan provenance |
+| Communication | Audio/event simulator mitra offline; synthetic fixture sementara | channel, speaker/source, target, duration, timebase, permission | Replay audio yang secara khusus diizinkan |
 | Weather | Preset | effective time dan simulation flag | Backend METAR/TAF adapter |
 | Assessment | Participant/instructor inputs | session, position, time, protocol version | Studi mitra |
 | Ground truth | Private simulator archive | seed, physical state, intervention log | Tidak tersedia untuk detector |
 
-MVP tidak bergantung pada dataset Indonesia lengkap yang belum ditemukan/diizinkan. Data nyata hanya dimasukkan setelah ada manifest kualitas, cakupan, timestamps, dan ketentuan akses.
+Belum ada mitra atau replay berizin yang dikonfirmasi per 3 Oktober 2026. Jangan menganggap data operasional Indonesia tersedia. Sebelum replay mitra dipakai, catat pemilik, izin/purpose, cakupan, timebase/drift, missingness, quality, retensi, lokasi pemrosesan, dan label data. Synthetic baseline tetap diberi label `SYNTHETIC / NOT OPERATIONALLY VALIDATED`.
 
 ### 7.2 Kontrak data minimum
 
@@ -541,6 +556,8 @@ Issued time dan received time boleh berbeda dalam scenario. Jika instruksi belum
 | Trainer scoring/truth reveal | Ya | Tidak | Tidak | Hanya evaluator berizin |
 
 Ini merupakan SOP simulator awal, bukan klaim bahwa kewenangan universal semua bandara sama. Trainer akan memvalidasinya sebelum pilot.
+
+Kandidat opsi AI hanya ditampilkan pada replay offline untuk review evaluator. Teks kandidat tidak boleh menjadi command payload, mengubah state sesi, atau menyamarkan sumber/ketidakpastian. Alokasi tanggung jawab dan prosedur lokal baru dapat dimodelkan setelah reviewer mitra menyediakan SOP/LOA yang boleh digunakan.
 
 ### 8.4 Instruksi berisiko dan instruksi tidak valid
 
@@ -949,6 +966,8 @@ Nominal public frame disimpan pada update 200 ms dan event penting. Coarse priva
 UI memperlihatkan waktu frame yang benar-benar dirender. Seek ke waktu antara dua recorded frames memakai frame terakhir yang tidak melewati target, atau interpolation visual berlabel; tidak membangun event masa depan sebelum waktunya.
 
 Replay memakai archived predictions/alerts dan historical rules/version, bukan menghitung ulang dengan model terbaru lalu menyebutnya rekaman asli. Re-analysis dengan rule baru menjadi output analisis terpisah.
+
+Replay simulator mitra mempertahankan source timestamps, event order, clock offset, coverage dan missingness yang diserahkan pemilik data. Kandidat AI disimpan sebagai analisis replay terpisah, dengan source/model/version dan evidence IDs; ia tidak mengubah replay source atau event asli. Validasi fidelity memerlukan review ATCO terhadap scenario dan prosedur yang dicakup.
 
 Event yang memiliki simulation time sama diurutkan dengan ordinal. Review filter mengacu pada time dan cursor supaya event setelah titik yang dipilih tidak muncul lebih awal.
 
@@ -1396,22 +1415,23 @@ Go-around yang tepat dapat menjadi tindakan keselamatan yang diperlukan; tujuan 
 
 | Tahap | Pekerjaan | Gate masuk | Output yang sah |
 |---|---|---|---|
-| Lab pilot | Reviewed scenarios dan participant experiments | Technical gates + trainer/protocol/participant access | Feasibility, usability, comprehension findings |
-| Offline partner research | Adapter satu dataset/lokasi, time alignment, quality audit | Data permission/specs/retention | Dataset-specific analysis |
-| AI communication study | ASR/callsign/command parsing/readback research | Licensed corpus dan protocol | Critical-slot errors, WER, latency, domain limits |
-| Shadow-mode research | Read-only parallel analysis, isolated output | Partner, safety/cyber/data review yang diperlukan | Research findings; tidak memberi instruksi operasi |
-| Operational development | Site-specific requirements dan assurance | Proyek/approval/validation tersendiri | Tidak dicapai oleh MVP ini |
+| Synthetic baseline | Skenario satu runway, event/audio buatan, AI evidence candidates/offline options | Sumber resmi dipetakan; label synthetic dan non-validated; fixture repeatable | Technical workflow dan metrik pada fixture saja |
+| MVP partner replay | Import offline dari simulator training mitra; candidate options untuk evaluator | Data permission/retention, provenance/timebase, coverage/quality manifest | Hasil khusus dataset/simulator; bukan bukti live performance |
+| ATCO replay evaluation | Review scenario fidelity, candidate relevance/errors, UI/workflow dan uncertainty | Reviewer berwenang, protocol, access/retention, source ground truth | Temuan penelitian berbatas sample, site, dan conditions |
+| Shadow-mode research | Analisis paralel terisolasi untuk data lebih dekat ke operasi; tidak tampil sebagai saran ke controller | Sponsor ANSP, intended-use/regulatory assessment, safety/human factors, cybersecurity, data approval | Research findings; tidak memengaruhi layanan ATC |
+| Operational advisory development | Persyaratan site-specific dan assurance untuk penggunaan live | Persetujuan/approval/validation/change process oleh pihak berwenang dan pemilik layanan | Fase proyek tersendiri; bukan capaian atau komitmen MVP |
 
 Public dataset bukan gateway otomatis ke live operations. ASTERIX CAT011 dapat dipelajari sebagai format pertukaran A-SMGCS pada fase integrasi, bukan berarti MVP sudah kompatibel atau mendapat akses feed. [Referensi EUROCONTROL CAT011](https://www.eurocontrol.int/publication/cat011-eurocontrol-specification-surveillance-data-exchange-part-8-category-011).
 
-### 19.6 Rencana AI fase berikutnya
+### 19.6 Batas AI komunikasi dan jalur lanjutan
 
-AI berada di luar target implementasi MVP. Jika dikembangkan:
+Addendum 3 Oktober 2026 menjadikan transcript, rekonsiliasi evidence, dan kandidat opsi sebagai target MVP replay offline dari simulator mitra yang berizin; baseline sintetik dipakai sampai ada akses dan tidak membuktikan fidelity lapangan. Intended end-state adalah advisory berbukti untuk Tower/Ground runway dengan controller sebagai pemegang keputusan/clearance. Integrasi live tetap merupakan tahap terpisah yang memerlukan intended-use determination, persetujuan ANSP/pemilik data, safety/human-factors dan cybersecurity review, serta keputusan regulator. Untuk batas dan prompt implementasi lihat [AI Assist Buddy MVP Addendum](ATC_FlowLens_AI_Assist_Buddy_MVP_Prompt.md). Prinsip berikut berlaku:
 
 - ASR dievaluasi pada corpus yang hak pakainya jelas, dengan split per airport/speaker untuk memeriksa domain shift.
 - Critical entities seperti callsign, runway, command, dan numeric value mendapat metric tersendiri; WER rendah tidak otomatis berarti clearance aman.
 - Parsed instruction menjadi candidate yang dapat ditinjau, bukan langsung authoritative clearance.
 - Low-confidence/mismatch menghasilkan review requirement; deterministic conflict engine tetap terpisah.
+- Offline option candidate hanya boleh menyatakan opsi sebagai bahan review, menyertakan evidence/unknown, dan tidak membuat command atau clearance.
 - Post-session LLM summary harus menunjuk event evidence; narrative tidak menulis ulang source log.
 
 ATCO2 one-hour subset memiliki status research-purpose pada laman sumber; bagian corpus lain mengikuti akses/lisensi masing-masing. [ATCO2 data/licensing](https://atco2.org/data).
@@ -1447,6 +1467,8 @@ ATCO2 one-hour subset memiliki status research-purpose pada laman sumber; bagian
 - [ ] Rules R01–R06 dan severity/lifecycle sesuai canonical fixtures.
 - [ ] Alert memiliki source/version/timestamp/asumsi; acknowledgement tidak resolve ancaman.
 - [ ] Stale/missing/unknown route tidak menjadi klaim clear.
+- [ ] Replay offline membedakan sumber simulator mitra berizin dari baseline sintetik dan mencatat provenance, timebase, coverage, quality, serta batas akses.
+- [ ] Kandidat opsi AI hanya tersedia pada replay review, menunjuk evidence/unknown, dan tidak dapat membuat command atau mengubah clearance/state.
 - [ ] Role authority, command revision, idempotency, dan durable receipts diuji.
 - [ ] Tower/ground/instructor/observer mengikuti state yang sama melalui LAN.
 - [ ] Archive, interruption recovery, replay seek, dan source freezing berfungsi.
@@ -1461,6 +1483,7 @@ Checklist kosong bukan failure report; checklist ini merupakan acceptance templa
 ### 20.3 Definition of done pilot riset
 
 - [ ] Trainer yang relevan telah meninjau SOP/scenarios/rubric dan perubahan tercatat.
+- [ ] Reviewer ATCO menilai fidelity workflow dan candidate options pada replay yang izinnya tercatat; bila belum tersedia, partner replay/ATCO review berstatus NOT_DONE dan baseline sintetik tidak disebut tervalidasi.
 - [ ] Protocol/version, conditions, order, sampling, instruments, dan retention dibekukan.
 - [ ] Peserta yang benar-benar direkrut dan expertise mereka dicatat dengan pseudonym.
 - [ ] Baseline/FlowLens mempunyai inputs/timing yang setara.
@@ -1477,21 +1500,23 @@ MVP teknis dan pilot riset merupakan milestone berbeda. Tidak tersedianya pesert
 | “FlowLens menjalankan skenario runway terkontrol” | Runtime demo dan reproducibility checks selesai |
 | “Mendeteksi risiko yang didefinisikan” | Canonical/benchmark results dengan definitions dan denominator |
 | “Menjelaskan bukti pemicu dan mendukung replay” | Evidence/replay tests dan usable flow |
+| “Menghasilkan kandidat opsi AI berbasis evidence” | Evaluasi offline pada replay/ground truth yang diizinkan, reference integrity, uncertainty, dan review ATCO dinyatakan; bukan klaim manfaat safety |
 | “Memperbaiki pemahaman/waktu identifikasi peserta” | Actual human study sesuai protocol dan batas sampel |
 | “Mengurangi workload” | Evidence subjective/behavioral yang relevan; label konteks dan metode |
-| “Mencegah kecelakaan”, “siap ATC live”, “certified” | Tidak didukung oleh hasil MVP yang direncanakan |
+| “Siap ATC live”, “certified”, atau membantu keputusan operasional dengan aman | Tidak didukung oleh hasil MVP; perlu intended-use/regulatory determination dan assurance tersendiri |
 | “Menghemat bahan bakar” | Memerlukan model/data/validation tambahan; bukan klaim MVP |
 
 ### 20.5 Asumsi yang harus dibawa ke implementasi
 
-1. Produk pertama merupakan training tool pada LAN sintetik, bukan autonomous controller.
-2. Default satu training session RUNNING dengan beberapa posisi; archive/review tetap terpisah.
-3. Rules/geometry/buffer/complexity weights adalah versioned experiment assumptions.
-4. ETA threshold, protection entry, full exit, overlap, dan collision time adalah konsep berbeda.
-5. Node dipakai saat build; runtime membawa frontend bundle lokal.
-6. Current-source licensing, access, dan participant availability harus diperiksa sebelum fase yang bergantung padanya.
-7. Technical results dan human results tidak digabung menjadi satu status “validated”.
-8. Jika keputusan domain baru diperlukan, pemilik spec/trainer memperbarui version; implementer tidak diam-diam mengubah semantics.
+1. Produk jangka panjang dimaksudkan sebagai human-supervised advisory Tower/Ground; MVP terbatas pada replay offline dan kandidat opsi untuk evaluator, bukan posisi kontrol aktif.
+2. Simulator partner dan reviewer ATCO belum dikonfirmasi; synthetic baseline hanya sementara dan berlabel belum tervalidasi.
+3. Default satu training session RUNNING dengan beberapa posisi; archive/review tetap terpisah.
+4. Rules/geometry/buffer/complexity weights adalah versioned experiment assumptions.
+5. ETA threshold, protection entry, full exit, overlap, dan collision time adalah konsep berbeda.
+6. Node dipakai saat build; runtime membawa frontend bundle lokal.
+7. Current-source licensing, access, dan participant availability harus diperiksa sebelum fase yang bergantung padanya.
+8. Technical results dan human results tidak digabung menjadi satu status “validated”.
+9. Jika keputusan domain baru diperlukan, pemilik spec/trainer memperbarui version; implementer tidak diam-diam mengubah semantics.
 
 ### 20.6 Referensi sumber primer
 
@@ -1511,6 +1536,14 @@ MVP teknis dan pilot riset merupakan milestone berbeda. Tidak tersedianya pesert
 | E12 | [AviationWeather — Data API](https://aviationweather.gov/data/api/) |
 | E13 | [FAA — RIM FY2025 report, DOT/FAA/TC-26/27](https://rosap.ntl.bts.gov/view/dot/92844) |
 | E14 | [NASA — ASRS Database](https://asrs.arc.nasa.gov/search/database.html) |
+| E15 | [Kemenhub JDIH — PM 65/2017 Part 170, diubah PM 10/2022](https://jdih.dephub.go.id/peraturan/detail?data=6GcuOvUrW6426aSdKT754z4a8bhQfAjxb4DsAYg4Z63e8mxq8ahNg4U4EqUfeEGx7Z8LOPTqFLas48gj5jeeo7MI4uPmZ0bPm8w4ZBIeSwfUOKHLkmCCVSTPT9kH3qiFwd7H1AMrDni5eoD36bepdytQmW) |
+| E16 | [Kemenhub JDIH — PR 5 DJPU/2024, MOS CASR Part 170-01](https://jdih.dephub.go.id/peraturan-terjemahan/detail?data=LgllyaaumOsGHjhwAeLvgs8bT9Q2T34r38n0dQ9S0cWz8m0XPG44td58LOPTuyHJH04uTQM7nEotA4Ob9ZScczUG4jn24lpG3EZ4jn1og82BO6CjJ5HjhQGjLELEFy9LlGwY84ERx3ab4tKGGpQsQB4Dhw) |
+| E17 | [AirNav — New JATSC/New ATMAS](https://www.airnavindonesia.co.id/berita-dan-siaran-pers/kunjungi-airnavindonesia-presiden-icao-tinjau-langsung-fasilitas-new-jatsc/) |
+| E18 | [KNKT — Adisutjipto runway incursion report](https://knkt.go.id/Repo/Files/Laporan/Penerbangan/2013/PK-AXG%20%26%20PK-LBH%20Final%20Report.pdf) |
+| E19 | [EASA — AI Concept Paper Issue 2](https://www.easa.europa.eu/en/newsroom-and-events/news/easa-publishes-artificial-intelligence-concept-paper-issue-2-guidance) |
+| E20 | [EASA — AI publication register (Proposed Issue 3 status)](https://www.easa.europa.eu/en/publication-types/artificial-intelligence) |
+| E21 | [FAA — Roadmap for AI Safety Assurance](https://www.faa.gov/media/82891) |
+| E22 | [ICAO — CNS SG/13-WP/20](https://www.icao.int/MID/Documents/2024/CNS%20SG13/CNS%20SG13-WP20.pdf) |
 
 Referensi engineering: [React](https://react.dev/learn), [Vite](https://vite.dev/guide/static-deploy.html), [FastAPI](https://fastapi.tiangolo.com/advanced/websockets/), [Shapely](https://shapely.readthedocs.io/en/stable/manual.html), [SQLite WAL](https://sqlite.org/wal.html), [EUROCONTROL CAT011](https://www.eurocontrol.int/publication/cat011-eurocontrol-specification-surveillance-data-exchange-part-8-category-011).
 

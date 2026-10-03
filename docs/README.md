@@ -7,6 +7,9 @@ Start with the repository [agent instructions](../AGENTS.md), then use this page
 | Role | Canonical source | Use |
 |---|---|---|
 | Intended product, MVP scope, architecture, interfaces, and acceptance targets | [Rencana Teknis MVP](Knowledge-Review/ATC_FlowLens_Rencana_Teknis_MVP.md) | Normative target. Requirements are not proof that the feature is implemented. |
+| AI advisory requirements, environment readiness, and coding prompt | [AI Assist Buddy Addendum](Knowledge-Review/ATC_FlowLens_AI_Assist_Buddy_MVP_Prompt.md) | Specifies offline partner-simulator replay and evidence-linked candidate options for MVP; live Tower/Ground advisory is a future gated objective, not current authorization or implementation. |
+| Modular technical implementation blueprint authoring prompt | [Blueprint authoring prompt](Technical-Implementation/blueprint-authoring-prompt.md) | Reusable prompt for generating a master blueprint and parallel backend/replay, simulation/detection, AI harness, frontend, and integration/QA packets; documentation-only. |
+| Modular technical implementation blueprint | [Technical Implementation Blueprint](Technical-Implementation/README.md) | Documentation-only master, shared contracts, and five workstream packets. Separates inspected source from target/proposed interfaces; supports parallel development with mocks, without claiming feature implementation. |
 | Current repository implementation state | [Implementation Status](IMPLEMENTATION_STATUS.md) plus the source code | Dated static inventory. Inspect code and run the appropriate checks before making stronger claims. |
 | Evidence about the ATC operating context | [Operational Reality Research](Knowledge-Review/ATC_FlowLens_Operational_Reality_Research.md) | Domain claims, sources, evidence limits, and research gaps. |
 | Historical review | [Knowledge Review snapshot](Knowledge-Review/ATC_FlowLens_Knowledge_Review.md) | Archive and navigation only; it is not a current implementation report. |
@@ -20,6 +23,7 @@ Use the relevant section instead of loading all 1,500+ lines for every task:
 | Task | Read these sections in the technical plan |
 |---|---|
 | Product purpose, users, training flow, or MVP boundary | [§1](Knowledge-Review/ATC_FlowLens_Rencana_Teknis_MVP.md#1-tujuan-keputusan-awal-dan-cara-membaca-dokumen), [§4](Knowledge-Review/ATC_FlowLens_Rencana_Teknis_MVP.md#4-pengguna-penerapan-dan-alur-latihan), [§5](Knowledge-Review/ATC_FlowLens_Rencana_Teknis_MVP.md#5-ruang-lingkup-dan-prioritas-mvp) |
+| AI advisory, offline replay, readiness gate, or standards gap | [AI Assist Buddy Addendum](Knowledge-Review/ATC_FlowLens_AI_Assist_Buddy_MVP_Prompt.md), [Operational Reality Research](Knowledge-Review/ATC_FlowLens_Operational_Reality_Research.md) |
 | Architecture and technology choices | [§6](Knowledge-Review/ATC_FlowLens_Rencana_Teknis_MVP.md#6-arsitektur-teknis-dan-keputusan-teknologi) |
 | Scenario data, time, geometry, and simulator | [§7](Knowledge-Review/ATC_FlowLens_Rencana_Teknis_MVP.md#7-data-waktu-geometri-dan-simulator) |
 | Clearances, roles, communication, or authority | [§8](Knowledge-Review/ATC_FlowLens_Rencana_Teknis_MVP.md#8-clearance-komunikasi-dan-kewenangan) |
