@@ -1,0 +1,14 @@
+[
+  {"id":"overlap","title":"Arrival / vehicle overlap","objective":"Recognize an arrival and ARFF crossing using track, clearance and time evidence.","variant":"overlap","duration_s":180,"low_visibility":true,"emergency":true},
+  {"id":"safe_cross","title":"Crossing with time margin","objective":"Distinguish a safe crossing from nominal overlap.","variant":"safe","duration_s":180},
+  {"id":"stopped","title":"Vehicle stops on the runway","objective":"Maintain occupancy when runway-clear time is unknown.","variant":"stopped","duration_s":180},
+  {"id":"hold_line","title":"Vehicle holds outside protection","objective":"Do not confuse permission or a request with physical occupancy.","variant":"hold","duration_s":180},
+  {"id":"unauthorized","title":"Crossing without clearance","objective":"Detect occupancy even when a vehicle has no crossing clearance.","variant":"unauthorized","duration_s":180},
+  {"id":"hold_violation","title":"Hold-short violation","objective":"Compare observed movement to an active hold instruction.","variant":"violation","duration_s":180},
+  {"id":"cancelled","title":"Cancelled crossing, continuing movement","objective":"Cancellation does not remove an object from the runway.","variant":"cancel","duration_s":180},
+  {"id":"delayed_goaround","title":"Delayed go-around response","objective":"Do not assume a command immediately changes flight movement.","variant":"goaround","duration_s":180},
+  {"id":"reciprocal_departure","title":"Opposite-direction runway use","objective":"Map 09 and 27 to the same physical resource.","variant":"reciprocal","duration_s":180},
+  {"id":"dropout","title":"Tracking lost during an active threat","objective":"Keep the threat and show degraded information.","variant":"dropout","duration_s":180},
+  {"id":"duplicate_command","title":"Concurrent instructions exercise","objective":"Use acknowledgement and command revisions while coordinating tower and ground.","variant":"overlap","duration_s":180},
+  {"id":"replay_sync","title":"Timeline and replay exercise","objective":"Reconstruct events at the selected time and compare role views.","variant":"safe","duration_s":180}
+]

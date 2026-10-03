@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ATC FlowLens Slide 1 Runway Asset</title>
+  <style>
+    :root {
+      --navy: #061a3a;
+      --runway: #082d63;
+      --blue: #0d6eff;
+      --cyan: #39a8ff;
+      --surface: #dbeaff;
+      --line: #8db8ee;
+      --amber: #e7a400;
+      --red: #e21d22;
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      width: 1280px;
+      height: 720px;
+      overflow: hidden;
+      background: transparent;
+      font-family: Montserrat, "Segoe UI", Arial, sans-serif;
+    }
+
+    .asset {
+      position: relative;
+      width: 1280px;
+      height: 720px;
+      overflow: hidden;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 42% 42%, rgba(255,255,255,.44), transparent 34%),
+        linear-gradient(135deg, #b6d1f2 0%, #e6f1ff 45%, #c5dbf7 100%);
+      border: 1px solid rgba(255,255,255,.38);
+      box-shadow: 0 30px 80px rgba(6,26,58,.26);
+    }
+
+    .apron, .building, .parking {
+      position: absolute;
+      border: 2px solid rgba(0,51,160,.28);
+      background: rgba(6,26,58,.05);
+    }
+
+    .apron { left: -20px; top: 0; width: 325px; height: 180px; }
+    .building { left: 420px; bottom: -30px; width: 310px; height: 124px; }
+    .parking { right: 28px; top: -18px; width: 265px; height: 160px; }
+
+    .apron::before,
+    .parking::before,
+    .building::before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 1px solid rgba(0,51,160,.18);
+      opacity: .7;
+    }
+
+    .gate-plane {
+      position: absolute;
+      width: 54px;
+      height: 54px;
+      opacity: .72;
+      filter: drop-shadow(0 4px 7px rgba(6,26,58,.18));
+    }
+    .gate-plane.one { left: 38px; top: 86px; }
+    .gate-plane.two { left: 128px; top: 86px; }
+    .gate-plane.three { left: 242px; top: 64px; transform: rotate(35deg); }
+
+    .taxi {
+      position: absolute;
+      height: 5px;
+      background: var(--blue);
+      box-shadow: 0 0 16px rgba(13,110,255,.3);
+    }
+    .taxi.h1 { left: 0; top: 222px; width: 420px; }
+    .taxi.h2 { left: 804px; top: 222px; width: 476px; }
+    .taxi.h3 { left: 0; top: 520px; width: 385px; }
+    .taxi.v1 { left: 410px; top: -10px; width: 5px; height: 283px; }
+    .taxi.v2 { left: 808px; top: -10px; width: 5px; height: 284px; }
+    .taxi.v3 { left: 385px; top: 420px; width: 5px; height: 300px; }
+    .taxi.v4 { left: 805px; top: 420px; width: 5px; height: 300px; }
+
+    .taxi-label {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 4px;
+      color: #fff;
+      background: #0d6eff;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.62);
+      box-shadow: 0 6px 16px rgba(6,26,58,.22);
+    }
+    .a { left: 397px; top: 226px; }
+    .b { left: 794px; top: 226px; }
+    .c { left: 383px; top: 486px; }
+    .d { left: 792px; top: 486px; }
+
+    .runway {
+      position: absolute;
+      left: 220px;
+      top: 292px;
+      width: 1040px;
+      height: 112px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.07), transparent 18%, transparent 82%, rgba(255,255,255,.06)),
+        var(--runway);
+      border: 2px solid rgba(255,255,255,.8);
+      box-shadow: 0 18px 50px rgba(6,26,58,.26);
+    }
+
+    .runway::before {
+      content: "";
+      position: absolute;
+      left: 145px;
+      right: 145px;
+      top: 53px;
+      height: 3px;
+      background: repeating-linear-gradient(90deg, #fff 0 28px, transparent 28px 70px);
+      opacity: .94;
+    }
+
+    .threshold {
+      position: absolute;
+      top: 14px;
+      width: 72px;
+      height: 84px;
+      background: repeating-linear-gradient(0deg, #fff 0 7px, transparent 7px 15px);
+    }
+    .threshold.left { left: 16px; }
+    .threshold.right { right: 16px; }
+
+    .rwy-num {
+      position: absolute;
+      color: #fff;
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      top: 34px;
+      transform: rotate(90deg);
+    }
+    .rwy-num.left { left: 96px; }
+    .rwy-num.right { right: 96px; }
+
+    .incoming-plane {
+      position: absolute;
+      left: 38px;
+      top: 308px;
+      width: 136px;
+      height: 76px;
+      filter: drop-shadow(0 10px 12px rgba(6,26,58,.18));
+    }
+
+    .dash-red {
+      position: absolute;
+      left: 170px;
+      top: 345px;
+      width: 228px;
+      height: 3px;
+      background: repeating-linear-gradient(90deg, var(--red) 0 18px, transparent 18px 34px);
+    }
+
+    .vehicle {
+      position: absolute;
+      left: 674px;
+      top: 278px;
+      width: 42px;
+      height: 132px;
+      background: var(--amber);
+      border: 3px solid #7d5a00;
+      border-radius: 8px;
+      box-shadow: 0 10px 22px rgba(6,26,58,.32);
+      z-index: 5;
+    }
+
+    .vehicle::before,
+    .vehicle::after {
+      content: "";
+      position: absolute;
+      left: -16px;
+      width: 12px;
+      height: 26px;
+      border-radius: 8px;
+      background: var(--navy);
+    }
+    .vehicle::before { top: 22px; }
+    .vehicle::after { bottom: 22px; }
+
+    .vehicle .w2,
+    .vehicle .w3 {
+      position: absolute;
+      right: -16px;
+      width: 12px;
+      height: 26px;
+      border-radius: 8px;
+      background: var(--navy);
+    }
+    .vehicle .w2 { top: 22px; }
+    .vehicle .w3 { bottom: 22px; }
+
+    .risk-v {
+      position: absolute;
+      left: 694px;
+      top: 252px;
+      width: 3px;
+      height: 184px;
+      background: repeating-linear-gradient(0deg, var(--red) 0 20px, transparent 20px 36px);
+      z-index: 4;
+    }
+
+    .risk-ring {
+      position: absolute;
+      left: 646px;
+      top: 300px;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      border: 4px solid var(--red);
+      box-shadow: 0 0 0 18px rgba(226,29,34,.14), 0 0 0 36px rgba(226,29,34,.09);
+      z-index: 3;
+    }
+
+    .rwy-label {
+      position: absolute;
+      left: 32px;
+      bottom: 36px;
+      background: var(--navy);
+      color: #fff;
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 24px;
+      font-weight: 900;
+      box-shadow: 0 12px 30px rgba(6,26,58,.24);
+    }
+
+    .alert {
+      position: absolute;
+      right: 34px;
+      bottom: 28px;
+      width: 392px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid rgba(6,26,58,.28);
+      box-shadow: 0 20px 60px rgba(6,26,58,.28);
+    }
+
+    .alert-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--red);
+      color: white;
+      padding: 16px 22px;
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .alert-body {
+      padding: 20px 24px 22px;
+      color: var(--navy);
+      font-size: 20px;
+      line-height: 1.33;
+      font-weight: 800;
+    }
+
+    .alert-body .rule {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(6,26,58,.22);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    svg { display: block; }
+  </style>
+</head>
+<body>
+  <div class="asset">
+    <div class="apron"></div>
+    <div class="building"></div>
+    <div class="parking"></div>
+    <svg class="gate-plane one" viewBox="0 0 64 64"><path fill="#ffffff" stroke="#7da8da" stroke-width="2" d="M32 5c2 0 3.5 1.5 3.5 3.5v20L58 42v5L35.5 40v13l7 4v4l-10.5-3-10.5 3v-4l7-4V40L6 47v-5l22.5-13.5v-20C28.5 6.5 30 5 32 5Z"/></svg>
+    <svg class="gate-plane two" viewBox="0 0 64 64"><path fill="#ffffff" stroke="#7da8da" stroke-width="2" d="M32 5c2 0 3.5 1.5 3.5 3.5v20L58 42v5L35.5 40v13l7 4v4l-10.5-3-10.5 3v-4l7-4V40L6 47v-5l22.5-13.5v-20C28.5 6.5 30 5 32 5Z"/></svg>
+    <svg class="gate-plane three" viewBox="0 0 64 64"><path fill="#ffffff" stroke="#7da8da" stroke-width="2" d="M32 5c2 0 3.5 1.5 3.5 3.5v20L58 42v5L35.5 40v13l7 4v4l-10.5-3-10.5 3v-4l7-4V40L6 47v-5l22.5-13.5v-20C28.5 6.5 30 5 32 5Z"/></svg>
+    <div class="taxi h1"></div>
+    <div class="taxi h2"></div>
+    <div class="taxi h3"></div>
+    <div class="taxi v1"></div>
+    <div class="taxi v2"></div>
+    <div class="taxi v3"></div>
+    <div class="taxi v4"></div>
+    <div class="taxi-label a">A</div>
+    <div class="taxi-label b">B</div>
+    <div class="taxi-label c">C</div>
+    <div class="taxi-label d">D</div>
+    <div class="runway">
+      <div class="threshold left"></div>
+      <div class="threshold right"></div>
+      <div class="rwy-num left">27</div>
+      <div class="rwy-num right">09</div>
+    </div>
+    <svg class="incoming-plane" viewBox="0 0 160 90">
+      <path fill="#ffffff" stroke="#1a3155" stroke-width="2" d="M146 43c0 8-11 13-28 13H86L50 84H34l19-30H30L14 70H2l10-24L2 22h12l16 16h23L34 8h16l36 30h32c17 0 28 5 28 13Z"/>
+      <path fill="#dcecff" d="M62 42h55c8 0 14 2 14 5s-6 5-14 5H62Z"/>
+    </svg>
+    <div class="dash-red"></div>
+    <div class="risk-v"></div>
+    <div class="risk-ring"></div>
+    <div class="vehicle"><div class="w2"></div><div class="w3"></div></div>
+    <div class="rwy-label">RWY 27 active operation</div>
+    <div class="alert">
+      <div class="alert-head">
+        <svg width="42" height="42" viewBox="0 0 64 64" aria-hidden="true">
+          <path fill="#fff" d="M32 6 4 56h56L32 6Z"/>
+          <rect x="29" y="22" width="6" height="18" rx="3" fill="#e21d22"/>
+          <circle cx="32" cy="47" r="4" fill="#e21d22"/>
+        </svg>
+        Conflict window
+      </div>
+      <div class="alert-body">
+        Aircraft is cleared to land on RWY 27 while an airport rescue vehicle is crossing the same runway.
+        <div class="rule">High risk of runway incursion.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
