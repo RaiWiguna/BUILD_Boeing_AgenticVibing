@@ -2,7 +2,7 @@
 
 - **Pemeriksaan source dan verifikasi terpilih terakhir:** 4 Oktober 2026
 - **Cakupan:** inventaris source/config/docs yang ada di repository
-- **Metode:** inspeksi source; suite BE-01/BE-02/BE-03 yang ditargetkan dijalankan pada 4 Oktober 2026. Pemeriksaan tersebut bukan build/deployment atau validasi domain/operasional.
+- **Metode:** inspeksi source; suite BE-01/BE-02/BE-03/BE-04 yang ditargetkan dijalankan pada 4 Oktober 2026. Pemeriksaan tersebut bukan build/deployment atau validasi domain/operasional.
 
 Dokumen ini mencatat apa yang tampak tersedia di source pada tanggal pemeriksaan. Keberadaan source bukan bukti bahwa komponen berhasil dibangun, berjalan, lulus test, ditinjau trainer, atau tervalidasi untuk operasi.
 
@@ -10,13 +10,13 @@ Dokumen ini mencatat apa yang tampak tersedia di source pada tanggal pemeriksaan
 
 | Area | Status dari inspeksi source | Batas klaim |
 |---|---|---|
-| Backend | Modul FastAPI, kontrak sesi, simulasi, deteksi, sesi, review, laporan, dan arsip SQLite tersedia di `backend/`. BE-01 menyediakan DTO replay `replay-1`, typed ports, dan seam composition; BE-02 menyediakan source reader, observed-state reducer, dan builder analysis in-memory; BE-03 menyediakan import normalized atomik, archive replay aditif, event-source adapter, serta public read projection. | Test BE-02 memakai source/detector/lifecycle stubs; BE-03 memakai fixture sintetis dan SQLite sementara. Route HTTP BE-04 dan detector SD riil belum tersedia. Base detector port belum mengikat source layout, sehingga jalur base ditandai degraded. |
-| API dan stream | Source mendefinisikan endpoint health, skenario, autentikasi operator, sesi, seat, command, event, assessment, review/branch, report, serta WebSocket stream. | Kehadiran route di source tidak membuktikan alur API berhasil. |
+| Backend | Modul FastAPI, kontrak sesi, simulasi, deteksi, sesi, review, laporan, dan arsip SQLite tersedia di `backend/`. BE-01 menyediakan DTO replay `replay-1`, typed ports, dan seam composition; BE-02 menyediakan source reader, observed-state reducer, dan builder analysis in-memory; BE-03 menyediakan import normalized atomik, archive replay aditif, event-source adapter, serta public read projection; BE-04 menyediakan route import/read/evidence/event dan imported read-only review pada `app.py`/`review.py`. | BE-02 memakai source/detector/lifecycle stubs; BE-03/04 memakai fixture authored synthetic dan SQLite sementara. Base detector port belum mengikat source layout, sehingga jalur analysis base dapat degraded. Tidak ada mitra/replay berizin yang dikonfirmasi; belum ada domain review atau validasi operasional. |
+| API dan stream | Source mendefinisikan endpoint health, skenario, autentikasi operator, sesi, seat, command, event, assessment, review/branch, report, WebSocket stream, multipart replay import, replay-source/frame/evidence, serta source-read token. | BE-04 diuji melalui TestClient saja. Kehadiran route dan hasil harness tidak membuktikan startup/deployment atau alur browser. Main WebSocket synthetic tetap menggunakan first-message auth. |
 | Persistensi | Source `backend/storage.py` menyediakan arsip SQLite synthetic yang ada serta schema replay aditif versi 1 untuk immutable source bytes/records/receipt dan namespace analysis/frame terpisah. | Suite BE-03 membuktikan transaksi dan reopen pada temporary SQLite; recovery disk, backup, beban, deployment, dan concurrency belum diuji. |
 | Frontend | `frontend/` memiliki konfigurasi Vite, entry point React, API helper, dan type TypeScript. | Belum menjadi dashboard: `main.tsx` mengimpor `App` dan `styles.css`, tetapi kedua modul tersebut tidak tersedia pada pemeriksaan ini. |
 | Penyajian UI | `backend/app.py` menyajikan bundle dari `frontend/dist`; direktori tersebut belum memiliki `index.html`. Tanpa hasil build, route `/` mengembalikan halaman instruksi dengan HTTP 503. | Belum dapat digunakan sebagai aplikasi web end-to-end dari kondisi bundle yang diperiksa. |
-| Test dan validasi manusia | Suite terpilih BE-01, BE-02, dan BE-03 lulus: 30 tests terpilih. | Tidak menjalankan keseluruhan test suite. Tidak ada review trainer, studi peserta, sertifikasi, atau manfaat keselamatan tervalidasi. |
-| AI advisory replay | Requirement target mencakup replay offline simulator mitra, transkripsi/evidence, dan kandidat opsi AI yang ditinjau evaluator. Import normalized dan reducer observed-state tersedia di source. | Belum ada route API BE-04, worker ASR, kandidat opsi, audio store/replay review UI, atau integrasi SD. Belum ada mitra/replay berizin yang dikonfirmasi. Tidak ada domain review atau validasi operasional. |
+| Test dan validasi manusia | Suite terpilih BE-01 sampai BE-04 lulus: 35 tests terpilih. Suite BE-04 memakai lima integration tests TestClient, temporary SQLite, fake clock/actor, dan replay synthetic. | Tidak menjalankan keseluruhan test suite. Tidak ada review trainer, studi peserta, sertifikasi, atau manfaat keselamatan tervalidasi. |
+| AI advisory replay | Requirement target mencakup replay offline simulator mitra, transkripsi/evidence, dan kandidat opsi AI yang ditinjau evaluator. Import normalized, reducer observed-state, route replay/evidence BE-04, dan imported read-only review tersedia di source. | Worker ASR, opsi kandidat, audio store/replay review UI, dan integrasi SD belum tersedia. Fixture BE-04 authored synthetic; belum ada mitra/replay berizin yang dikonfirmasi, domain review, atau validasi operasional. |
 
 ## Verifikasi BE-01 pada 4 Oktober 2026
 
@@ -45,6 +45,15 @@ Dokumen ini mencatat apa yang tampak tersedia di source pada tanggal pemeriksaan
 - `git diff --check` — exit 0; Git memberi pemberitahuan bahwa line ending `backend/storage.py` akan dikonversi ke CRLF.
 - Test harness membuktikan parse/validasi, byte-exact hash, rollback transaksional, reopen SQLite, cutoff/paging, compatibility dengan frame synthetic, dan reader projection. Ini bukan runtime deployment, recovery/backup, beban produksi, API BE-04, data partner, review domain, atau validasi operasional.
 
+## Verifikasi BE-04 pada 4 Oktober 2026
+
+- `python -m pytest tests/integration/test_be_04.py` — lulus, 5 tests memakai `TestClient`, temporary SQLite, fake wall/monotonic clock, operator test token, dan fixture replay authored synthetic. Assertions mencakup multipart receipt/retry/conflict/invalid input, projection privacy, historical frame/explicit analysis, event cutoff sebelum paging dan ordinal tie, evidence resolution/unresolved refs, source-read scope/expiry, imported review read-only, serta compatibility login/command/snapshot/WebSocket synthetic.
+- `python -m ruff check --ignore B008,UP041 backend/app.py backend/review.py tests/integration/test_be_04.py` — lulus. `B008` untuk dependency `Depends(...)` FastAPI dan `UP041` pada timeout handling dikecualikan sesuai pola legacy BE-01 yang tercatat.
+- `python -m ruff check backend/app.py backend/review.py tests/integration/test_be_04.py` — belum bersih: melaporkan 17 temuan `B008`/`UP041` pada pola FastAPI/timeout `app.py`; scoped Ruff di atas lulus dengan pengecualian tersebut.
+- `python -m mypy --follow-imports=skip backend/app.py backend/review.py tests/integration/test_be_04.py` — lulus untuk tiga file; imported modules dilewati.
+- `git diff --check` — exit 0; Git memberi peringatan bahwa line endings `backend/app.py` dan `backend/review.py` akan dikonversi ke CRLF.
+- TestClient membuktikan runtime dalam test harness saja. Tidak ada build, deployment, domain review, mitra/data replay berizin, atau validasi operasional yang dijalankan.
+
 ## Arsitektur target yang didokumentasikan
 
 Rencana Teknis MVP menetapkan satu proses server lokal/LAN sebagai pemilik state sesi, frontend browser React/TypeScript, REST untuk command dan arsip, WebSocket untuk snapshot sinkron, Shapely untuk geometri, serta SQLite lokal untuk persistence. Alur target memisahkan truth simulator dari observasi yang diterima detector, lalu membentuk prediksi occupancy dan alert yang menyertakan evidence serta kualitas data. Sesi ditujukan untuk latihan multi-peran, replay, dan debrief.
@@ -55,7 +64,7 @@ Arsitektur tersebut adalah target spesifikasi. Rincian acceptance dan batas MVP 
 
 - Arah produk jangka panjang adalah advisory berbukti bagi controller Tower/Ground runway; target MVP tetap replay offline, bukan live ATC.
 - FlowLens tidak menerbitkan clearance dan tidak mengambil alih keputusan controller.
-- Replay simulator mitra yang berizin menjadi target validasi fidelity. Baseline sintetik sementara tidak membuktikan realisme operasional. Source import/reducer normalized tersedia, tetapi API BE-04, transkripsi, kandidat opsi AI, dan UI review belum tersedia. Live integration, persetujuan/assurance, dan klaim manfaat keselamatan belum dicapai.
+- Replay simulator mitra yang berizin menjadi target validasi fidelity. Baseline sintetik sementara tidak membuktikan realisme operasional. Source import/reducer normalized dan API BE-04 tersedia; transkripsi, kandidat opsi AI, dan UI review belum tersedia. Live integration, persetujuan/assurance, domain review, dan klaim manfaat keselamatan belum dicapai.
 - Indikator kompleksitas/workload adalah konteks eksperimen, bukan diagnosis kondisi mental atau ukuran fitness-for-duty.
 
 ## Memperbarui status

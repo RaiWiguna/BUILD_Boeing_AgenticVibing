@@ -7,16 +7,18 @@ import hashlib
 import logging
 import os
 import secrets
+import sqlite3
 import time
 from collections.abc import Callable, Mapping, Sequence
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import Field
+from starlette.datastructures import UploadFile
 
 from .models import (
     Acknowledgement,
@@ -30,8 +32,15 @@ from .models import (
 )
 from .ports import CompositionOverrides, SessionWriter, WorkerRequest, WorkerResult
 from .replay_contracts import ReplayEventRecord, ReplaySourceManifest
+from .replay_import import (
+    ArchiveReplayEventSource,
+    ReplayImportConflict,
+    ReplayImportService,
+    ReplayImportValidationError,
+    SQLiteReplayArchiveReader,
+)
 from .reporting import report_csv, report_html, session_report
-from .review import Review
+from .review import Review, imported_replay_frame
 from .scenarios import CATALOGUE
 from .session import Session, SessionError
 from .storage import Archive
@@ -46,6 +55,17 @@ class OperatorLogin(Contract):
 
 class BranchRequest(Contract):
     at_ms: int = Field(ge=0)
+
+
+class ReplayEvidenceRef(Contract):
+    kind: Literal["session_event", "transcript_segment", "detector_alert"]
+    id: str = Field(min_length=1, max_length=300)
+
+
+class ReplayEvidenceRequest(Contract):
+    refs: list[ReplayEvidenceRef] = Field(min_length=1, max_length=100)
+    until_ms: int = Field(ge=0)
+    analysis_id: str | None = Field(default=None, min_length=1, max_length=200)
 
 
 class _ArchivePublicReader:
@@ -81,6 +101,8 @@ class Manager:
         )
         self.replay_event_source = self.ports.replay_event_source
         self.replay_archive_reader = self.ports.replay_archive_reader or _ArchivePublicReader(archive)
+        self.replay_import_service = ReplayImportService(archive)
+        self.replay_import_reader = SQLiteReplayArchiveReader(archive)
         self.worker_port = self.ports.worker
         self.wall_clock = wall_clock
         self.monotonic_clock = monotonic_clock
@@ -96,6 +118,22 @@ class Manager:
             "role": role, "label": label, "session_id": session_id, "expires": self.wall_clock()+8*3600}
         return token
 
+    def mint_source_read(self, actor: dict, source_session_id: str) -> str:
+        if actor.get("source_read"):
+            raise HTTPException(403, "A source-read token cannot mint another capability")
+        if actor["role"] != Role.INSTRUCTOR:
+            raise HTTPException(403, "Instructor access required")
+        token = secrets.token_urlsafe(32)
+        self.tokens[hashlib.sha256(token.encode()).hexdigest()] = {
+            "role": actor["role"],
+            "label": actor["label"],
+            "session_id": source_session_id,
+            "source_session_id": source_session_id,
+            "source_read": True,
+            "expires": self.wall_clock() + 8 * 3600,
+        }
+        return token
+
     def identity(self, token: str) -> dict:
         actor = self.tokens.get(hashlib.sha256(token.encode()).hexdigest())
         if not actor or actor["expires"] < self.wall_clock():
@@ -103,20 +141,39 @@ class Manager:
         return actor
 
     def access(self, id: str, actor: dict):
+        if actor.get("source_read"):
+            raise HTTPException(403, "Source-read tokens cannot access session controls")
         if actor["session_id"] is not None and actor["session_id"] != id:
             raise HTTPException(403, "Token belongs to a different session")
-        if id not in self.sessions and not self.archive.metadata(id):
+        if (id not in self.sessions and not self.archive.metadata(id)
+                and not self.replay_import_reader.metadata(id)):
             raise HTTPException(404, "Session not found")
 
     def instructor(self, actor: dict):
+        if actor.get("source_read"):
+            raise HTTPException(403, "Source-read tokens cannot access instructor controls")
         if actor["role"] != Role.INSTRUCTOR:
             raise HTTPException(403, "Instructor access required")
+
+    def source_read_access(self, source_session_id: str, actor: dict) -> Mapping[str, Any]:
+        if actor.get("source_read"):
+            if actor.get("source_session_id") != source_session_id:
+                raise HTTPException(403, "Source-read token belongs to a different replay source")
+        else:
+            self.access(source_session_id, actor)
+            self.instructor(actor)
+        metadata = self.replay_import_reader.metadata(source_session_id)
+        if metadata is None:
+            raise HTTPException(404, "Replay source not found")
+        return metadata
 
     def snapshot(self, id: str, actor: dict) -> dict:
         self.access(id, actor)
         if id in self.sessions:
             result = copy.deepcopy(self.sessions[id].snapshot())
         else:
+            if self.replay_import_reader.metadata(id):
+                raise HTTPException(409, "Use the replay-source and replay-frame reads for imported sources")
             frame = self.replay_archive_reader.frame(id)
             if not frame:
                 raise HTTPException(404, "No recorded snapshot")
@@ -130,7 +187,7 @@ class Manager:
             result["assessments"] = [e for e in result["assessments"] if e.get("actor") == actor["label"]]
             result["events"] = [e for e in result["events"] if e["type"] != "ASSESSMENT" or e.get("actor") == actor["label"]]
             result["review_annotations"] = []
-        if result["metadata"]["condition"] == "baseline":
+        if result.get("metadata", {}).get("condition") == "baseline":
             result["predictions"] = []
             for alert in result["alerts"]:
                 alert["reason"] = "Runway attention required."
@@ -293,7 +350,49 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
         item = manager().sessions.get(id)
         if isinstance(item, Review):
             return {"id": id, "kind": "review", "source_id": item.source_id, "status": item.status}
+        replay_metadata = manager().replay_import_reader.metadata(id)
+        if replay_metadata is not None:
+            return {
+                "id": id,
+                "kind": "replay_source",
+                "source_id": replay_metadata["source_id"],
+                "status": replay_metadata["import_status"],
+            }
         return manager().archive.metadata(id)
+
+    @app.post("/api/v1/replay-imports", status_code=201)
+    async def replay_imports(request: Request, actor=Depends(identity)):
+        manager().instructor(actor)
+        try:
+            form = await request.form()
+        except Exception as error:
+            raise HTTPException(400, "Invalid multipart replay import") from error
+        if set(form.keys()) != {"manifest", "events"}:
+            raise HTTPException(422, "Multipart body must contain only manifest and events files")
+        manifest_parts = form.getlist("manifest")
+        event_parts = form.getlist("events")
+        if (len(manifest_parts) != 1 or len(event_parts) != 1
+                or not isinstance(manifest_parts[0], UploadFile)
+                or not isinstance(event_parts[0], UploadFile)):
+            raise HTTPException(422, "manifest and events must each be one uploaded UTF-8 file")
+        manifest_part, event_part = manifest_parts[0], event_parts[0]
+        manifest_bytes = await manifest_part.read()
+        event_bytes = await event_part.read()
+        await manifest_part.close()
+        await event_part.close()
+        try:
+            receipt = manager().replay_import_service.import_bundle(manifest_bytes, event_bytes)
+        except ReplayImportConflict as error:
+            raise HTTPException(409, str(error)) from error
+        except ReplayImportValidationError as error:
+            raise HTTPException(422, str(error)) from error
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Replay archive is temporarily unavailable") from error
+        return {
+            "source_session_id": receipt.source_session_id,
+            "source_id": receipt.source_id,
+            "import_status": receipt.import_status,
+        }
 
     @app.post("/api/v1/sessions/{id}/seats", status_code=201)
     async def seats(id: str, payload: SeatRequest, actor=Depends(identity)):
@@ -307,6 +406,113 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
     def snapshot(id: str, actor=Depends(identity)):
         return manager().snapshot(id, actor)
 
+    @app.get("/api/v1/sessions/{id}/replay-source")
+    def replay_source(id: str, actor=Depends(identity)):
+        return manager().source_read_access(id, actor)
+
+    @app.get("/api/v1/sessions/{id}/replay-frame")
+    def replay_frame(
+        id: str,
+        at_ms: int = Query(ge=0),
+        analysis_id: str | None = Query(default=None, min_length=1, max_length=200),
+        actor=Depends(identity),
+    ):
+        manager().source_read_access(id, actor)
+        frame = imported_replay_frame(manager().archive, id, at_ms, analysis_id)
+        if frame is None:
+            raise HTTPException(404, "Replay source not found")
+        return frame
+
+    @app.post("/api/v1/sessions/{id}/evidence")
+    def replay_evidence(id: str, payload: ReplayEvidenceRequest, actor=Depends(identity)):
+        metadata = manager().source_read_access(id, actor)
+        reader = manager().replay_import_reader
+
+        all_records: list[Mapping[str, Any]] = []
+        cursor = -1
+        while True:
+            page = reader.events(id, after_ordinal=cursor, until_ms=payload.until_ms, limit=500)
+            if not page:
+                break
+            all_records.extend(page)
+            cursor = int(page[-1]["event"]["ordinal"])
+        internal_records = {
+            record.source_event_id: record
+            for record in ArchiveReplayEventSource(manager().archive, id).read(-1)
+        }
+
+        items: list[dict[str, Any]] = []
+        unresolved: list[dict[str, Any]] = []
+        selected_analysis_exists = payload.analysis_id is not None and any(
+            item.get("id") == payload.analysis_id for item in metadata.get("analyses", ())
+        )
+        derived_frame = (
+            imported_replay_frame(manager().archive, id, payload.until_ms, payload.analysis_id)
+            if selected_analysis_exists and any(ref.kind == "detector_alert" for ref in payload.refs)
+            else None
+        )
+        derived_state = derived_frame.get("state", {}) if derived_frame else {}
+        alert_values = derived_state.get("alerts")
+        lifecycle_events = derived_state.get("lifecycle_events") or []
+
+        for ref in payload.refs:
+            ref_value = ref.model_dump()
+            if ref.kind == "transcript_segment":
+                unresolved.append({"ref": ref_value, "reason": "not_available"})
+                continue
+            if ref.kind == "detector_alert":
+                if payload.analysis_id is None:
+                    unresolved.append({"ref": ref_value, "reason": "analysis_not_selected"})
+                    continue
+                if not selected_analysis_exists or not derived_frame or derived_frame.get("analysis_status") == "unavailable":
+                    unresolved.append({"ref": ref_value, "reason": "analysis_unavailable"})
+                    continue
+                alert = None
+                if isinstance(alert_values, Mapping):
+                    alert = alert_values.get(ref.id)
+                    if alert is None:
+                        alert = next((value for value in alert_values.values()
+                                      if isinstance(value, Mapping) and value.get("id") == ref.id), None)
+                if alert is not None:
+                    items.append({"ref": ref_value, "item": {"kind": ref.kind, "analysis_id": payload.analysis_id,
+                                                                 "alert": alert}})
+                    continue
+                lifecycle = next((event for event in lifecycle_events
+                                  if isinstance(event, Mapping) and event.get("alert_id") == ref.id), None)
+                if lifecycle is not None:
+                    items.append({"ref": ref_value, "item": {"kind": ref.kind, "analysis_id": payload.analysis_id,
+                                                                 "event": lifecycle}})
+                    continue
+                unresolved.append({"ref": ref_value, "reason": "not_available_by_cutoff"})
+                continue
+
+            event_id = ref.id
+            if ":" in event_id:
+                source_prefix, event_id = event_id.split(":", 1)
+                if source_prefix != metadata["source_id"]:
+                    unresolved.append({"ref": ref_value, "reason": "source_mismatch"})
+                    continue
+            match = next((item for item in all_records if item.get("source_event_id") == event_id), None)
+            if match is None:
+                internal = internal_records.get(event_id)
+                if internal is not None and internal.event.sim_ms is None:
+                    unresolved.append({"ref": ref_value, "reason": "time_unaligned"})
+                    continue
+                if internal is not None and internal.event.sim_ms is not None \
+                        and internal.event.sim_ms > payload.until_ms:
+                    unresolved.append({"ref": ref_value, "reason": "outside_time_window"})
+                    continue
+                unresolved.append({"ref": ref_value, "reason": "not_found"})
+                continue
+            event = match["event"]
+            if event.get("sim_ms") is None:
+                unresolved.append({"ref": ref_value, "reason": "time_unaligned"})
+            elif event["sim_ms"] > payload.until_ms:
+                unresolved.append({"ref": ref_value, "reason": "outside_time_window"})
+            else:
+                items.append({"ref": ref_value, "item": {"kind": ref.kind, "event": match}})
+        return {"items": items, "unresolved": unresolved}
+
     @app.post("/api/v1/sessions/{id}/commands")
     async def command(id: str, payload: Command, actor=Depends(identity)):
         manager().access(id, actor)
@@ -317,14 +523,44 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             return session.execute(payload, actor["role"], actor["label"])
 
     @app.get("/api/v1/sessions/{id}/events")
-    def events(id: str, cursor: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=500), actor=Depends(identity)):
-        manager().access(id, actor)
-        session = manager().sessions.get(id)
-        source = session.source_id if isinstance(session, Review) else id
-        items = manager().archive.events(source, cursor, limit,
-                                         session.now_ms if isinstance(session, Review) else None)
-        # Cursor advances through unfiltered rows so personal-data filtering cannot stall pagination.
-        next_cursor = items[-1]["ordinal"] if items else cursor
+    def events(
+        id: str,
+        cursor: int | None = Query(default=None, ge=0),
+        limit: int = Query(100, ge=1, le=500),
+        until_ms: int | None = Query(default=None, ge=0),
+        actor=Depends(identity),
+    ):
+        if actor.get("source_read"):
+            source = id
+            manager().source_read_access(source, actor)
+            session = None
+        else:
+            manager().access(id, actor)
+            session = manager().sessions.get(id)
+            source = session.source_id if isinstance(session, Review) else id
+        if isinstance(session, Review):
+            until_ms = min(until_ms, session.now_ms) if until_ms is not None else session.now_ms
+
+        imported_metadata = manager().replay_import_reader.metadata(source)
+        if imported_metadata is not None:
+            if not actor.get("source_read"):
+                manager().instructor(actor)
+            after_ordinal = -1 if cursor is None else cursor
+            items = list(manager().replay_import_reader.events(
+                source, after_ordinal=after_ordinal, until_ms=until_ms, limit=limit,
+            ))
+            next_cursor = int(items[-1]["event"]["ordinal"]) if items else cursor
+            return {"items": items, "next_cursor": next_cursor}
+
+        current_cursor = cursor if cursor is not None else 0
+        # Filter historical visibility before paging. The event ordinal remains a stable cursor
+        # across ties in sim_ms, and privacy filtering below cannot stall that cursor.
+        visible_by_time = [
+            event for event in manager().archive.all_events(source)
+            if event["ordinal"] > current_cursor and (until_ms is None or event["sim_ms"] <= until_ms)
+        ]
+        items = visible_by_time[:limit]
+        next_cursor = items[-1]["ordinal"] if items else current_cursor
         if actor["role"] != Role.INSTRUCTOR:
             items = [e for e in items if e["type"] != "ASSESSMENT" or e.get("actor") == actor["label"]]
         metadata = manager().archive.metadata(source)
@@ -368,13 +604,17 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             source = manager().sessions.get(id)
             if isinstance(source, Review):
                 raise HTTPException(422, "Create a review from a training session")
-            if source and source.status not in {"ENDED", "INTERRUPTED"}:
+            imported_source = manager().replay_import_reader.metadata(id) is not None
+            if not imported_source and source and source.status not in {"ENDED", "INTERRUPTED"}:
                 raise HTTPException(409, "End the training session before freezing a review")
             review = Review(manager().archive, id)
             manager().sessions[review.id] = review
             # Session-bound instructor may control the newly created review only through a new token.
-            return {"id": review.id, "source_id": id,
-                    "token": manager().mint(Role.INSTRUCTOR, actor["label"], review.id)}
+            response = {"id": review.id, "source_id": id,
+                        "token": manager().mint(Role.INSTRUCTOR, actor["label"], review.id)}
+            if imported_source:
+                response["source_read_token"] = manager().mint_source_read(actor, id)
+            return response
 
     @app.post("/api/v1/sessions/{id}/branches", status_code=201)
     async def branch(id: str, payload: BranchRequest, actor=Depends(identity)):
@@ -383,6 +623,9 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
         async with manager().lock:
             current = manager().sessions.get(id)
             source_id = current.source_id if isinstance(current, Review) else id
+            if (isinstance(current, Review) and current.imported
+                    or manager().replay_import_reader.metadata(source_id) is not None):
+                raise HTTPException(409, "Imported replay sources are read-only and cannot be branched")
             source = manager().sessions.get(source_id)
             if source and source.status not in {"ENDED", "INTERRUPTED"}:
                 raise HTTPException(409, "End the source training session before branching")
@@ -411,6 +654,8 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
         manager().instructor(actor)
         session = manager().sessions.get(id)
         source = session.source_id if isinstance(session, Review) else id
+        if manager().replay_import_reader.metadata(source) is not None:
+            raise HTTPException(409, "Imported replay reports are not available in this review profile")
         result = session_report(manager().archive, source)
         if isinstance(session, Review):
             result["review_annotations"] = session.annotations
