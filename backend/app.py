@@ -20,6 +20,14 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import Field
 from starlette.datastructures import UploadFile
 
+from .assist_service import (
+    MAX_AUDIO_BYTES,
+    AssistAssetUnavailable,
+    AssistConflict,
+    AssistJobConfig,
+    AssistService,
+    AssistValidationError,
+)
 from .models import (
     Acknowledgement,
     Assessment,
@@ -91,7 +99,9 @@ class _ArchivePublicReader:
 class Manager:
     def __init__(self, archive: Archive, operator_key: str, *, ports: CompositionOverrides | None = None,
                  wall_clock: Callable[[], float] = time.time,
-                 monotonic_clock: Callable[[], float] = time.perf_counter):
+                 monotonic_clock: Callable[[], float] = time.perf_counter,
+                 audio_root: str | Path | None = None,
+                 assist_config: AssistJobConfig | None = None):
         self.archive = archive
         self.operator_key = operator_key
         self.ports = ports or CompositionOverrides()
@@ -106,6 +116,14 @@ class Manager:
         self.worker_port = self.ports.worker
         self.wall_clock = wall_clock
         self.monotonic_clock = monotonic_clock
+        self.assist_service = AssistService(
+            archive.db,
+            audio_root or ROOT / "runtime" / "private-audio",
+            worker=self.worker_port,
+            job_config=assist_config,
+            wall_clock=wall_clock,
+            monotonic_clock=monotonic_clock,
+        )
         self.sessions: dict[str, Session | Review] = {}
         self.tokens: dict[str, dict] = {}
         self.lock = asyncio.Lock()
@@ -258,12 +276,15 @@ class Manager:
                         session.status = "PAUSED"
                         LOGGER.exception("Session paused after runtime/persistence failure")
             await asyncio.sleep(.05)
+            self.assist_service.expire_due()
 
 
 def create_app(db_path: str | Path | None = None, operator_key: str | None = None,
                run_clock: bool = True, *, ports: CompositionOverrides | None = None,
                wall_clock: Callable[[], float] = time.time,
-               monotonic_clock: Callable[[], float] = time.perf_counter) -> FastAPI:
+               monotonic_clock: Callable[[], float] = time.perf_counter,
+               audio_root: str | Path | None = None,
+               assist_config: AssistJobConfig | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         runtime = ROOT / "runtime"
@@ -277,7 +298,8 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             LOGGER.warning("Local operator key is stored at %s (paste into the operator login)", key_file)
         archive = Archive(db_path or runtime / "flowlens.sqlite3")
         app.state.manager = Manager(archive, key, ports=ports, wall_clock=wall_clock,
-                                    monotonic_clock=monotonic_clock)
+                                    monotonic_clock=monotonic_clock, audio_root=audio_root,
+                                    assist_config=assist_config)
         task = asyncio.create_task(app.state.manager.clock()) if run_clock else None
         yield
         if task:
@@ -286,6 +308,7 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
                 await task
             except asyncio.CancelledError:
                 pass
+        await app.state.manager.assist_service.close()
         archive.close()
 
     app = FastAPI(title="ATC FlowLens Training API", version="0.1.0", lifespan=lifespan)
@@ -409,6 +432,109 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
     @app.get("/api/v1/sessions/{id}/replay-source")
     def replay_source(id: str, actor=Depends(identity)):
         return manager().source_read_access(id, actor)
+
+    @app.post("/api/v1/sessions/{id}/audio-assets", status_code=201)
+    async def audio_assets(id: str, request: Request, actor=Depends(identity)):
+        manager().source_read_access(id, actor)
+        manager().instructor(actor)
+        try:
+            form = await request.form()
+        except Exception as error:
+            raise HTTPException(400, "Invalid multipart audio asset upload") from error
+        if set(form.keys()) != {"audio", "metadata"}:
+            raise HTTPException(422, "Multipart body must contain only audio and metadata")
+        audio_parts = form.getlist("audio")
+        metadata_parts = form.getlist("metadata")
+        if (len(audio_parts) != 1 or len(metadata_parts) != 1
+                or not isinstance(audio_parts[0], UploadFile)
+                or not isinstance(metadata_parts[0], str)):
+            raise HTTPException(422, "audio must be one WAV file and metadata one JSON field")
+        audio_part = audio_parts[0]
+        try:
+            audio_bytes = await audio_part.read(MAX_AUDIO_BYTES + 1)
+        finally:
+            await audio_part.close()
+        if len(audio_bytes) > MAX_AUDIO_BYTES:
+            raise HTTPException(413, "Audio payload exceeds the private upload limit")
+        try:
+            manifest = ArchiveReplayEventSource(manager().archive, id).manifest()
+            receipt = manager().assist_service.register_asset(
+                source_session_id=id,
+                source_manifest=manifest,
+                metadata_json=metadata_parts[0],
+                filename=audio_part.filename or "",
+                content_type=audio_part.content_type or "",
+                audio_bytes=audio_bytes,
+            )
+        except AssistValidationError as error:
+            raise HTTPException(422, str(error)) from error
+        except KeyError as error:
+            raise HTTPException(404, "Replay source not found") from error
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Audio job storage is temporarily unavailable") from error
+        except OSError as error:
+            raise HTTPException(503, "Private audio storage is temporarily unavailable") from error
+        return {"asset": receipt["asset"], "job": receipt["job"]}
+
+    @app.get("/api/v1/sessions/{id}/transcription-jobs/{job_id}")
+    async def transcription_job(id: str, job_id: str, actor=Depends(identity)):
+        manager().source_read_access(id, actor)
+        try:
+            job = manager().assist_service.get_job(id, job_id)
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Audio job storage is temporarily unavailable") from error
+        if job is None:
+            raise HTTPException(404, "Transcription job not found")
+        return job
+
+    @app.post("/api/v1/sessions/{id}/transcription-jobs/{job_id}/cancel")
+    async def cancel_transcription_job(id: str, job_id: str, actor=Depends(identity)):
+        manager().source_read_access(id, actor)
+        manager().instructor(actor)
+        try:
+            job = manager().assist_service.cancel_job(id, job_id)
+        except AssistConflict as error:
+            raise HTTPException(409, str(error)) from error
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Audio job storage is temporarily unavailable") from error
+        if job is None:
+            raise HTTPException(404, "Transcription job not found")
+        return job
+
+    @app.post("/api/v1/sessions/{id}/transcription-jobs/{job_id}/retry", status_code=202)
+    async def retry_transcription_job(id: str, job_id: str, actor=Depends(identity)):
+        manager().source_read_access(id, actor)
+        manager().instructor(actor)
+        try:
+            job = manager().assist_service.retry_job(id, job_id)
+        except AssistConflict as error:
+            raise HTTPException(409, str(error)) from error
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Audio job storage is temporarily unavailable") from error
+        if job is None:
+            raise HTTPException(404, "Transcription job not found")
+        return job
+
+    @app.get("/api/v1/sessions/{id}/audio-assets/{asset_id}/content")
+    async def audio_asset_content(id: str, asset_id: str, actor=Depends(identity)):
+        # Check source capability before looking up the opaque asset ID.
+        manager().source_read_access(id, actor)
+        try:
+            asset = manager().assist_service.content_asset(id, asset_id)
+            path = (
+                await asyncio.to_thread(
+                    manager().assist_service.verified_content_path, asset_id, asset["hash"]
+                )
+                if asset is not None
+                else None
+            )
+        except AssistAssetUnavailable as error:
+            raise HTTPException(503, "Private audio integrity check failed") from error
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Audio job storage is temporarily unavailable") from error
+        if path is None:
+            raise HTTPException(404, "Audio asset not found")
+        return FileResponse(path, media_type="audio/wav", filename=f"{asset_id}.wav")
 
     @app.get("/api/v1/sessions/{id}/replay-frame")
     def replay_frame(
