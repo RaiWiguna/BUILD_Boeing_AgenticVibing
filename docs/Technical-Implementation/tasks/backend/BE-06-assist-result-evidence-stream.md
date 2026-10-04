@@ -3,7 +3,7 @@
 **Owner-role:** Backend/Replay
 
 **Packet induk:** [backend-session-replay-storage.md](../../packages/backend-session-replay-storage.md)
-**Status:** TARGET / belum diimplementasikan sebagai deliverable task. Inspeksi statis: 4 Oktober 2026.
+**Status:** Implemented in BE-owned source; selected integration checks passed 4 Oktober 2026. This records source and test-harness status only.
 
 [Indeks task](../README.md) · [Shared contracts](../../shared-contracts.md). Penyempurnaan C-01–C-08 dan aturan ownership/test pada indeks berlaku; ini dokumentasi, bukan hasil runtime.
 
@@ -13,9 +13,9 @@ Menyimpan hasil worker valid tepat satu kali dan menyajikan transcript/highlight
 
 ## 2. Kondisi saat ini dan batas pekerjaan
 
-**CURRENT_SOURCE:** Belum ada assist result schema/storage/routes; event history current adalah dict dan report instructor mengandung truth sehingga tidak boleh menjadi model evidence input.
+**CURRENT_SOURCE after BE-06:** `assist_service.py` defines a local extra-forbid SC-04/05 result adapter; `assist_storage.py` appends immutable analysis/result/receipt/stream rows through the existing `Archive.db` connection; `app.py` adds transcript, highlight, evaluator-only option reads, assist snapshot, evidence-segment resolution, and `/assist-stream`. Source event history remains the BE-04 archive projection. Instructor reports contain restricted truth and are not used as model evidence.
 
-**TARGET:** Result sink/schema integrity, source/version analysis binding, typed assist subscriptions dan evaluator-only options. Tidak mencakup geometri/rule body, inferensi provider, UI, atau source live.
+**Implementation boundary:** AI-01's DTO package and AI-02's process worker are not available, so the BE-local DTO/adapter follows SC-04/05. The fixed WorkerResult fixture used by integration checks is explicitly synthetic. No transcript/highlight/option is generated from fixture audio. This is not provider/ASR inference, AI-02 process isolation, domain review, partner-data validation, deployment, or operational validation.
 
 ## 3. Context dan ownership
 
@@ -26,7 +26,7 @@ Menyimpan hasil worker valid tepat satu kali dan menyajikan transcript/highlight
 
 **Existing yang dimiliki task:** `backend/app.py`
 
-**File baru usulan, belum ada:** Tidak ada file source baru di task ini.
+**File baru ditambahkan:** `tests/integration/test_be_06.py`, authorized by the BE-06 implementation request for scoped producer assertions.
 
 **File usulan dari task lain yang diperluas, belum ada:** `backend/assist_service.py`, `backend/assist_storage.py`
 
@@ -48,29 +48,29 @@ Mengubah file baru yang diperkenalkan BE-05 (`assist_service.py/assist_storage.p
 2. Resolve typed evidence refs pada source+analysis window yang sama; reject foreign/dangling refs/extra action fields; transcript unresolved alignment tetap diberi uncertainty.
 3. Commit accepted result batch+terminal job state+assist sequence atomik. Duplicate valid attempt mengembalikan receipt; payload berubah conflict.
 4. Expose transcripts/highlights/options/job reads dari stored DTO; opsi hanya instructor evaluator replay capability. Jangan gabungkan detector severity dengan review_priority.
-5. Assist-stream mengirim snapshot union C-07 lalu ordered updates; time filtering berdasarkan evidence availability, snapshot reconnect resync; source WS/read tetap tersedia ketika assist gagal.
+5. `assist-stream` authenticates its first message, emits a typed `assist-1` snapshot and ordered updates, keeps assist sequence separate from source sequence, and resyncs with a scoped snapshot on gaps or filtered updates. The existing synthetic source WebSocket remains compatible.
 
-## 6. Output yang harus diserahkan
+## 6. Implemented output
 
-Durable analysis results, scoped EvidenceReader dan assist REST/WS untuk FE; tidak ada option execute endpoint.
+Durable assist analysis/result rows, version metadata, immutable receipt, stream sequence/events, scoped transcript/highlight reads, evaluator-only options, transcript evidence resolution, and typed assist REST/WS reads are present in source. No option execute endpoint exists. Analysis windows and result availability are applied before historical paging; unknown alignment is marked and excluded from historical-time reads. `review_priority` remains an assist field and is not merged with detector severity.
 
 ## 7. Asumsi dan unknown
 
-**ASSUMPTION:** Analysis results versioned immutable; server schema validator terpisah dari provider validator.
+**ASSUMPTION:** Analysis results are versioned immutable; server schema validation is separate from any provider validation. Until AI-01 exists, the local strict adapter is temporary BE-owned glue.
 
 **UNKNOWN:** Makna factual support/relevance perlu evaluasi corpus/domain, bukan disimpulkan dari valid JSON. Pengembangan baseline memakai fixture/stub; tidak memalsukan fakta mitra atau hasil pengukuran.
 
 ## 8. Test dan kriteria lulus
 
-QA-03 memiliki result/stream assertions dengan fixed DTO fixtures. Seluruh command berikut adalah TARGET setelah test/runner dibuat; tidak dijalankan dalam penyusunan dokumentasi ini.
+`tests/integration/test_be_06.py` holds the focused result/stream assertions with fixed synthetic DTO fixtures.
 
-Tests mandiri (dependency luar memakai stub):
+Tests mandiri (dependency AI memakai fixture sintetik):
 
 | Test/check | Input/fixture | Cara menjalankan | Hasil yang wajib diperoleh |
 |---|---|---|---|
-| Commit | Valid attempt + F-COMM-01 refs | `python -m pytest tests/integration/test_be_06.py` | Satu batch/receipt; source/model/input versions dan refs utuh setelah reopen. |
-| Negative | Dangling/foreign evidence, late/cancelled attempt, action field | Command sama | Result ditolak tanpa partial segments/options; source read tidak rusak. |
-| Contract | Assist snapshot/sequence gap dan earlier until_ms | Command sama | No future evidence/candidate leak; source sequence berbeda dari assist sequence. |
+| Commit | Fixed synthetic WorkerResult + same-source event/segment refs | `python -m pytest tests/integration/test_be_06.py` | Passed, 24 tests; result batch, terminal job state, analysis, receipt, and assist sequence reopen from temporary SQLite. |
+| Negative | Foreign/dangling evidence, hash/source/version/job/attempt mismatch, action fields, timeout/cancel/stale attempt | Command sama | Passed; no partial result rows or source mutation. |
+| Contract | Source/read-token scope, evaluator-only options, historical cutoff, typed snapshot/reconnect, ordered updates and gap | Command sama | Passed; future result rows stay hidden at earlier replay time; assist sequence is separate from source WebSocket payload. |
 
 Integration checks (memerlukan implementation riil yang disebut pada §4):
 
@@ -78,4 +78,11 @@ Integration checks (memerlukan implementation riil yang disebut pada §4):
 |---|---|---|---|
 | Assist UI | AI stub/real result + FE-02/05 | `python -m pytest tests/browser/test_assist_stream.py` | Option muncul hanya pada evaluator replay dan refs membuka evidence yang tepat. |
 
-Task memenuhi kriteria teknis ketika output §6 tersedia dan assertions relevan di atas lulus dengan bukti command/fixture/version. Stub pass dilaporkan terpisah dari integration/provider riil; tidak menyatakan fidelity mitra atau validasi operasional.
+Verification actually run on 4 October 2026:
+
+- `python -m pytest tests/integration/test_be_06.py` — passed, 24 tests, using `TestClient`, temporary SQLite, fake clocks, and fixed synthetic worker results.
+- `python -m ruff check --ignore B008,UP041 backend/app.py backend/assist_service.py backend/assist_storage.py tests/integration/test_be_06.py` — passed.
+- `python -m mypy --follow-imports=skip backend/app.py backend/assist_service.py backend/assist_storage.py tests/integration/test_be_06.py` — passed; imported modules were skipped.
+- `git diff --check` — passed; Git printed CRLF conversion notices for the three edited backend files.
+
+These checks cover the stubbed technical path only. They do not verify AI-02 process isolation, provider inference/ASR, browser integration, domain review, partner data, build/deployment, or operational validity.

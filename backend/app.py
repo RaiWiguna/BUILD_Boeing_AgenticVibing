@@ -17,16 +17,27 @@ from typing import Any, Literal
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
-from pydantic import Field
+from pydantic import Field, StrictInt, StrictStr, ValidationError
 from starlette.datastructures import UploadFile
 
 from .assist_service import (
     MAX_AUDIO_BYTES,
+    AdvisoryOptionCandidate,
     AssistAssetUnavailable,
     AssistConflict,
+    AssistHighlight,
+    AssistHighlightMessage,
     AssistJobConfig,
+    AssistJobProgressMessage,
+    AssistJobProgressPayload,
+    AssistJobView,
+    AssistOptionMessage,
+    AssistSegmentMessage,
     AssistService,
+    AssistSnapshotMessage,
+    AssistStreamErrorMessage,
     AssistValidationError,
+    TranscriptReadItem,
 )
 from .models import (
     Acknowledgement,
@@ -74,6 +85,13 @@ class ReplayEvidenceRequest(Contract):
     refs: list[ReplayEvidenceRef] = Field(min_length=1, max_length=100)
     until_ms: int = Field(ge=0)
     analysis_id: str | None = Field(default=None, min_length=1, max_length=200)
+
+
+class AssistStreamAuth(Contract):
+    token: StrictStr = Field(min_length=1, max_length=500)
+    after_sequence: StrictInt | None = Field(default=None, ge=0)
+    analysis_id: StrictStr | None = Field(default=None, min_length=1, max_length=200)
+    until_ms: StrictInt | None = Field(default=None, ge=0)
 
 
 class _ArchivePublicReader:
@@ -133,7 +151,11 @@ class Manager:
     def mint(self, role: Role, label: str, session_id: str | None) -> str:
         token = secrets.token_urlsafe(32)
         self.tokens[hashlib.sha256(token.encode()).hexdigest()] = {
-            "role": role, "label": label, "session_id": session_id, "expires": self.wall_clock()+8*3600}
+            "role": role, "label": label, "session_id": session_id,
+            # Only the server-minted lab operator credential carries evaluator
+            # replay capability; session/source-read tokens do not inherit it.
+            "evaluator_replay": role == Role.INSTRUCTOR and session_id is None,
+            "expires": self.wall_clock()+8*3600}
         return token
 
     def mint_source_read(self, actor: dict, source_session_id: str) -> str:
@@ -148,6 +170,7 @@ class Manager:
             "session_id": source_session_id,
             "source_session_id": source_session_id,
             "source_read": True,
+            "evaluator_replay": False,
             "expires": self.wall_clock() + 8 * 3600,
         }
         return token
@@ -184,6 +207,19 @@ class Manager:
         if metadata is None:
             raise HTTPException(404, "Replay source not found")
         return metadata
+
+    def evaluator_replay_access(self, source_session_id: str, actor: dict) -> Mapping[str, Any]:
+        # Evaluator access is a server-derived instructor capability. It is never
+        # accepted from query/body claims, and a source_read credential cannot gain it.
+        if (actor.get("source_read") or actor.get("role") != Role.INSTRUCTOR
+                or actor.get("evaluator_replay") is not True):
+            raise HTTPException(403, "Evaluator replay capability required")
+        return self.source_read_access(source_session_id, actor)
+
+    @staticmethod
+    def can_evaluate_replay(actor: dict) -> bool:
+        return (actor.get("role") == Role.INSTRUCTOR and not actor.get("source_read")
+                and actor.get("evaluator_replay") is True)
 
     def snapshot(self, id: str, actor: dict) -> dict:
         self.access(id, actor)
@@ -431,7 +467,12 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
 
     @app.get("/api/v1/sessions/{id}/replay-source")
     def replay_source(id: str, actor=Depends(identity)):
-        return manager().source_read_access(id, actor)
+        metadata = dict(manager().source_read_access(id, actor))
+        metadata["analyses"] = [
+            *metadata.get("analyses", []),
+            *manager().assist_service.list_analyses(id),
+        ]
+        return metadata
 
     @app.post("/api/v1/sessions/{id}/audio-assets", status_code=201)
     async def audio_assets(id: str, request: Request, actor=Depends(identity)):
@@ -486,6 +527,89 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
         if job is None:
             raise HTTPException(404, "Transcription job not found")
         return job
+
+    @app.get("/api/v1/sessions/{id}/transcripts")
+    def transcripts(
+        id: str,
+        analysis_id: str | None = Query(default=None, min_length=1, max_length=200),
+        until_ms: int | None = Query(default=None, ge=0),
+        cursor: str | None = Query(default=None, max_length=1000),
+        limit: int = Query(100, ge=1, le=100),
+        actor=Depends(identity),
+    ):
+        manager().source_read_access(id, actor)
+        try:
+            return manager().assist_service.list_transcripts(
+                id, analysis_id=analysis_id, until_ms=until_ms, cursor=cursor, limit=limit,
+            )
+        except KeyError as error:
+            raise HTTPException(404, str(error)) from error
+        except AssistValidationError as error:
+            raise HTTPException(422, str(error)) from error
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Assist result storage is temporarily unavailable") from error
+
+    @app.get("/api/v1/sessions/{id}/highlights")
+    def highlights(
+        id: str,
+        analysis_id: str | None = Query(default=None, min_length=1, max_length=200),
+        until_ms: int | None = Query(default=None, ge=0),
+        cursor: str | None = Query(default=None, max_length=1000),
+        limit: int = Query(100, ge=1, le=100),
+        actor=Depends(identity),
+    ):
+        manager().source_read_access(id, actor)
+        try:
+            return manager().assist_service.list_highlights(
+                id, analysis_id=analysis_id, until_ms=until_ms, cursor=cursor, limit=limit,
+            )
+        except KeyError as error:
+            raise HTTPException(404, str(error)) from error
+        except AssistValidationError as error:
+            raise HTTPException(422, str(error)) from error
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Assist result storage is temporarily unavailable") from error
+
+    @app.get("/api/v1/sessions/{id}/replay-analyses/{analysis_id}/options")
+    def assist_options(
+        id: str,
+        analysis_id: str,
+        until_ms: int | None = Query(default=None, ge=0),
+        cursor: str | None = Query(default=None, max_length=1000),
+        limit: int = Query(100, ge=1, le=100),
+        actor=Depends(identity),
+    ):
+        manager().evaluator_replay_access(id, actor)
+        try:
+            return manager().assist_service.list_options(
+                id, analysis_id=analysis_id, until_ms=until_ms, cursor=cursor, limit=limit,
+            )
+        except KeyError as error:
+            raise HTTPException(404, str(error)) from error
+        except AssistValidationError as error:
+            raise HTTPException(422, str(error)) from error
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Assist result storage is temporarily unavailable") from error
+
+    @app.get("/api/v1/sessions/{id}/assist-snapshot")
+    def assist_snapshot(
+        id: str,
+        analysis_id: str | None = Query(default=None, min_length=1, max_length=200),
+        until_ms: int | None = Query(default=None, ge=0),
+        actor=Depends(identity),
+    ):
+        manager().source_read_access(id, actor)
+        try:
+            return manager().assist_service.assist_snapshot(
+                id, analysis_id=analysis_id, until_ms=until_ms,
+                evaluator=manager().can_evaluate_replay(actor),
+            )
+        except KeyError as error:
+            raise HTTPException(404, str(error)) from error
+        except AssistValidationError as error:
+            raise HTTPException(422, str(error)) from error
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Assist result storage is temporarily unavailable") from error
 
     @app.post("/api/v1/sessions/{id}/transcription-jobs/{job_id}/cancel")
     async def cancel_transcription_job(id: str, job_id: str, actor=Depends(identity)):
@@ -584,7 +708,11 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
         for ref in payload.refs:
             ref_value = ref.model_dump()
             if ref.kind == "transcript_segment":
-                unresolved.append({"ref": ref_value, "reason": "not_available"})
+                transcript = manager().assist_service.get_segment_at(id, ref.id, payload.until_ms)
+                if transcript is None:
+                    unresolved.append({"ref": ref_value, "reason": "not_available_by_cutoff"})
+                else:
+                    items.append({"ref": ref_value, "item": {"kind": ref.kind, **transcript}})
                 continue
             if ref.kind == "detector_alert":
                 if payload.analysis_id is None:
@@ -808,6 +936,120 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             await socket.close(code=4403 if error.status_code == 403 else 4401)
         except (WebSocketDisconnect, asyncio.TimeoutError, RuntimeError):
             return
+
+    @app.websocket("/api/v1/sessions/{id}/assist-stream")
+    async def assist_stream(socket: WebSocket, id: str):
+        await socket.accept()
+        try:
+            first_message = await asyncio.wait_for(socket.receive_json(), timeout=5)
+            auth = AssistStreamAuth.model_validate(first_message)
+            actor = manager().identity(auth.token)
+            manager().source_read_access(id, actor)
+            evaluator = manager().can_evaluate_replay(actor)
+            snapshot = manager().assist_service.assist_snapshot(
+                id, analysis_id=auth.analysis_id, until_ms=auth.until_ms, evaluator=evaluator,
+            )
+            if auth.after_sequence is not None and auth.after_sequence > snapshot["sequence"]:
+                error_message = AssistStreamErrorMessage(
+                    source_session_id=id, sequence=snapshot["sequence"], type="error",
+                    payload={"code": "sequence_ahead", "message": "Assist cursor is ahead of the committed stream."},
+                )
+                await socket.send_json(error_message.model_dump(mode="json"))
+                await socket.close(code=4400)
+                return
+            # A full authorized snapshot is the initial and reconnect state.
+            await socket.send_json(AssistSnapshotMessage.model_validate(snapshot).model_dump(mode="json"))
+            last_sequence = int(snapshot["sequence"])
+            while True:
+                if actor["expires"] < manager().wall_clock():
+                    await socket.close(code=4401)
+                    return
+                events = manager().assist_service.stream_events(id, last_sequence)
+                if not events:
+                    await asyncio.sleep(0.1)
+                    continue
+                resync = False
+                for event in events:
+                    if event["sequence"] != last_sequence + 1:
+                        resync = True
+                        break
+                    selected_analysis = event["analysis_id"]
+                    if auth.analysis_id is not None and selected_analysis != auth.analysis_id:
+                        resync = True
+                        break
+                    if auth.until_ms is not None and (
+                        event["available_ms"] is None or event["available_ms"] > auth.until_ms
+                    ):
+                        resync = True
+                        break
+                    if event["evaluator_only"] and not evaluator:
+                        resync = True
+                        break
+                    base = {
+                        "source_session_id": id,
+                        "sequence": event["sequence"],
+                        "type": event["type"],
+                    }
+                    payload = event["payload"]
+                    if event["type"] == "job_progress":
+                        job = manager().assist_service.get_job(id, event["job_id"])
+                        if job is None:
+                            resync = True
+                            break
+                        receipt = job.get("result_receipt")
+                        view = AssistJobView.model_validate({key: job.get(key) for key in (
+                            "id", "source_session_id", "asset_id", "attempt_id", "status", "provider",
+                            "model", "version", "config_version", "language", "started_utc",
+                            "finished_utc", "error", "chunk_progress",
+                        )} | {"analysis_id": receipt.get("analysis_id") if receipt else None})
+                        message = AssistJobProgressMessage(
+                            **base, payload=AssistJobProgressPayload(job=view),
+                        )
+                    elif event["type"] == "segment":
+                        message = AssistSegmentMessage(
+                            **base, payload=TranscriptReadItem.model_validate(payload),
+                        )
+                    elif event["type"] == "highlight":
+                        message = AssistHighlightMessage(
+                            **base, payload=AssistHighlight.model_validate(payload),
+                        )
+                    elif event["type"] == "option":
+                        message = AssistOptionMessage(
+                            **base, payload=AdvisoryOptionCandidate.model_validate(payload),
+                        )
+                    else:
+                        resync = True
+                        break
+                    await socket.send_json(message.model_dump(mode="json"))
+                    last_sequence = event["sequence"]
+                if resync:
+                    current = manager().assist_service.assist_snapshot(
+                        id, analysis_id=auth.analysis_id, until_ms=auth.until_ms, evaluator=evaluator,
+                    )
+                    await socket.send_json(AssistSnapshotMessage.model_validate(current).model_dump(mode="json"))
+                    last_sequence = int(current["sequence"])
+                else:
+                    await asyncio.sleep(0.1)
+        except HTTPException as error:
+            await socket.close(code=4403 if error.status_code == 403 else 4401)
+        except (ValidationError, AssistValidationError):
+            await socket.close(code=4400)
+        except KeyError:
+            await socket.close(code=4404)
+        except (WebSocketDisconnect, asyncio.TimeoutError, RuntimeError):
+            return
+        except sqlite3.Error:
+            try:
+                await socket.send_json(AssistStreamErrorMessage(
+                    source_session_id=id, sequence=manager().assist_service.stream_sequence(id),
+                    type="error", payload={
+                        "code": "storage_unavailable",
+                        "message": "Assist stream storage is temporarily unavailable.",
+                    },
+                ).model_dump(mode="json"))
+                await socket.close(code=1011)
+            except RuntimeError:
+                return
 
     dist = ROOT / "frontend" / "dist"
     if (dist / "assets").exists():
