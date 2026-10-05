@@ -2,7 +2,7 @@
 
 **Diperbarui:** 5 Oktober 2026
 
-**Status:** perbaikan lokal terverifikasi dan dipush ke `origin/feat/backend` pada `120c587`; hasil GitHub Actions untuk SHA ini belum terverifikasi.
+**Status:** koreksi composition sebelumnya dipush ke `origin/feat/backend` pada `120c587`. Log Actions terbaru yang diberikan pengguna gagal pada multipart replay import; deklarasi dependency sudah diperbaiki di worktree ini dan lulus verifikasi lokal, tetapi belum dipush atau dijalankan ulang di GitHub Actions.
 
 Dokumen ini mencatat requirement, keputusan implementasi, hasil CI, akar masalah, dan pekerjaan tersisa. [CI/CD setup](../CI_CD.md) tetap menjadi panduan konfigurasi GitHub. Workflow yang menjadi sumber perilaku adalah [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
 
@@ -14,7 +14,7 @@ Kriteria target:
 
 1. Push ke `dev` dan `main` menjalankan seluruh check.
 2. PR yang menargetkan `dev` atau `main` menjalankan seluruh check. Push `feat/*` sendiri tidak menjalankan CI; PR `feat/* → dev` menjalankannya.
-3. Check stabil yang dapat dijadikan required checks: `ATC FlowLens CI / backend tests`, `ATC FlowLens CI / ruff`, `ATC FlowLens CI / mypy`, dan `ATC FlowLens CI / diff check`.
+3. Check stabil yang dapat dijadikan required checks: `ATC FlowLens CI / backend tests`, `ATC FlowLens CI / backend tests (Python 3.13)`, `ATC FlowLens CI / ruff`, `ATC FlowLens CI / mypy`, dan `ATC FlowLens CI / diff check`.
 4. Hanya push ke `dev` yang lulus semua check membuat atau memperbarui satu PR `dev → main`. Workflow tidak merge PR dan tidak melakukan deployment.
 5. Izin token dibatasi per job. Job promosi memakai `GITHUB_TOKEN` dengan `pull-requests: write`; job verifikasi hanya membaca source.
 
@@ -64,14 +64,35 @@ Worktree lokal memakai branch `codex/ci-test-fix` yang berawal dari head PR `1a0
 - `python -m mypy --follow-imports=skip backend/app.py backend/session.py backend/storage.py backend/review.py backend/__init__.py tests/integration/test_be_08.py` — lulus untuk enam file yang disebut; imported modules dilewati.
 - `git diff --check origin/feat/backend`, `git diff --check origin/main`, dan whitespace check untuk file build log baru — lulus.
 
-Commit `120c587` berisi perbaikan dan log ini, lalu berhasil dipush ke `origin/feat/backend` pada 5 Oktober 2026. `git ls-remote` mengonfirmasi pointer branch remote pada SHA tersebut. Pemeriksaan daftar run Actions melalui API GitHub mengembalikan HTTP 404, sehingga hasil CI untuk SHA terkoreksi belum dapat diverifikasi di sini. Run terakhir yang dapat dipastikan tetap run sebelum fix pada head `1a01745`.
+Commit `120c587` berisi perbaikan dan log ini, lalu berhasil dipush ke `origin/feat/backend` pada 5 Oktober 2026. `git ls-remote` mengonfirmasi pointer branch remote pada SHA tersebut. Pemeriksaan daftar run Actions melalui API GitHub mengembalikan HTTP 404; log yang kemudian diberikan pengguna menjadi bukti kegagalan yang lebih baru, tetapi tidak memuat run ID atau SHA untuk dicocokkan.
+
+## Kegagalan multipart replay import dan koreksi lokal
+
+Log CI yang diberikan pengguna menunjukkan `43 failed, 35 passed`; sebagian besar kegagalan berhenti saat fixture mengimpor replay dan menerima `400 Invalid multipart replay import` dari `POST /api/v1/replay-imports`. Jadi assertion BE-06 di sekitar `test_be_06.py:352` adalah titik setup bersama, bukan bukti kegagalan validasi result/evidence BE-06.
+
+Akar masalahnya adalah endpoint memakai `Request.form()` untuk membaca file multipart, tetapi `python-multipart` belum dideklarasikan sebagai dependency runtime di `pyproject.toml`. Exception parser ditangkap endpoint dan dibungkus sebagai HTTP 400; instalasi Python pengembang yang sudah memiliki paket ini menyamarkan masalah pada runner bersih. Koreksi lokal menambahkan `python-multipart` ke dependency proyek.
+
+Verifikasi koreksi pada 5 Oktober 2026:
+
+- Membuat virtualenv baru dengan Python 3.13, lalu `python -m pip install -e ".[dev]"` — berhasil dan memasang `python-multipart 0.0.32` dari deklarasi proyek.
+- `python -m pytest` pada run pertama — 77 passed dan satu kegagalan sementara pada assertion attempt BE-05 (`stored_job["attempts"]` kosong); test itu lulus saat dijalankan sendiri.
+- `python -m pytest` pada run penuh berikutnya — 78 passed, 1 warning.
+- Lingkungan lokal hanya menyediakan Python 3.13, sedangkan CI memakai Python 3.11. Hasil lokal ini belum menggantikan rerun GitHub Actions.
+- Perubahan dependency dan pembaruan dokumentasi ini masih lokal pada worktree; belum dikirim ke `origin/feat/backend`.
+
+## Strategi versi Python
+
+`requires-python = ">=3.11"` menyatakan batas minimum dukungan proyek, bukan pin versi runtime. Source memakai `tomllib` pada `backend/app.py`; modul standard-library itu baru ditambahkan pada Python 3.11, jadi penurunan minimum ke versi lebih tua memerlukan dependency atau perubahan implementasi. Inspeksi source tidak menemukan API khusus Python 3.13.
+
+Python 3.11 bukan rilis paling baru atau yang paling lama didukung saat ini: pada Oktober 2026, jadwal resmi menyatakan 3.11 berada di fase security-only sampai Oktober 2027, sementara 3.13 masih menerima bug fixes dan dijadwalkan berakhir Oktober 2029. CI mempertahankan 3.11 untuk menguji batas minimum dan menambah suite penuh pada 3.13 agar cocok dengan lingkungan verifikasi lokal.
 
 ## Progres dan pekerjaan tersisa
 
 | Item | Status | Bukti/pekerjaan berikutnya |
 |---|---|---|
-| Workflow CI pada `feat/backend` | Ada di source; koreksi dipush ke PR branch pada SHA `120c587`. | Periksa hasil Actions untuk SHA terbaru pada halaman PR #2; jangan menyatakan CI lulus sampai semua check selesai. |
-| Test suite lengkap | Lulus lokal, 78 tests. | Tunggu hasil remote pada SHA koreksi sebelum menyatakan CI lulus. |
+| Workflow CI pada `feat/backend` | Source lokal sekarang memuat dependency multipart dan job Python 3.13; branch remote masih di SHA `120c587`, dan log Actions yang diberikan pengguna menunjukkan kegagalan multipart. | Kirim koreksi dependency dan workflow, lalu periksa ulang semua check PR #2 termasuk job Python 3.13. |
+| Cakupan versi Python | CI source menguji backend pada 3.11 dan menambahkan job 3.13. | Verifikasi kedua job pada GitHub Actions; required checks repository harus mencakup check 3.13 yang baru. |
+| Test suite lengkap | 78 tests lulus pada run penuh lokal kedua di virtualenv Python 3.13 yang menginstal deklarasi terbaru. | Run pertama pada env bersih memiliki satu kegagalan sementara di BE-05; check remote Python 3.11 dan 3.13 tetap perlu dijalankan. |
 | Ruff, mypy, diff check | Lulus pada run remote sebelum fix; Ruff dan mypy juga lulus lokal sesudah fix. | Pastikan seluruh check remote berhasil pada SHA terbaru. |
 | Promosi `dev → main` | Job menunggu semua check dan hanya berjalan pada push ke `dev`. | Verifikasi satu PR promosi dibuat/diperbarui setelah push `dev` dengan semua check sukses. |
 | Branch protection `main` dan `dev` | Belum diverifikasi atau diubah. | Aktifkan kewajiban PR, required checks, larangan force-push/penghapusan, dan izin Actions membuat PR di GitHub. |
