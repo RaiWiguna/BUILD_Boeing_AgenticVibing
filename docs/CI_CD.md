@@ -31,7 +31,7 @@ Workflow tidak membuat branch. `dev` kini tersedia dari `main`; perubahan `feat/
 
 ## Batas verifikasi saat ini
 
-Workflow telah dipush pada `feat/backend`, tetapi belum digabung ke `dev` atau dijalankan oleh GitHub Actions. Lingkungan ini tidak memiliki GitHub CLI dan permintaan baca proteksi branch ke API GitHub mengembalikan HTTP 401 tanpa autentikasi; status atau perubahan branch protection remote tidak dapat diverifikasi. Tidak ada kredensial yang ditambahkan.
+Workflow telah dipush pada `feat/backend` dan dijalankan oleh GitHub Actions pada PR #2 menuju `dev`, tetapi belum digabung ke `dev`. Run terbaru gagal pada `backend tests`; Ruff, mypy, dan diff check lulus, lalu job promosi dilewati. PR tetap terbuka. Lingkungan ini tidak memiliki GitHub CLI dan permintaan baca proteksi branch ke API GitHub mengembalikan HTTP 401 tanpa autentikasi; status atau perubahan branch protection remote tidak dapat diverifikasi. Tidak ada kredensial yang ditambahkan.
 
 Test suite lengkap sengaja dijalankan CI agar kegagalan apa pun mencegah promosi. Pada pemeriksaan lokal 5 Oktober 2026, gate BE-03–BE-08, Ruff, dan mypy lulus. `python -m pytest` menghasilkan 77 passed dan 1 failed pada `tests/integration/test_composition.py`; karena itu job `backend tests` saat ini akan gagal sampai kegagalan tersebut diperbaiki di lingkup perubahan yang sesuai. Perbaikan perilaku backend tidak termasuk perubahan CI ini.
 
