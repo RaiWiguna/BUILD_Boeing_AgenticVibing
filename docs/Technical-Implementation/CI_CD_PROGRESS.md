@@ -14,7 +14,7 @@ Kriteria target:
 
 1. Push ke `dev` dan `main` menjalankan seluruh check.
 2. PR yang menargetkan `dev` atau `main` menjalankan seluruh check. Push `feat/*` sendiri tidak menjalankan CI; PR `feat/* → dev` menjalankannya.
-3. Check stabil yang dapat dijadikan required checks: `ATC FlowLens CI / backend tests`, `ATC FlowLens CI / backend tests (Python 3.13)`, `ATC FlowLens CI / ruff`, `ATC FlowLens CI / mypy`, dan `ATC FlowLens CI / diff check`.
+3. Check stabil yang dapat dijadikan required checks: `ATC FlowLens CI / backend tests`, `ATC FlowLens CI / ruff`, `ATC FlowLens CI / mypy`, dan `ATC FlowLens CI / diff check`.
 4. Hanya push ke `dev` yang lulus semua check membuat atau memperbarui satu PR `dev → main`. Workflow tidak merge PR dan tidak melakukan deployment.
 5. Izin token dibatasi per job. Job promosi memakai `GITHUB_TOKEN` dengan `pull-requests: write`; job verifikasi hanya membaca source.
 
@@ -77,22 +77,22 @@ Verifikasi koreksi pada 5 Oktober 2026:
 - Membuat virtualenv baru dengan Python 3.13, lalu `python -m pip install -e ".[dev]"` — berhasil dan memasang `python-multipart 0.0.32` dari deklarasi proyek.
 - `python -m pytest` pada run pertama — 77 passed dan satu kegagalan sementara pada assertion attempt BE-05 (`stored_job["attempts"]` kosong); test itu lulus saat dijalankan sendiri.
 - `python -m pytest` pada run penuh berikutnya — 78 passed, 1 warning.
-- Lingkungan lokal hanya menyediakan Python 3.13, sedangkan CI memakai Python 3.11. Hasil lokal ini belum menggantikan rerun GitHub Actions.
+- Lingkungan lokal hanya menyediakan Python 3.13; saat suite ini pertama diverifikasi, runner CI memakai Python 3.11. Hasil lokal ini belum menggantikan rerun GitHub Actions.
 - Perubahan dependency dan job Python 3.13 dipush ke `origin/feat/backend` pada `4c035e4`. GitHub Actions untuk SHA baru belum diperiksa.
 
 ## Strategi versi Python
 
-`requires-python = ">=3.11"` menyatakan batas minimum dukungan proyek, bukan pin versi runtime. Source memakai `tomllib` pada `backend/app.py`; modul standard-library itu baru ditambahkan pada Python 3.11, jadi penurunan minimum ke versi lebih tua memerlukan dependency atau perubahan implementasi. Inspeksi source tidak menemukan API khusus Python 3.13.
+`requires-python = ">=3.11"` menyatakan batas minimum metadata proyek, bukan pin versi runtime. Source memakai `tomllib` pada `backend/app.py`; modul standard-library itu baru ditambahkan pada Python 3.11, jadi penurunan minimum ke versi lebih tua memerlukan dependency atau perubahan implementasi. Inspeksi source tidak menemukan API khusus Python 3.13.
 
-Python 3.11 bukan rilis paling baru atau yang paling lama didukung saat ini: pada Oktober 2026, jadwal resmi menyatakan 3.11 berada di fase security-only sampai Oktober 2027, sementara 3.13 masih menerima bug fixes dan dijadwalkan berakhir Oktober 2029. CI mempertahankan 3.11 untuk menguji batas minimum dan menambah suite penuh pada 3.13 agar cocok dengan lingkungan verifikasi lokal.
+Python 3.11 sebelumnya dipakai CI untuk menguji batas minimum metadata. Atas pilihan pengguna, seluruh job workflow sekarang memakai interpreter Python 3.13 agar cocok dengan runtime lokal; suite BE-03–BE-08 lulus pada virtualenv lokal 3.13. Konsekuensinya, klaim metadata `>=3.11` belum diuji otomatis pada versi minimum sampai job 3.11 dipulihkan atau batas metadata dinaikkan secara terpisah. `python_version = "3.11"` di konfigurasi mypy adalah target bahasa yang dianalisis, bukan interpreter runner CI.
 
 ## Progres dan pekerjaan tersisa
 
 | Item | Status | Bukti/pekerjaan berikutnya |
 |---|---|---|
-| Workflow CI pada `feat/backend` | Dependency multipart dan job Python 3.13 dipush pada SHA `4c035e4`; run sebelumnya yang diberikan pengguna gagal pada multipart imports. | Periksa semua check PR #2 pada SHA baru, termasuk job Python 3.13. |
-| Cakupan versi Python | CI source menguji backend pada 3.11 dan menambahkan job 3.13. | Verifikasi kedua job pada GitHub Actions; required checks repository harus mencakup check 3.13 yang baru. |
-| Test suite lengkap | 78 tests lulus pada run penuh lokal kedua di virtualenv Python 3.13 yang menginstal deklarasi terbaru. | Run pertama pada env bersih memiliki satu kegagalan sementara di BE-05; check remote Python 3.11 dan 3.13 tetap perlu dijalankan. |
+| Workflow CI pada `feat/backend` | Dependency multipart dan workflow Python 3.13 dipush pada SHA `4c035e4`; perubahan versi 3.13 saja sedang disiapkan lokal. | Kirim pembaruan workflow dan periksa check PR #2 pada SHA baru. |
+| Cakupan versi Python | Semua job Python pada workflow lokal memakai 3.13 saja. | Verifikasi CI setelah push. Metadata tetap `>=3.11`; minimum 3.11 belum diuji oleh CI. |
+| Test suite lengkap | 78 tests lulus pada run penuh lokal kedua di virtualenv Python 3.13 yang menginstal deklarasi terbaru. | Run pertama pada env bersih memiliki satu kegagalan sementara di BE-05; GitHub Actions pada SHA versi terbaru belum berjalan/diverifikasi. |
 | Ruff, mypy, diff check | Lulus pada run remote sebelum fix; Ruff dan mypy juga lulus lokal sesudah fix. | Pastikan seluruh check remote berhasil pada SHA terbaru. |
 | Promosi `dev → main` | Job menunggu semua check dan hanya berjalan pada push ke `dev`. | Verifikasi satu PR promosi dibuat/diperbarui setelah push `dev` dengan semua check sukses. |
 | Branch protection `main` dan `dev` | Belum diverifikasi atau diubah. | Aktifkan kewajiban PR, required checks, larangan force-push/penghapusan, dan izin Actions membuat PR di GitHub. |
