@@ -22,20 +22,21 @@ from starlette.datastructures import UploadFile
 
 from .assist_service import (
     MAX_AUDIO_BYTES,
-    AdvisoryOptionCandidate,
+    AssistAnnotationMessage,
     AssistAssetUnavailable,
     AssistConflict,
-    AssistHighlight,
     AssistHighlightMessage,
     AssistJobConfig,
     AssistJobProgressMessage,
     AssistJobProgressPayload,
     AssistJobView,
     AssistOptionMessage,
+    AssistReviewRequest,
     AssistSegmentMessage,
     AssistService,
     AssistSnapshotMessage,
     AssistStreamErrorMessage,
+    AssistTranscriptCorrectionRequest,
     AssistValidationError,
     TranscriptReadItem,
 )
@@ -58,7 +59,14 @@ from .replay_import import (
     ReplayImportValidationError,
     SQLiteReplayArchiveReader,
 )
-from .reporting import report_csv, report_html, session_report
+from .reporting import (
+    debrief_csv,
+    debrief_html,
+    replay_debrief,
+    report_csv,
+    report_html,
+    session_report,
+)
 from .review import Review, imported_replay_frame
 from .scenarios import CATALOGUE
 from .session import Session, SessionError
@@ -152,6 +160,7 @@ class Manager:
         token = secrets.token_urlsafe(32)
         self.tokens[hashlib.sha256(token.encode()).hexdigest()] = {
             "role": role, "label": label, "session_id": session_id,
+            "actor_id": secrets.token_hex(16),
             # Only the server-minted lab operator credential carries evaluator
             # replay capability; session/source-read tokens do not inherit it.
             "evaluator_replay": role == Role.INSTRUCTOR and session_id is None,
@@ -170,6 +179,7 @@ class Manager:
             "session_id": source_session_id,
             "source_session_id": source_session_id,
             "source_read": True,
+            "actor_id": secrets.token_hex(16),
             "evaluator_replay": False,
             "expires": self.wall_clock() + 8 * 3600,
         }
@@ -549,6 +559,23 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
         except sqlite3.Error as error:
             raise HTTPException(503, "Assist result storage is temporarily unavailable") from error
 
+    @app.post("/api/v1/sessions/{id}/transcripts/{segment_id}/corrections")
+    def correct_transcript(
+        id: str, segment_id: str, payload: AssistTranscriptCorrectionRequest,
+        actor=Depends(identity),
+    ):
+        manager().evaluator_replay_access(id, actor)
+        try:
+            return manager().assist_service.correct_transcript(
+                id, segment_id, payload, actor_id=actor["actor_id"], reviewer=actor["label"],
+            )
+        except AssistConflict as error:
+            raise HTTPException(409, str(error)) from error
+        except KeyError as error:
+            raise HTTPException(404, str(error)) from error
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Review storage is temporarily unavailable") from error
+
     @app.get("/api/v1/sessions/{id}/highlights")
     def highlights(
         id: str,
@@ -570,6 +597,23 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
         except sqlite3.Error as error:
             raise HTTPException(503, "Assist result storage is temporarily unavailable") from error
 
+    @app.post("/api/v1/sessions/{id}/highlights/{highlight_id}/review")
+    def review_highlight(
+        id: str, highlight_id: str, payload: AssistReviewRequest, actor=Depends(identity),
+    ):
+        manager().evaluator_replay_access(id, actor)
+        try:
+            return manager().assist_service.review_candidate(
+                id, "highlight", highlight_id, payload,
+                actor_id=actor["actor_id"], reviewer=actor["label"],
+            )
+        except AssistConflict as error:
+            raise HTTPException(409, str(error)) from error
+        except KeyError as error:
+            raise HTTPException(404, str(error)) from error
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Review storage is temporarily unavailable") from error
+
     @app.get("/api/v1/sessions/{id}/replay-analyses/{analysis_id}/options")
     def assist_options(
         id: str,
@@ -590,6 +634,24 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             raise HTTPException(422, str(error)) from error
         except sqlite3.Error as error:
             raise HTTPException(503, "Assist result storage is temporarily unavailable") from error
+
+    @app.post("/api/v1/sessions/{id}/replay-analyses/{analysis_id}/options/{option_id}/review")
+    def review_option(
+        id: str, analysis_id: str, option_id: str, payload: AssistReviewRequest,
+        actor=Depends(identity),
+    ):
+        manager().evaluator_replay_access(id, actor)
+        try:
+            return manager().assist_service.review_candidate(
+                id, "option", option_id, payload,
+                actor_id=actor["actor_id"], reviewer=actor["label"], analysis_id=analysis_id,
+            )
+        except AssistConflict as error:
+            raise HTTPException(409, str(error)) from error
+        except KeyError as error:
+            raise HTTPException(404, str(error)) from error
+        except sqlite3.Error as error:
+            raise HTTPException(503, "Review storage is temporarily unavailable") from error
 
     @app.get("/api/v1/sessions/{id}/assist-snapshot")
     def assist_snapshot(
@@ -919,6 +981,46 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             return HTMLResponse(report_html(result))
         return result
 
+    @app.get("/api/v1/sessions/{id}/debrief")
+    def replay_debrief_export(
+        id: str,
+        format: str = Query("json", pattern="^(json|csv|html)$"),
+        actor=Depends(identity),
+    ):
+        metadata = manager().evaluator_replay_access(id, actor)
+        if metadata.get("import_status") != "completed":
+            raise HTTPException(409, "Debrief requires a committed imported replay source")
+        event_refs: list[dict[str, Any]] = []
+        cursor = -1
+        while True:
+            page = manager().replay_import_reader.events(id, after_ordinal=cursor, limit=500)
+            if not page:
+                break
+            for record in page:
+                event = record["event"]
+                event_refs.append({
+                    "kind": "session_event",
+                    "id": record["source_event_id"],
+                    "sim_ms": event.get("sim_ms"),
+                    "type": event.get("type"),
+                    "quality": record["quality"],
+                    "source_time": record["source_time"],
+                })
+                cursor = int(event["ordinal"])
+            if len(page) < 500:
+                break
+        analyses = [
+            *metadata.get("analyses", []),
+            *manager().assist_service.list_analyses(id),
+        ]
+        snapshot = manager().assist_service.assist_snapshot(id, evaluator=True)
+        result = replay_debrief(metadata, event_refs, analyses, snapshot)
+        if format == "csv":
+            return Response(debrief_csv(result), media_type="text/csv")
+        if format == "html":
+            return HTMLResponse(debrief_html(result))
+        return result
+
     @app.websocket("/api/v1/sessions/{id}/stream")
     async def stream(socket: WebSocket, id: str):
         await socket.accept()
@@ -1007,16 +1109,26 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
                         )
                     elif event["type"] == "segment":
                         message = AssistSegmentMessage(
-                            **base, payload=TranscriptReadItem.model_validate(payload),
+                            **base, payload=TranscriptReadItem.model_validate(
+                                payload | {"source_session_id": id, "analysis_id": event["analysis_id"]}
+                            ),
                         )
                     elif event["type"] == "highlight":
                         message = AssistHighlightMessage(
-                            **base, payload=AssistHighlight.model_validate(payload),
+                            **base, payload=payload | {
+                                "source_session_id": id, "analysis_id": event["analysis_id"],
+                            },
                         )
                     elif event["type"] == "option":
                         message = AssistOptionMessage(
-                            **base, payload=AdvisoryOptionCandidate.model_validate(payload),
+                            **base, payload=payload | {
+                                "source_session_id": id, "analysis_id": event["analysis_id"],
+                            },
                         )
+                    elif event["type"] == "review_annotation":
+                        message = AssistAnnotationMessage.model_validate({
+                            **base, "payload": payload,
+                        })
                     else:
                         resync = True
                         break

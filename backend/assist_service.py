@@ -28,7 +28,7 @@ from pydantic import (
     model_validator,
 )
 
-from .assist_storage import AssistStorage
+from .assist_storage import AssistStorage, ReviewRequestConflict, StaleReviewRevision
 from .models import Contract
 from .ports import WorkerPort
 from .replay_contracts import (
@@ -202,11 +202,24 @@ class WorkerResultDTO(Contract):
         return self
 
 
-class TranscriptReadItem(Contract):
-    segment: TranscriptSegment
-    entities: list[CandidateEntity]
-    time_alignment: Literal["aligned", "unknown"]
-    alignment_uncertainty: StrictStr | None
+class TranscriptRevisionView(Contract):
+    id: StrictStr
+    source_session_id: StrictStr
+    analysis_id: StrictStr
+    segment_id: StrictStr
+    expected_revision: StrictInt = Field(ge=0)
+    basis_revision: StrictInt = Field(ge=0)
+    revision: StrictInt = Field(gt=0)
+    text: StrictStr
+    reason: StrictStr
+    reviewer: StrictStr
+    timestamp: StrictStr
+
+
+class CorrectedTranscriptView(Contract):
+    text: StrictStr
+    revision: StrictInt = Field(ge=0)
+    is_corrected: bool
 
 
 class AssistJobView(Contract):
@@ -228,19 +241,86 @@ class AssistJobView(Contract):
 
 
 class ReviewAnnotationView(Contract):
+    id: StrictStr
+    source_session_id: StrictStr
+    analysis_id: StrictStr
+    target_kind: Literal["transcript_segment", "highlight", "option"]
     target_id: StrictStr
     decision: Literal["corrected", "confirmed", "dismissed", "unresolved"]
+    expected_revision: StrictInt = Field(ge=0)
+    basis_revision: StrictInt = Field(ge=0)
+    revision: StrictInt = Field(gt=0)
     reviewer: StrictStr
     timestamp: StrictStr
     correction: StrictStr | None = None
     reason: StrictStr | None = None
 
 
+class AssistHighlightReadItem(AssistHighlight):
+    source_session_id: StrictStr | None = None
+    analysis_id: StrictStr | None = None
+    current_decision: ReviewAnnotationView | None = None
+    review_history: list[ReviewAnnotationView] = Field(default_factory=list)
+
+
+class AssistOptionReadItem(AdvisoryOptionCandidate):
+    source_session_id: StrictStr | None = None
+    analysis_id: StrictStr | None = None
+    current_decision: ReviewAnnotationView | None = None
+    review_history: list[ReviewAnnotationView] = Field(default_factory=list)
+
+
+class AssistTranscriptCorrectionRequest(Contract):
+    request_id: StrictStr = Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9._:-]+$")
+    expected_revision: StrictInt = Field(ge=0, le=1_000_000_000)
+    text: StrictStr = Field(min_length=1, max_length=4000)
+    reason: StrictStr = Field(min_length=1, max_length=1000)
+
+    @model_validator(mode="after")
+    def nonblank_text_and_reason(self) -> AssistTranscriptCorrectionRequest:
+        if not self.text.strip() or not self.reason.strip():
+            raise ValueError("correction text and reason must contain non-whitespace characters")
+        return self
+
+
+class AssistReviewRequest(Contract):
+    request_id: StrictStr = Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9._:-]+$")
+    expected_revision: StrictInt = Field(ge=0, le=1_000_000_000)
+    decision: Literal["corrected", "confirmed", "dismissed", "unresolved"]
+    correction: StrictStr | None = Field(default=None, min_length=1, max_length=4000)
+    reason: StrictStr | None = Field(default=None, min_length=1, max_length=1000)
+
+    @model_validator(mode="after")
+    def decision_has_explanation(self) -> AssistReviewRequest:
+        if self.decision == "corrected":
+            if self.correction is None or not self.correction.strip():
+                raise ValueError("corrected decisions require correction text")
+        elif self.correction is not None:
+            raise ValueError("correction text is only accepted for corrected decisions")
+        if self.reason is not None and not self.reason.strip():
+            raise ValueError("reason must contain non-whitespace characters")
+        if self.decision != "corrected" and self.reason is None:
+            raise ValueError("review decisions require a reason")
+        return self
+
+
+class TranscriptReadItem(Contract):
+    source_session_id: StrictStr | None = None
+    analysis_id: StrictStr | None = None
+    segment: TranscriptSegment
+    entities: list[CandidateEntity]
+    time_alignment: Literal["aligned", "unknown"]
+    alignment_uncertainty: StrictStr | None
+    revision_history: list[TranscriptRevisionView] = Field(default_factory=list)
+    corrected_view: CorrectedTranscriptView | None = None
+    review_history: list[ReviewAnnotationView] = Field(default_factory=list)
+
+
 class AssistSnapshotPayload(Contract):
     jobs: list[AssistJobView]
     segments: list[TranscriptReadItem]
-    highlights: list[AssistHighlight]
-    options: list[AdvisoryOptionCandidate]
+    highlights: list[AssistHighlightReadItem]
+    options: list[AssistOptionReadItem]
     review_annotations: list[ReviewAnnotationView]
 
 
@@ -277,12 +357,12 @@ class AssistSegmentMessage(_AssistMessage):
 
 class AssistHighlightMessage(_AssistMessage):
     type: Literal["highlight"]
-    payload: AssistHighlight
+    payload: AssistHighlightReadItem
 
 
 class AssistOptionMessage(_AssistMessage):
     type: Literal["option"]
-    payload: AdvisoryOptionCandidate
+    payload: AssistOptionReadItem
 
 
 class AssistAnnotationMessage(_AssistMessage):
@@ -951,6 +1031,119 @@ class AssistService:
         except ValueError as error:
             raise AssistResultConflict(str(error)) from error
 
+    def _review_mutation(
+        self,
+        *,
+        source_session_id: str,
+        target_kind: Literal["transcript_segment", "highlight", "option"],
+        target_id: str,
+        expected_analysis_id: str | None,
+        request: AssistTranscriptCorrectionRequest | AssistReviewRequest,
+        actor_id: str,
+        reviewer: str,
+        decision: Literal["corrected", "confirmed", "dismissed", "unresolved"],
+        correction: str | None,
+        reason: str | None,
+    ) -> dict[str, Any]:
+        body = request.model_dump(mode="json")
+        fingerprint = {
+            "source_session_id": source_session_id,
+            "expected_analysis_id": expected_analysis_id,
+            "target_kind": target_kind,
+            "target_id": target_id,
+            "body": body,
+        }
+        canonical = json.dumps(fingerprint, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        request_hash = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+        try:
+            receipt = self._storage.commit_review_mutation(
+                source_session_id=source_session_id,
+                target_kind=target_kind,
+                target_id=target_id,
+                expected_analysis_id=expected_analysis_id,
+                request_id=request.request_id,
+                request_hash=request_hash,
+                actor_id=actor_id,
+                reviewer=reviewer,
+                expected_revision=request.expected_revision,
+                decision=decision,
+                correction=correction,
+                reason=reason,
+                timestamp_utc=self._now_utc(),
+            )
+        except (ReviewRequestConflict, StaleReviewRevision) as error:
+            raise AssistConflict(str(error)) from error
+        if receipt is None:
+            raise KeyError("Review target not found in this source or analysis")
+        return receipt
+
+    def correct_transcript(
+        self, source_session_id: str, segment_id: str,
+        request: AssistTranscriptCorrectionRequest, *, actor_id: str, reviewer: str,
+    ) -> dict[str, Any]:
+        return self._review_mutation(
+            source_session_id=source_session_id,
+            target_kind="transcript_segment",
+            target_id=segment_id,
+            expected_analysis_id=None,
+            request=request,
+            actor_id=actor_id,
+            reviewer=reviewer,
+            decision="corrected",
+            correction=request.text,
+            reason=request.reason,
+        )
+
+    def review_candidate(
+        self, source_session_id: str, target_kind: Literal["highlight", "option"], target_id: str,
+        request: AssistReviewRequest, *, actor_id: str, reviewer: str,
+        analysis_id: str | None = None,
+    ) -> dict[str, Any]:
+        return self._review_mutation(
+            source_session_id=source_session_id,
+            target_kind=target_kind,
+            target_id=target_id,
+            expected_analysis_id=analysis_id,
+            request=request,
+            actor_id=actor_id,
+            reviewer=reviewer,
+            decision=request.decision,
+            correction=request.correction,
+            reason=request.reason,
+        )
+
+    def _transcript_read_item(self, source_session_id: str, row: Mapping[str, Any]) -> TranscriptReadItem:
+        segment = row["segment"]
+        analysis_id = str(row["analysis_id"])
+        segment_id = str(segment["id"])
+        revisions = [
+            TranscriptRevisionView.model_validate(item)
+            for item in self._storage.transcript_revisions(source_session_id, analysis_id, segment_id)
+        ]
+        annotation_history = [
+            ReviewAnnotationView.model_validate(item)
+            for item in self._storage.review_history(
+                source_session_id, analysis_id, "transcript_segment", segment_id,
+            )
+        ]
+        current_revision = revisions[-1].revision if revisions else 0
+        corrected_text = revisions[-1].text if revisions else str(segment["text"])
+        return TranscriptReadItem.model_validate({
+            "source_session_id": source_session_id,
+            "analysis_id": analysis_id,
+            "segment": segment,
+            "entities": row["entities"],
+            "time_alignment": row["time_alignment"],
+            "alignment_uncertainty": row["alignment_uncertainty"],
+            "revision_history": revisions,
+            "corrected_view": {
+                "text": corrected_text,
+                "revision": current_revision,
+                "is_corrected": bool(revisions),
+            },
+            "review_history": annotation_history,
+        })
+
     def _finish(
         self,
         job_id: str,
@@ -1056,12 +1249,7 @@ class AssistService:
         )
         has_more = len(rows) > limit
         visible = rows[:limit]
-        items = [TranscriptReadItem.model_validate({
-            "segment": row["segment"], "entities": row["entities"],
-            "time_alignment": row["time_alignment"],
-            "alignment_uncertainty": row["alignment_uncertainty"],
-        })
-                 for row in visible]
+        items = [self._transcript_read_item(source_session_id, row) for row in visible]
         next_cursor = None
         if has_more and visible:
             next_cursor = self._encode_cursor(
@@ -1083,7 +1271,19 @@ class AssistService:
         )
         has_more = len(rows) > limit
         visible = rows[:limit]
-        items = [AssistHighlight.model_validate(row["item"]) for row in visible]
+        items = []
+        for row in visible:
+            candidate = row["item"]
+            history = [ReviewAnnotationView.model_validate(item) for item in self._storage.review_history(
+                source_session_id, str(row["analysis_id"]), "highlight", str(candidate["id"]),
+            )]
+            items.append(AssistHighlightReadItem.model_validate({
+                **candidate,
+                "source_session_id": source_session_id,
+                "analysis_id": row["analysis_id"],
+                "review_history": history,
+                "current_decision": history[-1] if history else None,
+            }))
         next_cursor = None
         if has_more and visible:
             next_cursor = self._encode_cursor(
@@ -1105,7 +1305,19 @@ class AssistService:
         )
         has_more = len(rows) > limit
         visible = rows[:limit]
-        items = [AdvisoryOptionCandidate.model_validate(row["item"]) for row in visible]
+        items = []
+        for row in visible:
+            candidate = row["item"]
+            history = [ReviewAnnotationView.model_validate(item) for item in self._storage.review_history(
+                source_session_id, analysis_id, "option", str(candidate["id"]),
+            )]
+            items.append(AssistOptionReadItem.model_validate({
+                **candidate,
+                "source_session_id": source_session_id,
+                "analysis_id": row["analysis_id"],
+                "review_history": history,
+                "current_decision": history[-1] if history else None,
+            }))
         next_cursor = None
         if has_more and visible:
             next_cursor = self._encode_cursor(
@@ -1114,7 +1326,10 @@ class AssistService:
         return {"items": [item.model_dump(mode="json") for item in items], "next_cursor": next_cursor}
 
     def get_segment_at(self, source_session_id: str, segment_id: str, until_ms: int) -> dict[str, Any] | None:
-        return self._storage.transcript_segment_at(source_session_id, segment_id, until_ms)
+        row = self._storage.transcript_segment_at(source_session_id, segment_id, until_ms)
+        if row is None:
+            return None
+        return self._transcript_read_item(source_session_id, row).model_dump(mode="json")
 
     def assist_snapshot(
         self, source_session_id: str, *, analysis_id: str | None = None,
@@ -1157,12 +1372,18 @@ class AssistService:
                     limit=10000, after_ordinal=0,
                 )
                 options_response["items"].extend(row["item"] for row in rows)
+        options = [AssistOptionReadItem.model_validate(item) for item in options_response["items"]]
+        annotations = [ReviewAnnotationView.model_validate(item) for item in
+                       self._storage.list_review_annotations(
+                           source_session_id, analysis_id=analysis_id, until_ms=until_ms,
+                           evaluator=evaluator,
+                       )]
         payload = AssistSnapshotPayload(
             jobs=jobs,
             segments=[TranscriptReadItem.model_validate(item) for item in segments_response["items"]],
-            highlights=[AssistHighlight.model_validate(item) for item in highlights_response["items"]],
-            options=[AdvisoryOptionCandidate.model_validate(item) for item in options_response["items"]],
-            review_annotations=[],
+            highlights=[AssistHighlightReadItem.model_validate(item) for item in highlights_response["items"]],
+            options=options,
+            review_annotations=annotations,
         )
         return AssistSnapshotMessage(
             source_session_id=source_session_id,

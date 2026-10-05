@@ -18,6 +18,14 @@ def _json(value: Any) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
 
 
+class ReviewRequestConflict(ValueError):
+    """A request id was reused for another payload or actor."""
+
+
+class StaleReviewRevision(ValueError):
+    """The requested append was based on an older target revision."""
+
+
 class AssistStorage:
     """Persist audio assets, jobs, results, and stream events via Archive.db."""
 
@@ -136,7 +144,7 @@ class AssistStorage:
                 source_session_id TEXT NOT NULL REFERENCES replay_sources(source_session_id),
                 sequence INTEGER NOT NULL CHECK(sequence > 0),
                 event_type TEXT NOT NULL CHECK(event_type IN
-                    ('job_progress','segment','highlight','option')),
+                    ('job_progress','segment','highlight','option','review_annotation')),
                 analysis_id TEXT NOT NULL REFERENCES assist_analyses(analysis_id),
                 job_id TEXT NOT NULL REFERENCES transcription_jobs(job_id),
                 available_ms INTEGER,
@@ -147,6 +155,52 @@ class AssistStorage:
             );
             CREATE INDEX IF NOT EXISTS assist_stream_events_time_idx
                 ON assist_stream_events(source_session_id, sequence, available_ms);
+            CREATE TABLE IF NOT EXISTS assist_transcript_revisions (
+                revision_id TEXT PRIMARY KEY,
+                source_session_id TEXT NOT NULL REFERENCES replay_sources(source_session_id),
+                analysis_id TEXT NOT NULL REFERENCES assist_analyses(analysis_id),
+                segment_id TEXT NOT NULL,
+                expected_revision INTEGER NOT NULL CHECK(expected_revision >= 0),
+                basis_revision INTEGER NOT NULL CHECK(basis_revision >= 0),
+                revision INTEGER NOT NULL CHECK(revision > 0),
+                corrected_text TEXT NOT NULL,
+                reason TEXT NOT NULL,
+                reviewer TEXT NOT NULL,
+                actor_id TEXT NOT NULL,
+                timestamp_utc TEXT NOT NULL,
+                request_id TEXT NOT NULL UNIQUE,
+                UNIQUE(source_session_id, analysis_id, segment_id, revision),
+                FOREIGN KEY(source_session_id, segment_id)
+                    REFERENCES assist_transcript_segments(source_session_id, segment_id)
+            );
+            CREATE TABLE IF NOT EXISTS assist_review_annotations (
+                annotation_id TEXT PRIMARY KEY,
+                source_session_id TEXT NOT NULL REFERENCES replay_sources(source_session_id),
+                analysis_id TEXT NOT NULL REFERENCES assist_analyses(analysis_id),
+                target_kind TEXT NOT NULL CHECK(target_kind IN ('transcript_segment','highlight','option')),
+                target_id TEXT NOT NULL,
+                expected_revision INTEGER NOT NULL CHECK(expected_revision >= 0),
+                basis_revision INTEGER NOT NULL CHECK(basis_revision >= 0),
+                revision INTEGER NOT NULL CHECK(revision > 0),
+                decision TEXT NOT NULL CHECK(decision IN ('corrected','confirmed','dismissed','unresolved')),
+                correction TEXT,
+                reason TEXT,
+                reviewer TEXT NOT NULL,
+                actor_id TEXT NOT NULL,
+                timestamp_utc TEXT NOT NULL,
+                request_id TEXT NOT NULL UNIQUE,
+                available_ms INTEGER,
+                UNIQUE(source_session_id, analysis_id, target_kind, target_id, revision)
+            );
+            CREATE INDEX IF NOT EXISTS assist_review_annotations_target_idx
+                ON assist_review_annotations(source_session_id, analysis_id, target_kind, target_id, revision);
+            CREATE TABLE IF NOT EXISTS assist_review_receipts (
+                request_id TEXT PRIMARY KEY,
+                request_hash TEXT NOT NULL,
+                actor_id TEXT NOT NULL,
+                receipt_json TEXT NOT NULL,
+                created_utc TEXT NOT NULL
+            );
             CREATE TRIGGER IF NOT EXISTS assist_analyses_no_update
                 BEFORE UPDATE ON assist_analyses BEGIN
                     SELECT RAISE(ABORT, 'assist analyses are immutable'); END;
@@ -189,9 +243,82 @@ class AssistStorage:
             CREATE TRIGGER IF NOT EXISTS assist_stream_events_no_delete
                 BEFORE DELETE ON assist_stream_events BEGIN
                     SELECT RAISE(ABORT, 'assist stream events are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS assist_transcript_revisions_no_update
+                BEFORE UPDATE ON assist_transcript_revisions BEGIN
+                    SELECT RAISE(ABORT, 'transcript revisions are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS assist_transcript_revisions_no_delete
+                BEFORE DELETE ON assist_transcript_revisions BEGIN
+                    SELECT RAISE(ABORT, 'transcript revisions are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS assist_review_annotations_no_update
+                BEFORE UPDATE ON assist_review_annotations BEGIN
+                    SELECT RAISE(ABORT, 'review annotations are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS assist_review_annotations_no_delete
+                BEFORE DELETE ON assist_review_annotations BEGIN
+                    SELECT RAISE(ABORT, 'review annotations are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS assist_review_receipts_no_update
+                BEFORE UPDATE ON assist_review_receipts BEGIN
+                    SELECT RAISE(ABORT, 'review receipts are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS assist_review_receipts_no_delete
+                BEFORE DELETE ON assist_review_receipts BEGIN
+                    SELECT RAISE(ABORT, 'review receipts are immutable'); END;
             """
         )
+        self._ensure_review_annotation_stream_type()
         self._db.commit()
+
+    def _ensure_review_annotation_stream_type(self) -> None:
+        """Upgrade BE-06's CHECK constraint while preserving every committed stream row."""
+        row = self._db.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='assist_stream_events'"
+        ).fetchone()
+        schema_sql = str(row["sql"] or "") if row is not None else ""
+        if "review_annotation" in schema_sql:
+            return
+        with self._db:
+            self._db.execute("DROP TRIGGER IF EXISTS assist_stream_events_no_update")
+            self._db.execute("DROP TRIGGER IF EXISTS assist_stream_events_no_delete")
+            self._db.execute("DROP INDEX IF EXISTS assist_stream_events_time_idx")
+            self._db.execute(
+                "ALTER TABLE assist_stream_events RENAME TO assist_stream_events_be06"
+            )
+            self._db.execute(
+                """CREATE TABLE assist_stream_events (
+                    source_session_id TEXT NOT NULL REFERENCES replay_sources(source_session_id),
+                    sequence INTEGER NOT NULL CHECK(sequence > 0),
+                    event_type TEXT NOT NULL CHECK(event_type IN
+                        ('job_progress','segment','highlight','option','review_annotation')),
+                    analysis_id TEXT NOT NULL REFERENCES assist_analyses(analysis_id),
+                    job_id TEXT NOT NULL REFERENCES transcription_jobs(job_id),
+                    available_ms INTEGER,
+                    evaluator_only INTEGER NOT NULL DEFAULT 0 CHECK(evaluator_only IN (0,1)),
+                    payload_json TEXT NOT NULL,
+                    created_utc TEXT NOT NULL,
+                    PRIMARY KEY(source_session_id, sequence)
+                )"""
+            )
+            self._db.execute(
+                """INSERT INTO assist_stream_events
+                   (source_session_id, sequence, event_type, analysis_id, job_id, available_ms,
+                    evaluator_only, payload_json, created_utc)
+                   SELECT source_session_id, sequence, event_type, analysis_id, job_id, available_ms,
+                          evaluator_only, payload_json, created_utc
+                   FROM assist_stream_events_be06 ORDER BY source_session_id, sequence"""
+            )
+            self._db.execute("DROP TABLE assist_stream_events_be06")
+            self._db.execute(
+                "CREATE INDEX assist_stream_events_time_idx "
+                "ON assist_stream_events(source_session_id, sequence, available_ms)"
+            )
+            self._db.execute(
+                """CREATE TRIGGER assist_stream_events_no_update
+                   BEFORE UPDATE ON assist_stream_events BEGIN
+                       SELECT RAISE(ABORT, 'assist stream events are immutable'); END"""
+            )
+            self._db.execute(
+                """CREATE TRIGGER assist_stream_events_no_delete
+                   BEFORE DELETE ON assist_stream_events BEGIN
+                       SELECT RAISE(ABORT, 'assist stream events are immutable'); END"""
+            )
 
     @staticmethod
     def _attempt_from_row(row: sqlite3.Row) -> dict[str, Any]:
@@ -317,6 +444,222 @@ class AssistStorage:
             (job_id, attempt_id),
         ).fetchone()
         return json.loads(row["receipt_json"]) if row else None
+
+    def _review_target(
+        self, source_session_id: str, target_kind: str, target_id: str,
+        expected_analysis_id: str | None = None,
+    ) -> dict[str, Any] | None:
+        table, id_column = {
+            "transcript_segment": ("assist_transcript_segments", "segment_id"),
+            "highlight": ("assist_highlights", "highlight_id"),
+            "option": ("assist_options", "option_id"),
+        }[target_kind]
+        row = self._db.execute(
+            f"""SELECT t.analysis_id, t.available_ms, a.job_id, a.window_end_ms
+                FROM {table} t JOIN assist_analyses a USING(analysis_id)
+                WHERE t.source_session_id=? AND t.{id_column}=?""",
+            (source_session_id, target_id),
+        ).fetchone()
+        if row is None or (expected_analysis_id is not None and row["analysis_id"] != expected_analysis_id):
+            return None
+        return {
+            "analysis_id": row["analysis_id"], "available_ms": row["available_ms"],
+            "job_id": row["job_id"], "window_end_ms": row["window_end_ms"],
+        }
+
+    def commit_review_mutation(
+        self,
+        *,
+        source_session_id: str,
+        target_kind: str,
+        target_id: str,
+        expected_analysis_id: str | None,
+        request_id: str,
+        request_hash: str,
+        actor_id: str,
+        reviewer: str,
+        expected_revision: int,
+        decision: str,
+        correction: str | None,
+        reason: str | None,
+        timestamp_utc: str,
+    ) -> dict[str, Any] | None:
+        """Append a revision/annotation, receipt, and stream event as one commit."""
+        with self._db:
+            existing = self._db.execute(
+                "SELECT request_hash, actor_id, receipt_json FROM assist_review_receipts WHERE request_id=?",
+                (request_id,),
+            ).fetchone()
+            if existing is not None:
+                if existing["request_hash"] != request_hash or existing["actor_id"] != actor_id:
+                    raise ReviewRequestConflict("Review request_id was already used with a different body or actor")
+                return json.loads(existing["receipt_json"])
+
+            target = self._review_target(
+                source_session_id, target_kind, target_id, expected_analysis_id,
+            )
+            if target is None:
+                return None
+            analysis_id = str(target["analysis_id"])
+            latest = self._db.execute(
+                """SELECT COALESCE(MAX(revision), 0) AS revision FROM assist_review_annotations
+                   WHERE source_session_id=? AND analysis_id=? AND target_kind=? AND target_id=?""",
+                (source_session_id, analysis_id, target_kind, target_id),
+            ).fetchone()
+            current_revision = int(latest["revision"])
+            if expected_revision != current_revision:
+                raise StaleReviewRevision("Expected review revision is stale")
+
+            revision = current_revision + 1
+            annotation_id = f"ann_{uuid.uuid4().hex}"
+            annotation = {
+                "id": annotation_id,
+                "source_session_id": source_session_id,
+                "analysis_id": analysis_id,
+                "target_kind": target_kind,
+                "target_id": target_id,
+                "decision": decision,
+                "expected_revision": expected_revision,
+                "basis_revision": current_revision,
+                "revision": revision,
+                "reviewer": reviewer,
+                "timestamp": timestamp_utc,
+                "correction": correction,
+                "reason": reason,
+            }
+            self._db.execute(
+                """INSERT INTO assist_review_annotations
+                   (annotation_id, source_session_id, analysis_id, target_kind, target_id,
+                    expected_revision, basis_revision, revision, decision, correction, reason,
+                    reviewer, actor_id, timestamp_utc, request_id, available_ms)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (annotation_id, source_session_id, analysis_id, target_kind, target_id,
+                 expected_revision, current_revision, revision, decision, correction, reason,
+                 reviewer, actor_id, timestamp_utc, request_id, target["available_ms"]),
+            )
+            if target_kind == "transcript_segment" and decision == "corrected":
+                self._db.execute(
+                    """INSERT INTO assist_transcript_revisions
+                       (revision_id, source_session_id, analysis_id, segment_id, expected_revision,
+                        basis_revision, revision, corrected_text, reason, reviewer, actor_id,
+                        timestamp_utc, request_id)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (f"tr_{uuid.uuid4().hex}", source_session_id, analysis_id, target_id,
+                     expected_revision, current_revision, revision, correction, reason or "",
+                     reviewer, actor_id, timestamp_utc, request_id),
+                )
+
+            self._db.execute(
+                "INSERT OR IGNORE INTO assist_stream_state(source_session_id, sequence) VALUES (?, 0)",
+                (source_session_id,),
+            )
+            state = self._db.execute(
+                "SELECT sequence FROM assist_stream_state WHERE source_session_id=?",
+                (source_session_id,),
+            ).fetchone()
+            sequence = int(state["sequence"]) + 1
+            self._db.execute(
+                """INSERT INTO assist_stream_events
+                   (source_session_id, sequence, event_type, analysis_id, job_id, available_ms,
+                    evaluator_only, payload_json, created_utc)
+                   VALUES (?, ?, 'review_annotation', ?, ?, ?, ?, ?, ?)""",
+                (source_session_id, sequence, analysis_id, target["job_id"], target["available_ms"],
+                 int(target_kind == "option"), _json(annotation), timestamp_utc),
+            )
+            self._db.execute(
+                "UPDATE assist_stream_state SET sequence=? WHERE source_session_id=?",
+                (sequence, source_session_id),
+            )
+            receipt = {
+                "receipt_id": f"review-receipt-{uuid.uuid4().hex}",
+                "request_id": request_id,
+                "source_session_id": source_session_id,
+                "analysis_id": analysis_id,
+                "target_kind": target_kind,
+                "target_id": target_id,
+                "expected_revision": expected_revision,
+                "basis_revision": current_revision,
+                "revision": revision,
+                "decision": decision,
+                "reviewer": reviewer,
+                "timestamp_utc": timestamp_utc,
+                "sequence": sequence,
+            }
+            self._db.execute(
+                """INSERT INTO assist_review_receipts
+                   (request_id, request_hash, actor_id, receipt_json, created_utc)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (request_id, request_hash, actor_id, _json(receipt), timestamp_utc),
+            )
+            return receipt
+
+    def transcript_revisions(
+        self, source_session_id: str, analysis_id: str, segment_id: str,
+    ) -> list[dict[str, Any]]:
+        rows = self._db.execute(
+            """SELECT revision_id, expected_revision, basis_revision, revision, corrected_text,
+                      reason, reviewer, timestamp_utc
+               FROM assist_transcript_revisions
+               WHERE source_session_id=? AND analysis_id=? AND segment_id=? ORDER BY revision""",
+            (source_session_id, analysis_id, segment_id),
+        ).fetchall()
+        return [{
+            "id": row["revision_id"], "source_session_id": source_session_id,
+            "analysis_id": analysis_id, "segment_id": segment_id,
+            "expected_revision": row["expected_revision"], "basis_revision": row["basis_revision"],
+            "revision": row["revision"], "text": row["corrected_text"], "reason": row["reason"],
+            "reviewer": row["reviewer"], "timestamp": row["timestamp_utc"],
+        } for row in rows]
+
+    def review_history(
+        self, source_session_id: str, analysis_id: str, target_kind: str, target_id: str,
+    ) -> list[dict[str, Any]]:
+        rows = self._db.execute(
+            """SELECT annotation_id, expected_revision, basis_revision, revision, decision,
+                      correction, reason, reviewer, timestamp_utc
+               FROM assist_review_annotations
+               WHERE source_session_id=? AND analysis_id=? AND target_kind=? AND target_id=?
+               ORDER BY revision""",
+            (source_session_id, analysis_id, target_kind, target_id),
+        ).fetchall()
+        return [{
+            "id": row["annotation_id"], "source_session_id": source_session_id,
+            "analysis_id": analysis_id, "target_kind": target_kind, "target_id": target_id,
+            "expected_revision": row["expected_revision"], "basis_revision": row["basis_revision"],
+            "revision": row["revision"], "decision": row["decision"],
+            "correction": row["correction"], "reason": row["reason"],
+            "reviewer": row["reviewer"], "timestamp": row["timestamp_utc"],
+        } for row in rows]
+
+    def list_review_annotations(
+        self, source_session_id: str, *, analysis_id: str | None, until_ms: int | None,
+        evaluator: bool,
+    ) -> list[dict[str, Any]]:
+        sql = """SELECT r.annotation_id, r.analysis_id, r.target_kind, r.target_id,
+                         r.expected_revision, r.basis_revision, r.revision, r.decision,
+                         r.correction, r.reason, r.reviewer, r.timestamp_utc
+                  FROM assist_review_annotations r JOIN assist_analyses a USING(analysis_id)
+                  WHERE r.source_session_id=?"""
+        params: list[Any] = [source_session_id]
+        if analysis_id is not None:
+            sql += " AND r.analysis_id=?"
+            params.append(analysis_id)
+        if not evaluator:
+            sql += " AND r.target_kind!='option'"
+        if until_ms is not None:
+            sql += " AND r.available_ms IS NOT NULL AND r.available_ms<=? AND a.window_end_ms<=?"
+            params.extend((until_ms, until_ms))
+        sql += " ORDER BY r.rowid"
+        rows = self._db.execute(sql, params).fetchall()
+        return [{
+            "id": row["annotation_id"], "source_session_id": source_session_id,
+            "analysis_id": row["analysis_id"], "target_kind": row["target_kind"],
+            "target_id": row["target_id"], "expected_revision": row["expected_revision"],
+            "basis_revision": row["basis_revision"], "revision": row["revision"],
+            "decision": row["decision"], "correction": row["correction"],
+            "reason": row["reason"], "reviewer": row["reviewer"],
+            "timestamp": row["timestamp_utc"],
+        } for row in rows]
 
     def commit_result_batch(
         self,
@@ -510,7 +853,7 @@ class AssistStorage:
             ).fetchall()
             time_alignment = json.loads(row["versions_json"]).get("time_alignment", "unknown")
             result.append({
-                "ordinal": row["ordinal"], "segment": payload,
+                "ordinal": row["ordinal"], "analysis_id": row["analysis_id"], "segment": payload,
                 "entities": [json.loads(item["payload_json"]) for item in entity_rows],
                 "time_alignment": time_alignment,
                 "alignment_uncertainty": (
@@ -524,7 +867,7 @@ class AssistStorage:
         self, source_session_id: str, *, analysis_id: str | None, until_ms: int | None,
         limit: int, after_ordinal: int = 0,
     ) -> list[dict[str, Any]]:
-        sql = """SELECT h.rowid AS ordinal, h.payload_json, h.highlight_id
+        sql = """SELECT h.rowid AS ordinal, h.payload_json, h.highlight_id, h.analysis_id
                  FROM assist_highlights h JOIN assist_analyses a USING(analysis_id)
                  WHERE h.source_session_id=?"""
         params: list[Any] = [source_session_id]
@@ -539,14 +882,15 @@ class AssistStorage:
         params.append(after_ordinal)
         sql += " ORDER BY h.rowid LIMIT ?"
         params.append(limit)
-        return [{"ordinal": row["ordinal"], "item": json.loads(row["payload_json"])}
+        return [{"ordinal": row["ordinal"], "analysis_id": row["analysis_id"],
+                 "item": json.loads(row["payload_json"])}
                 for row in self._db.execute(sql, params).fetchall()]
 
     def list_options(
         self, source_session_id: str, *, analysis_id: str, until_ms: int | None,
         limit: int, after_ordinal: int = 0,
     ) -> list[dict[str, Any]]:
-        sql = """SELECT o.rowid AS ordinal, o.payload_json, o.option_id FROM assist_options o
+        sql = """SELECT o.rowid AS ordinal, o.payload_json, o.option_id, o.analysis_id FROM assist_options o
                  JOIN assist_analyses a USING(analysis_id)
                  WHERE o.source_session_id=? AND o.analysis_id=?"""
         params: list[Any] = [source_session_id, analysis_id]
@@ -558,7 +902,8 @@ class AssistStorage:
         params.append(after_ordinal)
         sql += " ORDER BY o.rowid LIMIT ?"
         params.append(limit)
-        return [{"ordinal": row["ordinal"], "item": json.loads(row["payload_json"])}
+        return [{"ordinal": row["ordinal"], "analysis_id": row["analysis_id"],
+                 "item": json.loads(row["payload_json"])}
                 for row in self._db.execute(sql, params).fetchall()]
 
     def list_jobs(self, source_session_id: str) -> list[dict[str, Any]]:
@@ -599,7 +944,7 @@ class AssistStorage:
 
     def transcript_segment_at(self, source_session_id: str, segment_id: str, until_ms: int) -> dict[str, Any] | None:
         row = self._db.execute(
-            """SELECT s.payload_json, s.analysis_id, a.versions_json FROM assist_transcript_segments s
+            """SELECT s.payload_json, s.analysis_id, s.available_ms, a.versions_json FROM assist_transcript_segments s
                JOIN assist_analyses a USING(analysis_id)
                WHERE s.source_session_id=? AND s.segment_id=? AND s.available_ms IS NOT NULL
                  AND s.available_ms<=? AND a.window_end_ms<=?""",
@@ -614,6 +959,7 @@ class AssistStorage:
         time_alignment = json.loads(row["versions_json"]).get("time_alignment", "unknown")
         return {
             "segment": json.loads(row["payload_json"]),
+            "analysis_id": row["analysis_id"],
             "entities": [json.loads(item["payload_json"]) for item in entity_rows],
             "time_alignment": time_alignment,
             "alignment_uncertainty": (
