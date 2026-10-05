@@ -1,5 +1,7 @@
 # CI dan promosi branch
 
+Rekap requirement, keputusan, run history, dan tindak lanjut kegagalan ada di [CI/CD build log](Technical-Implementation/CI_CD_PROGRESS.md).
+
 ## Perilaku workflow
 
 Workflow [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) menjalankan pemeriksaan pada setiap push ke `dev` atau `main`, serta setiap pull request yang menargetkan salah satu branch tersebut. Push ke `feat/*` sendiri tidak memicu workflow; PR `feat/* → dev` tetap menjalankan CI. Hanya push yang berhasil diuji pada `dev` yang dapat menjalankan job promosi.
@@ -31,8 +33,8 @@ Workflow tidak membuat branch. `dev` kini tersedia dari `main`; perubahan `feat/
 
 ## Batas verifikasi saat ini
 
-Workflow telah dipush pada `feat/backend` dan dijalankan oleh GitHub Actions pada PR #2 menuju `dev`, tetapi belum digabung ke `dev`. Run terbaru gagal pada `backend tests`; Ruff, mypy, dan diff check lulus, lalu job promosi dilewati. PR tetap terbuka. Lingkungan ini tidak memiliki GitHub CLI dan permintaan baca proteksi branch ke API GitHub mengembalikan HTTP 401 tanpa autentikasi; status atau perubahan branch protection remote tidak dapat diverifikasi. Tidak ada kredensial yang ditambahkan.
+Workflow telah dipush pada `feat/backend` dan dijalankan oleh GitHub Actions pada PR #2 menuju `dev`, tetapi belum digabung ke `dev`. Run remote sebelum koreksi gagal pada `backend tests`; Ruff, mypy, dan diff check lulus, lalu job promosi dilewati. Perbaikan lokal sekarang lulus suite lengkap, sementara hasil Actions pada SHA terkoreksi masih menunggu. PR tetap terbuka. Lingkungan ini tidak memiliki GitHub CLI dan permintaan baca proteksi branch ke API GitHub mengembalikan HTTP 401 tanpa autentikasi; status atau perubahan branch protection remote tidak dapat diverifikasi.
 
-Test suite lengkap sengaja dijalankan CI agar kegagalan apa pun mencegah promosi. Pada pemeriksaan lokal 5 Oktober 2026, gate BE-03–BE-08, Ruff, dan mypy lulus. `python -m pytest` menghasilkan 77 passed dan 1 failed pada `tests/integration/test_composition.py`; karena itu job `backend tests` saat ini akan gagal sampai kegagalan tersebut diperbaiki di lingkup perubahan yang sesuai. Perbaikan perilaku backend tidak termasuk perubahan CI ini.
+Test suite lengkap sengaja dijalankan CI agar kegagalan apa pun mencegah promosi. Sebelum koreksi, `python -m pytest` menghasilkan 77 passed dan 1 failed pada `tests/integration/test_composition.py`. Koreksi lokal memperbaiki jalur lookup receipt melalui port writer dan menyelaraskan assertion branch dengan persistensi frame lengkap BE-08; hasil sesudahnya `python -m pytest` adalah 78 passed. Status remote PR menunggu run pada SHA terkoreksi.
 
 `pyproject.toml` mendeklarasikan dependency dengan rentang; workflow memasang deklarasi itu dan tidak mengklaim dependency terkunci. Opsi `mypy --follow-imports=skip` memang melewati imported modules. Build frontend tidak menjadi check karena entry point saat ini mengimpor `frontend/src/App` dan `frontend/src/styles.css` yang tidak tersedia pada source yang diperiksa. Tidak ada browser, provider, model, data mitra, secret, feed/audio produksi, live advisory, atau langkah deployment yang digunakan.

@@ -252,8 +252,10 @@ def test_injected_ports_are_used_once_and_control_capabilities_stay_separate(tmp
         assert not hasattr(worker.calls[0], "database")
 
     assert len(writers) == 1
-    assert writers[0].creates == [session_id, branch_id]
+    # Branch creation is deferred; its first complete restored frame persists the child row.
+    assert writers[0].creates == [session_id]
     assert len(writers[0].saves) == 4  # session, two commands, and one restored branch frame
+    assert writers[0].saves[-1][0] == branch_id
     assert [bool(item[1]) for item in writers[0].saves] == [False, True, True, False]
     assert writers[0].command_lookups == [(session_id, "be01-cmd-1"), (session_id, "be01-end-1")]
     assert len(detector.calls) == len(lifecycle.calls) == 4

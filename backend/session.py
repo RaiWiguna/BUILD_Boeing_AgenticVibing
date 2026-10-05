@@ -259,7 +259,9 @@ class Session:
         request = {"command": command.model_dump(mode="json"), "actor": actor_id or actor,
                    "role": role.value}
         try:
-            prior = self.archive.command(self.id, command.command_id)
+            # Ordinary receipt reads go through the injected writer port; archive reads below
+            # are reserved for reconciling an ambiguous storage outcome.
+            prior = self.writer.command(self.id, command.command_id)
         except Exception as error:
             raise SessionError(503, STORAGE_FAILURE_MESSAGE) from error
         if prior:
