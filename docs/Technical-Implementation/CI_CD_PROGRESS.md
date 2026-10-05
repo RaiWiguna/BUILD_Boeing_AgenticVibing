@@ -2,7 +2,7 @@
 
 **Diperbarui:** 5 Oktober 2026
 
-**Status:** perbaikan lokal terverifikasi; belum dikirim ke PR #2 atau divalidasi ulang oleh GitHub Actions.
+**Status:** perbaikan lokal terverifikasi dan dipush ke `origin/feat/backend` pada `120c587`; hasil GitHub Actions untuk SHA ini belum terverifikasi.
 
 Dokumen ini mencatat requirement, keputusan implementasi, hasil CI, akar masalah, dan pekerjaan tersisa. [CI/CD setup](../CI_CD.md) tetap menjadi panduan konfigurasi GitHub. Workflow yang menjadi sumber perilaku adalah [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
 
@@ -64,13 +64,13 @@ Worktree lokal memakai branch `codex/ci-test-fix` yang berawal dari head PR `1a0
 - `python -m mypy --follow-imports=skip backend/app.py backend/session.py backend/storage.py backend/review.py backend/__init__.py tests/integration/test_be_08.py` — lulus untuk enam file yang disebut; imported modules dilewati.
 - `git diff --check origin/feat/backend`, `git diff --check origin/main`, dan whitespace check untuk file build log baru — lulus.
 
-Hasil ini membuktikan pemeriksaan lokal saja. GitHub Actions belum menjalankan ulang PR #2 pada source yang telah dikoreksi; hasil remote terbaru masih berasal dari head sebelum fix.
+Commit `120c587` berisi perbaikan dan log ini, lalu berhasil dipush ke `origin/feat/backend` pada 5 Oktober 2026. `git ls-remote` mengonfirmasi pointer branch remote pada SHA tersebut. Pemeriksaan daftar run Actions melalui API GitHub mengembalikan HTTP 404, sehingga hasil CI untuk SHA terkoreksi belum dapat diverifikasi di sini. Run terakhir yang dapat dipastikan tetap run sebelum fix pada head `1a01745`.
 
 ## Progres dan pekerjaan tersisa
 
 | Item | Status | Bukti/pekerjaan berikutnya |
 |---|---|---|
-| Workflow CI pada `feat/backend` | Ada di source dan telah dijalankan pada PR #2. | Jalankan lagi setelah koreksi dikirim ke branch PR. |
+| Workflow CI pada `feat/backend` | Ada di source; koreksi dipush ke PR branch pada SHA `120c587`. | Periksa hasil Actions untuk SHA terbaru pada halaman PR #2; jangan menyatakan CI lulus sampai semua check selesai. |
 | Test suite lengkap | Lulus lokal, 78 tests. | Tunggu hasil remote pada SHA koreksi sebelum menyatakan CI lulus. |
 | Ruff, mypy, diff check | Lulus pada run remote sebelum fix; Ruff dan mypy juga lulus lokal sesudah fix. | Pastikan seluruh check remote berhasil pada SHA terbaru. |
 | Promosi `dev → main` | Job menunggu semua check dan hanya berjalan pada push ke `dev`. | Verifikasi satu PR promosi dibuat/diperbarui setelah push `dev` dengan semua check sukses. |
