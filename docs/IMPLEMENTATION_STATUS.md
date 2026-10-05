@@ -1,8 +1,9 @@
 # Status Implementasi ATC FlowLens
 
-- **Pemeriksaan statis terakhir:** 3 Oktober 2026
-- **Cakupan:** inventaris source/config/docs yang ada di repository
-- **Metode:** inspeksi berkas saja; build, startup, API runtime, dan test tidak dijalankan.
+- **Pemeriksaan source/build terakhir:** 5 Oktober 2026
+- **Progress FE-01 dan FE-02 diperiksa:** 5 Oktober 2026
+- **Cakupan:** source/config/docs sebelumnya ditambah implementasi adapter frontend FE-01/FE-02
+- **Metode:** `npm run typecheck` dan `npm run build` di `frontend/` lulus setelah perubahan FE-02. Backend/API runtime, WebSocket runtime, adapter/browser tests, domain review, dan validasi operasional tidak dijalankan.
 
 Dokumen ini mencatat apa yang tampak tersedia di source pada tanggal pemeriksaan. Keberadaan source bukan bukti bahwa komponen berhasil dibangun, berjalan, lulus test, ditinjau trainer, atau tervalidasi untuk operasi.
 
@@ -11,12 +12,12 @@ Dokumen ini mencatat apa yang tampak tersedia di source pada tanggal pemeriksaan
 | Area | Status dari inspeksi source | Batas klaim |
 |---|---|---|
 | Backend | Modul FastAPI, model kontrak, simulasi, deteksi, sesi, review, laporan, dan arsip SQLite tersedia di `backend/`. | Belum diverifikasi saat runtime. |
-| API dan stream | Source mendefinisikan endpoint health, skenario, autentikasi operator, sesi, seat, command, event, assessment, review/branch, report, serta WebSocket stream. | Kehadiran route di source tidak membuktikan alur API berhasil. |
+| API dan stream | Source mendefinisikan route health, skenario, autentikasi operator, sesi, seat, command, event, assessment, review/branch, report, dan WS direct snapshot. FE-02 memakai metadata/snapshot/events/commands/stream yang ada dan menyediakan decoder untuk profil source/assist. | Route source belum diuji runtime. Historical frame-at-time dan route replay/assist additive SC-06 belum ada di backend source; decoder/opt-in mock path FE tidak membuktikan dukungan server. |
 | Persistensi | Source `backend/storage.py` menyediakan arsip SQLite untuk metadata, event, snapshot, checkpoint, dan command. | Belum ada hasil uji recovery, durability, beban, atau concurrency dalam pemeriksaan ini. |
-| Frontend | `frontend/` memiliki konfigurasi Vite, entry point React, API helper, dan type TypeScript. | Belum menjadi dashboard: `main.tsx` mengimpor `App` dan `styles.css`, tetapi kedua modul tersebut tidak tersedia pada pemeriksaan ini. |
-| Penyajian UI | `backend/app.py` menyajikan bundle dari `frontend/dist`; direktori tersebut belum memiliki `index.html`. Tanpa hasil build, route `/` mengembalikan halaman instruksi dengan HTTP 503. | Belum dapat digunakan sebagai aplikasi web end-to-end dari kondisi bundle yang diperiksa. |
+| Frontend | Source FE-01 mencakup `App.tsx`, `styles.css`, typed adapter contracts, `FixtureReplayReviewAdapter`, dan `ApiDashboardAdapter`. FE-02 menambah `ApiReplayReviewAdapter`, runtime decoder, scoped credential handling, error states, event cutoff, command time conversion, WS first-message auth, sequence guard/resync/reconnect, cancellation, dan unavailable untuk route additive. `npm run typecheck` serta `npm run build` lulus pada 5 Oktober. | REST/WS runtime dan QA tests belum dijalankan. Backend saat ini tidak menerbitkan credential source-read/reviewer terpisah. Historical frame dan endpoint assist belum ada. |
+| Penyajian UI | `backend/app.py` menyajikan bundle dari `frontend/dist`; `npm run build` pada 5 Oktober menghasilkan `dist/index.html` di workspace (direktori ini di-ignore Git). | Backend startup dan route `/` belum diuji. Checkout bersih tetap perlu menjalankan build sebelum bundle tersedia. |
 | Test dan validasi manusia | Tidak ditemukan direktori `tests/` atau hasil test pada pemeriksaan ini. | Tidak ada klaim test lulus, review trainer, studi peserta, sertifikasi, atau manfaat keselamatan tervalidasi. |
-| AI advisory replay | Requirement target mencakup replay offline simulator mitra, transkripsi/evidence, dan kandidat opsi AI yang ditinjau evaluator. Baseline sintetik boleh dipakai sebelum akses mitra tersedia. | Tidak ada bukti source untuk worker ASR, kandidat opsi, audio store/replay review UI, atau adapter replay; belum ada mitra/replay berizin yang dikonfirmasi. Tidak ada domain review atau validasi operasional. |
+| AI advisory replay | Requirement target mencakup replay offline simulator mitra, transkripsi/evidence, dan kandidat opsi AI yang ditinjau evaluator. Baseline sintetik boleh dipakai sebelum akses mitra tersedia. Frontend kini memiliki decoder/read-model/adapter boundary untuk transcript, evidence, jobs, dan options. | Route worker/assist/audio store dan provider belum ada di backend source; route additive FE menghasilkan `unavailable` sampai implementasi server tersedia. Belum ada mitra/replay berizin yang dikonfirmasi, domain review, atau validasi operasional. |
 
 ## Arsitektur target yang didokumentasikan
 
