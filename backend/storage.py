@@ -22,8 +22,9 @@ def _canonical_json(value: Any) -> str:
 
 class Archive:
     def __init__(self, path: str | Path):
-        path = Path(path)
+        path = Path(path).expanduser().resolve()
         path.parent.mkdir(parents=True, exist_ok=True)
+        self.path = path
         self.db = sqlite3.connect(path, check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         self.db.execute("PRAGMA journal_mode=WAL")
@@ -142,6 +143,12 @@ class Archive:
     def save(self, id: str, status: str, events: list[dict], public: dict, private: dict,
              command: tuple[str, dict, dict] | None = None) -> None:
         with self.db:
+            # A branch can be prepared in memory and only become visible with its
+            # first complete frame. Normal sessions already have this row.
+            self.db.execute(
+                "INSERT OR IGNORE INTO sessions(id, metadata, status) VALUES (?, ?, ?)",
+                (id, json.dumps(public["metadata"], allow_nan=False), status),
+            )
             self.db.execute("UPDATE sessions SET status=? WHERE id=?", (status, id))
             self.db.executemany("INSERT OR IGNORE INTO events VALUES (?, ?, ?)",
                                 [(id, e["ordinal"], json.dumps(e, allow_nan=False)) for e in events])
@@ -184,6 +191,36 @@ class Archive:
 
     def close(self) -> None:
         self.db.close()
+
+    def backup_to(self, destination: str | Path) -> Path:
+        """Create a consistent SQLite snapshot at an operator-owned local path.
+
+        The destination is a trusted caller choice, never request data from the
+        public API. SQLite's backup API includes committed WAL contents; callers
+        own the destination directory and retention policy.
+        """
+        requested = Path(destination).expanduser()
+        if requested.is_symlink():
+            raise ValueError("backup destination must not be a symbolic link")
+        target_path = requested.resolve()
+        if target_path == self.path:
+            raise ValueError("backup destination must differ from the live archive")
+        if target_path.exists() and not target_path.is_file():
+            raise ValueError("backup destination must be a file path")
+        if not target_path.parent.is_dir():
+            raise ValueError("backup destination directory must already exist")
+
+        target = sqlite3.connect(target_path)
+        try:
+            self.db.backup(target)
+            target.commit()
+            integrity = target.execute("PRAGMA integrity_check").fetchone()
+            foreign_key_errors = target.execute("PRAGMA foreign_key_check").fetchall()
+            if integrity is None or integrity[0] != "ok" or foreign_key_errors:
+                raise sqlite3.DatabaseError("SQLite backup failed integrity verification")
+        finally:
+            target.close()
+        return target_path
 
     def commit_replay_source(
         self,

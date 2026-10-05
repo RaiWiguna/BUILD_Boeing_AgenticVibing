@@ -1,5 +1,6 @@
 """Single-writer session state, evidence lifecycle and durable frames."""
 import copy
+import sqlite3
 import time
 import uuid
 from collections.abc import Callable, Mapping
@@ -22,6 +23,8 @@ from .simulator import Simulator
 from .storage import Archive
 
 RANK = {"ADVISORY": 1, "WARNING": 2, "CRITICAL": 3, "DATA_DEGRADED": 0}
+CHECKPOINT_SCHEMA_VERSION = "synthetic-checkpoint-1"
+STORAGE_FAILURE_MESSAGE = "Storage could not confirm this change. The committed session state was restored and paused."
 
 
 class _LegacyAlertLifecycle:
@@ -88,7 +91,8 @@ class Session:
                  config: SimulationConfig | None = None, condition: str = "flowlens",
                  parent: dict | None = None, *, detector: DetectorPort | None = None,
                  lifecycle: AlertLifecyclePort | None = None, writer: SessionWriter | None = None,
-                 audit_clock: Callable[[], float] = time.time, initialize: bool = True):
+                 audit_clock: Callable[[], float] = time.time, initialize: bool = True,
+                 defer_create: bool = False):
         self.id = uuid.uuid4().hex[:12]
         self.archive = archive
         self.writer = writer or archive
@@ -121,8 +125,13 @@ class Session:
         self.metadata = {"id": self.id, "scenario": self.scenario.public(), "seed": seed,
                          "config": self.config.model_dump(), "condition": condition,
                          "engine_version": ENGINE_VERSION, "config_version": CONFIG_VERSION,
+                         "layout_id": LAYOUT["id"], "layout_version": LAYOUT["version"],
                          "kind": "training", "parent": parent, "created_utc": self.audit_clock()}
-        self.writer.create(self.id, self.metadata)
+        if not defer_create:
+            self.writer.create(self.id, self.metadata)
+        self._storage_outcome_unknown = False
+        self._unknown_command_id: str | None = None
+        self._committed_state = self._capture_state()
         if not initialize:
             return
         self.event("SESSION_CREATED", "Session created; synthetic data and unreviewed lab SOP.")
@@ -245,14 +254,30 @@ class Session:
             if command.target not in {"ARFF-2", "OPS-1", "GA712", "QZ804"}:
                 raise SessionError(403, "Ground may only hold surface mobiles")
 
-    def execute(self, command: Command, role: Role, actor: str) -> dict:
+    def execute(self, command: Command, role: Role, actor: str, *, actor_id: str | None = None) -> dict:
         self.authorize(command, role)
-        prior = self.writer.command(self.id, command.command_id)
-        request = {"command": command.model_dump(mode="json"), "actor": actor, "role": role.value}
+        request = {"command": command.model_dump(mode="json"), "actor": actor_id or actor,
+                   "role": role.value}
+        try:
+            prior = self.archive.command(self.id, command.command_id)
+        except Exception as error:
+            raise SessionError(503, STORAGE_FAILURE_MESSAGE) from error
         if prior:
             if prior[0] != request:
                 raise SessionError(409, "Command ID was already used for a different request or actor")
+            if self._storage_outcome_unknown:
+                self._reconcile_storage(prior)
             return prior[1]
+        if self._storage_outcome_unknown:
+            self._reconcile_pending_storage()
+            try:
+                prior = self.archive.command(self.id, command.command_id)
+            except Exception as error:
+                raise SessionError(503, STORAGE_FAILURE_MESSAGE) from error
+            if prior:
+                if prior[0] != request:
+                    raise SessionError(409, "Command ID was already used for a different request or actor")
+                return prior[1]
         if self.status in {"ENDED", "INTERRUPTED"}:
             raise SessionError(409, "This session is frozen; create a review or branch")
         if command.expected_revision != self.revision:
@@ -274,6 +299,7 @@ class Session:
         if type in {"CANCEL", "READBACK"} and not self.active_clearance(str(target)):
             raise SessionError(409, "Target has no active clearance")
         # All validation precedes state mutation.
+        self.error = None
         if type == "START":
             self.status = "RUNNING"
         elif type == "PAUSE":
@@ -318,6 +344,8 @@ class Session:
         return response
 
     def acknowledge(self, alert_id: str, actor: str):
+        if self._storage_outcome_unknown:
+            self._reconcile_pending_storage()
         if not any(a["id"] == alert_id for a in self.alerts.values()):
             raise SessionError(404, "Alert not found")
         item = {"alert_id": alert_id, "actor": actor, "sim_ms": self.now_ms}
@@ -327,6 +355,8 @@ class Session:
         return item
 
     def assess(self, payload: dict, actor: str, role: Role):
+        if self._storage_outcome_unknown:
+            self._reconcile_pending_storage()
         if payload["type"] == "trainer_review" and role != Role.INSTRUCTOR:
             raise SessionError(403, "Only instructors record a trainer review")
         event = self.event("ASSESSMENT", payload["text"], actor=actor, role=role.value, assessment=payload)
@@ -352,7 +382,11 @@ class Session:
                                for role in ["tower", "ground"]}, "error": self.error}
 
     def checkpoint(self) -> dict:
-        return {"simulator": self.simulator.checkpoint(), "tracks": {id: t.model_dump() for id, t in self.tracks.items()},
+        return {"schema_version": CHECKPOINT_SCHEMA_VERSION,
+                "engine_version": ENGINE_VERSION, "config_version": CONFIG_VERSION,
+                "scenario_id": self.scenario.id, "layout_id": LAYOUT["id"],
+                "layout_version": LAYOUT["version"],
+                "simulator": self.simulator.checkpoint(), "tracks": {id: t.model_dump() for id, t in self.tracks.items()},
                 "previous_tracks": {id: t.model_dump() for id, t in self.previous_tracks.items()},
                 "event_ordinal": self.event_ordinal, "runway_open": self.runway_open,
                 "detection_ms": self.detection_ms[-200:], "snapshot_marker": self.now_ms % 5000 == 0}
@@ -361,14 +395,212 @@ class Session:
         self.sequence += 1
         try:
             self.writer.save(self.id, self.status, self.pending_events, self.snapshot(), self.checkpoint(), command)
-            self.pending_events.clear()
-        except Exception:
+        except Exception as error:
+            committed, outcome_known = self._attempt_is_committed(command)
+            if committed:
+                self.pending_events.clear()
+                self._storage_outcome_unknown = False
+                self._unknown_command_id = None
+                self._committed_state = self._capture_state()
+                return
+            self._restore_state(self._committed_state)
             self.status = "PAUSED"
-            self.error = "Storage failed. Session paused; restore local disk access before continuing."
-            raise
+            self.error = STORAGE_FAILURE_MESSAGE
+            self._storage_outcome_unknown = not outcome_known
+            self._unknown_command_id = command[0] if command is not None and not outcome_known else None
+            raise SessionError(503, STORAGE_FAILURE_MESSAGE) from error
+        self.pending_events.clear()
+        self._committed_state = self._capture_state()
+        self._storage_outcome_unknown = False
+        self._unknown_command_id = None
+
+    def _capture_state(self) -> dict[str, Any]:
+        names = (
+            "status", "speed", "revision", "sequence", "event_ordinal", "events", "pending_events",
+            "tracks", "previous_tracks", "clearances", "requests", "alerts", "acknowledgements",
+            "assessments", "runway_open", "error", "detection_ms", "result", "metadata",
+        )
+        state = {name: getattr(self, name) for name in names}
+        state["simulator"] = self.simulator.checkpoint()
+        return copy.deepcopy(state)
+
+    def _restore_state(self, state: dict[str, Any]) -> None:
+        restored = copy.deepcopy(state)
+        simulator_state = restored.pop("simulator")
+        for name, value in restored.items():
+            setattr(self, name, value)
+        self.simulator.restore(simulator_state)
+
+    def _attempt_is_committed(self, command) -> tuple[bool, bool]:
+        """Return whether the attempted frame and its receipt are durably visible."""
+        try:
+            stored = self.archive.frame(self.id)
+            if not stored:
+                return False, True
+            public, private = stored
+            frame_matches = (
+                public.get("sequence") == self.sequence
+                and public.get("revision") == self.revision
+                and public.get("sim_ms") == self.now_ms
+                and private.get("event_ordinal") == self.event_ordinal
+            )
+            if command is None:
+                return frame_matches, True
+            key, request, response = command
+            receipt = self.archive.command(self.id, key)
+            if receipt == (request, response):
+                return frame_matches, True
+            if frame_matches or receipt is not None:
+                return False, False
+            return False, True
+        except (sqlite3.Error, ValueError, TypeError, KeyError, IndexError, AttributeError):
+            return False, False
+
+    def _reconcile_storage(self, receipt: tuple[dict, dict] | None) -> None:
+        """Resolve a prior ambiguous writer outcome before accepting another mutation."""
+        try:
+            stored = self.archive.frame(self.id)
+            if not stored:
+                raise RuntimeError("no committed session frame is available")
+            public, private = stored
+            events = self.archive.all_events(self.id)
+            if receipt is not None:
+                command_id = receipt[0].get("command", {}).get("command_id")
+                if (not command_id or public.get("revision", -1) < receipt[1].get("revision", 0)
+                        or not any(event.get("command", {}).get("command_id") == command_id
+                                   for event in events)):
+                    raise RuntimeError("durable command receipt has no matching committed session state")
+            self._restore_frame(public, private, events)
+        except Exception as error:
+            self.status = "PAUSED"
+            self.error = STORAGE_FAILURE_MESSAGE
+            raise SessionError(503, STORAGE_FAILURE_MESSAGE) from error
+        self._storage_outcome_unknown = False
+        self._unknown_command_id = None
+        if receipt is None:
+            # A readable archive with no receipt proves the attempted command was
+            # not committed. Require a fresh explicit command from the restored state.
+            self.status = "PAUSED"
+            self.error = STORAGE_FAILURE_MESSAGE
+            self._committed_state = self._capture_state()
+
+    def _reconcile_pending_storage(self) -> None:
+        receipt = None
+        if self._unknown_command_id is not None:
+            try:
+                receipt = self.archive.command(self.id, self._unknown_command_id)
+            except Exception as error:
+                raise SessionError(503, STORAGE_FAILURE_MESSAGE) from error
+        self._reconcile_storage(receipt)
+
+    def _restore_frame(self, public: dict, private: dict, events: list[dict]) -> None:
+        self.simulator.restore(private["simulator"])
+        self.tracks = {key: Track.model_validate(value) for key, value in private["tracks"].items()}
+        self.previous_tracks = {
+            key: Track.model_validate(value) for key, value in private["previous_tracks"].items()
+        }
+        self.clearances = [Clearance.model_validate(value) for value in public["clearances"]]
+        self.requests = copy.deepcopy(public["requests"])
+        self.alerts = {alert["key"]: copy.deepcopy(alert) for alert in public["alerts"]}
+        self.acknowledgements = copy.deepcopy(public["acknowledgements"])
+        self.assessments = copy.deepcopy(public["assessments"])
+        self.events = copy.deepcopy(events)
+        self.pending_events = []
+        self.event_ordinal = int(private["event_ordinal"])
+        self.runway_open = bool(private["runway_open"])
+        self.detection_ms = copy.deepcopy(private.get("detection_ms", []))
+        self.revision = int(public["revision"])
+        self.sequence = int(public["sequence"])
+        self.status = str(public["status"])
+        self.speed = float(public["speed"])
+        self.error = public.get("error")
+        self.metadata = copy.deepcopy(public["metadata"])
+        self.result = {"predictions": copy.deepcopy(public.get("predictions", [])),
+                       "runway": copy.deepcopy(public.get("runway", {}))}
+        self._committed_state = self._capture_state()
+
+    @staticmethod
+    def checkpoint_compatibility_error(public: dict, private: dict) -> str | None:
+        """Validate a saved private checkpoint against this synthetic runtime."""
+        if not isinstance(private, dict):
+            return "Checkpoint private metadata is unavailable; this frame cannot be branched safely."
+        metadata = public.get("metadata")
+        if not isinstance(metadata, dict):
+            return "Checkpoint metadata is missing; this frame cannot be branched safely."
+        scenario_meta = metadata.get("scenario")
+        if not isinstance(scenario_meta, dict):
+            return "Checkpoint scenario metadata is missing; this frame cannot be branched safely."
+        scenario_id = scenario_meta.get("id")
+        if (not isinstance(scenario_id, str) or scenario_id not in CATALOGUE
+                or scenario_meta.get("version") != CATALOGUE[scenario_id].public().get("version")):
+            return "Checkpoint scenario version is unavailable; this frame cannot be branched safely."
+        if (metadata.get("engine_version") != ENGINE_VERSION
+                or metadata.get("config_version") != CONFIG_VERSION
+                or metadata.get("layout_id") != LAYOUT["id"]
+                or metadata.get("layout_version") != LAYOUT["version"]):
+            return "Checkpoint engine, configuration, or layout version is incompatible."
+        try:
+            config = SimulationConfig.model_validate(metadata.get("config"))
+        except (ValueError, TypeError):
+            return "Checkpoint configuration metadata is invalid."
+        if config.version != CONFIG_VERSION:
+            return "Checkpoint configuration version is incompatible."
+        seed = metadata.get("seed")
+        if isinstance(seed, bool) or not isinstance(seed, int):
+            return "Checkpoint seed metadata is invalid."
+        expected = {
+            "schema_version": CHECKPOINT_SCHEMA_VERSION,
+            "engine_version": ENGINE_VERSION,
+            "config_version": CONFIG_VERSION,
+            "scenario_id": scenario_id,
+            "layout_id": LAYOUT["id"],
+            "layout_version": LAYOUT["version"],
+        }
+        if any(private.get(key) != value for key, value in expected.items()):
+            return "Checkpoint schema or runtime metadata is missing or incompatible."
+        simulator = private.get("simulator")
+        required_simulator = {
+            "mobiles", "actions", "action_index", "queue", "dropout_until", "responses", "now_ms", "rng_state",
+        }
+        if (not isinstance(simulator, dict) or not required_simulator.issubset(simulator)
+                or not {"tracks", "previous_tracks", "event_ordinal", "runway_open"}.issubset(private)):
+            return "Checkpoint private simulator state is incomplete."
+        event_ordinal = private.get("event_ordinal")
+        sim_ms = public.get("sim_ms")
+        if (isinstance(event_ordinal, bool) or not isinstance(event_ordinal, int) or event_ordinal < 0
+                or isinstance(sim_ms, bool) or not isinstance(sim_ms, int)
+                or simulator.get("now_ms") != sim_ms or not isinstance(private.get("runway_open"), bool)):
+            return "Checkpoint time or event ancestry is inconsistent."
+        if (not isinstance(simulator.get("mobiles"), dict)
+                or not isinstance(simulator.get("actions"), list)
+                or isinstance(simulator.get("action_index"), bool)
+                or not isinstance(simulator.get("action_index"), int)
+                or not 0 <= simulator["action_index"] <= len(simulator["actions"])
+                or not isinstance(simulator.get("queue"), list)
+                or not isinstance(simulator.get("dropout_until"), dict)
+                or not isinstance(simulator.get("responses"), list)
+                or not isinstance(private.get("tracks"), dict)
+                or not isinstance(private.get("previous_tracks"), dict)):
+            return "Checkpoint private simulator state is malformed."
+        for field in ("clearances", "requests", "alerts", "acknowledgements", "assessments"):
+            if not isinstance(public.get(field), list):
+                return "Checkpoint public state is incomplete."
+        try:
+            probe = Simulator(CATALOGUE[scenario_id].variant, seed, config)
+            probe.restore(simulator)
+            for track in (*private["tracks"].values(), *private["previous_tracks"].values(),
+                          *simulator["queue"]):
+                Track.model_validate(track)
+            for clearance in public["clearances"]:
+                Clearance.model_validate(clearance)
+            if any(not isinstance(alert, dict) or not isinstance(alert.get("key"), str)
+                   for alert in public["alerts"]):
+                return "Checkpoint alert state is malformed."
+        except (ValueError, TypeError, KeyError, IndexError, AttributeError, OverflowError):
+            return "Checkpoint private simulator state is incompatible."
+        return None
 
     def restore(self, public: dict, private: dict, parent_events: list[dict]):
-        self.archive.reset_branch_archive(self.id)
         self.simulator.restore(private["simulator"])
         self.tracks = {id: Track.model_validate(t) for id, t in private["tracks"].items()}
         self.previous_tracks = {id: Track.model_validate(t) for id, t in private["previous_tracks"].items()}
@@ -379,7 +611,7 @@ class Session:
         self.assessments = copy.deepcopy(public["assessments"])
         self.events = copy.deepcopy(parent_events)
         self.pending_events = self.events.copy()
-        self.event_ordinal = max([e["ordinal"] for e in self.events] or [0])
+        self.event_ordinal = int(private["event_ordinal"])
         self.runway_open = private["runway_open"]
         self.revision = 0
         self.status = "PAUSED"

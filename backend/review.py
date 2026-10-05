@@ -117,10 +117,10 @@ class Review:
 
     def snapshot(self) -> dict:
         if self.imported:
-            frame = imported_replay_frame(self.archive, self.source_id, self.now_ms)
-            if frame is None:
+            imported_frame = imported_replay_frame(self.archive, self.source_id, self.now_ms)
+            if imported_frame is None:
                 raise SessionError(404, "Replay source not available")
-            state = frame["state"]
+            state = imported_frame["state"]
             replay_metadata = SQLiteReplayArchiveReader(self.archive).metadata(self.source_id) or {}
             tracks = state.get("tracks", {})
             if isinstance(tracks, Mapping):
@@ -135,7 +135,7 @@ class Review:
                 "source_session_id": self.source_id,
                 "kind": "review",
                 "sequence": self.sequence,
-                "sim_ms": frame["frame_ms"],
+                "sim_ms": imported_frame["frame_ms"],
                 "revision": self.revision,
                 "status": self.status,
                 "speed": self.speed,

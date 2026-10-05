@@ -4,11 +4,16 @@ from __future__ import annotations
 import asyncio
 import copy
 import hashlib
+import importlib.metadata
 import logging
 import os
+import platform
+import re
 import secrets
 import sqlite3
+import sys
 import time
+import tomllib
 from collections.abc import Callable, Mapping, Sequence
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -41,6 +46,8 @@ from .assist_service import (
     TranscriptReadItem,
 )
 from .models import (
+    CONFIG_VERSION,
+    ENGINE_VERSION,
     Acknowledgement,
     Assessment,
     Command,
@@ -68,8 +75,8 @@ from .reporting import (
     session_report,
 )
 from .review import Review, imported_replay_frame
-from .scenarios import CATALOGUE
-from .session import Session, SessionError
+from .scenarios import CATALOGUE, LAYOUT
+from .session import CHECKPOINT_SCHEMA_VERSION, Session, SessionError
 from .storage import Archive
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -266,7 +273,7 @@ class Manager:
 
     def new_session(self, scenario_id: str, seed: int = 42, config: SimulationConfig | None = None,
                     condition: str = "flowlens", parent: dict | None = None,
-                    initialize: bool = True) -> Session:
+                    initialize: bool = True, defer_create: bool = False) -> Session:
         return Session(
             self.archive, scenario_id, seed, config, condition, parent,
             detector=self.ports.detector,
@@ -274,6 +281,7 @@ class Manager:
             writer=self.session_writer,
             audit_clock=self.wall_clock,
             initialize=initialize,
+            defer_create=defer_create,
         )
 
     def read_replay_source(
@@ -375,6 +383,66 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
     @app.get("/health")
     def health():
         return {"status": "ok", "version": "0.1.0", "mode": "synthetic-training", "single_writer": True}
+
+    @app.get("/api/v1/runtime-manifest")
+    def runtime_manifest(actor=Depends(identity)):
+        manager().instructor(actor)
+        project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+        groups = {"required": project.get("dependencies", [])}
+        optional = project.get("optional-dependencies", {})
+        groups.update({str(group): values for group, values in optional.items()})
+        dependencies = []
+        for group, requirements in groups.items():
+            for requirement in requirements:
+                distribution = re.split(r"[<=>!~;\[]", requirement, maxsplit=1)[0].strip()
+                try:
+                    installed_version = importlib.metadata.version(distribution)
+                except importlib.metadata.PackageNotFoundError:
+                    installed_version = None
+                dependencies.append({
+                    "group": group,
+                    "requirement": requirement,
+                    "distribution": distribution,
+                    "installed_version": installed_version,
+                    "available": installed_version is not None,
+                })
+        job_configuration = assist_config
+        worker_available = manager().worker_port is not None
+        optional_providers = {
+            "assist_worker": {
+                "available": worker_available,
+                "inference_verified": False,
+                "provider": job_configuration.provider if job_configuration else None,
+                "model": job_configuration.model if job_configuration else None,
+                "version": job_configuration.version if job_configuration else None,
+                "config_version": job_configuration.config_version if job_configuration else None,
+            },
+            "local_model": {"available": False, "configured": False},
+        }
+        return {
+            "schema_version": "flowlens-runtime-1",
+            "application": {"name": project["name"], "version": project["version"]},
+            "runtime": {
+                "python_version": platform.python_version(),
+                "python_implementation": platform.python_implementation(),
+                "platform": sys.platform,
+                "platform_release": platform.release(),
+                "architecture": platform.machine(),
+            },
+            "configuration": {
+                "mode": "synthetic-training",
+                "python_requirement_declared": project.get("requires-python"),
+                "storage": "sqlite",
+                "journal_mode": str(manager().archive.db.execute("PRAGMA journal_mode").fetchone()[0]).lower(),
+                "engine_version": ENGINE_VERSION,
+                "config_version": CONFIG_VERSION,
+                "checkpoint_schema_version": CHECKPOINT_SCHEMA_VERSION,
+                "layout_id": LAYOUT["id"],
+                "layout_version": LAYOUT["version"],
+            },
+            "dependencies": dependencies,
+            "optional_providers": optional_providers,
+        }
 
     @app.post("/api/v1/auth/operator")
     async def login(payload: OperatorLogin):
@@ -772,7 +840,15 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             if ref.kind == "transcript_segment":
                 transcript = manager().assist_service.get_segment_at(id, ref.id, payload.until_ms)
                 if transcript is None:
-                    unresolved.append({"ref": ref_value, "reason": "not_available_by_cutoff"})
+                    try:
+                        all_transcripts = manager().assist_service.list_transcripts(
+                            id, analysis_id=payload.analysis_id, until_ms=None, cursor=None, limit=10000,
+                        )["items"]
+                    except KeyError:
+                        all_transcripts = []
+                    exists = any(item.get("segment", {}).get("id") == ref.id for item in all_transcripts)
+                    reason = "not_available_by_cutoff" if exists else "not_available"
+                    unresolved.append({"ref": ref_value, "reason": reason})
                 else:
                     items.append({"ref": ref_value, "item": {"kind": ref.kind, **transcript}})
                 continue
@@ -836,6 +912,8 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             session = manager().sessions.get(id)
             if not session:
                 raise HTTPException(409, "Archived session cannot receive commands")
+            if isinstance(session, Session):
+                return session.execute(payload, actor["role"], actor["label"], actor_id=actor["actor_id"])
             return session.execute(payload, actor["role"], actor["label"])
 
     @app.get("/api/v1/sessions/{id}/events")
@@ -951,15 +1029,21 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             frame = manager().archive.frame(source_id, payload.at_ms)
             if not frame:
                 raise HTTPException(422, "No checkpoint at this time")
+            incompatibility = Session.checkpoint_compatibility_error(frame[0], frame[1])
+            if incompatibility:
+                raise HTTPException(409, incompatibility)
+            parent_events = [e for e in manager().archive.all_events(source_id)
+                             if e["ordinal"] <= frame[1]["event_ordinal"]]
+            if max((e["ordinal"] for e in parent_events), default=0) != frame[1]["event_ordinal"]:
+                raise HTTPException(409, "Checkpoint ancestry is incomplete; this frame cannot be branched safely.")
             metadata = frame[0]["metadata"]
             child = manager().new_session(
                 metadata["scenario"]["id"], metadata["seed"],
                 SimulationConfig.model_validate(metadata["config"]), metadata["condition"],
                 {"session_id": source_id, "requested_ms": payload.at_ms, "frame_ms": frame[0]["sim_ms"]},
-                initialize=False,
+                initialize=False, defer_create=True,
             )
-            child.restore(frame[0], frame[1], [e for e in manager().archive.all_events(source_id)
-                                              if e["ordinal"] <= frame[1]["event_ordinal"]])
+            child.restore(frame[0], frame[1], parent_events)
             manager().sessions[child.id] = child
             return {"id": child.id, "parent": child.metadata["parent"],
                     "token": manager().mint(Role.INSTRUCTOR, actor["label"], child.id)}
@@ -1036,7 +1120,7 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
                 await asyncio.sleep(.2)
         except HTTPException as error:
             await socket.close(code=4403 if error.status_code == 403 else 4401)
-        except (WebSocketDisconnect, asyncio.TimeoutError, RuntimeError):
+        except (asyncio.TimeoutError, WebSocketDisconnect, RuntimeError):
             return
 
     @app.websocket("/api/v1/sessions/{id}/assist-stream")
@@ -1148,7 +1232,7 @@ def create_app(db_path: str | Path | None = None, operator_key: str | None = Non
             await socket.close(code=4400)
         except KeyError:
             await socket.close(code=4404)
-        except (WebSocketDisconnect, asyncio.TimeoutError, RuntimeError):
+        except (asyncio.TimeoutError, WebSocketDisconnect, RuntimeError):
             return
         except sqlite3.Error:
             try:
