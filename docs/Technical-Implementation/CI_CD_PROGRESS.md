@@ -2,7 +2,7 @@
 
 **Diperbarui:** 5 Oktober 2026
 
-**Status:** multipart dependency fix dan job Python 3.13 dipush ke `origin/feat/backend` pada `4c035e4`. Suite lokal lulus pada Python 3.13; hasil GitHub Actions untuk SHA baru masih menunggu.
+**Status:** multipart dependency fix dipush ke `origin/feat/backend` pada `4c035e4`; workflow diselaraskan ke Python 3.13 saja pada `a3ac1a5`. Suite lokal lulus pada Python 3.13; hasil GitHub Actions untuk head terbaru masih menunggu.
 
 Dokumen ini mencatat requirement, keputusan implementasi, hasil CI, akar masalah, dan pekerjaan tersisa. [CI/CD setup](../CI_CD.md) tetap menjadi panduan konfigurasi GitHub. Workflow yang menjadi sumber perilaku adalah [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
 
@@ -90,7 +90,7 @@ Python 3.11 sebelumnya dipakai CI untuk menguji batas minimum metadata. Atas pil
 
 | Item | Status | Bukti/pekerjaan berikutnya |
 |---|---|---|
-| Workflow CI pada `feat/backend` | Dependency multipart dan workflow Python 3.13 dipush pada SHA `4c035e4`; perubahan versi 3.13 saja sedang disiapkan lokal. | Kirim pembaruan workflow dan periksa check PR #2 pada SHA baru. |
+| Workflow CI pada `feat/backend` | Dependency multipart dipush pada `4c035e4`; seluruh job Python diselaraskan ke 3.13 pada `a3ac1a5`. | Periksa check PR #2 pada SHA terbaru. |
 | Cakupan versi Python | Semua job Python pada workflow lokal memakai 3.13 saja. | Verifikasi CI setelah push. Metadata tetap `>=3.11`; minimum 3.11 belum diuji oleh CI. |
 | Test suite lengkap | 78 tests lulus pada run penuh lokal kedua di virtualenv Python 3.13 yang menginstal deklarasi terbaru. | Run pertama pada env bersih memiliki satu kegagalan sementara di BE-05; GitHub Actions pada SHA versi terbaru belum berjalan/diverifikasi. |
 | Ruff, mypy, diff check | Lulus pada run remote sebelum fix; Ruff dan mypy juga lulus lokal sesudah fix. | Pastikan seluruh check remote berhasil pada SHA terbaru. |
