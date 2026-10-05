@@ -2,7 +2,7 @@
 
 **Diperbarui:** 5 Oktober 2026
 
-**Status:** koreksi composition sebelumnya dipush ke `origin/feat/backend` pada `120c587`. Log Actions terbaru yang diberikan pengguna gagal pada multipart replay import; deklarasi dependency sudah diperbaiki di worktree ini dan lulus verifikasi lokal, tetapi belum dipush atau dijalankan ulang di GitHub Actions.
+**Status:** multipart dependency fix dan job Python 3.13 dipush ke `origin/feat/backend` pada `4c035e4`. Suite lokal lulus pada Python 3.13; hasil GitHub Actions untuk SHA baru masih menunggu.
 
 Dokumen ini mencatat requirement, keputusan implementasi, hasil CI, akar masalah, dan pekerjaan tersisa. [CI/CD setup](../CI_CD.md) tetap menjadi panduan konfigurasi GitHub. Workflow yang menjadi sumber perilaku adalah [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
 
@@ -78,7 +78,7 @@ Verifikasi koreksi pada 5 Oktober 2026:
 - `python -m pytest` pada run pertama — 77 passed dan satu kegagalan sementara pada assertion attempt BE-05 (`stored_job["attempts"]` kosong); test itu lulus saat dijalankan sendiri.
 - `python -m pytest` pada run penuh berikutnya — 78 passed, 1 warning.
 - Lingkungan lokal hanya menyediakan Python 3.13, sedangkan CI memakai Python 3.11. Hasil lokal ini belum menggantikan rerun GitHub Actions.
-- Perubahan dependency dan pembaruan dokumentasi ini masih lokal pada worktree; belum dikirim ke `origin/feat/backend`.
+- Perubahan dependency dan job Python 3.13 dipush ke `origin/feat/backend` pada `4c035e4`. GitHub Actions untuk SHA baru belum diperiksa.
 
 ## Strategi versi Python
 
@@ -90,7 +90,7 @@ Python 3.11 bukan rilis paling baru atau yang paling lama didukung saat ini: pad
 
 | Item | Status | Bukti/pekerjaan berikutnya |
 |---|---|---|
-| Workflow CI pada `feat/backend` | Source lokal sekarang memuat dependency multipart dan job Python 3.13; branch remote masih di SHA `120c587`, dan log Actions yang diberikan pengguna menunjukkan kegagalan multipart. | Kirim koreksi dependency dan workflow, lalu periksa ulang semua check PR #2 termasuk job Python 3.13. |
+| Workflow CI pada `feat/backend` | Dependency multipart dan job Python 3.13 dipush pada SHA `4c035e4`; run sebelumnya yang diberikan pengguna gagal pada multipart imports. | Periksa semua check PR #2 pada SHA baru, termasuk job Python 3.13. |
 | Cakupan versi Python | CI source menguji backend pada 3.11 dan menambahkan job 3.13. | Verifikasi kedua job pada GitHub Actions; required checks repository harus mencakup check 3.13 yang baru. |
 | Test suite lengkap | 78 tests lulus pada run penuh lokal kedua di virtualenv Python 3.13 yang menginstal deklarasi terbaru. | Run pertama pada env bersih memiliki satu kegagalan sementara di BE-05; check remote Python 3.11 dan 3.13 tetap perlu dijalankan. |
 | Ruff, mypy, diff check | Lulus pada run remote sebelum fix; Ruff dan mypy juga lulus lokal sesudah fix. | Pastikan seluruh check remote berhasil pada SHA terbaru. |
