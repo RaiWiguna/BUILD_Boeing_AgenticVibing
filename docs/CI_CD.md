@@ -19,7 +19,7 @@ Check yang diwajibkan dijalankan pada push ke `dev` untuk SHA yang sama dengan h
 
 ## Pengaturan GitHub yang perlu dilakukan
 
-Konfigurasi lokal belum menerapkan proteksi remote. Setelah branch `dev` dibuat oleh pemilik repository dari `main` yang disepakati, atur repository:
+Branch `dev` sudah dibuat dari `main` pada commit `2660222` dan dipush ke remote pada 5 Oktober 2026. Konfigurasi berikut belum diterapkan; atur repository:
 
 1. Pastikan Actions diizinkan berjalan dan aktifkan **Allow GitHub Actions to create and approve pull requests**, agar job dengan `GITHUB_TOKEN` dan izin `pull-requests: write` dapat membuat PR.
 2. Atur branch protection atau ruleset untuk `main`: wajibkan pull request; wajibkan empat check stabil di atas; nonaktifkan force-push dan penghapusan branch.
@@ -27,11 +27,11 @@ Konfigurasi lokal belum menerapkan proteksi remote. Setelah branch `dev` dibuat 
 4. Setelah workflow pertama kali menghasilkan check di GitHub, pilih check dari GitHub Actions sebagai sumber status yang diwajibkan. Verifikasi bahwa setiap check tampil pada PR promosi dan mengikuti SHA head terkini.
 5. Pertahankan merge manual. Jangan aktifkan auto-merge untuk PR promosi.
 
-Branch `dev` tidak ada pada remote yang diperiksa 5 Oktober 2026. Workflow tidak membuat branch itu. Jalur aman yang disiapkan adalah membuat `dev` dari `main` setelah pemilik repository mengonfirmasi titik awal, lalu mengirim perubahan kerja melalui PR menuju `dev`.
+Workflow tidak membuat branch. `dev` kini tersedia dari `main`; perubahan `feat/backend` selanjutnya dikirim melalui PR menuju `dev`.
 
 ## Batas verifikasi saat ini
 
-Workflow telah ditambahkan ke source lokal, tetapi belum dipush atau dijalankan oleh GitHub Actions. Lingkungan ini tidak memiliki GitHub CLI dan permintaan baca proteksi branch ke API GitHub mengembalikan HTTP 401 tanpa autentikasi; status atau perubahan branch protection remote tidak dapat diverifikasi. Tidak ada kredensial yang ditambahkan.
+Workflow telah dipush pada `feat/backend`, tetapi belum digabung ke `dev` atau dijalankan oleh GitHub Actions. Lingkungan ini tidak memiliki GitHub CLI dan permintaan baca proteksi branch ke API GitHub mengembalikan HTTP 401 tanpa autentikasi; status atau perubahan branch protection remote tidak dapat diverifikasi. Tidak ada kredensial yang ditambahkan.
 
 Test suite lengkap sengaja dijalankan CI agar kegagalan apa pun mencegah promosi. Pada pemeriksaan lokal 5 Oktober 2026, gate BE-03–BE-08, Ruff, dan mypy lulus. `python -m pytest` menghasilkan 77 passed dan 1 failed pada `tests/integration/test_composition.py`; karena itu job `backend tests` saat ini akan gagal sampai kegagalan tersebut diperbaiki di lingkup perubahan yang sesuai. Perbaikan perilaku backend tidak termasuk perubahan CI ini.
 
