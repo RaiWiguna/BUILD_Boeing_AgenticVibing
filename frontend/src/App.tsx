@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { ApiReplayReviewAdapter } from './adapters/apiReplayReview'
-import { FixtureReplayReviewAdapter } from './adapters/fixtureReplayReview'
+import { FixtureReplayReviewAdapter, FIXTURE_FRAME_MS } from './adapters/fixtureReplayReview'
+import { AlertEvidence } from './features/runway/AlertEvidence'
+import { RunwayBoard } from './features/runway/RunwayBoard'
+import { RunwayMap } from './features/runway/RunwayMap'
+import { SourceSetup } from './features/replay/SourceSetup'
 import type {
   AsyncState,
-  DashboardAdapter,
   OperatorAccess,
   OverviewReadModel,
+  ReplayFrameReadModel,
+  ReplayReviewAdapter,
+  ReplaySourceReadModel,
   SessionReadModel,
   SessionViewReadModel,
 } from './contracts/replayReview'
@@ -15,12 +21,17 @@ const configuredMode = import.meta.env.VITE_FLOWLENS_MODE
 const mode: 'fixture' | 'api' = configuredMode === 'api' ? 'api' : 'fixture'
 const invalidMode = configuredMode !== undefined && configuredMode !== '' && configuredMode !== 'fixture' && configuredMode !== 'api'
 
-function createAdapter(value: 'fixture' | 'api'): DashboardAdapter {
+function createAdapter(value: 'fixture' | 'api'): ReplayReviewAdapter {
   return value === 'api' ? new ApiReplayReviewAdapter() : new FixtureReplayReviewAdapter()
 }
 
 function errorState(error: unknown): AsyncState<never> {
-  if (error instanceof ApiRequestError) return { state: error.kind, message: error.message }
+  if (error instanceof ApiRequestError) {
+    if (error.reason === 'unsupported_profile' && /layout|coordinate system|geometry/i.test(error.message)) {
+      return { state: 'unsupported-layout', message: error.message }
+    }
+    return { state: error.kind, message: error.message }
+  }
   if (error instanceof DOMException && error.name === 'AbortError') return { state: 'loading' }
   return { state: 'error', message: error instanceof Error ? error.message : 'An unexpected error occurred.' }
 }
@@ -54,6 +65,10 @@ function App() {
   const [selectedScenario, setSelectedScenario] = useState('')
   const [selectedSessionId, setSelectedSessionId] = useState('')
   const [busyAction, setBusyAction] = useState<'login' | 'create' | 'refresh' | null>(null)
+  const [sourceState, setSourceState] = useState<AsyncState<ReplaySourceReadModel>>({ state: 'empty' })
+  const [frameState, setFrameState] = useState<AsyncState<ReplayFrameReadModel>>({ state: 'empty' })
+  const activeSession = sessionState.state === 'ready' ? sessionState.data : null
+  const apiFrameTime = activeSession?.snapshot.sim_ms
 
   const loadOverview = useCallback(async (signal?: AbortSignal) => {
     if (invalidMode) return
@@ -112,6 +127,97 @@ function App() {
     if (invalidMode || !selectedSessionId || (mode === 'api' && !access)) return
     void loadSession(selectedSessionId, access?.token ?? '')
   }, [selectedSessionId, access, loadSession])
+
+  useEffect(() => {
+    if (invalidMode || !selectedSessionId || (mode === 'api' && !access)) {
+      setSourceState({ state: 'empty' })
+      setFrameState({ state: 'empty' })
+      return
+    }
+
+    const selectedSessionTime = activeSession?.session.id === selectedSessionId ? apiFrameTime : undefined
+    const requestedFrameMs = mode === 'fixture' ? FIXTURE_FRAME_MS : selectedSessionTime
+    if (requestedFrameMs === undefined) {
+      setSourceState({ state: 'empty' })
+      setFrameState({ state: 'empty' })
+      return
+    }
+
+    const controller = new AbortController()
+    let unsubscribe: () => void = () => {}
+    setSourceState({ state: 'loading' })
+    setFrameState({ state: 'loading' })
+
+    const updateFrame = (frame: ReplayFrameReadModel) => {
+      if (frame.state === 'disconnected') {
+        setFrameState({ state: 'disconnected', data: frame, message: frame.connection_message ?? 'Source stream disconnected; retained frame shown.' })
+      } else if (frame.state === 'unavailable') {
+        setFrameState({ state: 'error', message: frame.connection_message ?? 'Source frame is unavailable.' })
+      } else if (frame.quality !== 'known' || frame.state === 'degraded') {
+        setFrameState({ state: 'degraded', data: frame, message: frame.connection_message ?? `Frame quality is ${frame.quality}.` })
+      } else {
+        setFrameState({ state: 'ready', data: frame })
+      }
+    }
+
+    void (async () => {
+      let source: ReplaySourceReadModel
+      try {
+        source = await adapter.loadSource(selectedSessionId, controller.signal)
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return
+        const failure = errorState(error)
+        setSourceState(failure)
+        setFrameState(failure)
+        return
+      }
+      if (controller.signal.aborted) return
+      setSourceState(source.quality === 'known'
+        ? { state: 'ready', data: source }
+        : { state: 'degraded', data: source, message: `Source quality is ${source.quality}.` })
+
+      let frame: ReplayFrameReadModel
+      try {
+        frame = await adapter.loadFrame(selectedSessionId, requestedFrameMs, controller.signal)
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return
+        setFrameState(errorState(error))
+        return
+      }
+      if (controller.signal.aborted) return
+      updateFrame(frame)
+
+      if (mode === 'api' && !controller.signal.aborted) {
+        try {
+          unsubscribe = adapter.subscribeSource(
+            selectedSessionId,
+            (nextFrame) => {
+              if (nextFrame) updateFrame(nextFrame)
+            },
+            (state, message) => {
+              if (state === 'connected' || state === 'loading') return
+              if (state === 'disconnected') {
+                setFrameState((current) => 'data' in current && current.data
+                  ? { state: 'disconnected', data: current.data, message: message ?? 'Source stream disconnected; retained frame shown.' }
+                  : { state: 'disconnected', message: message ?? 'Source stream disconnected before a frame was received.' })
+              } else if (state === 'unauthorized') {
+                setFrameState({ state: 'unauthorized', message: message ?? 'Source-read access is unavailable.' })
+              } else if (state === 'error' || state === 'unavailable') {
+                setFrameState({ state: 'error', message: message ?? 'Source stream is unavailable.' })
+              }
+            },
+          )
+        } catch (error) {
+          if (!(error instanceof DOMException && error.name === 'AbortError')) setFrameState(errorState(error))
+        }
+      }
+    })()
+
+    return () => {
+      controller.abort()
+      unsubscribe()
+    }
+  }, [adapter, access, activeSession?.session.id, apiFrameTime, selectedSessionId])
 
   useEffect(() => () => {
     if (adapter instanceof ApiReplayReviewAdapter) adapter.dispose()
@@ -173,7 +279,9 @@ function App() {
 
   const overview = overviewState.state === 'ready' || overviewState.state === 'degraded' ? overviewState.data : null
   const sessions = sessionsState.state === 'ready' ? sessionsState.data : []
-  const activeSession = sessionState.state === 'ready' ? sessionState.data : null
+  const activeFrame = frameState.state === 'ready' || frameState.state === 'degraded' || frameState.state === 'disconnected'
+    ? frameState.data ?? null
+    : null
 
   return (
     <div className="app-shell">
@@ -191,9 +299,9 @@ function App() {
       <main id="main" className="workspace">
         <section className="page-heading">
           <div>
-            <p className="eyebrow">FRONTEND FOUNDATION / FE-01</p>
+            <p className="eyebrow">FRONTEND REPLAY REVIEW / FE-03</p>
             <h1>Replay review workspace</h1>
-            <p className="lede">A typed, adapter-driven shell for local synthetic sessions and offline replay work.</p>
+            <p className="lede">Source context, runway geometry and evidence-linked deterministic alerts for offline replay review.</p>
           </div>
           <button className="button button-secondary refresh-button" onClick={() => void onRefresh()} disabled={busyAction !== null}>
             <span className={busyAction === 'refresh' ? 'refresh-glyph spinning' : 'refresh-glyph'} aria-hidden="true">↻</span>
@@ -269,7 +377,7 @@ function App() {
         ) : (
           <section className="panel fixture-note" aria-label="Fixture mode details">
             <div className="fixture-stamp">SYNTHETIC<br />FIXTURE</div>
-            <div><p className="eyebrow">03 / FIXTURE MODE</p><h2>Adapter ready for replay UI tasks</h2><p className="muted">This authored fixture exercises the typed source, frame, event, evidence and revision ports. It contains no partner simulator data, ASR output or operational validation.</p></div>
+            <div><p className="eyebrow">03 / FIXTURE MODE</p><h2>Synthetic runway review fixture</h2><p className="muted">The inline sample contains authored layout, tracks, prediction and alert evidence. It contains no partner simulator data, measured performance or operational validation.</p></div>
           </section>
         )}
 
@@ -297,6 +405,13 @@ function App() {
             ? <StateMessage state={sessionState} />
             : null}
         </section>
+
+        <SourceSetup mode={mode} source={sourceState} frame={frameState} selectedSourceId={selectedSessionId} />
+        <div className="runway-workspace-grid">
+          <RunwayMap frame={activeFrame} frameState={frameState} />
+          <RunwayBoard frame={activeFrame} />
+        </div>
+        <AlertEvidence adapter={adapter} sourceSessionId={selectedSessionId} frame={activeFrame} />
 
         <footer className="workspace-footer"><span>ATC FlowLens · offline replay and synthetic training</span><span>Controller authority remains with the human operator.</span></footer>
       </main>

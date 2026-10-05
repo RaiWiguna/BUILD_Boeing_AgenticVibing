@@ -139,6 +139,9 @@ export interface ReplaySnapshotReadModel {
   scenario_title: string
   condition: string
   source_version: string
+  config_version: string | null
+  viewer_role: string
+  viewer_label: string
   layout: {
     id: string
     version: string
@@ -157,6 +160,7 @@ export interface ReplaySnapshotReadModel {
   predictions: Array<{ object_id: string; physical_runway_id?: string; direction?: string; interval_index?: number; entry_s: number; exit_s: number; exit_unknown: boolean; threshold_eta_s: number | null; assumed_entry_range_s: number[]; assumed_exit_range_s: number[]; model_version?: string; source_event_id?: string }>
   alerts: Array<{ id: string; rule: string; objects: string[]; severity: string; reason: string; status: string; created_ms: number; calculated_ms: number; updated_ms?: number; data_degraded: boolean; metrics: Record<string, unknown>; evidence_event_ids: string[]; track_ages_ms: Record<string, number>; assumptions: string }>
   runway: { open: boolean; state: string; data_quality: string; observed_occupants: string[]; degraded_ids: string[] }
+  acknowledgements: Array<{ alert_id: string; actor: string; sim_ms: number }>
   events: EventReadModel[]
   event_count: number
   track_count: number
@@ -317,4 +321,6 @@ export type AsyncState<T> =
   | { state: 'empty' }
   | { state: 'ready'; data: T }
   | { state: 'degraded'; data: T; message: string }
-  | { state: 'disconnected' | 'unauthorized' | 'conflict' | 'error'; message: string }
+  | { state: 'disconnected'; message: string; data?: T }
+  | { state: 'unsupported-layout'; message: string }
+  | { state: 'unauthorized' | 'conflict' | 'error'; message: string }
