@@ -1,0 +1,12 @@
+{
+  "schema_version": "assist-1",
+  "fixture_version": "qa01-2026-10-06.1",
+  "source_session_id": "SYN-COMM-01",
+  "replay_analysis_id": "AN-SYN-01",
+  "label": "SYNTHETIC / NOT OPERATIONALLY VALIDATED",
+  "highlights": [
+    {"id":"HL-004","category":"critical_slot_uncertain","review_priority":"high","statement":"Authored transcript stub leaves the instruction fragment and negation unresolved; inspect the referenced replay evidence.","transcript_segment_ids":["SEG-TWR-006"],"session_event_ids":["EVT-CLR-021","EVT-TRK-088"],"uncertainty":["Transcript is a stub/mock, not ASR.","No audio bytes or model output are available.","Temporal proximity alone does not establish semantic alignment."],"provider_version":"stub-mock-1","rule_version":"reconcile-fixture-1","status":"needs_review","linked_alert_id":"ALRT-009","link_status":"possible_link"}
+  ],
+  "note": "review_priority is not safety severity; highlight is an authored fixture candidate and does not add or change a deterministic alert.",
+  "alert_reference_policy": "ALRT-009 is an identifier for causal-oracle bookkeeping, not a public alert DTO or detector input. Its timing oracle stays private; this public relation remains possible_link and unresolved."
+}

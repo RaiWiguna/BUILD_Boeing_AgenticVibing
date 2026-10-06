@@ -1,0 +1,15 @@
+{
+  "schema_version": "qa01-quality-time-input-1",
+  "fixture_version": "qa01-2026-10-06.1",
+  "bundle_id": "F-QUALITY-01",
+  "label": "SYNTHETIC / NOT OPERATIONALLY VALIDATED",
+  "freshness_policy_under_test": {"age_basis":"observed_ms","stale_threshold_ms":3000,"comparison":"strictly greater than threshold","nominal_sample_observed_ms":0,"nominal_sample_received_ms":500},
+  "cases": [
+    {"id":"sample-and-delay-boundaries","kind":"availability-and-freshness","sample":{"event_id":"Q-SAMPLE-001","observed_ms":0,"received_ms":500},"checkpoints_ms":[499,500,3000,3001]},
+    {"id":"out-of-order-delivery","kind":"latest-observation-reducer","packets":[{"event_id":"Q-OBS-002","ordinal":2,"observed_ms":2000,"received_ms":2500,"x_m":1500,"y_m":-60},{"event_id":"Q-OBS-003","ordinal":3,"observed_ms":1500,"received_ms":2600,"x_m":1500,"y_m":-70}]},
+    {"id":"missing-source-time","kind":"unresolved-record","source_time":{"value":null,"unit":"ms","clock":"unknown-source-clock"},"quality":{"status":"alignment_unknown","reasons":["source timestamp not supplied","no mapping to session clock"]},"normalized_track":null},
+    {"id":"invalid-coordinate","kind":"invalid-observation","source_time":{"value":3000,"unit":"ms","clock":"synthetic-session"},"quality":{"status":"invalid","reasons":["coordinate is null"]},"coordinate":{"x_m":null,"y_m":0},"normalized_track":null},
+    {"id":"duplicate-id-different-payload","kind":"import-conflict","first":{"source_event_id":"Q-DUP-001","payload_digest":"authored-payload-A"},"second":{"source_event_id":"Q-DUP-001","payload_digest":"authored-payload-B"}},
+    {"id":"cancelled-clearance-occupancy-independent","kind":"source-state-separation","clearance":{"event_id":"Q-CLR-001","status":"CANCELLED"},"observed_track":{"event_id":"Q-TRK-001","kind":"vehicle","center_m":[1500,0],"speed_mps":0,"received_ms":4000}}
+  ]
+}

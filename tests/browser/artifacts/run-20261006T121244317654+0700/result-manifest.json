@@ -1,0 +1,137 @@
+{
+  "task": "QA-05",
+  "label": "actual native browser run; screenshot verifies UI rendering only, not domain correctness",
+  "run_id": "20261006T121244317654+0700",
+  "client_date": "2026-10-06",
+  "timezone": "Asia/Jakarta",
+  "command": "python -m pytest tests/browser",
+  "exit_status": 0,
+  "environment": {
+    "python": "3.13.14",
+    "playwright": "1.60.0",
+    "pytest": "9.0.3",
+    "browser": "Playwright Chromium (headless)",
+    "fixture_profile": "FE-05 authored inline fixture-1; no ASR/provider/partner/server result",
+    "qa01_canonical_fixture_bundle": "not present; F-COMM-01 used only as a documented target name",
+    "qa04_mock_stack_launcher": "not present; QA-05 launches isolated Vite/backend processes only for its own tests"
+  },
+  "screenshots": [
+    "tests/browser/artifacts/run-20261006T121244317654+0700/fixture-evaluator-desktop.png",
+    "tests/browser/artifacts/run-20261006T121244317654+0700/fixture-evaluator-narrow-viewport.png",
+    "tests/browser/artifacts/run-20261006T121244317654+0700/fixture-evaluator-options-boundary.png",
+    "tests/browser/artifacts/run-20261006T121244317654+0700/fixture-evidence-cutoff.png",
+    "tests/browser/artifacts/run-20261006T121244317654+0700/fixture-transcript-conflict-reconciled.png",
+    "tests/browser/artifacts/run-20261006T121244317654+0700/real-api-current-source-unavailable-capabilities.png"
+  ],
+  "tests": [
+    {
+      "test": "tests/browser/test_api_capability.py::test_real_current_api_keeps_additive_routes_unavailable_without_source_read",
+      "outcome": "passed",
+      "duration_s": 1.761,
+      "suite_file": "test_api_capability.py"
+    },
+    {
+      "test": "tests/browser/test_api_capability.py::test_real_api_role_contexts_cannot_elevate_or_read_instructor_report",
+      "outcome": "passed",
+      "duration_s": 0.131,
+      "suite_file": "test_api_capability.py"
+    },
+    {
+      "test": "tests/browser/test_fe_01.py::test_fe_01_setup_map_seek_and_cutoff",
+      "outcome": "passed",
+      "duration_s": 1.422,
+      "suite_file": "test_fe_01.py"
+    },
+    {
+      "test": "tests/browser/test_fe_01.py::test_mock_stack_is_explicit_frontend_fixture_only",
+      "outcome": "passed",
+      "duration_s": 0.628,
+      "suite_file": "test_fe_01.py"
+    },
+    {
+      "test": "tests/browser/test_fe_02.py::test_fe_02_typed_evidence_link_states_and_unknown_alignment",
+      "outcome": "passed",
+      "duration_s": 1.339,
+      "suite_file": "test_fe_02.py"
+    },
+    {
+      "test": "tests/browser/test_fe_02.py::test_fe_02_api_adapter_marks_typed_evidence_unavailable_without_source_read",
+      "outcome": "passed",
+      "duration_s": 0.601,
+      "suite_file": "test_fe_02.py"
+    },
+    {
+      "test": "tests/browser/test_fe_03.py::test_fe_03_transcript_provenance_and_conflict_reconcile_retry",
+      "outcome": "passed",
+      "duration_s": 1.401,
+      "suite_file": "test_fe_03.py"
+    },
+    {
+      "test": "tests/browser/test_fe_04.py::test_fe_04_debrief_ai_outage_audio_unavailable_and_scope",
+      "outcome": "passed",
+      "duration_s": 0.697,
+      "suite_file": "test_fe_04.py"
+    },
+    {
+      "test": "tests/browser/test_fe_04.py::test_fe_04_fixture_provider_unavailable_badge",
+      "outcome": "skipped",
+      "duration_s": 5.605,
+      "suite_file": "test_fe_04.py",
+      "expected_failure": "FE-05 fixture subscription replaces provider_availability=unavailable with unknown in its snapshot projection"
+    },
+    {
+      "test": "tests/browser/test_fe_04.py::test_fe_04_training_view_has_no_evaluator_options",
+      "outcome": "passed",
+      "duration_s": 0.759,
+      "suite_file": "test_fe_04.py"
+    },
+    {
+      "test": "tests/browser/test_fe_05.py::test_fe_05_narrow_viewport_keyboard_focus_and_no_browser_errors",
+      "outcome": "passed",
+      "duration_s": 1.06,
+      "suite_file": "test_fe_05.py"
+    },
+    {
+      "test": "tests/browser/test_options_boundary.py::test_options_boundary_no_command_or_state_change",
+      "outcome": "passed",
+      "duration_s": 1.154,
+      "suite_file": "test_options_boundary.py"
+    },
+    {
+      "test": "tests/browser/test_options_boundary.py::test_review_editor_receipt_states_are_distinct[accepted]",
+      "outcome": "passed",
+      "duration_s": 0.712,
+      "suite_file": "test_options_boundary.py"
+    },
+    {
+      "test": "tests/browser/test_options_boundary.py::test_review_editor_receipt_states_are_distinct[conflict]",
+      "outcome": "passed",
+      "duration_s": 0.834,
+      "suite_file": "test_options_boundary.py"
+    },
+    {
+      "test": "tests/browser/test_options_boundary.py::test_review_editor_receipt_states_are_distinct[unauthorized]",
+      "outcome": "passed",
+      "duration_s": 0.71,
+      "suite_file": "test_options_boundary.py"
+    },
+    {
+      "test": "tests/browser/test_options_boundary.py::test_review_editor_receipt_states_are_distinct[unavailable]",
+      "outcome": "passed",
+      "duration_s": 0.705,
+      "suite_file": "test_options_boundary.py"
+    },
+    {
+      "test": "tests/browser/test_options_boundary.py::test_review_editor_receipt_states_are_distinct[error]",
+      "outcome": "passed",
+      "duration_s": 0.733,
+      "suite_file": "test_options_boundary.py"
+    }
+  ],
+  "summary": {
+    "passed": 16,
+    "failed": 0,
+    "skipped": 1,
+    "expected_failures": 1
+  }
+}

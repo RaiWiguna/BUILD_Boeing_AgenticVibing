@@ -1,0 +1,184 @@
+name: ATC FlowLens CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  backend-tests:
+    name: backend tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install project and development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Run the complete Python test suite
+        run: python -m pytest
+
+  ruff:
+    name: ruff
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install project and development dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Check backend style
+        run: >-
+          python -m ruff check --ignore B008,UP041
+          backend/app.py backend/session.py backend/storage.py backend/review.py
+          backend/__init__.py tests/integration/test_be_08.py
+
+  mypy:
+    name: mypy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install project and development dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Check scoped backend types
+        run: >-
+          python -m mypy --follow-imports=skip
+          backend/app.py backend/session.py backend/storage.py backend/review.py
+          backend/__init__.py tests/integration/test_be_08.py
+
+  diff-check:
+    name: diff check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source and comparison refs
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Check changed lines for whitespace errors
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_REF: ${{ github.base_ref }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+          CURRENT_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            git diff --check "origin/${PR_BASE_REF}...${CURRENT_SHA}"
+          elif [[ "$PUSH_BEFORE" =~ ^0+$ ]]; then
+            if [[ "$CURRENT_REF" == "refs/heads/dev" ]]; then
+              git diff --check "origin/main...${CURRENT_SHA}"
+            else
+              git diff --check --root "${CURRENT_SHA}"
+            fi
+          else
+            git diff --check "${PUSH_BEFORE}" "${CURRENT_SHA}"
+          fi
+
+  promote-dev-to-main:
+    name: promote dev to main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    needs: [backend-tests, ruff, mypy, diff-check]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: promote-dev-to-main
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Create or update the promotion pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TESTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          current_dev_sha="$(gh api "repos/${GH_REPO}/git/ref/heads/dev" --jq '.object.sha')"
+          if [[ "$current_dev_sha" != "$TESTED_SHA" ]]; then
+            echo "Skipping stale CI run: dev now points to ${current_dev_sha}, not ${TESTED_SHA}."
+            exit 0
+          fi
+
+          open_prs="$(gh pr list --repo "$GH_REPO" --base main --head dev --state open --json number --jq '.[].number')"
+          pr_numbers=()
+          if [[ -n "$open_prs" ]]; then
+            while IFS= read -r number; do
+              [[ -n "$number" ]] && pr_numbers+=("$number")
+            done <<< "$open_prs"
+          fi
+
+          if (( ${#pr_numbers[@]} > 1 )); then
+            echo "::error::Found more than one open PR from dev to main; resolve duplicates manually."
+            exit 1
+          fi
+
+          body_file="$RUNNER_TEMP/dev-to-main-pr-body.md"
+          cat > "$body_file" <<'EOF'
+          Automated promotion of the current `dev` branch tip to `main`.
+
+          This PR is created or updated only after the CI checks pass for a push to `dev`. The successful push checks are attached to the exact head commit. GitHub may place pull-request workflows created with `GITHUB_TOKEN` in an approval-required state, so the promotion relies on the passing checks for that same commit rather than assuming a new PR event will run immediately.
+
+          This workflow does not merge or deploy.
+          EOF
+
+          current_dev_sha="$(gh api "repos/${GH_REPO}/git/ref/heads/dev" --jq '.object.sha')"
+          if [[ "$current_dev_sha" != "$TESTED_SHA" ]]; then
+            echo "Skipping stale CI run: dev advanced before the promotion PR could be changed."
+            exit 0
+          fi
+
+          if (( ${#pr_numbers[@]} == 1 )); then
+            gh pr edit "${pr_numbers[0]}" --repo "$GH_REPO" \
+              --title "Promote dev to main" --body-file "$body_file"
+            echo "Updated promotion PR #${pr_numbers[0]}."
+          else
+            gh pr create --repo "$GH_REPO" --base main --head dev \
+              --title "Promote dev to main" --body-file "$body_file"
+          fi

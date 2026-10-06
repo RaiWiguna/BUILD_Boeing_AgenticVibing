@@ -3,7 +3,7 @@
 **Owner-role:** Frontend
 
 **Packet induk:** [frontend-replay-review.md](../../packages/frontend-replay-review.md)
-**Status:** TARGET / belum diimplementasikan sebagai deliverable task. Inspeksi statis: 4 Oktober 2026.
+**Status:** Partial implementation in source on 5 October 2026; frontend typecheck/build pass, while runtime, adapter QA, domain review, and operational validation are unverified.
 
 [Indeks task](../README.md) · [Shared contracts](../../shared-contracts.md). Penyempurnaan C-01–C-08 dan aturan ownership/test pada indeks berlaku; ini dokumentasi, bukan hasil runtime.
 
@@ -13,9 +13,9 @@ Menyediakan frontend yang dapat dibuild dengan typed port dan fixture mode ekspl
 
 ## 2. Kondisi saat ini dan batas pekerjaan
 
-**CURRENT_SOURCE:** main.tsx mengimpor App/styles yang tidak ditemukan; types.ts/api.ts ada, snapshot TS tidak punya layout/received/source/route lengkap. package scripts memakai Vite/tsc tetapi tooling belum dideklarasikan lengkap.
+**CURRENT_SOURCE (5 October 2026):** `main.tsx`, `App.tsx`, `styles.css`, typed frontend contracts, fixture replay adapter, and an API dashboard adapter exist. API dashboard requests the existing local `/health`, scenarios, sessions, snapshot, and events routes with runtime shape checks. Frontend typecheck and build passed; backend/runtime status has not been checked. Existing wire types now include layout, route, source, and receive-time fields.
 
-**TARGET:** Scaffold/tooling React/TS/Vite, read-model contracts, deterministic FixtureReplayReviewAdapter dan state union. Tidak mengimplementasikan detector/provider/database atau memberi opsi AI jalur command.
+**TARGET:** Buildable React/TS/Vite scaffold, read-model contracts, deterministic `FixtureReplayReviewAdapter`, explicit source-mode state, and direct API access through an adapter. Tidak mengimplementasikan detector/provider/database atau memberi opsi AI jalur command.
 
 ## 3. Context dan ownership
 
@@ -63,7 +63,7 @@ Buildable frontend shell, typed port dan mock adapter untuk UI tasks/tests; fixt
 
 ## 8. Test dan kriteria lulus
 
-QA-02/05 owns adapter behavior checks; build scripts existing tetapi belum dijalankan. Seluruh command berikut adalah TARGET setelah test/runner dibuat; tidak dijalankan dalam penyusunan dokumentasi ini.
+QA-02/05 owns adapter behavior checks. Build/typecheck commands were run for this implementation and their results are recorded in §9; the browser/adapter test commands below remain target checks and were not run.
 
 Tests mandiri (dependency luar memakai stub):
 
@@ -80,3 +80,10 @@ Integration checks (memerlukan implementation riil yang disebut pada §4):
 | Adapter parity | Same canonical public fixtures via FE-02 API | `python -m pytest tests/browser/test_adapter_parity.py` | Fixture/API menghasilkan semantik read-model sama dengan mode label berbeda. |
 
 Task memenuhi kriteria teknis ketika output §6 tersedia dan assertions relevan di atas lulus dengan bukti command/fixture/version. Stub pass dilaporkan terpisah dari integration/provider riil; tidak menyatakan fidelity mitra atau validasi operasional.
+
+## 9. Progress aktual — 5 Oktober 2026
+
+- **Source ada:** `App.tsx`/`styles.css`, typed contracts, deterministic fixture adapter, explicit `VITE_FLOWLENS_MODE`, and local API dashboard adapter are present. FE-02 adds replay API decoding/auth/reconnect; historical frame-at-time and assist route runtime support remain unavailable until the backend implements them.
+- **Build/typecheck:** `npm run typecheck` passed; `npm run build` passed with Vite 8.3.2 and emitted `frontend/dist/`.
+- **Runtime/API integration:** not run; backend process and API responses have not been observed.
+- **Tests, domain review, operational validation:** not run / not established.

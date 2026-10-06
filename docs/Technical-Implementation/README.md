@@ -1,6 +1,6 @@
 # Technical Implementation Blueprint ATC FlowLens
 
-Tanggal inspeksi: **3 Oktober 2026**. Paket ini dokumentasi untuk implementasi berikutnya; tidak membuat API, schema runtime, worker, fixture executable, atau UI. Mulai dari [shared contracts](shared-contracts.md), kemudian packet workstream masing-masing.
+Inspeksi arsitektur awal: **3 Oktober 2026**. Progress frontend terpisah: **5 Oktober 2026**. Mulai dari [shared contracts](shared-contracts.md), kemudian packet workstream masing-masing. FE-01 typecheck dan build lulus; hasil itu belum membuktikan runtime, API integration, atau test.
 
 Pecahan pekerjaan implementasi tersedia pada [indeks task BE/SD/AI/FE/QA](tasks/README.md), disusun dari packet dengan inspeksi statis 4 Oktober 2026. Setiap task memuat target, output, ownership, pendekatan implementasi, serta test dan kriteria lulus pada bagian terakhir; belum merupakan implementasi fitur.
 
@@ -27,10 +27,10 @@ Acuan target: [Rencana Teknis MVP](../Knowledge-Review/ATC_FlowLens_Rencana_Tekn
 | Detector | [detection.py](../../backend/detection.py): footprint, occupancy interval, rules, task complexity; lifecycle di session | Port observed-only, explicit layout/coverage dan hasil bertipe; tidak memakai future plans/benchmark labels |
 | Replay/archive | [storage.py](../../backend/storage.py), [review.py](../../backend/review.py), [reporting.py](../../backend/reporting.py): SQLite frames/checkpoints/receipts, review, branch, exports | Import replay vendor, source versions, kompatibilitas checkpoint, persistensi assist/reviewer terpisah belum ada |
 | AI | Tidak ditemukan modul ASR, assist entities/options, atau audio asset store di `backend/` | Worker offline terisolasi, reconciliation, evidence-linked options, append-only corrections |
-| Frontend | [types.ts](../../frontend/src/types.ts), [api.ts](../../frontend/src/api.ts), [main.tsx](../../frontend/src/main.tsx) ada | `App` dan `styles.css` yang diimpor belum ada; typed adapter, map/timeline/evidence review perlu dibuat |
-| Verifikasi | [pyproject.toml](../../pyproject.toml) menyebut pytest dan `tests`; direktori itu tidak ditemukan. `frontend/dist/index.html` tidak ditemukan | Contract/unit/integration/browser checks adalah pekerjaan target; belum dijalankan |
+| Frontend | FE-01 scaffold, typed contracts, fixture adapter, dan dashboard adapter tersedia. FE-02 menambah API replay adapter, runtime decoders, scoped credentials, review controls, dan source/assist subscription handling | Typecheck/build lulus; runtime belum diverifikasi. Historical frame-at-time dan replay/assist routes masih belum tersedia pada backend source; map/timeline/evidence review tetap FE-03–05 |
+| Verifikasi | FE-02 `npm run typecheck` dan `npm run build` lulus 5 Oktober, menghasilkan `frontend/dist/index.html` locally | Contract/adapter/browser tests, frontend runtime, dan backend/API integration belum dijalankan; hasil build ignored dan tidak di-commit |
 
-[Implementation Status](../IMPLEMENTATION_STATUS.md) tetap inventaris bertanggal. Pemeriksaan ini hanya statis. Tidak ada hasil build, startup, automated test, review ATCO, atau validasi operasional yang dibuat oleh tugas blueprint. Mitra, replay berizin, format vendor, dan ground truth mitra tetap `UNKNOWN`/belum dikonfirmasi per 3 Oktober 2026.
+[Implementation Status](../IMPLEMENTATION_STATUS.md) tetap inventaris bertanggal. FE-01/FE-02 source melewati `npm run typecheck` dan `npm run build` pada 5 Oktober; startup, API runtime, automated test, review ATCO, dan validasi operasional belum dilakukan. Mitra, replay berizin, format vendor, dan ground truth mitra tetap `UNKNOWN`/belum dikonfirmasi per 3 Oktober 2026.
 
 ## Peta paket dan deliverables
 

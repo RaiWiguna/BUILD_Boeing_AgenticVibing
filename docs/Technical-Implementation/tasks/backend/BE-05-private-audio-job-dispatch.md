@@ -3,7 +3,7 @@
 **Owner-role:** Backend/Replay
 
 **Packet induk:** [backend-session-replay-storage.md](../../packages/backend-session-replay-storage.md)
-**Status:** TARGET / belum diimplementasikan sebagai deliverable task. Inspeksi statis: 4 Oktober 2026.
+**Status:** SOURCE IMPLEMENTED pada 4 Oktober 2026; tujuh integration tests dan pemeriksaan scoped lulus (rincian §8). Belum terhubung ke process worker/provider AI; tidak ada audio mitra atau validasi operasional.
 
 [Indeks task](../README.md) · [Shared contracts](../../shared-contracts.md). Penyempurnaan C-01–C-08 dan aturan ownership/test pada indeks berlaku; ini dokumentasi, bukan hasil runtime.
 
@@ -13,9 +13,9 @@ Mendaftarkan audio replay privat dan mengantrekan typed worker job/attempt tanpa
 
 ## 2. Kondisi saat ini dan batas pekerjaan
 
-**CURRENT_SOURCE:** Tidak ditemukan AudioAsset/TranscriptionJob/worker dispatch di backend; runtime SQLite dimiliki server.
+**CURRENT_SOURCE setelah BE-05:** `backend/assist_service.py` dan `backend/assist_storage.py` menyediakan registrasi audio privat dan job/attempt di atas koneksi SQLite milik `Archive`. `backend/app.py` mengikat layanan dan routes tambahan. Belum ada provider/model AI atau worker process AI-02.
 
-**TARGET:** Audio registration/authorized playback, asset/job persistence, dispatch/cancel/timeout dengan stub worker. Tidak mencakup geometri/rule body, inferensi provider, UI, atau source live.
+**DELIVERED:** Registrasi PCM WAV untuk imported replay dengan source/timebase/coverage/provenance/permission metadata yang cocok; hash dihitung server; file opaque disimpan di private runtime directory; asset/job/attempt disimpan sebelum worker dispatch; playback dan status scoped; cancel/timeout/retry menjaga attempt aktif. Worker default/config yang tidak ada membuat job gagal dengan alasan aman. Tidak mencakup geometri/rule body, inferensi provider, UI, atau source live.
 
 ## 3. Context dan ownership
 
@@ -27,9 +27,9 @@ Mendaftarkan audio replay privat dan mengantrekan typed worker job/attempt tanpa
 
 **Existing yang dimiliki task:** `backend/app.py`
 
-**File baru usulan, belum ada:** `backend/assist_service.py`, `backend/assist_storage.py`
+**File baru pada deliverable ini:** `backend/assist_service.py`, `backend/assist_storage.py`
 
-Asset metadata DTO milik AI-01; BE owns file validation/job state/storage/transport. Inference worker milik AI-02/03. Tests/fixtures executable tetap milik QA; task ini menentukan perilaku yang harus diuji. App setelah BE-04; assist_service/storage edits berikut BE-06 lalu BE-07.
+Asset metadata DTO target milik AI-01; karena DTO itu belum tersedia, BE-05 memakai adapter lokal yang mengikuti SC-04. BE owns file validation/job state/storage/transport. Inference worker milik AI-02/03 dan belum terpasang. App setelah BE-04; assist_service/storage edits berikut BE-06 lalu BE-07. `tests/integration/test_be_05.py` dibuat untuk verifikasi task ini sesuai instruksi deliverable.
 
 ## 4. Kontrak dan dependency
 
@@ -43,11 +43,12 @@ Asset metadata DTO milik AI-01; BE owns file validation/job state/storage/transp
 
 ## 5. Pendekatan implementasi
 
-1. Validate asset/source relation dan usage metadata sebelum queue; hash server-side, simpan raw file di runtime/private-audio dengan opaque ID, tidak di dist/static.
-2. Persist asset+queued job+attempt atomik; job config/input hash/model version fixed C-05. Playback stream mengakses opaque ID sesudah token/scope validation, tanpa menerima path browser.
-3. Dispatch typed local queue request di luar lock clock; worker tidak mempunyai Archive/DB/token operator.
-4. Implement cancel/timeout/retry transitions SC-04 dan diagnostic safe; deadline menggunakan wall monotonic time, bukan sim_ms.
-5. File registration/cleanup failure tidak mengembalikan success palsu; cancelled/old attempt result nanti ditolak BE-06. Tanpa local model, job explicit unavailable; tidak cloud fallback.
+1. Multipart menerima field `audio` dan field string `metadata` JSON dengan field SC-04 selain ID/duration/hash/path server-owned. Metadata harus terikat pada source import, channel/coverage, timebase, provenance, usage profile, dan retention yang sama. Baseline memvalidasi PCM WAV 1–2 channel, sample width 1–4 byte, positive sample rate/duration, serta batas upload 64 MiB; codec lain belum didukung.
+2. Implementasi menghitung SHA-256, menulis file staging lalu rename ke ID opaque di `runtime/private-audio`, kemudian meng-commit asset, job, dan attempt pertama dalam satu transaksi pada koneksi `Archive.db`. Bila transaksi gagal, file dibersihkan; file/path tidak masuk respons publik.
+3. Worker port memakai `asyncio.to_thread` agar panggilan sync tidak menahan event loop/lock simulation. Request immutable berisi ID/attempt/asset, validated private file reference/hash, provider/model/config version, timebase dan alignment; tidak berisi DB, Archive, actor/token, checkpoint, simulator truth, command, atau production feed. Process-isolation/spawn queue tetap dependency AI-02 yang belum tersedia.
+4. `GET .../transcription-jobs/{job_id}` membaca status/attempt; `POST .../{job_id}/cancel` dan `POST .../{job_id}/retry` adalah endpoint additive pilihan BE-05. Retry hanya dari `failed`/`cancelled` dan membuat `attempt_id` baru. Deadline perlu `AssistJobConfig.timeout_s` eksplisit dan memakai injected monotonic clock, bukan `sim_ms`.
+5. Worker/config yang belum dikonfigurasi menghasilkan job `failed` dengan diagnostic aman `job_configuration_unavailable` atau `worker_unavailable`. Tidak ada cloud fallback, inference, transcript, atau candidate yang dibuat. Hash mismatch, exception worker, timeout, cancel, dan stale attempt memberi transisi aman; hanya hasil attempt aktif yang diterima.
+6. `GET .../audio-assets/{asset_id}/content` memeriksa source scope sebelum lookup asset dan memverifikasi hash; `source_read_token` dapat memakai route ini dan job status pada source terikat, namun tidak command, seat, import, branch, atau cancel/retry.
 
 ## 6. Output yang harus diserahkan
 
@@ -55,13 +56,13 @@ Private audio/job service dan storage, typed dispatch port, scoped playback dan 
 
 ## 7. Asumsi dan unknown
 
-**ASSUMPTION:** Baseline synthetic WAV/audio fixtures dan same-host multiprocessing queues; model provisioned sebelum inferensi riil.
+**ASSUMPTION:** Test baseline memakai WAV sintetik dan fake worker. Test adapter berjalan di thread melalui `asyncio.to_thread`; belum mengklaim process isolation atau multiprocessing queue.
 
-**UNKNOWN:** Actual model timeout/config/hardware; deadline adalah explicit job config, tanpa angka buatan. Pengembangan baseline memakai fixture/stub; tidak memalsukan fakta mitra atau hasil pengukuran.
+**UNKNOWN / batas tersisa:** AI-01 DTO dan AI-02 process queue belum tersedia; adapter BE bersifat lokal. Model/provider/config/hardware riil dan timeout production tidak tersedia; hanya injected test `AssistJobConfig.timeout_s` mengaktifkan dispatch. Format audio hanya PCM WAV dan limit 64 MiB. Tidak ada audio mitra, attestation permission operator yang independen, ASR, domain review, atau operational validation. Tujuh test menggunakan WAV fixture sintetik dan fake worker.
 
 ## 8. Test dan kriteria lulus
 
-QA-03 memiliki job/audio tests dengan worker stub. Seluruh command berikut adalah TARGET setelah test/runner dibuat; tidak dijalankan dalam penyusunan dokumentasi ini.
+BE-05 verification dijalankan pada 4 Oktober 2026 melalui test mandiri dengan `TestClient`, SQLite sementara, fake wall/monotonic clock, actor/token uji, WAV PCM sintetik, dan fake worker. Tidak memakai database runtime, operator credential nyata, audio mitra, atau model eksternal.
 
 Tests mandiri (dependency luar memakai stub):
 
@@ -77,4 +78,6 @@ Integration checks (memerlukan implementation riil yang disebut pada §4):
 |---|---|---|---|
 | Process worker | AI-02 process dan BE-06 sink | `python -m pytest tests/integration/test_worker_lifecycle.py` | Cancel/retry/late output tidak menggandakan commit atau mengubah source replay. |
 
-Task memenuhi kriteria teknis ketika output §6 tersedia dan assertions relevan di atas lulus dengan bukti command/fixture/version. Stub pass dilaporkan terpisah dari integration/provider riil; tidak menyatakan fidelity mitra atau validasi operasional.
+Hasil aktual: `python -m pytest tests/integration/test_be_05.py` — lulus, 7 tests; Ruff command di atas — lulus dengan pengecualian legacy `B008,UP041`; scoped mypy command di atas — lulus pada empat file dengan imported modules dilewati; `git diff --check` — exit 0 dengan notifikasi line-ending `backend/app.py`. Stub pass dilaporkan terpisah dari integration/provider riil.
+
+Process-worker check `python -m pytest tests/integration/test_worker_lifecycle.py` belum dijalankan karena AI-02 process worker dan BE-06 result sink belum tersedia. TestClient membuktikan runtime pada harness sementara saja; tidak ada build, deployment, provider inference, review domain, audio partner, atau validasi operasional yang dinyatakan berhasil.
