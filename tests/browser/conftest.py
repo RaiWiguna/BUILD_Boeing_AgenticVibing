@@ -48,15 +48,21 @@ def pytest_sessionstart(session: pytest.Session) -> None:
 
 
 def pytest_runtest_logreport(report: pytest.TestReport) -> None:
-    if report.when != "call":
+    # Setup skips/errors (for example, missing Vite) are real run outcomes and
+    # must be visible in the manifest just like call-phase results.
+    if report.when != "call" and not (report.when == "setup" and report.outcome in {"skipped", "failed"}):
         return
     marker = report.nodeid.split("::", 1)[0]
+    skip_reason = None
+    if report.skipped:
+        skip_reason = str(report.longrepr[-1]) if isinstance(report.longrepr, tuple) else str(report.longrepr)
     _REPORTS.append(
         {
             "test": report.nodeid,
             "outcome": report.outcome,
             "duration_s": round(report.duration, 3),
             "suite_file": Path(marker).name,
+            **({"skip_reason": skip_reason} if skip_reason else {}),
             **({"expected_failure": str(report.wasxfail)} if getattr(report, "wasxfail", None) else {}),
         }
     )
@@ -84,9 +90,14 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
             "playwright": playwright_version,
             "pytest": pytest_version,
             "browser": "Playwright Chromium (headless)",
-            "fixture_profile": "FE-05 authored inline fixture-1; no ASR/provider/partner/server result",
-            "qa01_canonical_fixture_bundle": "not present; F-COMM-01 used only as a documented target name",
-            "qa04_mock_stack_launcher": "not present; QA-05 launches isolated Vite/backend processes only for its own tests",
+            "fixture_profile": "FE-05 authored inline fixture-1 for UI checks; current API route check used public F-REPLAY-01 with a test-local normalized projection",
+            "qa01_public_fixture_data": "public synthetic replay inputs only; private fixtures and benchmark-manifest mapping are not read",
+            "qa04_mock_stack_launcher": "available in this checkout; browser flow requires frontend/node_modules/vite/bin/vite.js",
+            "node": "available" if shutil.which("node") else "unavailable",
+            "npm": "available" if shutil.which("npm") else "unavailable",
+            "vite_entry": "available" if VITE_ENTRY.is_file() else "missing",
+            "frontend_node_modules": FRONTEND_DIR.joinpath("node_modules").is_dir(),
+            "api_profile": "actual local backend source with temporary SQLite and throwaway operator key; separate from fixture/mock checks",
         },
         "screenshots": sorted(set(_SCREENSHOTS)),
         "tests": _REPORTS,
@@ -276,3 +287,25 @@ def screenshot(page: Page):
 
 def qa05_run_directory() -> Path:
     return _RUN_DIR
+
+
+@pytest.fixture(scope="session")
+def qa04_mock_stack() -> Any:
+    """Start the QA-04 public fixture/mock stack only when local Vite is installed."""
+    if not shutil.which("node") or not VITE_ENTRY.is_file():
+        pytest.skip("QA-04 browser flow not run: Node or frontend/node_modules/vite/bin/vite.js is unavailable")
+
+    from scripts.run_mock_stack import MockStackRuntime, load_fixture
+
+    profile = load_fixture("F-COMM-01", REPO_ROOT)
+    api_port = _available_port()
+    web_port = _available_port()
+    while web_port == api_port:
+        web_port = _available_port()
+    runtime = MockStackRuntime(profile, api_port=api_port, web_port=web_port)
+    try:
+        runtime.start_api()
+        runtime.start_frontend()
+        yield runtime
+    finally:
+        runtime.close()

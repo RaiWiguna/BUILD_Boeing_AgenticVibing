@@ -303,11 +303,25 @@ def _safe_copy(source: Path, destination: Path, root: Path) -> None:
 
 
 def _source_replay_status(root: Path) -> dict[str, str]:
+    qa01_manifest = root / "tests/fixtures/replay/manifest.json"
+    qa04_launcher = root / "scripts/run_mock_stack.py"
+    qa01_status = "unavailable"
+    if qa01_manifest.is_file():
+        qa01_status = (
+            "raw QA-01 F-REPLAY-01 bundle is present, but QA-05 direct import returned HTTP 422 "
+            "against the current strict normalized DTO; the QA-05 projection is not included"
+        )
+    launcher_status = "unavailable"
+    if qa04_launcher.is_file():
+        launcher_status = "mock-only launcher; not a canonical source replay runner and not included"
     return {
         "status": "unavailable",
-        "reason": "QA-01 canonical replay bundle and additive replay API are not available; this package profile is current synthetic training source only.",
-        "qa01_bundle": "unavailable",
-        "qa04_launcher": "unavailable",
+        "reason": (
+            "No normalized, cold-runnable canonical source replay profile is included: raw QA-01 "
+            "input is not accepted by the current strict import DTO and QA-04 provides only a mock stack."
+        ),
+        "qa01_bundle": qa01_status,
+        "qa04_launcher": launcher_status,
     }
 
 
@@ -379,7 +393,7 @@ def build_package(repository_root: str | Path, output: str | Path) -> dict[str, 
         readme = (
             "ATC FlowLens local synthetic training package\n"
             "Profile: FIXTURE/MOCK current source; NOT OPERATIONALLY VALIDATED.\n"
-            "AI status: unavailable. QA-01 canonical source replay bundle and QA-04 launcher are unavailable.\n"
+            "AI status: unavailable. QA-01 raw replay input is not accepted by the normalized profile; QA-04 launcher is mock-only and is not included.\n"
             "Install only from this package's local wheelhouse: python -m pip install --no-index --find-links wheelhouse -r requirements.lock\n"
             "Run from this directory with: python -m uvicorn backend.app:app --host 127.0.0.1 --port 8000\n"
             "Use local-only synthetic training. This package is not a source replay integration or LAN readiness result.\n"
@@ -477,7 +491,10 @@ def main(argv: list[str] | None = None) -> int:
         print("Offline package preflight failed:", file=sys.stderr)
         for problem in error.problems:
             print(f"- {problem}", file=sys.stderr)
-        print("- source replay status: unavailable (QA-01 canonical bundle and QA-04 launcher missing)", file=sys.stderr)
+        source_replay = _source_replay_status(REPOSITORY_ROOT)
+        print(f"- source replay status: {source_replay['status']} ({source_replay['reason']})", file=sys.stderr)
+        print(f"  QA-01 bundle: {source_replay['qa01_bundle']}", file=sys.stderr)
+        print(f"  QA-04 launcher: {source_replay['qa04_launcher']}", file=sys.stderr)
         print(f"- AI status: unavailable ({_ai_status(REPOSITORY_ROOT)['reason']})", file=sys.stderr)
         return 2
     print(json.dumps({

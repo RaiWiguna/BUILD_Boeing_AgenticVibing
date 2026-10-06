@@ -3,14 +3,14 @@
   "label": "FIXTURE/MOCK — current synthetic simulator and detector inputs; not an independent QA-01 oracle",
   "status": "frozen-plan; measurements are generated only when the performance suite runs",
   "source_dependencies": {
-    "qa01_canonical_bundle": "unavailable; scenario mapping below is authored QA-06 metadata based on the current source catalogue",
-    "qa04_launcher": "unavailable",
+    "qa01_canonical_bundle": "raw QA-01 F-REPLAY-01 present; strict normalized import unavailable (QA-05 direct import returned HTTP 422); mapping below remains authored QA-06 metadata, not canonical",
+    "qa04_launcher": "mock-only launcher available; not a canonical source replay runner and excluded from the QA-06 package allowlist",
     "current_source_catalogue": "backend/data/scenarios.json",
     "current_source_hashes": {
-      "backend/data/scenarios.json": "a39054db26e734bbcb02d84806e138c0a37479a0da95e365089894e8e3dacea8",
-      "backend/detection.py": "639ab1267fdb814b7ad447cc2062111f891e8b5ef0ab986b11f6de253ba118fe",
-      "backend/simulator.py": "ff7a9572f4dce5bcc1143c6b3d0571e5b7924057cc45cab4078b2485905f57de",
-      "backend/models.py": "7657272f681d62e247e6f2dab873f32ca2a67f6559a00d19f19cb7ec83b8baf1"
+      "backend/data/scenarios.json": "253f6dcd10280e717a08ade9166bb5271967ac5d2c4149cc1cfc232e5aa0bec8",
+      "backend/detection.py": "7a6cfb8d621a87b417c7ac8059894615c59cc5deda3d2fdba1498621d301deef",
+      "backend/simulator.py": "8f1f24dfe13946cc15b8f776d1154630ea9315cc25f5260a8aca10d2ea15bfc9",
+      "backend/models.py": "3d4a412c4104e1ffa3930d7f5381100944fbc3646737059fc5d917137f47b3cb"
     }
   },
   "methodology": {

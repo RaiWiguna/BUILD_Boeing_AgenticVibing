@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { ApiRequestError, isAbortError } from '../../api'
 import type { AsyncState, EvidenceRef, EvidenceResolution, ReplayFrameReadModel, ReplayReviewAdapter } from '../../contracts/replayReview'
 
+const EMPTY_ALERTS: NonNullable<ReplayFrameReadModel['snapshot']>['alerts'] = []
+
 function evidenceKey(ref: EvidenceRef): string {
   return `${ref.kind}:${ref.id}`
 }
@@ -25,7 +27,7 @@ export function AlertEvidence({ adapter, sourceSessionId, frame, selectedRef = n
   selectedRef?: EvidenceRef | null
   onSelectEvidence?: (ref: EvidenceRef) => void
 }) {
-  const alerts = frame?.snapshot?.alerts ?? []
+  const alerts = frame?.snapshot?.alerts ?? EMPTY_ALERTS
   const refs = useMemo(() => {
     const unique = new Map<string, EvidenceRef>()
     for (const alert of alerts) {

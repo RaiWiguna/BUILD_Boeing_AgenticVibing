@@ -145,7 +145,13 @@ def _benchmark(tmp_path: Path) -> dict[str, Any]:
                 detector_ms = (time.perf_counter_ns() - detector_started) / 1_000_000
 
                 session_id = f"QA06-{run['run_id']}"
+                metadata = {
+                    "source_profile": "synthetic-fixture-mock",
+                    "scenario_id": run["source_scenario_id"],
+                    "seed": run["seed"],
+                }
                 public = {
+                    "metadata": metadata,
                     "sim_ms": context["sim_ms"],
                     "sequence": 1,
                     "source_profile": "synthetic-fixture-mock",
@@ -161,11 +167,7 @@ def _benchmark(tmp_path: Path) -> dict[str, Any]:
                     "message": "Authored synthetic benchmark observation; not partner or server data.",
                 }
                 persist_started = time.perf_counter_ns()
-                archive.create(session_id, {
-                    "source_profile": "synthetic-fixture-mock",
-                    "scenario_id": run["source_scenario_id"],
-                    "seed": run["seed"],
-                })
+                archive.create(session_id, metadata)
                 archive.save(session_id, "READY", [event], public, {})
                 persistence_ms = (time.perf_counter_ns() - persist_started) / 1_000_000
 
@@ -242,8 +244,8 @@ def _benchmark(tmp_path: Path) -> dict[str, Any]:
                 "scope": "current Archive.create plus Archive.save of one synthetic public frame/event per run; not backup/recovery",
                 "persisted_row_counts": persisted_counts,
             },
-            "api_delivery_render": {"status": "unavailable", "reason": "No additive source replay API/QA-04 launcher; browser render timing is not measured by this suite."},
-            "reconnect": {"status": "not_run", "reason": "Source replay stream integration is unavailable."},
+            "api_delivery_render": {"status": "unavailable", "reason": "The raw QA-01 bundle is rejected by the strict normalized import DTO; QA-04 is mock-only, and browser render timing is not measured by this suite."},
+            "reconnect": {"status": "not_run", "reason": "No canonical source replay UI/stream runner is available; QA-04 mock reconnect behavior is not a source replay performance measurement."},
             "synchronization_lan": {"status": "not_run", "reason": "Only one localhost process; no LAN or second machine."},
             "endurance_30m": {"status": "not_run", "reason": "No integrated source replay runtime; no 30-minute session was run."},
             "provider_ai_asr": {"status": "unavailable", "reason": "No provisioned provider/model assets; no provider metrics reported."},
@@ -277,8 +279,10 @@ def test_benchmark_manifest_freezes_all_strata_and_seed_parameters() -> None:
     assert {row["source_scenario_id"] for row in MANIFEST["scenarios"]} == set(CATALOGUE)
     for relative, expected_hash in MANIFEST["source_dependencies"]["current_source_hashes"].items():
         assert _sha256(REPOSITORY_ROOT / relative) == expected_hash
-    assert MANIFEST["source_dependencies"]["qa01_canonical_bundle"].startswith("unavailable")
-    assert MANIFEST["source_dependencies"]["qa04_launcher"] == "unavailable"
+    assert MANIFEST["source_dependencies"]["qa01_canonical_bundle"].startswith(
+        "raw QA-01 F-REPLAY-01 present; strict normalized import unavailable"
+    )
+    assert MANIFEST["source_dependencies"]["qa04_launcher"].startswith("mock-only launcher")
 
 
 def test_current_source_benchmark_measures_all_100_runs_and_persists_evidence(tmp_path: Path) -> None:
