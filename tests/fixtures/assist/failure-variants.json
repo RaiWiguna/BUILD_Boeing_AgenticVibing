@@ -1,0 +1,20 @@
+{
+  "schema_version": "qa01-assist-failure-input-1",
+  "fixture_version": "qa01-2026-10-06.1",
+  "bundle_id": "F-AI-FAIL-01",
+  "label": "SYNTHETIC / NOT OPERATIONALLY VALIDATED",
+  "provider_state": "unavailable",
+  "audio_bytes_available": false,
+  "cases": [
+    {"id":"no-speech","input_kind":"authored_metadata_only","audio_ref":null,"expected_job_state":"needs-review","transcript_segments":[],"confidence":null,"label":"No audio supplied; this is a state fixture, not a measured no-speech clip."},
+    {"id":"null-confidence","input_kind":"transcript_stub","segment_id":"SEG-FAIL-NULL-001","speaker_confidence":null,"asr_confidence":null,"expected_interpretation":"unknown_not_zero"},
+    {"id":"clipped-placeholder","input_kind":"text_placeholder","text":"[clipped synthetic placeholder]","audio_ref":null,"expected_interpretation":"review_required"},
+    {"id":"overlap-placeholder","input_kind":"text_placeholder","text":"[overlap synthetic placeholder]","audio_ref":null,"expected_interpretation":"speaker_unknown"},
+    {"id":"code-switch-placeholder","input_kind":"text_placeholder","text":"[code-switching synthetic placeholder]","audio_ref":null,"expected_interpretation":"language_or_alignment_unknown"},
+    {"id":"unknown-alignment","input_kind":"unmapped-time","source_time":{"value":null,"unit":"ms","clock":"unknown"},"alignment_status":"unknown","expected_session_timestamp_ms":null},
+    {"id":"worker-timeout","job_id":"JOB-SYN-001","attempt_id":"ATTEMPT-SYN-001","status":"failed","error_code":"provider_unavailable","late_result_commit_allowed":false},
+    {"id":"worker-cancelled-late-result","job_id":"JOB-SYN-002","attempt_id":"ATTEMPT-SYN-001","status":"cancelled","late_result_commit_allowed":false,"retry_attempt_id":"ATTEMPT-SYN-002"},
+    {"id":"worker-duplicate-attempt","job_id":"JOB-SYN-003","attempt_id":"ATTEMPT-SYN-001","duplicate_result_commit_count_expected":1}
+  ],
+  "warning": "No audio clips, ASR, diarization, provider/model output, or quality metrics are present in these placeholder fixtures."
+}

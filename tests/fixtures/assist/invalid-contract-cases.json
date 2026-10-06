@@ -1,0 +1,12 @@
+{
+  "schema_version": "qa01-invalid-input-1",
+  "fixture_version": "qa01-2026-10-06.1",
+  "bundle_id": "F-INVALID-01",
+  "label": "SYNTHETIC / NOT OPERATIONALLY VALIDATED; intentional negative fixtures, excluded from valid payload sets.",
+  "cases": [
+    {"id":"dangling-evidence-reference","target":"AdvisoryOptionCandidate.supporting_evidence_ids","value":[{"kind":"session_event","id":"EVT-NOT-IN-BUNDLE"}],"expected_validation":"reject_or_report_unresolved_out_of_scope_reference"},
+    {"id":"unexpected-action-field","target":"AdvisoryOptionCandidate","value":{"id":"OPT-INVALID-01","replay_analysis_id":"AN-SYN-01","option_statement":"invalid fixture","rationale":"extra action field is deliberate","supporting_evidence_ids":[{"kind":"transcript_segment","id":"SEG-TWR-006"}],"preconditions":[],"unknowns":[],"source_version":"synthetic-fixture-1","model_version":"stub-mock-1","rule_version":"reconcile-fixture-1","review_status":"unresolved","command":{"type":"CLEARANCE","target":"ARFF-2"}},"expected_validation":"reject_extra_action_field"},
+    {"id":"ambiguous-untyped-evidence","target":"AdvisoryOptionCandidate.supporting_evidence_ids","value":["EVT-CLR-021"],"expected_validation":"reject_untyped_reference"},
+    {"id":"unaligned-precise-time","target":"TranscriptSegment.timebase","value":{"alignment_status":"unknown","start_ms":72400,"end_ms":73600},"expected_validation":"reject_false_precision_or_mark_unresolved"}
+  ]
+}

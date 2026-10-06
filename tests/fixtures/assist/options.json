@@ -1,0 +1,12 @@
+{
+  "schema_version": "assist-1",
+  "fixture_version": "qa01-2026-10-06.1",
+  "source_session_id": "SYN-COMM-01",
+  "replay_analysis_id": "AN-SYN-01",
+  "audience": "evaluator_only_replay_fixture",
+  "label": "SYNTHETIC / NOT OPERATIONALLY VALIDATED",
+  "options": [
+    {"id":"OPT-SYN-01","replay_analysis_id":"AN-SYN-01","option_statement":"Evaluator may replay the cited segment and compare it with the available structured event timeline before recording a review decision.","rationale":"The only transcript is a stub/mock and the event links are fixture evidence references; no operational conclusion is encoded.","supporting_evidence_ids":[{"kind":"transcript_segment","id":"SEG-TWR-006"},{"kind":"session_event","id":"EVT-CLR-021"},{"kind":"session_event","id":"EVT-TRK-088"}],"preconditions":["Offline synthetic replay fixture.","Evaluator access to this source bundle."],"unknowns":["No audio bytes, ASR result, or provider model is available.","The stub does not resolve negation or establish phraseology.","The fixture does not establish operational applicability."],"source_version":"synthetic-fixture-1","model_version":"stub-mock-1","rule_version":"reconcile-fixture-1","review_status":"unresolved"}
+  ],
+  "boundary": "Fixture DTO intentionally has no command, clearance, instruction_action, control_action, or execution payload. It is not an action path."
+}

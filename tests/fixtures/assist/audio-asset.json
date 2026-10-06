@@ -1,0 +1,21 @@
+{
+  "schema_version": "qa01-assist-asset-wrapper-1",
+  "fixture_version": "qa01-2026-10-06.1",
+  "label": "SYNTHETIC / NOT OPERATIONALLY VALIDATED; transcript stub/mock, not ASR",
+  "fixture_kind": "metadata_only_stub_no_audio_bytes",
+  "audio_bytes_available": false,
+  "asset": {
+    "id": "AUD-SYN-01",
+    "session_id": "SYN-COMM-01",
+    "source_kind": "synthetic_transcript_stub",
+    "source_ref": "no-audio-bytes-in-this-fixture",
+    "channel_id": "TWR",
+    "audio_start": 72000,
+    "timebase": {"source_clock":"SYN-COMM-01/audio-relative","source_unit":"ms","mapping_id":"tb-audio-syn-01","offset_ms":72000,"uncertainty_ms":0,"alignment_status":"aligned"},
+    "duration_ms": 4000,
+    "hash": null,
+    "provenance": {"owner":null,"version":"qa01-2026-10-06.1","derivation":"Metadata-only synthetic audio timeline for a text stub; no recording or waveform exists."},
+    "permission_profile": {"reference":"synthetic-local-fixture","purpose":"local fixture only","processing_scope":"text metadata only"},
+    "retention_until": null
+  }
+}

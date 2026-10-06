@@ -1,0 +1,18 @@
+{
+  "schema_version": "qa01-review-input-1",
+  "fixture_version": "qa01-2026-10-06.1",
+  "bundle_id": "F-REVIEW-01",
+  "source_session_id": "SYN-COMM-01",
+  "label": "SYNTHETIC / NOT OPERATIONALLY VALIDATED",
+  "raw_result_is_immutable": true,
+  "cases": [
+    {"id":"confirm-highlight","target_id":"HL-004","decision":"confirmed","reviewer":"fixture-evaluator-1","timestamp":"fixture-time-not-wall-clock","expected_revision":1},
+    {"id":"dismiss-highlight","target_id":"HL-004","decision":"dismissed","reviewer":"fixture-evaluator-1","timestamp":"fixture-time-not-wall-clock","expected_revision":1},
+    {"id":"unresolved-highlight","target_id":"HL-004","decision":"unresolved","reviewer":"fixture-evaluator-1","timestamp":"fixture-time-not-wall-clock","reason":"Stub evidence cannot resolve the candidate.","expected_revision":1},
+    {"id":"corrected-transcript-revision","target_id":"SEG-TWR-006","decision":"corrected","reviewer":"fixture-evaluator-1","timestamp":"fixture-time-not-wall-clock","correction":"[authored correction placeholder; not a transcript truth label]","basis_revision":"raw-1","expected_revision":1},
+    {"id":"stale-revision","target_id":"SEG-TWR-006","decision":"confirmed","reviewer":"fixture-evaluator-1","timestamp":"fixture-time-not-wall-clock","expected_revision":0,"expected_result":"conflict_no_append"},
+    {"id":"same-request-retry","request_id":"REQ-SYN-001","expected_revision":1,"body_digest":"authored-body-A","retry_count":2,"expected_committed_receipts":1},
+    {"id":"same-request-different-body","request_id":"REQ-SYN-001","expected_revision":1,"body_digest":"authored-body-B","expected_result":"conflict_no_append"}
+  ],
+  "warning": "Reviewer labels and timestamps are fixture-only; they do not represent an actual evaluator, correction, or review event."
+}
