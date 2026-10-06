@@ -18,16 +18,20 @@ import type {
   ApiSnapshotWire,
 } from '../contracts/apiWire'
 import type {
+  AudioAlignmentReadModel,
+  AudioAssetReadModel,
+  AssistReviewReadModel,
   AssistHighlightReadModel,
   AssistUpdateReadModel,
   CandidateReadModel,
   EventPageReadModel,
-  EventReadModel,
   EvidenceRef,
   EvidenceResolution,
   ReplayFrameReadModel,
   ReplayReviewAdapter,
   ReplaySourceReadModel,
+  ReviewOpenResult,
+  ReviewSpeed,
   ReviewControl,
   ReviewReceipt,
   SubscriptionState,
@@ -38,8 +42,9 @@ import {
   decodeApiEventPage,
   decodeApiSnapshot,
   decodeCandidatePage,
+  decodeHighlightPage,
   decodeControlReceipt,
-  decodeEvidenceResolution,
+  decodeEvidenceResolutions,
   decodeReviewReceipt,
   decodeReplayFrame,
   decodeSession,
@@ -59,6 +64,8 @@ export interface ScopedApiCredential {
 export interface ScopedApiCredentials {
   source_read?: ScopedApiCredential
   review_control?: ScopedApiCredential
+  source_review?: ScopedApiCredential
+  /** Evaluator-scoped assist read capability; never used for transcript correction writes. */
   reviewer?: ScopedApiCredential
 }
 
@@ -77,7 +84,7 @@ export interface ApiReplayReviewAdapterOptions {
   reconnect_max_ms?: number
 }
 
-type CredentialName = 'source_read' | 'review_control' | 'reviewer'
+type CredentialName = 'source_read' | 'review_control' | 'source_review' | 'reviewer'
 
 interface SubscriptionBase {
   active: boolean
@@ -116,13 +123,15 @@ let requestCounter = 0
 
 export class ApiReplayReviewAdapter extends ApiDashboardAdapter implements ReplayReviewAdapter {
   readonly mode = 'api' as const
+  readonly supported_speeds: readonly ReviewSpeed[] = [0.5, 1, 2, 4]
   private readonly transport: ApiTransport
   private readonly websocketOrigin?: string
   private readonly reconnectMinMs: number
   private readonly reconnectMaxMs: number
   private readonly replayAssistProfile: boolean
   private credentials: ScopedApiCredentials
-  private readonly sourceScope?: ApiReplayScope
+  private sourceScope?: ApiReplayScope
+  private readonly audioUrlsBySource = new Map<string, Set<string>>()
   private readonly sourceSubscriptions = new Set<SourceSubscription>()
   private readonly assistSubscriptions = new Set<AssistSubscription>()
   private readonly sourceByListener = new Map<(frame: ReplayFrameReadModel | null) => void, SourceSubscription>()
@@ -145,6 +154,7 @@ export class ApiReplayReviewAdapter extends ApiDashboardAdapter implements Repla
   setCredentials(credentials: ScopedApiCredentials): void {
     const changed = credentialChanged(this.credentials.source_read, credentials.source_read)
       || credentialChanged(this.credentials.review_control, credentials.review_control)
+      || credentialChanged(this.credentials.source_review, credentials.source_review)
       || credentialChanged(this.credentials.reviewer, credentials.reviewer)
     this.credentials = credentials
     if (changed) this.stopAllSubscriptions('Credentials changed; reopen the replay subscriptions.', 'disconnected')
@@ -153,12 +163,34 @@ export class ApiReplayReviewAdapter extends ApiDashboardAdapter implements Repla
   clearCredentials(): void {
     this.stopAllSubscriptions('Replay credentials were cleared.', 'unauthorized')
     this.credentials = {}
+    this.sourceScope = undefined
+    this.releaseAllAudioUrls()
   }
 
   dispose(): void {
     this.stopAllSubscriptions('Replay adapter was disposed.', 'disconnected')
     this.credentials = {}
     this.activeSourceId = null
+    this.sourceScope = undefined
+    this.releaseAllAudioUrls()
+  }
+
+  async openReview(sourceSessionId: string, operatorToken: string, signal?: AbortSignal): Promise<ReviewOpenResult> {
+    if (!sourceSessionId || !operatorToken) throw invalidInput('A source session and operator credential are required to open a review.')
+    this.activateSource(sourceSessionId)
+    const opened = await this.scopedRequest('review_control', `/api/v1/sessions/${encodeURIComponent(sourceSessionId)}/reviews`, decodeOpenedReview, {
+      method: 'POST', token: operatorToken, signal,
+    })
+    if (opened.source_id !== sourceSessionId) throw unsupported('Opened review belongs to a different source session.')
+    this.sourceScope = { source_session_id: sourceSessionId, review_session_id: opened.id }
+    this.credentials = {
+      ...this.credentials,
+      ...(opened.source_read_token ? { source_read: { token: opened.source_read_token } } : {}),
+      review_control: { token: opened.token },
+      // The operator credential remains a separate source-review capability; it is never sent as source_read.
+      source_review: { token: operatorToken },
+    }
+    return { status: 'accepted', review_session_id: opened.id }
   }
 
   async loadSource(sourceSessionId: string, signal?: AbortSignal): Promise<ReplaySourceReadModel> {
@@ -242,13 +274,13 @@ export class ApiReplayReviewAdapter extends ApiDashboardAdapter implements Repla
     if (untilMs !== undefined && (!Number.isSafeInteger(untilMs) || untilMs < 0)) throw invalidInput('Transcript cutoff must be a nonnegative integer in session milliseconds.')
     if (!this.replayAssistProfile) return { state: 'unavailable', items: [], next_cursor: cursor }
 
-    const token = this.requireCredential('reviewer')
+    const token = this.requireCredential('source_read')
     const query = new URLSearchParams()
     if (cursor !== null) query.set('cursor', cursor)
     if (untilMs !== undefined) query.set('until_ms', String(untilMs))
     const suffix = query.size ? `?${query.toString()}` : ''
     try {
-      const page = await this.scopedRequest('reviewer', `/api/v1/sessions/${encodeURIComponent(sourceSessionId)}/transcripts${suffix}`, decodeTranscriptPage, {
+      const page = await this.scopedRequest('source_read', `/api/v1/sessions/${encodeURIComponent(sourceSessionId)}/transcripts${suffix}`, decodeTranscriptPage, {
         token,
         signal,
       })
@@ -259,31 +291,138 @@ export class ApiReplayReviewAdapter extends ApiDashboardAdapter implements Repla
     }
   }
 
-  async resolveEvidence(sourceSessionId: string, refs: EvidenceRef[], untilMs?: number, signal?: AbortSignal): Promise<EvidenceResolution[]> {
+  async loadAssistReview(sourceSessionId: string, analysisId?: string, signal?: AbortSignal): Promise<AssistReviewReadModel> {
     this.activateSource(sourceSessionId)
     this.assertSourceScope(sourceSessionId)
-    const eventRefs = refs.filter((ref) => ref.kind === 'session_event')
-    let eventById = new Map<string, EventReadModel>()
-    if (eventRefs.length > 0) {
-      const page = await this.listEvents(sourceSessionId, 0, untilMs, signal)
-      eventById = new Map(page.items.map((event) => [event.id, event]))
-    }
-    return refs.map((ref) => {
-      if (ref.kind !== 'session_event') {
-        const unresolved = decodeEvidenceResolution({ ref, state: 'unresolved' })
-        return { ref: unresolved.ref, state: 'unavailable' }
+    if (!this.replayAssistProfile) {
+      return {
+        state: 'unavailable',
+        message: 'The inspected backend has no transcript, highlight, candidate, or assist-stream routes for this replay profile.',
+        provider_availability: 'unknown',
+        evaluator_access: 'unknown', highlights: [],
+        candidates: { state: 'unavailable', evaluator_access: 'unknown', message: 'Evaluator options are unavailable from the current API.', items: [] },
+        review_annotations: [], jobs: [], analysis: null,
       }
-      const event = eventById.get(ref.id)
-      return event
-        ? decodeEvidenceResolution({ ref, state: 'resolved', summary: `${event.type}: ${event.message}` })
-        : decodeEvidenceResolution({ ref, state: 'unresolved' })
-    })
+    }
+
+    const token = this.requireCredential('reviewer')
+    const query = analysisId ? `?analysis_id=${encodeURIComponent(analysisId)}` : ''
+    try {
+      const highlights = await this.scopedRequest('reviewer', `/api/v1/sessions/${encodeURIComponent(sourceSessionId)}/highlights${query}`, decodeHighlightPage, { token, signal })
+      const candidates = analysisId
+        ? await this.listCandidates(sourceSessionId, analysisId, signal)
+        : { state: 'unavailable' as const, evaluator_access: 'unknown' as const, message: 'No immutable replay analysis ID was supplied by the backend.', items: [] }
+      return {
+        state: highlights.length > 0 || candidates.state === 'ready' ? 'ready' : 'empty',
+        provider_availability: 'unknown',
+        evaluator_access: candidates.state === 'ready' || highlights.length > 0 ? 'granted' : 'unknown',
+        highlights,
+        candidates,
+        review_annotations: [],
+        jobs: [],
+        analysis: candidates.analysis ?? null,
+      }
+    } catch (error) {
+      if (isMissingProfileRoute(error)) {
+        return {
+          state: 'unavailable', message: 'The backend does not implement the scoped assist review routes.',
+          provider_availability: 'unknown',
+          evaluator_access: 'unknown', highlights: [],
+          candidates: { state: 'unavailable', evaluator_access: 'unknown', message: 'Evaluator options are unavailable from the current API.', items: [] },
+          review_annotations: [], jobs: [], analysis: null,
+        }
+      }
+      throw error
+    }
+  }
+
+  async loadAudioAsset(sourceSessionId: string, assetId?: string, signal?: AbortSignal): Promise<AudioAssetReadModel> {
+    this.activateSource(sourceSessionId)
+    this.assertSourceScope(sourceSessionId)
+    if (!this.replayAssistProfile) return { state: 'unavailable', ...(assetId ? { asset_id: assetId } : {}), message: 'The inspected backend has no private audio asset route or source-read profile.' }
+    if (!assetId) return { state: 'unavailable', message: 'No audio asset identity is available for this source.' }
+    const token = this.requireCredential('source_read')
+    const path = `/api/v1/sessions/${encodeURIComponent(sourceSessionId)}/audio-assets/${encodeURIComponent(assetId)}/content`
+    let response: Response
+    try {
+      response = await this.transport.request(path, {
+        method: 'GET',
+        headers: { Accept: 'audio/*', Authorization: `Bearer ${token}` },
+        signal,
+      })
+    } catch (error) {
+      if (isAbortError(error)) throw error
+      throw new ApiRequestError('disconnected', 'Could not reach the local API for the audio asset.', null, 'network')
+    }
+    if (response.status === 404) return { state: 'unavailable', asset_id: assetId, message: 'The backend does not expose this audio asset route or asset.' }
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        this.expireCredential('source_read')
+        throw new ApiRequestError('unauthorized', 'Source-read access is unavailable for this audio asset.', response.status, response.status === 401 ? 'unauthorized' : 'forbidden')
+      }
+      if (response.status === 409) throw new ApiRequestError('conflict', 'The audio asset source scope changed.', 409, 'conflict')
+      if (response.status === 503) throw new ApiRequestError('error', 'The audio asset service is unavailable.', 503, 'service_unavailable')
+      throw new ApiRequestError('error', `The audio asset request failed with HTTP ${response.status}.`, response.status, 'http_error')
+    }
+    const blob = await response.blob()
+    const mimeType = response.headers.get('Content-Type')?.split(';', 1)[0]?.trim() || blob.type
+    if (!mimeType.startsWith('audio/')) throw unsupported('The audio asset response did not declare an audio media type.')
+    const objectUrl = URL.createObjectURL(blob)
+    const urls = this.audioUrlsBySource.get(sourceSessionId) ?? new Set<string>()
+    urls.add(objectUrl)
+    this.audioUrlsBySource.set(sourceSessionId, urls)
+    let released = false
+    return {
+      state: 'ready', source_session_id: sourceSessionId, asset_id: assetId, object_url: objectUrl,
+      mime_type: mimeType, duration_ms: null,
+      alignment: { state: 'unknown', reason: 'The current audio content route does not provide a source-to-session time mapping.' },
+      release: () => {
+        if (released) return
+        released = true
+        URL.revokeObjectURL(objectUrl)
+        const sourceUrls = this.audioUrlsBySource.get(sourceSessionId)
+        sourceUrls?.delete(objectUrl)
+        if (sourceUrls?.size === 0) this.audioUrlsBySource.delete(sourceSessionId)
+      },
+    }
+  }
+
+  sessionMsToAudioSeconds(alignment: AudioAlignmentReadModel, sessionMs: number): number | null {
+    if (alignment.state !== 'mapped' || !Number.isFinite(sessionMs) || sessionMs < 0) return null
+    const audioMs = sessionMs - alignment.offset_ms
+    return audioMs < 0 ? null : audioMs / 1000
+  }
+
+  audioSecondsToSessionMs(alignment: AudioAlignmentReadModel, audioSeconds: number): number | null {
+    if (alignment.state !== 'mapped' || !Number.isFinite(audioSeconds) || audioSeconds < 0) return null
+    const sessionMs = Math.round(audioSeconds * 1000 + alignment.offset_ms)
+    return Number.isSafeInteger(sessionMs) && sessionMs >= 0 ? sessionMs : null
+  }
+
+  async resolveEvidence(sourceSessionId: string, refs: EvidenceRef[], untilMs?: number, signal?: AbortSignal, analysisId?: string): Promise<EvidenceResolution[]> {
+    this.activateSource(sourceSessionId)
+    this.assertSourceScope(sourceSessionId)
+    if (!this.replayAssistProfile || !this.credentials.source_read?.token) {
+      return refs.map((ref) => ({ ref, state: 'unavailable' as const }))
+    }
+    const token = this.requireCredential('source_read')
+    let raw: EvidenceResolution[]
+    try {
+      raw = await this.scopedRequest('source_read', `/api/v1/sessions/${encodeURIComponent(sourceSessionId)}/evidence`, decodeEvidenceResolutions, {
+        method: 'POST', token, body: { refs, ...(untilMs === undefined ? {} : { until_ms: untilMs }), ...(analysisId === undefined ? {} : { analysis_id: analysisId }) }, signal,
+      })
+    } catch (error) {
+      if (isMissingProfileRoute(error)) return refs.map((ref) => ({ ref, state: 'unavailable' }))
+      throw error
+    }
+    const byRef = new Map(raw.map((item) => [`${item.ref.kind}:${item.ref.id}`, item]))
+    return refs.map((ref) => byRef.get(`${ref.kind}:${ref.id}`) ?? { ref, state: 'unresolved' })
   }
 
   async listCandidates(sourceSessionId: string, analysisId: string, signal?: AbortSignal): Promise<CandidateReadModel> {
     this.activateSource(sourceSessionId)
     this.assertSourceScope(sourceSessionId)
-    if (!this.replayAssistProfile) return { state: 'unavailable', items: [] }
+    if (!this.replayAssistProfile) return { state: 'unavailable', evaluator_access: 'unknown', items: [] }
     const token = this.requireCredential('reviewer')
     try {
       return await this.scopedRequest(
@@ -293,7 +432,7 @@ export class ApiReplayReviewAdapter extends ApiDashboardAdapter implements Repla
         { token, signal },
       )
     } catch (error) {
-      if (isMissingProfileRoute(error)) return { state: 'unavailable', items: [] }
+      if (isMissingProfileRoute(error)) return { state: 'unavailable', evaluator_access: 'unknown', items: [] }
       throw error
     }
   }
@@ -439,7 +578,7 @@ export class ApiReplayReviewAdapter extends ApiDashboardAdapter implements Repla
     if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) throw invalidInput('Expected transcript revision must be a nonnegative integer.')
     if (typeof text !== 'string') throw invalidInput('Transcript correction text must be a string.')
     requestId = validateRequestId(requestId)
-    const token = this.requireCredential('reviewer')
+    const token = this.requireCredential('source_review')
     return this.postReviewReceipt(
       `/api/v1/sessions/${encodeURIComponent(sourceSessionId)}/transcripts/${encodeURIComponent(segmentId)}/corrections`,
       { request_id: requestId, expected_revision: expectedRevision, text, reason },
@@ -463,7 +602,7 @@ export class ApiReplayReviewAdapter extends ApiDashboardAdapter implements Repla
     if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) throw invalidInput('Expected candidate revision must be a nonnegative integer.')
     if (!analysisId) throw unavailable('Candidate review requires its replay analysis ID.')
     requestId = validateRequestId(requestId)
-    const token = this.requireCredential('reviewer')
+    const token = this.requireCredential('source_review')
     return this.postReviewReceipt(
       `/api/v1/sessions/${encodeURIComponent(sourceSessionId)}/replay-analyses/${encodeURIComponent(analysisId)}/options/${encodeURIComponent(candidateId)}/review`,
       { request_id: requestId, expected_revision: expectedRevision, decision, reason },
@@ -472,13 +611,41 @@ export class ApiReplayReviewAdapter extends ApiDashboardAdapter implements Repla
     )
   }
 
+  async reviewHighlight(
+    sourceSessionId: string,
+    highlightId: string,
+    expectedRevision: number,
+    decision: 'confirmed' | 'dismissed' | 'unresolved',
+    reason = 'Reviewer decision',
+    requestId = makeRequestId('highlight-review'),
+  ): Promise<ReviewReceipt> {
+    this.activateSource(sourceSessionId)
+    this.assertSourceScope(sourceSessionId)
+    if (!this.replayAssistProfile) return unavailableReceipt('The current backend has no highlight review route.')
+    if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) throw invalidInput('Expected highlight revision must be a nonnegative integer.')
+    requestId = validateRequestId(requestId)
+    const token = this.requireCredential('source_review')
+    return this.postReviewReceipt(
+      `/api/v1/sessions/${encodeURIComponent(sourceSessionId)}/highlights/${encodeURIComponent(highlightId)}/review`,
+      { request_id: requestId, expected_revision: expectedRevision, decision, reason },
+      requestId,
+      token,
+    )
+  }
+
   private async postReviewReceipt(path: string, body: unknown, requestId: string, token: string): Promise<ReviewReceipt> {
     try {
-      const receipt: ApiReviewReceiptWire = await this.scopedRequest('reviewer', path, (value) => decodeReviewReceipt(value, requestId), {
+      const receipt: ApiReviewReceiptWire = await this.scopedRequest('source_review', path, (value) => decodeReviewReceipt(value, requestId), {
         method: 'POST', token, body,
       })
       if (receipt.request_id !== requestId) throw unsupported('Review receipt request_id does not match the submitted action.')
-      return receipt
+      return {
+        ...receipt,
+        authority: 'server',
+        ...(receipt.annotation ? { annotation: {
+          kind: 'review_annotation', ...receipt.annotation, session_ms: null,
+        } } : {}),
+      }
     } catch (error) {
       if (isMissingProfileRoute(error)) return unavailableReceipt('The backend does not implement this replay review route.')
       throw error
@@ -513,6 +680,9 @@ export class ApiReplayReviewAdapter extends ApiDashboardAdapter implements Repla
   private activateSource(sourceSessionId: string): void {
     if (this.activeSourceId !== null && this.activeSourceId !== sourceSessionId) {
       this.stopAllSubscriptions(`Source changed to ${sourceSessionId}; prior source projections were cleared.`, 'disconnected')
+      this.releaseAudioUrlsForSource(this.activeSourceId)
+      this.credentials = {}
+      this.sourceScope = undefined
     }
     this.activeSourceId = sourceSessionId
   }
@@ -896,6 +1066,35 @@ export class ApiReplayReviewAdapter extends ApiDashboardAdapter implements Repla
     for (const subscription of [...this.sourceSubscriptions]) this.stopSourceSubscription(subscription, message, state, true)
     for (const subscription of [...this.assistSubscriptions]) this.stopAssistSubscription(subscription, message, state, true)
   }
+
+  private releaseAudioUrlsForSource(sourceSessionId: string): void {
+    for (const url of this.audioUrlsBySource.get(sourceSessionId) ?? []) URL.revokeObjectURL(url)
+    this.audioUrlsBySource.delete(sourceSessionId)
+  }
+
+  private releaseAllAudioUrls(): void {
+    for (const sourceSessionId of this.audioUrlsBySource.keys()) this.releaseAudioUrlsForSource(sourceSessionId)
+  }
+}
+
+function decodeOpenedReview(value: unknown): { id: string; source_id: string; token: string; source_read_token?: string } {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) throw unsupported('The review response is not an object.')
+  const item = value as Record<string, unknown>
+  if (Object.keys(item).some((key) => !['id', 'source_id', 'token', 'source_read_token'].includes(key))) {
+    throw unsupported('The review response contains unsupported credential fields.')
+  }
+  if (typeof item.id !== 'string' || !item.id || typeof item.source_id !== 'string' || !item.source_id || typeof item.token !== 'string' || !item.token) {
+    throw unsupported('The review response omitted its identity or control credential.')
+  }
+  if (item.source_read_token !== undefined && (typeof item.source_read_token !== 'string' || !item.source_read_token)) {
+    throw unsupported('The review response contains an invalid source-read credential.')
+  }
+  return {
+    id: item.id,
+    source_id: item.source_id,
+    token: item.token,
+    ...(item.source_read_token === undefined ? {} : { source_read_token: item.source_read_token as string }),
+  }
 }
 
 function frameFromSnapshot(snapshot: ApiSnapshotWire, sourceSessionId: string, requestedMs: number): ReplayFrameReadModel {
@@ -915,9 +1114,11 @@ function frameFromSnapshot(snapshot: ApiSnapshotWire, sourceSessionId: string, r
 function candidateModelFromOptions(options: ApiOptionWire[]): CandidateReadModel {
   return {
     state: options.length ? 'ready' : 'empty',
+    evaluator_access: 'granted',
     items: options.map((option) => ({
       id: option.id,
       replay_analysis_id: option.replay_analysis_id,
+      revision: option.revision ?? null,
       statement: option.option_statement,
       rationale: option.rationale,
       supporting_evidence: option.supporting_evidence_ids,
@@ -934,6 +1135,7 @@ function candidateModelFromOptions(options: ApiOptionWire[]): CandidateReadModel
 function toHighlightReadModel(value: ApiHighlightWire): AssistHighlightReadModel {
   return {
     id: value.id,
+    revision: value.revision ?? null,
     category: value.category,
     review_priority: value.review_priority,
     statement: value.statement,
@@ -999,6 +1201,7 @@ function asMessage(error: unknown): string {
 function credentialLabel(name: CredentialName): string {
   if (name === 'source_read') return 'source-read'
   if (name === 'review_control') return 'review-control'
+  if (name === 'source_review') return 'source-review'
   return 'reviewer'
 }
 

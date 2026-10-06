@@ -112,6 +112,12 @@ export function RunwayMap({ frame, frameState }: { frame: ReplayFrameReadModel |
         <span className="map-frame-time">Frame {sessionTime(snapshot.sim_ms)}</span>
       </div>
 
+      {frameState.state === 'disconnected' && (
+        <p className="context-notice state-disconnected" role="status">
+          {frameState.message} The map retains this frame and applies no position extrapolation.
+        </p>
+      )}
+
       <div className="map-canvas-wrap">
         <svg className="runway-map-svg" viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`} role="img" aria-labelledby="runway-map-title runway-map-description">
           <title id="runway-map-title">{snapshot.layout.name} runway layout and track positions</title>

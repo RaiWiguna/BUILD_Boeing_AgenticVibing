@@ -193,6 +193,7 @@ export interface ApiEvidenceResolutionWire {
 
 export interface ApiHighlightWire {
   id: string
+  revision?: number
   category: string
   review_priority: string
   statement: string
@@ -209,6 +210,7 @@ export interface ApiHighlightWire {
 export interface ApiOptionWire {
   id: string
   replay_analysis_id: string
+  revision?: number
   option_statement: string
   rationale: string
   supporting_evidence_ids: ApiEvidenceRefWire[]
@@ -225,7 +227,7 @@ export interface ApiReviewAnnotationWire {
   target_id: string
   decision: 'corrected' | 'confirmed' | 'dismissed' | 'unresolved'
   reviewer: string
-  timestamp: number
+  timestamp: number | string
   revision?: number
   correction?: string | null
   reason?: string | null

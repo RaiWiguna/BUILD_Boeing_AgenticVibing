@@ -22,6 +22,7 @@ import type {
 } from '../contracts/apiWire'
 import type {
   BackendHealth,
+  AssistHighlightReadModel,
   CandidateReadModel,
   EventPageReadModel,
   EventReadModel,
@@ -29,6 +30,7 @@ import type {
   OperatorAccess,
   ReplayFrameReadModel,
   ReplaySnapshotReadModel,
+  ReviewAnnotationReadModel,
   ScenarioReadModel,
   SessionReadModel,
   SnapshotReadModel,
@@ -194,6 +196,7 @@ export function toReplaySnapshotReadModel(snapshot: ApiSnapshotWire): ReplaySnap
     sequence: snapshot.sequence,
     sim_ms: snapshot.sim_ms,
     playback_ms: snapshot.playback_ms ?? null,
+    ...(snapshot.review_end_ms === undefined ? {} : { review_end_ms: snapshot.review_end_ms }),
     revision: snapshot.revision,
     status: snapshot.status,
     speed: snapshot.speed,
@@ -214,6 +217,7 @@ export function toReplaySnapshotReadModel(snapshot: ApiSnapshotWire): ReplaySnap
     })),
     runway: snapshot.runway,
     acknowledgements: snapshot.acknowledgements,
+    review_annotations: (snapshot.review_annotations ?? []).map(toSnapshotReviewAnnotation),
     events: snapshot.events.map(toEventReadModel),
     event_count: snapshot.events.length,
     track_count: snapshot.tracks.length,
@@ -293,6 +297,8 @@ export function toTranscriptReadModel(page: ApiTranscriptPageWire): TranscriptRe
     asset_id: item.asset_id,
     start_ms: item.start_ms,
     end_ms: item.end_ms,
+    timebase: 'audio-relative' as const,
+    alignment_state: item.session_start_ms == null ? 'unknown' as const : 'mapped' as const,
     channel_id: item.channel_id,
     speaker_label: item.speaker_label,
     speaker_source: item.speaker_source,
@@ -303,12 +309,16 @@ export function toTranscriptReadModel(page: ApiTranscriptPageWire): TranscriptRe
     asr_confidence: item.asr_confidence,
     model_version: item.model_version,
     correction_status: item.correction_status,
-    revision: item.revision ?? 0,
+    revision: item.revision ?? null,
     ...(item.session_start_ms === undefined ? {} : { session_start_ms: item.session_start_ms }),
+    ...(item.session_start_ms == null ? {} : { session_end_ms: item.session_start_ms + (item.end_ms - item.start_ms) }),
   }))
   return {
     state: items.length ? 'ready' : 'empty',
     items,
+    ...(items.some((item) => item.session_start_ms == null)
+      ? { message: 'One or more transcript segments have no source-to-session mapping and remain audio-relative.' }
+      : {}),
     next_cursor: page.next_cursor,
     ...(page.job === undefined ? {} : { job: toJobReadModel(page.job) }),
   }
@@ -328,12 +338,68 @@ export function decodeEvidenceResolution(value: unknown): ApiEvidenceResolutionW
 }
 
 export function toEvidenceResolution(value: ApiEvidenceResolutionWire): EvidenceResolution {
-  return { ref: value.ref, state: value.state, ...(value.summary === undefined ? {} : { summary: value.summary }) }
+  const context = evidenceContext(value)
+  return {
+    ref: value.ref,
+    state: value.state,
+    ...(value.summary === undefined ? {} : { summary: value.summary }),
+    ...(context ? { context } : {}),
+  }
 }
 
 export function decodeEvidenceResolutions(value: unknown): EvidenceResolution[] {
-  const items = Array.isArray(value) ? value : array(object(value, 'evidence collection').items, 'evidence.items')
-  return items.map((item) => toEvidenceResolution(decodeEvidenceResolution(item)))
+  if (Array.isArray(value)) return value.map((item) => toEvidenceResolution(decodeEvidenceResolution(item)))
+  const collection = object(value, 'evidence collection')
+  assertAllowedKeys(collection, ['items', 'unresolved'], 'evidence collection')
+  const resolvedRows = array(collection.items, 'evidence.items').map((item) => toEvidenceResolution(decodeEvidenceResolution(item)))
+  const unresolvedRows = (collection.unresolved === undefined ? [] : array(collection.unresolved, 'evidence.unresolved')).map((item) => {
+    if (isRecord(item) && 'state' in item) return toEvidenceResolution(decodeEvidenceResolution(item))
+    return { ref: decodeEvidenceRef(item), state: 'unresolved' as const }
+  })
+  return [...resolvedRows, ...unresolvedRows]
+}
+
+function evidenceContext(value: ApiEvidenceResolutionWire): EvidenceResolution['context'] | undefined {
+  if (value.item === undefined || value.item === null || Array.isArray(value.item) || typeof value.item !== 'object') return undefined
+  const item = value.item as Record<string, JsonValue>
+  if (value.ref.kind === 'session_event') {
+    const at = typeof item.received_ms === 'number' ? item.received_ms : item.sim_ms
+    return typeof at === 'number' && Number.isSafeInteger(at) && at >= 0 ? { timebase: 'session', at_ms: at } : undefined
+  }
+  if (value.ref.kind === 'detector_alert') {
+    const at = typeof item.calculated_ms === 'number' ? item.calculated_ms : item.created_ms
+    return typeof at === 'number' && Number.isSafeInteger(at) && at >= 0 ? { timebase: 'session', at_ms: at } : undefined
+  }
+  if (typeof item.session_start_ms === 'number' && Number.isSafeInteger(item.session_start_ms) && item.session_start_ms >= 0) {
+    return { timebase: 'session', at_ms: item.session_start_ms }
+  }
+  if (typeof item.start_ms === 'number' && Number.isSafeInteger(item.start_ms) && item.start_ms >= 0 && typeof item.asset_id === 'string') {
+    return { timebase: 'audio-relative', asset_id: item.asset_id, at_ms: item.start_ms }
+  }
+  return { timebase: 'unknown', reason: 'Evidence item did not supply a session or audio-relative time.' }
+}
+
+export const decodeHighlightPage: Decoder<AssistHighlightReadModel[]> = (value) => {
+  const item = object(value, 'highlight collection')
+  assertAllowedKeys(item, ['items'], 'highlight collection')
+  return array(item.items, 'highlights.items').map((row) => {
+    const highlight = decodeHighlight(row)
+    return {
+      id: highlight.id,
+      revision: highlight.revision ?? null,
+      category: highlight.category,
+      review_priority: highlight.review_priority,
+      statement: highlight.statement,
+      transcript_segment_ids: highlight.transcript_segment_ids,
+      session_event_ids: highlight.session_event_ids,
+      uncertainty: highlight.uncertainty,
+      provider_version: highlight.provider_version,
+      rule_version: highlight.rule_version,
+      status: highlight.status,
+      ...(highlight.linked_alert_id === undefined ? {} : { linked_alert_id: highlight.linked_alert_id }),
+      ...(highlight.link_status === undefined ? {} : { link_status: highlight.link_status }),
+    }
+  })
 }
 
 export function decodeJob(value: unknown): ApiTranscriptionJobWire {
@@ -364,9 +430,11 @@ export const decodeCandidatePage: Decoder<CandidateReadModel> = (value) => {
   const options = array(item.items, 'options.items').map((row, index) => decodeOption(row, `options.items[${index}]`))
   return {
     state: options.length ? 'ready' : 'empty',
+    evaluator_access: 'granted',
     items: options.map((option) => ({
       id: option.id,
       replay_analysis_id: option.replay_analysis_id,
+      revision: option.revision ?? null,
       statement: option.option_statement,
       rationale: option.rationale,
       supporting_evidence: option.supporting_evidence_ids,
@@ -731,12 +799,13 @@ function decodeEvidenceRef(value: unknown): ApiEvidenceRefWire {
 
 function decodeHighlight(value: unknown): ApiHighlightWire {
   const item = object(value, 'assist highlight')
-  assertAllowedKeys(item, ['id', 'category', 'review_priority', 'statement', 'transcript_segment_ids', 'session_event_ids', 'uncertainty', 'provider_version', 'rule_version', 'status', 'linked_alert_id', 'link_status'], 'assist highlight')
+  assertAllowedKeys(item, ['id', 'revision', 'category', 'review_priority', 'statement', 'transcript_segment_ids', 'session_event_ids', 'uncertainty', 'provider_version', 'rule_version', 'status', 'linked_alert_id', 'link_status'], 'assist highlight')
   const linkStatus = item.link_status === undefined || item.link_status === null
     ? item.link_status
     : literal(item.link_status, ['linked', 'possible_link'], 'highlight.link_status')
   return {
     id: string(item.id, 'highlight.id'),
+    ...(item.revision === undefined ? {} : { revision: nonnegativeInteger(item.revision, 'highlight.revision') }),
     category: string(item.category, 'highlight.category'),
     review_priority: string(item.review_priority, 'highlight.review_priority'),
     statement: string(item.statement, 'highlight.statement'),
@@ -753,10 +822,11 @@ function decodeHighlight(value: unknown): ApiHighlightWire {
 
 function decodeOption(value: unknown, label: string): ApiOptionWire {
   const item = object(value, label)
-  assertAllowedKeys(item, ['id', 'replay_analysis_id', 'option_statement', 'rationale', 'supporting_evidence_ids', 'preconditions', 'unknowns', 'source_version', 'model_version', 'rule_version', 'review_status'], label)
+  assertAllowedKeys(item, ['id', 'replay_analysis_id', 'revision', 'option_statement', 'rationale', 'supporting_evidence_ids', 'preconditions', 'unknowns', 'source_version', 'model_version', 'rule_version', 'review_status'], label)
   return {
     id: string(item.id, `${label}.id`),
     replay_analysis_id: string(item.replay_analysis_id, `${label}.replay_analysis_id`),
+    ...(item.revision === undefined ? {} : { revision: nonnegativeInteger(item.revision, `${label}.revision`) }),
     option_statement: string(item.option_statement, `${label}.option_statement`),
     rationale: string(item.rationale, `${label}.rationale`),
     supporting_evidence_ids: array(item.supporting_evidence_ids, `${label}.supporting_evidence_ids`).map(decodeEvidenceRef),
@@ -772,15 +842,44 @@ function decodeOption(value: unknown, label: string): ApiOptionWire {
 function decodeReviewAnnotation(value: unknown): ApiReviewAnnotationWire {
   const item = object(value, 'review annotation')
   assertAllowedKeys(item, ['id', 'target_id', 'decision', 'reviewer', 'timestamp', 'revision', 'correction', 'reason'], 'review annotation')
+  const timestamp = item.timestamp
+  if (typeof timestamp !== 'number' && (typeof timestamp !== 'string' || !/^\d{4}-\d\d-\d\dT.*(?:Z|[+-]\d\d:\d\d)$/.test(timestamp) || !Number.isFinite(Date.parse(timestamp)))) {
+    fail('invalid_payload', 'annotation.timestamp must be a finite epoch value or an ISO-8601 timestamp with timezone.')
+  }
   return {
     ...(optionalString(item.id) === undefined ? {} : { id: optionalString(item.id) }),
     target_id: string(item.target_id, 'annotation.target_id'),
     decision: literal(item.decision, ['corrected', 'confirmed', 'dismissed', 'unresolved'], 'annotation.decision'),
     reviewer: string(item.reviewer, 'annotation.reviewer'),
-    timestamp: finiteNumber(item.timestamp, 'annotation.timestamp'),
+    timestamp: typeof timestamp === 'number' ? finiteNumber(timestamp, 'annotation.timestamp') : timestamp,
     ...(item.revision === undefined ? {} : { revision: nonnegativeInteger(item.revision, 'annotation.revision') }),
     ...(item.correction === undefined ? {} : { correction: nullableString(item.correction, 'annotation.correction') }),
     ...(item.reason === undefined ? {} : { reason: nullableString(item.reason, 'annotation.reason') }),
+  }
+}
+
+function toSnapshotReviewAnnotation(value: Record<string, JsonValue>): ReviewAnnotationReadModel {
+  const item = object(value, 'snapshot review annotation')
+  if ('decision' in item || 'target_id' in item) {
+    return {
+      kind: 'review_annotation',
+      ...decodeReviewAnnotation(item),
+      // Additive annotations carry audit time; no session-time mapping is supplied by this snapshot.
+      session_ms: null,
+    }
+  }
+
+  // CURRENT_SOURCE Review annotations are existing Assessment records. Preserve their own
+  // type/text/values and explicit review playhead without coercing them into C-05 decisions.
+  assertAllowedKeys(item, ['sim_ms', 'actor', 'type', 'text', 'values'], 'snapshot assessment annotation')
+  const assessmentType = literal(item.type, ['bookmark', 'recognition', 'answer', 'tlx', 'trainer_review'], 'annotation.type')
+  return {
+    kind: 'assessment',
+    assessment_type: assessmentType,
+    reviewer: string(item.actor, 'annotation.actor'),
+    session_ms: nonnegativeInteger(item.sim_ms, 'annotation.sim_ms'),
+    text: string(item.text, 'annotation.text'),
+    values: item.values === undefined ? {} : numberRecord(item.values, 'annotation.values'),
   }
 }
 

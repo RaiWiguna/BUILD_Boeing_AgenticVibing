@@ -1,4 +1,5 @@
 export type AdapterMode = 'fixture' | 'api'
+export type ReviewSpeed = 0.5 | 1 | 2 | 4
 
 export type UiState =
   | 'loading'
@@ -132,6 +133,7 @@ export interface ReplaySnapshotReadModel {
   sequence: number
   sim_ms: number
   playback_ms: number | null
+  review_end_ms?: number
   revision: number
   status: string
   speed: number
@@ -161,6 +163,7 @@ export interface ReplaySnapshotReadModel {
   alerts: Array<{ id: string; rule: string; objects: string[]; severity: string; reason: string; status: string; created_ms: number; calculated_ms: number; updated_ms?: number; data_degraded: boolean; metrics: Record<string, unknown>; evidence_event_ids: string[]; track_ages_ms: Record<string, number>; assumptions: string }>
   runway: { open: boolean; state: string; data_quality: string; observed_occupants: string[]; degraded_ids: string[] }
   acknowledgements: Array<{ alert_id: string; actor: string; sim_ms: number }>
+  review_annotations: ReviewAnnotationReadModel[]
   events: EventReadModel[]
   event_count: number
   track_count: number
@@ -194,6 +197,25 @@ export interface EvidenceResolution {
   ref: EvidenceRef
   state: 'resolved' | 'unresolved' | 'unavailable'
   summary?: string
+  link_status?: 'linked' | 'possible_link'
+  context?:
+    | { timebase: 'session'; at_ms: number }
+    | { timebase: 'audio-relative'; asset_id: string; at_ms: number }
+    | { timebase: 'unknown'; reason: string }
+}
+
+export interface AnalysisProvenanceReadModel {
+  id: string
+  source_session_id: string
+  kind: 'detector' | 'assist'
+  source_version: string | null
+  model_version: string | null
+  rule_version: string | null
+  input_hash: string | null
+  transcript_revision_basis: number | null
+  window_start_ms: number | null
+  window_end_ms: number | null
+  status: string
 }
 
 export interface TranscriptionJobReadModel {
@@ -212,11 +234,14 @@ export interface TranscriptionJobReadModel {
 
 export interface TranscriptReadModel {
   state: 'ready' | 'empty' | 'unavailable'
+  message?: string
   items: Array<{
     id: string
     asset_id?: string
     start_ms: number
     end_ms: number
+    timebase: 'audio-relative'
+    alignment_state: 'mapped' | 'unknown'
     channel_id?: string
     speaker_label?: string | null
     speaker_source?: string | null
@@ -227,8 +252,9 @@ export interface TranscriptReadModel {
     asr_confidence?: number | null
     model_version?: string | null
     correction_status?: string
-    revision: number
+    revision: number | null
     session_start_ms?: number | null
+    session_end_ms?: number | null
   }>
   next_cursor?: string | null
   job?: TranscriptionJobReadModel
@@ -236,9 +262,13 @@ export interface TranscriptReadModel {
 
 export interface CandidateReadModel {
   state: 'ready' | 'empty' | 'unavailable'
+  message?: string
+  evaluator_access: 'granted' | 'denied' | 'unknown'
+  analysis?: AnalysisProvenanceReadModel | null
   items: Array<{
     id: string
     replay_analysis_id?: string
+    revision: number | null
     statement: string
     rationale?: string
     supporting_evidence: EvidenceRef[]
@@ -253,6 +283,7 @@ export interface CandidateReadModel {
 
 export interface AssistHighlightReadModel {
   id: string
+  revision: number | null
   category: string
   review_priority: string
   statement: string
@@ -267,14 +298,54 @@ export interface AssistHighlightReadModel {
 }
 
 export interface ReviewAnnotationReadModel {
+  kind?: 'review_annotation' | 'assessment'
   id?: string
-  target_id: string
-  decision: 'corrected' | 'confirmed' | 'dismissed' | 'unresolved'
+  target_id?: string
+  decision?: 'corrected' | 'confirmed' | 'dismissed' | 'unresolved'
   reviewer: string
-  timestamp: number
+  timestamp?: number | string
+  session_ms?: number | null
   revision?: number
   correction?: string | null
   reason?: string | null
+  assessment_type?: string
+  text?: string
+  values?: Record<string, number>
+}
+
+export interface AssistReviewReadModel {
+  state: 'ready' | 'empty' | 'unavailable'
+  message?: string
+  provider_availability: 'available' | 'unavailable' | 'unknown'
+  evaluator_access: 'granted' | 'denied' | 'unknown'
+  highlights: AssistHighlightReadModel[]
+  candidates: CandidateReadModel
+  review_annotations: ReviewAnnotationReadModel[]
+  jobs: TranscriptionJobReadModel[]
+  analysis: AnalysisProvenanceReadModel | null
+}
+
+export type AudioAlignmentReadModel =
+  | { state: 'mapped'; offset_ms: number; uncertainty_ms?: number }
+  | { state: 'unknown'; reason: string }
+
+export type AudioAssetReadModel =
+  | {
+      state: 'ready'
+      source_session_id: string
+      asset_id: string
+      object_url: string
+      mime_type: string
+      duration_ms: number | null
+      alignment: AudioAlignmentReadModel
+      release: () => void
+    }
+  | { state: 'unavailable'; message: string; asset_id?: string }
+
+export interface ReviewOpenResult {
+  status: 'accepted' | 'unavailable'
+  review_session_id?: string
+  message?: string
 }
 
 export type AssistUpdateReadModel =
@@ -299,26 +370,36 @@ export interface ReviewReceipt {
   request_id: string
   revision: number
   status: 'accepted' | 'conflict' | 'unavailable'
+  authority?: 'fixture' | 'server'
   message?: string
+  annotation?: ReviewAnnotationReadModel
 }
 
 export interface ReplayReviewAdapter extends DashboardAdapter {
+  readonly supported_speeds: readonly ReviewSpeed[]
+  openReview(sourceSessionId: string, operatorToken: string, signal?: AbortSignal): Promise<ReviewOpenResult>
   loadSource(sourceSessionId: string, signal?: AbortSignal): Promise<ReplaySourceReadModel>
   loadFrame(sourceSessionId: string, at_ms: number, signal?: AbortSignal): Promise<ReplayFrameReadModel>
   listEvents(sourceSessionId: string, cursor: number, until_ms?: number, signal?: AbortSignal): Promise<EventPageReadModel>
   listTranscript(sourceSessionId: string, cursor: string | null, until_ms?: number, signal?: AbortSignal): Promise<TranscriptReadModel>
-  resolveEvidence(sourceSessionId: string, refs: EvidenceRef[], until_ms?: number, signal?: AbortSignal): Promise<EvidenceResolution[]>
+  loadAssistReview(sourceSessionId: string, analysisId?: string, signal?: AbortSignal): Promise<AssistReviewReadModel>
+  loadAudioAsset(sourceSessionId: string, assetId?: string, signal?: AbortSignal): Promise<AudioAssetReadModel>
+  sessionMsToAudioSeconds(alignment: AudioAlignmentReadModel, sessionMs: number): number | null
+  audioSecondsToSessionMs(alignment: AudioAlignmentReadModel, audioSeconds: number): number | null
+  resolveEvidence(sourceSessionId: string, refs: EvidenceRef[], until_ms?: number, signal?: AbortSignal, analysis_id?: string): Promise<EvidenceResolution[]>
   listCandidates(sourceSessionId: string, analysisId: string, signal?: AbortSignal): Promise<CandidateReadModel>
   subscribeSource(sourceSessionId: string, listener: (frame: ReplayFrameReadModel | null) => void, stateListener?: (state: SubscriptionState, message?: string) => void): () => void
   subscribeAssist(sourceSessionId: string, listener: (state: AssistUpdateReadModel) => void, stateListener?: (state: SubscriptionState, message?: string) => void): () => void
   controlReview(sourceSessionId: string, control: ReviewControl): Promise<ReviewReceipt>
   correctTranscript(sourceSessionId: string, segmentId: string, expected_revision: number, text: string, reason?: string, request_id?: string): Promise<ReviewReceipt>
+  reviewHighlight(sourceSessionId: string, highlightId: string, expected_revision: number, decision: 'confirmed' | 'dismissed' | 'unresolved', reason?: string, request_id?: string): Promise<ReviewReceipt>
   reviewCandidate(sourceSessionId: string, candidateId: string, expected_revision: number, decision: 'confirmed' | 'dismissed' | 'unresolved', reason?: string, analysisId?: string, request_id?: string): Promise<ReviewReceipt>
 }
 
 export type AsyncState<T> =
   | { state: 'loading' }
-  | { state: 'empty' }
+  | { state: 'empty'; data?: T }
+  | { state: 'unavailable'; message: string; data?: T }
   | { state: 'ready'; data: T }
   | { state: 'degraded'; data: T; message: string }
   | { state: 'disconnected'; message: string; data?: T }

@@ -18,10 +18,12 @@ function evidenceStateText(state: AsyncState<EvidenceResolution[]>): string {
   return state.message
 }
 
-export function AlertEvidence({ adapter, sourceSessionId, frame }: {
+export function AlertEvidence({ adapter, sourceSessionId, frame, selectedRef = null, onSelectEvidence }: {
   adapter: ReplayReviewAdapter
   sourceSessionId: string
   frame: ReplayFrameReadModel | null
+  selectedRef?: EvidenceRef | null
+  onSelectEvidence?: (ref: EvidenceRef) => void
 }) {
   const alerts = frame?.snapshot?.alerts ?? []
   const refs = useMemo(() => {
@@ -78,12 +80,13 @@ export function AlertEvidence({ adapter, sourceSessionId, frame }: {
           {alerts.map((alert) => {
             const acknowledgements = snapshot.acknowledgements.filter((item) => item.alert_id === alert.id)
             return (
-              <article className="deterministic-alert" key={alert.id}>
+              <article id={`alert-${alert.id}`} className={`deterministic-alert ${selectedRef?.kind === 'detector_alert' && selectedRef.id === alert.id ? 'is-evidence-selected' : ''}`} key={alert.id}>
                 <div className="alert-title-row">
                   <div><span className="alert-id">{alert.id}</span><h3>{alert.rule}</h3></div>
                   <div className="alert-tags"><span className={`severity-tag severity-${alert.severity.toLowerCase()}`}>{alert.severity}</span><span className="lifecycle-tag">{alert.status}</span></div>
                 </div>
                 <p className="alert-reason">{alert.reason}</p>
+                {onSelectEvidence && <button className="evidence-select-button" type="button" onClick={() => onSelectEvidence({ kind: 'detector_alert', id: alert.id })}>{selectedRef?.kind === 'detector_alert' && selectedRef.id === alert.id ? 'Selected' : 'Open'} exact alert reference · {alert.id}</button>}
 
                 <dl className="alert-timing-grid">
                   <div><dt>Created</dt><dd>{alert.created_ms} ms SIM</dd></div>
@@ -127,6 +130,7 @@ export function AlertEvidence({ adapter, sourceSessionId, frame }: {
                                       : resolutionState.state === 'ready' || resolutionState.state === 'degraded' ? 'UNRESOLVED · resolver returned no matching reference'
                                         : evidenceStateText(resolutionState)}
                             </span>
+                            {onSelectEvidence && <button type="button" className="evidence-select-button" onClick={() => onSelectEvidence(ref)}>{selectedRef?.kind === ref.kind && selectedRef.id === ref.id ? 'Selected' : 'Open'} exact event reference · {id}</button>}
                           </li>
                         )
                       })}
