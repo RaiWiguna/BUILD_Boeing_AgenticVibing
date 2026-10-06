@@ -3,7 +3,7 @@
 **Owner-role:** Backend/Replay
 
 **Packet induk:** [backend-session-replay-storage.md](../../packages/backend-session-replay-storage.md)
-**Status:** TARGET / belum diimplementasikan sebagai deliverable task. Inspeksi statis: 4 Oktober 2026.
+**Status:** Implementasi source dan pemeriksaan terpilih lulus, 5 Oktober 2026. Belum ada domain review atau validasi operasional.
 
 [Indeks task](../README.md) · [Shared contracts](../../shared-contracts.md). Penyempurnaan C-01–C-08 dan aturan ownership/test pada indeks berlaku; ini dokumentasi, bukan hasil runtime.
 
@@ -13,9 +13,9 @@ Menyimpan koreksi/decision reviewer sebagai revision terpisah yang durable dan m
 
 ## 2. Kondisi saat ini dan batas pekerjaan
 
-**CURRENT_SOURCE:** Review.annotations dan review command receipts in-memory; reporting.py meng-escape HTML/CSV tetapi belum mempunyai transcript revision/assist summaries.
+**CURRENT_SOURCE (sebelum BE-07):** `Review.annotations` dan review command receipts synthetic in-memory; reporting.py memiliki export synthetic tetapi belum mempunyai transcript revision/assist debrief.
 
-**TARGET:** Correction/review receipts, persisted annotations dan read-only debrief JSON/CSV/HTML. Tidak mencakup geometri/rule body, inferensi provider, UI, atau source live.
+**DELIVERED (BE-07):** Imported replay sekarang memiliki correction/review receipts, transcript revision dan annotation append-only, review history pada read model/snapshot, typed `review_annotation` stream, serta read-only debrief JSON/CSV/HTML. Report synthetic `/report` tetap dipisahkan. Tidak mencakup geometri/rule body, inferensi provider, UI, atau source live.
 
 ## 3. Context dan ownership
 
@@ -45,15 +45,15 @@ Mengubah assist_service/storage yang diperkenalkan BE-05; reviewer/time dari tok
 
 ## 5. Pendekatan implementasi
 
-1. Implement per-target revision dan idempotent request_id+body+actor receipts; validate role/target/source/expected revision sebelum append.
-2. Correction membuat new revision tanpa overwrite raw ASR; confirm/dismiss/unresolved tidak mengubah recorded clearance/alert severity.
-3. Persist transcript revisions/annotations source-linked; new analysis menunjuk selected transcript revisions dan mempertahankan raw/model version.
-4. Extend existing report atau additive debrief projection dengan factual events, candidate statements, unknowns, reviewer revisions, valid evidence links dan synthetic/authorized limits.
-5. Pertahankan instructor restricted truth export terpisah dari public debrief/model input; escape HTML, formula-safe CSV, tanpa tokens/private audio paths.
+1. Revision/annotation source- dan analysis-bound memeriksa target dan expected revision sebelum menulis; receipt terikat request id, body, dan actor server.
+2. Correction membuat revision baru; raw ASR, candidate text, source event, clearance, alert, severity, dan worker result tetap immutable.
+3. Receipt, annotation/revision, dan assist sequence tersimpan dalam satu transaksi `Archive.db`. Migrasi additive memperluas CHECK stream BE-06 sambil mempertahankan baris lama.
+4. Read model/snapshot menampilkan raw transcript, corrected view, annotation history, decision terkini, uncertainty, dan provenance. Reconnect tetap mengirim full authorized snapshot.
+5. Endpoint `/debrief` mengekspor imported replay secara read-only. JSON/CSV/HTML tidak mengambil restricted truth atau data audio privat; HTML di-escape dan CSV melindungi formula setelah whitespace/control prefix.
 
 ## 6. Output yang harus diserahkan
 
-Durable review/correction service dan debrief exports untuk FE; restart mempertahankan raw result serta history annotations.
+Durable review/correction service dan debrief exports untuk FE tersedia di source. SQLite sementara menunjukkan raw result dan source tetap sama serta revisions/receipts/annotations/sequence terbaca kembali sesudah reopen.
 
 ## 7. Asumsi dan unknown
 
@@ -63,20 +63,23 @@ Durable review/correction service dan debrief exports untuk FE; restart memperta
 
 ## 8. Test dan kriteria lulus
 
-QA-03 memiliki persistence/idempotency/export tests. Seluruh command berikut adalah TARGET setelah test/runner dibuat; tidak dijalankan dalam penyusunan dokumentasi ini.
+Pemeriksaan berikut dijalankan pada 5 Oktober 2026. Fixture transcript, candidate, replay, dan WAV dibuat sintetik untuk TestClient; tidak ada provider inference atau data runtime/mitra.
 
 Tests mandiri (dependency luar memakai stub):
 
 | Test/check | Input/fixture | Cara menjalankan | Hasil yang wajib diperoleh |
 |---|---|---|---|
-| Review | F-REVIEW-01 valid correction+reopen | `python -m pytest tests/integration/test_be_07.py` | Raw text tidak berubah; corrected version/reviewer/reason survive restart. |
-| Negative | Stale revision, reused ID changed payload/actor | Command sama | 409 tanpa append baru; same ID identik mengembalikan receipt lama. |
-| Export | Injected HTML/formula text dan unknown refs | Command sama | Output aman di-render/parse, uncertainty terlihat, tidak memuat secrets/truth pada public view. |
+| BE-06 compatibility + review/restart | Authored synthetic transcript/candidate, temporary SQLite, fake clock | `python -m pytest tests/integration/test_be_06.py tests/integration/test_be_07.py` | Lulus, 30 tests; raw source/worker result immutable, durable corrected view/history/receipt/sequence survive reopen, dan BE-06 rows survive stream schema migration. |
+| Negative/idempotency/scope/stream | Stale revision, request id reused with changed body/actor, source-read token, reconnect | Command sama | Lulus: 409/403/404/422 sesuai kasus tanpa partial append; retry identik receipt sama; annotation sequence bertambah sekali dan message typed. |
+| Debrief/export | Synthetic provenance, alignment unknown, HTML/formula text | Command sama | Lulus: JSON/CSV/HTML mempertahankan provenance/uncertainty, formula/HTML aman, tanpa audio path/token/restricted truth. |
+| Ruff | BE-06/07 scoped files; pengecualian FastAPI/timeout legacy | `python -m ruff check --ignore B008,UP041 backend/app.py backend/review.py backend/reporting.py backend/assist_service.py backend/assist_storage.py tests/integration/test_be_06.py tests/integration/test_be_07.py` | Lulus. |
+| Mypy | Tujuh scoped source/test files | `python -m mypy --follow-imports=skip backend/app.py backend/review.py backend/reporting.py backend/assist_service.py backend/assist_storage.py tests/integration/test_be_06.py tests/integration/test_be_07.py` | Lulus; imported modules dilewati sesuai opsi. |
+| Diff whitespace | Working tree | `git diff --check` | Exit 0; Git memberi notifikasi line-ending LF→CRLF pada empat file backend. |
 
-Integration checks (memerlukan implementation riil yang disebut pada §4):
+Integration checks yang belum dijalankan:
 
 | Test/check | Input/fixture | Cara menjalankan | Hasil yang wajib diperoleh |
 |---|---|---|---|
 | Browser review | FE-05 correction→refresh→export | `python -m pytest tests/browser/test_review_debrief.py` | Accepted revision tampil setelah server commit; source hash/clearance/alert severity tetap. |
 
-Task memenuhi kriteria teknis ketika output §6 tersedia dan assertions relevan di atas lulus dengan bukti command/fixture/version. Stub pass dilaporkan terpisah dari integration/provider riil; tidak menyatakan fidelity mitra atau validasi operasional.
+Hasil di atas membuktikan source dan runtime dalam harness TestClient/SQLite sementara. Tidak ada build, deployment, browser suite, provider/ASR inference, AI-02 process isolation, domain review, validasi mitra, atau validasi operasional.

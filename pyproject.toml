@@ -7,7 +7,7 @@ name = "atc-flowlens"
 version = "0.1.0"
 description = "Local, simulation-first runway training and evidence replay"
 requires-python = ">=3.11"
-dependencies = ["fastapi", "uvicorn[standard]", "pydantic>=2", "shapely>=2"]
+dependencies = ["fastapi", "uvicorn[standard]", "pydantic>=2", "shapely>=2", "python-multipart"]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "httpx", "playwright", "ruff", "mypy", "types-shapely", "psutil"]

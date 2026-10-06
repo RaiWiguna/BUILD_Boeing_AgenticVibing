@@ -3,7 +3,7 @@
 **Owner-role:** Backend/Replay
 
 **Packet induk:** [backend-session-replay-storage.md](../../packages/backend-session-replay-storage.md)
-**Status:** TARGET / belum diimplementasikan sebagai deliverable task. Inspeksi statis: 4 Oktober 2026.
+**Status per 4 Oktober 2026:** source BE-03 tersedia; suite SQLite sementara lulus, 10 tests. Belum ada route HTTP BE-04, integrasi mitra, review domain, atau validasi operasional.
 
 [Indeks task](../README.md) · [Shared contracts](../../shared-contracts.md). Penyempurnaan C-01–C-08 dan aturan ownership/test pada indeks berlaku; ini dokumentasi, bukan hasil runtime.
 
@@ -13,9 +13,11 @@ Menerima normalized offline export dan menyimpan manifest/source records serta d
 
 ## 2. Kondisi saat ini dan batas pekerjaan
 
-**CURRENT_SOURCE:** Archive mempunyai tabel sessions/events/frames/commands; frames current replace pada session_id+sim_ms, tanpa source/import/analysis schema version table.
+**CURRENT_SOURCE:** Synthetic Archive tetap memakai tabel sessions/events/frames/commands; frame synthetic tetap replace pada `(session_id, sim_ms)`.
 
-**TARGET:** Import validator/staging dan archive extensions versioned untuk replay source/analysis tanpa mengganti history synthetic. Tidak mencakup geometri/rule body, inferensi provider, UI, atau source live.
+**IMPLEMENTED_SOURCE:** `backend/replay_import.py` memvalidasi normalized `replay-1`, menghitung hash dari bytes JSONL persis, mendeduplikasi identity yang payload-nya identik, dan memanggil transaksi import atomik. `backend/storage.py` menambah tabel schema marker, source/session metadata, source records, completed receipts, analysis versions, dan analysis frames dengan namespace serta aturan append-only terpisah. Internal event-source dan public projection reader tersedia.
+
+**BATAS:** Tidak mencakup geometri/rule body, inferensi provider, UI, route HTTP, atau source live. Import source synthetic fixture tidak memverifikasi permission atau fidelity operasi.
 
 ## 3. Context dan ownership
 
@@ -43,15 +45,15 @@ Source bytes/hash immutable; analysis data terpisah. Schema persistence di stora
 
 ## 5. Pendekatan implementasi
 
-1. Implementasikan import parser manifest+JSONL C-01, hash exact event bytes, finite/unit/time/geometry/identity validation; unsupported vendor format menjadi explicit unsupported.
-2. Stage private input dan validate seluruh records sebelum visibility; identical IDs dedup, changed payload conflict; authorized label memerlukan provenance penggunaan yang tercatat.
-3. Tambahkan versioned persistence extensions dengan transaksi SQLite; existing schema dibaca tanpa rename/drop data. Imported frames berkey source+analysis+frame time agar re-analysis tidak menimpa historical output.
-4. Commit manifest+source events bersama, lalu publish completed receipt. Kegagalan meninggalkan sumber lama utuh; partial analysis boleh unavailable tanpa memalsukan successful predictions.
-5. Query records menggunakan until_ms sebelum pagination dan pisahkan reader public/private; import retry same source/hash mengembalikan existing source, different hash menjadi conflict.
+1. Parser menolak schema/vendor mentah yang belum normalized, malformed JSON, hash mismatch, identitas berbeda, unit/clock/timebase yang bertentangan, waktu nonfinite/tidak dapat dipetakan, dan geometry/layout yang tidak sesuai DTO.
+2. Semua record divalidasi sebelum transaksi. Identity event sama dengan payload berbeda menjadi conflict; duplikat identik didedup. Timestamp/alignment yang unknown tetap unknown dan tidak diberi nilai nol.
+3. SQLite menambahkan schema replay version 1 dan tabel source/session/records/receipt serta analysis/frame; tabel synthetic tidak diubah. Source, records, receipt, analysis, dan frames append-only.
+4. Manifest canonical, original event bytes/hash, source metadata, records, dan completed receipt ditulis dalam satu transaksi. Source ID yang sama retry idempotent hanya jika hash, bytes, dan metadata canonical sama.
+5. Public reader memilih frame terakhir `<= at_ms`, menerapkan `until_ms` di query sebelum limit, dan hanya mengembalikan projection; event source internal tetap baca-saja dan mempertahankan record unresolved.
 
 ## 6. Output yang harus diserahkan
 
-Immutable import/archive service, schema-version compatibility reader, dan public frame/event APIs internal untuk BE-04; perubahan schema tetap target implementasi.
+`ReplayImportService`, schema SQLite replay aditif dengan reader yang tetap dapat membuka archive synthetic lama, immutable import/archive persistence, `ArchiveReplayEventSource`, dan `SQLiteReplayArchiveReader` untuk consumer internal BE-04. Tidak ada route transport.
 
 ## 7. Asumsi dan unknown
 
@@ -61,15 +63,15 @@ Immutable import/archive service, schema-version compatibility reader, dan publi
 
 ## 8. Test dan kriteria lulus
 
-QA-03 memiliki temporary SQLite import suite. Seluruh command berikut adalah TARGET setelah test/runner dibuat; tidak dijalankan dalam penyusunan dokumentasi ini.
+`tests/integration/test_be_03.py` memakai fixture sintetik inline dan temporary SQLite. Hasil yang dijalankan pada 4 Oktober 2026 dicatat di §9.
 
 Tests mandiri (dependency luar memakai stub):
 
 | Test/check | Input/fixture | Cara menjalankan | Hasil yang wajib diperoleh |
 |---|---|---|---|
-| Persistence | F-REPLAY-01 di temp DB | `python -m pytest tests/integration/test_be_03.py` | Reopen mempertahankan manifest/hash/events/frame versions. |
-| Negative | Commit failure, invalid final row, conflicting source ID | Command sama | Tidak ada half-import visible; source lama tidak berubah. |
-| Compatibility | DB schema current + same-time frames | Command sama | Existing archive tetap readable; analysis baru tidak replace historical namespace. |
+| Persistence | Synthetic bundle di temporary SQLite | `python -m pytest tests/integration/test_be_03.py` | Lulus: reopen mempertahankan manifest, hash bytes, source records, receipts, dan frame analysis. |
+| Negative | Hash mismatch, source/hash/manifest conflict, duplicate conflict, invalid record terakhir, injected pre-commit failure | Command sama | Lulus: tidak ada partial source/receipt dan committed source lama tetap utuh. |
+| Compatibility | Synthetic archive current + imported same-time analysis versions | Command sama | Lulus: frame/metadata synthetic tetap terbaca; source analysis terpisah dan tidak menimpa versi lain. |
 
 Integration checks (memerlukan implementation riil yang disebut pada §4):
 
@@ -77,4 +79,12 @@ Integration checks (memerlukan implementation riil yang disebut pada §4):
 |---|---|---|---|
 | Import/read HTTP | BE-04 + parser/reducer riil | `python -m pytest tests/integration/test_replay_import_api.py` | Receipt completed hanya setelah commit; repeated import sama tidak membuat dua source. |
 
-Task memenuhi kriteria teknis ketika output §6 tersedia dan assertions relevan di atas lulus dengan bukti command/fixture/version. Stub pass dilaporkan terpisah dari integration/provider riil; tidak menyatakan fidelity mitra atau validasi operasional.
+HTTP check pada BE-04 tetap target, karena route dan API transport di luar ownership BE-03.
+
+## 9. Verifikasi dan batas hasil
+
+- `python -m pytest tests/integration/test_be_03.py` — lulus, 10 tests. Fixture authored/sintetik dan temporary SQLite; termasuk reopen, byte-exact hash, retry/conflict, duplicate identity, invalid tail, injected pre-commit rollback, compatibility synthetic, same-time analysis versions, cutoff/page, public projection, dan unknown-time unresolved preservation.
+- `python -m ruff check backend/storage.py backend/replay_import.py tests/integration/test_be_03.py` — lulus.
+- `python -m mypy --follow-imports=skip backend/storage.py backend/replay_import.py tests/integration/test_be_03.py` — lulus untuk tiga file; imported modules dilewati.
+- `git diff --check` — exit 0; Git memberi pemberitahuan line-ending pada `backend/storage.py`.
+- Test membuktikan service berjalan di test harness menggunakan SQLite sementara saja. Tidak ada build/deployment, API BE-04, data/adapter mitra, review pakar domain, atau validasi operasional yang dijalankan.

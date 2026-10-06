@@ -3,7 +3,7 @@
 **Owner-role:** Backend/Replay
 
 **Packet induk:** [backend-session-replay-storage.md](../../packages/backend-session-replay-storage.md)
-**Status:** TARGET / belum diimplementasikan sebagai deliverable task. Inspeksi statis: 4 Oktober 2026.
+**Status:** Implementasi source BE-04 tersedia; lima test integrasi TestClient lulus pada 4 Oktober 2026. Belum ada review domain atau validasi operasional.
 
 [Indeks task](../README.md) · [Shared contracts](../../shared-contracts.md). Penyempurnaan C-01–C-08 dan aturan ownership/test pada indeks berlaku; ini dokumentasi, bukan hasil runtime.
 
@@ -13,9 +13,11 @@ Melayani import, historical frames/events/evidence dan review controls sesuai to
 
 ## 2. Kondisi saat ini dan batas pekerjaan
 
-**CURRENT_SOURCE:** Manager snapshot melakukan role/baseline redaction; Review token terikat review ID; source lookup dengan token itu ditolak. Review annotation/control receipt in-memory.
+**CURRENT_SOURCE sebelum BE-04:** Manager snapshot melakukan role/baseline redaction; Review token terikat review ID; source lookup dengan token itu ditolak. Review annotation/control receipt in-memory.
 
-**TARGET:** Additive replay routes, imported read-only review, credential source-read terpisah, pagination/resync. Tidak mencakup geometri/rule body, inferensi provider, UI, atau source live.
+**SOURCE BE-04:** `app.py` kini menyediakan multipart import melalui `ReplayImportService`, projection source/frame/evidence, paging events dengan cutoff sebelum limit, serta token source-read terikat source. `review.py` mendukung playback imported read-only dengan frame source-only dari event reader/reducer BE-02; analysis hanya disajikan bila dipilih eksplisit. Review synthetic dan stream synthetic yang lama dipertahankan.
+
+**BATAS:** Belum ada mitra atau replay berizin yang dikonfirmasi. Fixtures BE-04 seluruhnya authored synthetic. Tidak mencakup geometri/rule body baru, inferensi provider, UI, source live, domain review, atau validasi operasional.
 
 ## 3. Context dan ownership
 
@@ -44,11 +46,11 @@ Tidak memperluas authority command dari source-read capability; private checkpoi
 
 ## 5. Pendekatan implementasi
 
-1. Expose import multipart dan replay-source public projection; source identity tetap stable meskipun Review ID ephemeral.
-2. Tambah replay-frame/evidence endpoints C-02 dengan explicit time/analysis scope; historical state tidak dihitung ulang oleh client atau current model.
-3. Extend review control untuk imported replay tanpa private simulator checkpoint; SEEK value seconds dan revision tetap current. Reject simulator mutation pada frozen/imported source.
-4. Create review mengembalikan source-read credential terpisah sesuai C-04; source token tidak mendapat command privilege/evaluator truth.
-5. Filter event/source projection sesuai role/condition/time; pagination cursor atas inspected source rows, tanpa future leakage. Main WS first-message auth/direct snapshot tetap unchanged; reconnect resync.
+1. Import multipart memvalidasi file bytes lewat `ReplayImportService`; conflict menjadi 409 dan invalid input 422.
+2. `replay-source`, `replay-frame`, dan `evidence` menggunakan public SQLite reader; frame source-only dibangun dari `ArchiveReplayEventSource` + `ObservedStateReducer`, tanpa detector rerun. Derived `predictions`/`alerts` null jika analysis tidak dipilih atau frame tidak tersedia.
+3. Imported review membaca source immutable dan hanya menerima kontrol playback yang diizinkan `Review.execute`; branch dan simulator commands ditolak. Private checkpoint tidak dibaca.
+4. Create imported review mengembalikan `source_read_token` 8 jam yang terikat source dan role actor. Credential read-only ditolak oleh route control/write.
+5. Event paging memakai ordinal stabil. Cutoff time diterapkan sebelum paging untuk import dan synthetic archive; cursor tidak melewatkan event dengan timestamp yang sama. Synthetic WebSocket first-message auth dan payload snapshot tidak diubah.
 
 ## 6. Output yang harus diserahkan
 
@@ -62,20 +64,20 @@ Scoped REST/review reads dan main stream compatibility untuk FE adapter; unresol
 
 ## 8. Test dan kriteria lulus
 
-QA-03 memiliki API/WS tests; external detector/worker stub. Seluruh command berikut adalah TARGET setelah test/runner dibuat; tidak dijalankan dalam penyusunan dokumentasi ini.
+`tests/integration/test_be_04.py` memakai TestClient, temporary SQLite, fake wall/monotonic clock, operator test token, dan data replay authored synthetic. Pemeriksaan 4 Oktober 2026:
 
-Tests mandiri (dependency luar memakai stub):
+| Test/check | Command | Hasil aktual |
+|---|---|---|
+| API import/retry/conflict/invalid input, source/frame/event paging, evidence, token scope/expiry, imported review read-only, synthetic compatibility | `python -m pytest tests/integration/test_be_04.py` | Lulus, 5 tests; runtime TestClient saja. |
+| Ruff pada seluruh file source/test berubah | `python -m ruff check --ignore B008,UP041 backend/app.py backend/review.py tests/integration/test_be_04.py` | Lulus. Pengecualian FastAPI `Depends` dan `asyncio.TimeoutError` mengikuti pola legacy yang sudah dicatat di inventaris BE-01. |
+| Scoped type check | `python -m mypy --follow-imports=skip backend/app.py backend/review.py tests/integration/test_be_04.py` | Lulus untuk tiga file yang diperiksa; imported modules dilewati. |
+| Patch whitespace | `git diff --check` | Exit 0; Git memberi peringatan konversi LF→CRLF pada `app.py` dan `review.py`. |
+
+Pemeriksaan tambahan:
 
 | Test/check | Input/fixture | Cara menjalankan | Hasil yang wajib diperoleh |
 |---|---|---|---|
-| API | Frozen synthetic/imported source + scoped instructor | `python -m pytest tests/integration/test_be_04.py` | Frame <= requested time; metadata/source/review IDs benar; cursor tidak kehilangan same-time event. |
-| Negative | Cross-source, expired, baseline and observer actors | Command sama | 401/403/404 sesuai scope; private/AI evaluator data tidak bocor. |
-| Compatibility | Current login/Command/direct WS snapshot | Command sama | target/runway/revision/kind lowercase dan first-message token tetap diterima. |
+| Ruff tanpa pengecualian | Semua file source/test berubah | `python -m ruff check backend/app.py backend/review.py tests/integration/test_be_04.py` | Belum bersih: temuan `B008` untuk pola `Depends(...)` FastAPI dan `UP041` pada timeout handling legacy di `app.py`; scoped check di atas lulus dengan dua kode ini dikecualikan. |
+| Reconnect/UI | FE-02 API adapter + BE archive | `python -m pytest tests/browser/test_api_reconnect.py` | Tidak dijalankan pada task ini. |
 
-Integration checks (memerlukan implementation riil yang disebut pada §4):
-
-| Test/check | Input/fixture | Cara menjalankan | Hasil yang wajib diperoleh |
-|---|---|---|---|
-| Reconnect/UI | FE-02 API adapter + BE archive | `python -m pytest tests/browser/test_api_reconnect.py` | Latest authorized snapshot mengganti stale view; gap tidak membuat fabricated delta. |
-
-Task memenuhi kriteria teknis ketika output §6 tersedia dan assertions relevan di atas lulus dengan bukti command/fixture/version. Stub pass dilaporkan terpisah dari integration/provider riil; tidak menyatakan fidelity mitra atau validasi operasional.
+Hasil TestClient tidak membuktikan startup/deployment server atau integrasi browser/provider. Task memenuhi kriteria API scoped pada harness ini; fidelity source mitra, review pakar domain, dan validasi operasional belum tercapai.
