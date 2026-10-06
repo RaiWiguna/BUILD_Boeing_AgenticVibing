@@ -1,8 +1,12 @@
 # Status Implementasi ATC FlowLens
 
-- **Pemeriksaan source dan verifikasi terpilih terakhir:** 5 Oktober 2026
-- **Cakupan:** inventaris source/config/docs yang ada di repository
-- **Metode:** inspeksi source; suite BE-01 sampai BE-06 yang ditargetkan dijalankan pada 4 Oktober 2026, suite BE-06/BE-07 dan gabungan BE-03 sampai BE-08 pada 5 Oktober 2026, serta suite penuh pada virtualenv Python 3.13 setelah deklarasi dependency multipart diperbaiki. Pemeriksaan tersebut bukan build/deployment atau validasi domain/operasional.
+- **Pemeriksaan source dan verifikasi terpilih terakhir:** 6 Oktober 2026
+- **Cakupan source:** BE-01–08, FE-01–05, QA-01, QA-05, dan QA-06 sesuai snapshot masing-masing workstream.
+- **Backend:** 78 pytest lulus pada run penuh Python 3.13 tanggal 5 Oktober setelah dependency multipart diperbaiki. Itu adalah hasil harness sebelum merge saat ini, bukan rerun pada combined HEAD.
+- **Frontend:** `npm run typecheck` dan `npm run build` lulus pada 6 Oktober sebelum merge backend terbaru. QA-05 browser run menghasilkan 16 passed, 1 xfailed, juga terhadap source sebelum merge backend terbaru.
+- **QA-01:** fixture public/private dan authored oracles tersedia; data-integrity inspection selesai. `tests/contracts/test_fixtures.py` tidak dijalankan karena suite QA-02 belum ada.
+- **QA-06:** mock package tests 3 passed dan benchmark synthetic 2 passed pada run sebelumnya. Package nyata gagal preflight karena `requirements.lock`/`wheelhouse` tidak ada; cold runtime unavailable.
+- **Combined verification:** automated tests, FE build, dan browser/API integration **tidak dijalankan ulang setelah penggabungan branch**. Domain review dan validasi operasional belum dilakukan.
 
 Dokumen ini mencatat apa yang tampak tersedia di source pada tanggal pemeriksaan. Keberadaan source bukan bukti bahwa komponen berhasil dibangun, berjalan, lulus test, ditinjau trainer, atau tervalidasi untuk operasi.
 
@@ -13,11 +17,13 @@ Dokumen ini mencatat apa yang tampak tersedia di source pada tanggal pemeriksaan
 | Backend | Modul FastAPI, kontrak sesi, simulasi, deteksi, review, dan arsip SQLite tersedia di `backend/`. BE-01–04 menyediakan normalized replay import/read/evidence dan imported read-only review. BE-05 menambah asset/audio/job lifecycle; BE-06 menambah typed result/evidence, immutable analyses, scoped reads, evaluator-only options, dan assist stream. BE-07 menambah transcript revisions, candidate annotations, receipts, current-decision reads, dan debrief exports. BE-08 menambah committed-state rollback/receipt reconciliation, compatible synthetic checkpoint branching, backup API, serta manifest runtime/dependency. | BE-02 memakai source/detector/lifecycle stubs; BE-03–08 memakai fixture sintetik dan SQLite sementara. Worker BE-05/06 adapter berjalan lewat `asyncio.to_thread`; AI-01 DTO package dan AI-02 process worker/provider belum tersedia. Tidak ada mitra/replay berizin yang dikonfirmasi; belum ada domain review atau validasi operasional. |
 | API dan stream | Source mendefinisikan endpoint health, skenario, autentikasi operator, sesi, seat, command, event, assessment, review/branch, report, source WebSocket, replay import/source/frame/evidence, audio upload/job/content, transcript/highlight/option reads, transcript correction/highlight/option review, assist snapshot, assist WebSocket, imported `/debrief` JSON/CSV/HTML, dan manifest `/api/v1/runtime-manifest`. | BE-04–08 diuji melalui TestClient saja. Kehadiran route dan hasil harness tidak membuktikan startup/deployment atau alur browser. Main WebSocket synthetic tetap menggunakan first-message auth; assist stream mempunyai `assist-1` typed union termasuk `review_annotation`. |
 | Persistensi | `backend/storage.py` tetap memiliki schema replay aditif immutable. `assist_storage.py` menambah tabel asset/job/attempt/result/analysis/receipt/sequence serta revision/annotation/receipt review melalui koneksi `Archive.db` yang sama; tidak membuka writer SQLite kedua. Migrasi stream BE-06 mempertahankan rows lama dan memperluas CHECK constraint secara additive. BE-08 memulihkan memory ke frame committed ketika save gagal dan menyediakan backup melalui SQLite backup API. | BE-05–08 membuktikan transaksi terpilih, fault-injection/reopen, dan snapshot backup pada SQLite sementara; recovery disk fisik, beban, deployment, offline package cold-run, dan AI-02 multi-process worker belum diuji. |
-| Frontend | `frontend/` memiliki konfigurasi Vite, entry point React, API helper, dan type TypeScript. | Belum menjadi dashboard: `main.tsx` mengimpor `App` dan `styles.css`, tetapi kedua modul tersebut tidak tersedia pada pemeriksaan ini. |
-| Penyajian UI | `backend/app.py` menyajikan bundle dari `frontend/dist`; direktori tersebut belum memiliki `index.html`. Tanpa hasil build, route `/` mengembalikan halaman instruksi dengan HTTP 503. | Belum dapat digunakan sebagai aplikasi web end-to-end dari kondisi bundle yang diperiksa. |
-| Test dan validasi manusia | `python -m pytest` lulus 78 tests pada run penuh kedua di virtualenv baru Python 3.13 setelah deklarasi dependency multipart diperbaiki. | Log Actions yang diberikan pengguna mencatat 43 failed dan 35 passed karena multipart import mendapat HTTP 400. Workflow kini hanya menguji 3.13; metadata tetap mengklaim `>=3.11`, sehingga kompatibilitas 3.11 belum diuji otomatis. Tidak ada review trainer, studi peserta, sertifikasi, atau manfaat keselamatan tervalidasi. |
+| Frontend | FE-01/02 typed adapters dan API decoder; FE-03 source/map/evidence; FE-04 timeline/seek/audio state; FE-05 transcript review/debrief tersedia di source. API adapter tidak fallback ke fixture. | FE build sebelumnya lulus; belum dibuild ulang pada combined HEAD. UI/browser results diuji pada source sebelum backend BE merge terbaru. Tidak ada klaim full FE-BE integration. |
+| Penyajian UI | FE React/Vite source kini tersedia; backend menyediakan route static untuk bundle build. | Bundle `frontend/dist` tidak termasuk dalam merge; build/runtime pada combined HEAD belum diverifikasi. |
+| Test dan validasi manusia | BE full suite 78 passed (5 Okt); QA-05 browser suite 16 passed, 1 xfailed; QA-06 mock package tests 3 passed dan benchmark bookkeeping 2 passed pada run bertanggal. | Hasil QA-05 berasal dari source sebelum backend BE merge terbaru; API 404 assertion bersifat historis. Tidak ada rerun suite pada combined HEAD. Expected failure QA-05 terkait badge provider `Unknown`; trainer/domain review dan validasi operasional belum dilakukan. |
+| Canonical fixture data QA-01 | `tests/fixtures/replay/`, `assist/`, dan `private/` berisi versioned synthetic inputs/oracles dengan exact-byte hashes; private oracle terpisah dari public indexes. | QA-02 fixture suite tidak tersedia saat QA-01 diperiksa dan tidak dijalankan. Data check bukan pytest/build/runtime. |
+| Offline package / benchmark QA-06 | Package helper, mock/performance suites, benchmark manifest, dan final report tersedia. | `requirements.lock` dan `wheelhouse/` tetap tidak ada; package preflight gagal dan cold runtime tidak dijalankan. QA-06 run tidak menggunakan QA-01 labels; accuracy tidak tersedia. |
 | CI/CD | `.github/workflows/ci.yml` menjalankan backend tests, Ruff, dan mypy di lingkungan Python 3.13; diff check tidak membutuhkan Python. Job promosi menunggu semua check. | Dependency fix dipush pada `4c035e4`, lalu seluruh job Python diselaraskan ke 3.13 pada `a3ac1a5`. Hasil Actions untuk SHA terbaru belum diverifikasi. Metadata tetap `>=3.11`; kompatibilitas versi minimum tidak diverifikasi oleh workflow. Branch protection tidak dapat diperiksa atau diubah dari lingkungan ini. Tidak ada merge/deployment otomatis. |
-| AI advisory replay | Requirement target mencakup replay offline simulator mitra, transkripsi/evidence, dan kandidat opsi AI yang ditinjau evaluator. Source import/reducer/read/review BE-04, audio/job BE-05, BE-06 result storage/validation/scoped reads/stream, serta BE-07 durable reviewer changes/debrief tersedia. | Hasil BE-06/07 memakai fixed synthetic WorkerResult fixtures, bukan transkripsi dari audio. AI-01 package, AI-02 process isolation/provider, ASR inference, domain review, UI, mitra/replay berizin, dan validasi operasional belum tersedia. |
+| AI advisory replay | Backend BE-04–07 menyediakan source/audio/job/transcript/evidence/option routes dan storage; FE-04/05 menyediakan transcript/evidence review UI. | Tidak ada bukti browser/API parity pasca-merge. AI-01/AI-02 provider/ASR inference belum tersedia; fixtures/stubs bukan hasil ASR, data mitra, atau validasi operasional. |
 
 ## Verifikasi BE-01 pada 4 Oktober 2026
 
@@ -114,6 +120,94 @@ Dokumen ini mencatat apa yang tampak tersedia di source pada tanggal pemeriksaan
 - `python -m pytest` pada virtualenv baru — run pertama: 77 passed, 1 kegagalan sementara BE-05 (`stored_job["attempts"]` kosong); test yang sama lulus saat diisolasi. Run penuh berikutnya: 78 passed, 1 warning.
 - Fix dependency ini dipush pada `4c035e4`; penyesuaian workflow 3.13 saja dipush pada `a3ac1a5`. Hasil CI remote untuk versi workflow ini belum tersedia.
 
+## QA-01 canonical fixtures dan independent oracles — 6 Oktober 2026
+
+### Source dan fixture data
+
+`tests/fixtures/replay/` berisi manifest `replay-1`, normalized source events, public source-only frames, geometry/quality/time inputs, dan mapping seluruh 12 source catalogue IDs. `tests/fixtures/assist/` berisi stub/mock transcript, entities, highlight, evaluator-only option, metadata tanpa audio bytes, dan negative/failure/scope/review/stream inputs. `tests/fixtures/private/` terpisah dan memegang authored evaluator labels serta numerical, quality/time, evidence, dan causal oracles. `tests/fixtures/replay/benchmark-manifest.json` milik QA-06 dipertahankan.
+
+Semua fixture berlabel **SYNTHETIC / NOT OPERATIONALLY VALIDATED**. Transcript bukan ASR; provider/model dan audio bytes unavailable. Private oracle tidak termasuk manifest/hash index public dan tidak ditujukan untuk detector payload, mock-server response, frontend, atau package publik.
+
+Source yang diperiksa: katalog backend berisi 12 IDs, layout memakai `LOCAL_METRES` dan memetakan 09/27 ke physical runway yang sama, `Track` current extra-forbid, serta detector menghitung stale dari `now_ms - observed_ms > 3000`. Replay importer, AI harness, dan additive replay/assist API belum ada; fixture profile adalah authored target data, belum dikonsumsi runtime.
+
+Mapping QA-01 mengikuti Rencana Teknis MVP §15.2: S01 `safe_cross`, S02 `overlap`, S11/S12 workflow-only tanpa hazard stratum. QA-06 benchmark manifest saat ini membalik mapping S01/S02. QA-01 mencatat discrepancy dan tidak mengubah file QA-06; run QA-06 yang ada tidak memakai QA-01 independent labels, sehingga accuracy metrics tetap unavailable.
+
+### Runner dan pemeriksaan data
+
+- Dependency check: `python --version` → 3.13.14; `python -m pytest --version` → pytest 9.0.3; Pydantic 2.13.3, Shapely 2.1.2, FastAPI 0.136.1, httpx 0.28.1, Playwright 1.60.0 tersedia.
+- Data-integrity inspection dijalankan dengan `python -` yang menerima script dari PowerShell here-string. Hash exact bytes untuk replay/assist/private terverifikasi; JSON/JSONL parse, mapping 12 source IDs, S11/S12 workflow-only, pemisahan hash index private/public, cutoff availability, dan C-03 causal margin 70 ms cocok dengan fixture. Pydantic `Track` dan `Clearance` current DTO menerima nested fixture fields; outer replay import/runtime tidak diuji.
+- `python -m pytest tests/contracts/test_fixtures.py` — **not run** karena suite QA-02 belum tersedia. Pemeriksaan data di atas bukan pytest, test pass, build, atau runtime verification.
+- QA-03 integration suite dan QA-04 launcher belum tersedia; additive replay/assist API unavailable. QA-05 inline fixtures dan QA-06 benchmark bukan consumer bundle kanonis QA-01. `requirements.lock` dan `wheelhouse/` tetap tidak tersedia.
+
+### C-03 dan assurance boundary
+
+Fixture mencatat `SEG-TWR-006` pada 72.400 s, `EVT-CLR-021` pada 73.020 s, `EVT-TRK-088` observed 74.180 s / received 74.530 s, dan private expected time `ALRT-009` 74.600 s. Nilai alert adalah oracle authored, bukan hasil run detector. Review trainer/ATCO belum dilakukan; fidelity domain dan validasi operasional belum dilakukan.
+
+## QA-05 browser verification — 6 Oktober 2026
+
+### Source
+
+**Urutan integrasi:** run QA-05 di bawah dilakukan pada 6 Oktober terhadap FE branch sebelum backend BE merge terbaru. Pada combined source, replay/assist routes sudah ada dari BE-04–08; 404 assertions di run QA-05 adalah hasil historis dari source lama. Tidak ada browser/API rerun setelah merge.
+
+QA-owned native Playwright suite ada di `tests/browser/`. Test fixture memakai FE-05 inline `fixture-1`, bukan bundle kanonis QA-01 yang tersedia sejak 6 Oktober; QA-04 `run_mock_stack.py` belum ada. Test current API menjalankan source FastAPI dengan database SQLite sementara dan credential uji lokal.
+
+### Build
+
+FE build checks yang dicatat dari FE-05 tetap: `npm run typecheck` dan `npm run build` dari `frontend/` lulus pada 6 Oktober. QA-05 tidak mengubah source FE atau menjalankan build FE baru.
+
+### Runtime
+
+Vite fixture/evaluator, Vite training, Vite API mode, dan satu FastAPI current-source instance berjalan selama suite; lifecycle menghentikan proses setelah test. API flow menguji setup/create/end/open-review untuk sesi sintetik lokal. Route `/transcripts` pada backend actual 404; source-read/evidence/audio/assist/options/correction tetap tidak tersedia dan UI tidak fallback.
+
+### Automated test
+
+- `python -m pytest tests/browser -k 'fe_ or mock_stack or adapter_parity'` — 8 passed, 1 xfailed, 8 deselected.
+- `python -m pytest tests/browser/test_options_boundary.py` — 6 passed.
+- `python -m pytest tests/browser` — 16 passed, 1 xfailed.
+
+Manifest run penuh dan screenshot ada di [QA-05 run artifacts](../tests/browser/artifacts/run-20261006T121244317654+0700/result-manifest.json). Screenshot memverifikasi UI saja, bukan geometry/domain truth. Provider status xfailed karena FE-05 subscription projection mengganti nilai fixture unavailable menjadi unknown.
+
+### Domain review
+
+Belum dilakukan review trainer/ATCO. Authored fixture, receipt QA stub, dan current API responses bukan label operasional atau hasil AI/provider.
+
+### Validasi operasional
+
+Belum ada partner data, assessment site/hardware/LAN, readiness untuk operasi, certification, atau validasi keselamatan.
+
+## QA-06 offline package dan benchmark — 6 Oktober 2026
+
+### Source
+
+`scripts/package_offline.py`, dua suite `tests/integration/test_offline_package.py` / `test_performance.py`, dan `tests/fixtures/replay/benchmark-manifest.json` ditambahkan dalam ownership QA-06. Source backend/FE dan QA-04 launcher tidak diubah. Katalog 12 skenario, simulator observasi, detector, SQLite `Archive`, `frontend/dist`, dan dependency runner aktual tersedia. QA-01 canonical fixture bundle tersedia setelah pekerjaan QA-01 pada 6 Oktober, tetapi run QA-06 yang dilaporkan tidak menggunakannya; QA-03-owned integration suite, `scripts/run_mock_stack.py`, Python `requirements.lock`/`wheelhouse`, serta AI provider/model assets tidak tersedia. QA-05 browser suite dan run manifest ada.
+
+### Build dan package
+
+Frontend build tidak dijalankan ulang; existing `frontend/dist/index.html` diperiksa sebagai file yang tersedia. `python scripts/package_offline.py --output tmp/flowlens-offline` gagal preflight karena lock dan wheelhouse wajib tidak tersedia; output package tidak dibuat. Packager tidak mengunduh dependency dan menolak overwrite output lama. Source replay package tidak dihasilkan.
+
+### Cold runtime
+
+Cold run dengan network disabled **not run / unavailable**, sebab package dependency belum dapat dipenuhi. Backup/restart lifecycle juga belum dijalankan; QA-06 tidak menyalin database aktif mentah atau mengklaim backup API.
+
+### Automated test
+
+- `python -m pytest tests/integration/test_offline_package.py` — **3 passed**; positive package assembly memakai repository sementara berlabel mock, termasuk check hash/allowlist/no-network. Ini bukan cold run atas source aktual.
+- `python -m pytest tests/integration/test_performance.py` — **2 passed** pada final run. Percobaan awal menemukan dan memperbaiki typo hash pada benchmark manifest.
+
+### Benchmark teknis
+
+100/100 manifest run selesai dan tersimpan: conflict 40, safe 40, delay/noise 10, dropout 10; 10 detector warm-up tidak masuk denominator; seluruh parameter dan seed dibekukan. Dropout adalah observasi yang difilter oleh test harness mock. Detector p50 2.10895 ms, p95 2.377 ms, max 4.6145 ms; di bawah target p95 <50 ms hanya pada microbenchmark synthetic 5 aircraft/2 vehicle ini. SQLite `Archive.create` + `Archive.save` p50 1.478 ms, p95 2.2651 ms, max 2.8732 ms; 100 session/event/frame terverifikasi. Report aktual: [QA-06 performance evidence](../tmp/qa06-performance-20261006T123620051189+0700.json). Environment: Windows 11 build 26200, Python 3.13.14, SQLite 3.50.4, FastAPI 0.136.1, Uvicorn 0.46.0, Pydantic 2.13.3, Shapely 2.1.2; OS-reported CPU descriptor Intel64 Family 6 Model 140 Stepping 1 (8 logical CPUs), RAM 16,856,219,648 bytes; final benchmark wall time 0.3842 s, 100 simulated seconds. API delivery/render unavailable for source replay; reconnect/LAN synchronization/30-minute endurance not run. Recall/false-warning/lead-time remain unavailable in that run because it used no independent QA-01 labels and its S01/S02 mapping differs from canonical §15.2; QA-06 rerun/remediation belongs to QA-06 owner. ASR/provider metrics unavailable without real assets/provider.
+
+### Domain review dan validasi operasional
+
+Belum ada trainer/ATCO review, partner replay, validasi domain, LAN/site/hardware assessment, atau validasi operasional. Microbenchmark ini tidak menyimpulkan domain validity atau operational readiness.
+
+
+### Status dependency setelah snapshot QA-01
+
+`origin/dev` kini membawa QA-03 backend integration suite dari BE-03–08. Suite tersebut tidak dijalankan dalam merge ini. QA-02 `tests/contracts/test_fixtures.py` dan QA-04 `scripts/run_mock_stack.py` tetap tidak tersedia. Catatan QA-01 tentang QA-03 unavailable merekam kondisi saat task QA-01 dikerjakan.
+
+
 ## Arsitektur target yang didokumentasikan
 
 Rencana Teknis MVP menetapkan satu proses server lokal/LAN sebagai pemilik state sesi, frontend browser React/TypeScript, REST untuk command dan arsip, WebSocket untuk snapshot sinkron, Shapely untuk geometri, serta SQLite lokal untuk persistence. Alur target memisahkan truth simulator dari observasi yang diterima detector, lalu membentuk prediksi occupancy dan alert yang menyertakan evidence serta kualitas data. Sesi ditujukan untuk latihan multi-peran, replay, dan debrief.
@@ -124,7 +218,7 @@ Arsitektur tersebut adalah target spesifikasi. Rincian acceptance dan batas MVP 
 
 - Arah produk jangka panjang adalah advisory berbukti bagi controller Tower/Ground runway; target MVP tetap replay offline, bukan live ATC.
 - FlowLens tidak menerbitkan clearance dan tidak mengambil alih keputusan controller.
-- Replay simulator mitra yang berizin menjadi target validasi fidelity. Baseline sintetik sementara tidak membuktikan realisme operasional. Source import/reducer normalized BE-04 serta BE-06 transcript/highlight/option read interfaces tersedia; hasil BE-06 yang diuji adalah fixture, bukan ASR/model output. UI review, live integration, persetujuan/assurance, domain review, dan klaim manfaat keselamatan belum dicapai.
+- Replay simulator mitra yang berizin tetap menjadi target validasi fidelity. Backend replay/assist routes dan frontend review UI tersedia di source setelah merge, tetapi combined browser/API behavior belum diuji. Hasil fixture/provider stub bukan ASR/model output; live integration, persetujuan/assurance, domain review, dan klaim manfaat keselamatan belum dicapai.
 - Indikator kompleksitas/workload adalah konteks eksperimen, bukan diagnosis kondisi mental atau ukuran fitness-for-duty.
 
 ## Memperbarui status

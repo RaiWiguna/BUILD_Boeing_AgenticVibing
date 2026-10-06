@@ -3,7 +3,7 @@
 **Owner-role:** Frontend
 
 **Packet induk:** [frontend-replay-review.md](../../packages/frontend-replay-review.md)
-**Status:** TARGET / belum diimplementasikan sebagai deliverable task. Inspeksi statis: 4 Oktober 2026.
+**Status:** Source FE-04 tersedia; `npm run typecheck` dan `npm run build` lulus pada 6 Oktober 2026. Backend/API runtime, WebSocket runtime, browser QA, dan kriteria QA-05 belum diverifikasi.
 
 [Indeks task](../README.md) · [Shared contracts](../../shared-contracts.md). Penyempurnaan C-01–C-08 dan aturan ownership/test pada indeks berlaku; ini dokumentasi, bukan hasil runtime.
 
@@ -13,9 +13,13 @@ Menyelaraskan map/event/clearance/transcript lanes pada selected replay time dan
 
 ## 2. Kondisi saat ini dan batas pekerjaan
 
-**CURRENT_SOURCE:** Review supports START/PAUSE/SET_SPEED/SEEK; snapshot events tail non-TRACK sehingga history lengkap perlu cursor API; belum ada timeline/player.
+**CURRENT_SOURCE sebelum FE-04:** Review supports START/PAUSE/SET_SPEED/SEEK; snapshot events tail non-TRACK sehingga history lengkap perlu cursor API; belum ada timeline/player.
 
-**TARGET:** Timeline/controller/audio playback controls with unknown alignment and concurrency/disconnect states. Tidak mengimplementasikan detector/provider/database atau memberi opsi AI jalur command.
+**IMPLEMENTED_IN_SOURCE (6 Oktober 2026):** Fixture memuat semua halaman event melalui cursor, memisahkan frame aktual dari requested/playback time, menyediakan START/PAUSE/speed/seek dengan expected revision dan request identity, dan menampilkan enam lane event/communication, clearance, TRACK, alert, transcript, serta annotation. Cutoff dan urutan TRACK memakai `received_ms` bila tersedia; transcript tanpa mapping tetap di luar timeline presisi. UI audio menampilkan mapping hanya bila adapter menyediakannya, alignment unknown secara eksplisit, serta audio unavailable. Fixture transcript adalah authored stub; audio bytes tidak disediakan.
+
+API adapter memakai route frozen review/command yang ada untuk snapshot review dan controls; SEEK UI ms dikonversi ke detik wire di adapter. Backend mengembalikan token review-control, tetapi belum mengeluarkan credential `source_read` terpisah. Karena itu source history, source metadata/evidence, transcript/assist, dan audio content tidak dianggap berhasil dibaca tanpa capability/route masing-masing; UI menunjukkan unauthorized/unavailable dan tidak beralih ke fixture. Backend juga belum menyediakan route historical frame-at-time mandiri; adapter tidak menganggap snapshot saat ini sebagai jawaban bagi requested time yang berbeda.
+
+**TARGET LIMITS:** Tidak mengimplementasikan detector/provider/database atau memberi opsi AI jalur command. Implementasi source/build bukan bukti API runtime, codec compatibility, browser QA, domain review, atau validasi operasional.
 
 ## 3. Context dan ownership
 
@@ -25,11 +29,9 @@ Menyelaraskan map/event/clearance/transcript lanes pada selected replay time dan
 - [Rencana Teknis MVP](../../../Knowledge-Review/ATC_FlowLens_Rencana_Teknis_MVP.md), §7.5, §12.2–12.4, §13.6, §14.2.
 - [AI Assist Buddy](../../../Knowledge-Review/ATC_FlowLens_AI_Assist_Buddy_MVP_Prompt.md), §1 dan §3–5 bila terkait.
 
-**Existing yang dimiliki task:** Tidak ada perubahan file existing.
+**Existing yang diperluas:** `frontend/src/App.tsx`, `frontend/src/styles.css`, `frontend/src/contracts/replayReview.ts`, `frontend/src/adapters/apiReplayReview.ts`, `frontend/src/adapters/fixtureReplayReview.ts`, `frontend/src/adapters/apiDecoders.ts`.
 
-**File baru usulan, belum ada:** `frontend/src/features/replay/ReplayTimeline.tsx`, `frontend/src/features/replay/ReplayControls.tsx`, `frontend/src/features/replay/ReplayController.ts`, `frontend/src/features/replay/AudioPlayer.tsx`
-
-**File usulan dari task lain yang diperluas, belum ada:** `frontend/src/App.tsx`, `frontend/src/styles.css`
+**File baru diimplementasikan:** `frontend/src/features/replay/ReplayTimeline.tsx`, `frontend/src/features/replay/ReplayControls.tsx`, `frontend/src/features/replay/ReplayController.ts`, `frontend/src/features/replay/AudioPlayer.tsx`.
 
 FE controls review only; server/adapter owns revision/receipt/cursor. No commands derived from audio/AI. Tests/fixtures executable tetap milik QA; task ini menentukan perilaku yang harus diuji. App/styles setelah FE-03 dan sebelum FE-05.
 
@@ -63,7 +65,7 @@ Timeline/controller/audio components and consistent selected-time/evidence conte
 
 ## 8. Test dan kriteria lulus
 
-QA-05 owns seek/time/audio UI assertions. Seluruh command berikut adalah TARGET setelah test/runner dibuat; tidak dijalankan dalam penyusunan dokumentasi ini.
+QA-05 owns seek/time/audio UI assertions. Command QA di bawah tetap TARGET dan tidak dijalankan dalam implementasi FE-04. Pemeriksaan aktual 6 Oktober 2026: `npm run typecheck` di `frontend/` lulus; `npm run build` di `frontend/` lulus. Tidak ada browser/QA test, backend/API/WebSocket runtime, domain review, atau validasi operasional yang dijalankan; tidak ada file pada namespace `tests/` yang ditulis.
 
 Tests mandiri (dependency luar memakai stub):
 

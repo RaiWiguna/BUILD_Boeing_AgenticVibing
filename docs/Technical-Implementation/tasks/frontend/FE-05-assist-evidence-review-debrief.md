@@ -3,7 +3,7 @@
 **Owner-role:** Frontend
 
 **Packet induk:** [frontend-replay-review.md](../../packages/frontend-replay-review.md)
-**Status:** TARGET / belum diimplementasikan sebagai deliverable task. Inspeksi statis: 4 Oktober 2026.
+**Status (6 Oktober 2026):** UI/read-model dan fixture FE-05 tersedia di source; `npm run typecheck` dan `npm run build` lulus. API assist/transcript/evidence/audio tetap unavailable karena route/capability backend belum tersedia. Runtime, browser QA, domain review, dan validasi operasional belum diverifikasi.
 
 [Indeks task](../README.md) · [Shared contracts](../../shared-contracts.md). Penyempurnaan C-01–C-08 dan aturan ownership/test pada indeks berlaku; ini dokumentasi, bukan hasil runtime.
 
@@ -13,9 +13,9 @@ Memberi evaluator UI untuk inspeksi transcript/highlights/options, koreksi/decis
 
 ## 2. Kondisi saat ini dan batas pekerjaan
 
-**CURRENT_SOURCE:** Tidak ditemukan transcript/candidate/review UI; existing TS Assessment berbeda dari durable transcript correction contract.
+**CURRENT_SOURCE, 6 Oktober 2026:** FE-05 menambahkan transcript provenance/revision panel, evaluator-only highlight/options panel, generic correction/review editor, dan debrief. Port/read models membawa typed evidence refs, nullable revisions/confidence, provenance, serta audio/session alignment state. Fixture conflict adalah simulasi lokal authored; bukan receipt server.
 
-**TARGET:** Raw/corrected transcript, linked/possible_link evidence, evaluator-only options, revision-conflict and debrief/export views. Tidak mengimplementasikan detector/provider/database atau memberi opsi AI jalur command.
+**Batas belum terintegrasi:** API adapter mengembalikan unavailable untuk assist ketika profile/routes tidak aktif; tidak menggunakan report instructor/truth untuk debrief. Backend belum menyediakan `source_read` terpisah atau transcript/highlight/option review/evidence/audio route. Tidak ada provider, persistence FE-05, atau export FE-05 yang diklaim.
 
 ## 3. Context dan ownership
 
@@ -25,11 +25,9 @@ Memberi evaluator UI untuk inspeksi transcript/highlights/options, koreksi/decis
 - [Rencana Teknis MVP](../../../Knowledge-Review/ATC_FlowLens_Rencana_Teknis_MVP.md), §12.3–12.4, §14.5.
 - [AI Assist Buddy](../../../Knowledge-Review/ATC_FlowLens_AI_Assist_Buddy_MVP_Prompt.md), §1 dan §3–5 bila terkait.
 
-**Existing yang dimiliki task:** Tidak ada perubahan file existing.
+**File source baru:** `frontend/src/features/assist/TranscriptPanel.tsx`, `frontend/src/features/assist/CandidatePanel.tsx`, `frontend/src/features/assist/ReviewEditor.tsx`, `frontend/src/features/assist/DebriefPanel.tsx`.
 
-**File baru usulan, belum ada:** `frontend/src/features/assist/TranscriptPanel.tsx`, `frontend/src/features/assist/CandidatePanel.tsx`, `frontend/src/features/assist/ReviewEditor.tsx`, `frontend/src/features/assist/DebriefPanel.tsx`
-
-**File usulan dari task lain yang diperluas, belum ada:** `frontend/src/App.tsx`, `frontend/src/styles.css`
+**File existing yang diperluas:** `frontend/src/App.tsx`, `frontend/src/styles.css`, `frontend/src/contracts/replayReview.ts`, `frontend/src/contracts/apiWire.ts`, `frontend/src/adapters/apiDecoders.ts`, `frontend/src/adapters/apiReplayReview.ts`, `frontend/src/adapters/fixtureReplayReview.ts`, `frontend/src/features/replay/ReplayController.ts`, `frontend/src/features/replay/ReplayTimeline.tsx`, `frontend/src/features/replay/AudioPlayer.tsx`, `frontend/src/features/runway/AlertEvidence.tsx`, `frontend/src/vite-env.d.ts`.
 
 No buttons execute/send-clearance; feature controllers call adapter only. Reviewer confirm/dismiss adalah evaluasi candidate, bukan authority operasi. Tests/fixtures executable tetap milik QA; task ini menentukan perilaku yang harus diuji. App/styles sesudah FE-04; api adapter FE-02 tetap file terpisah.
 
@@ -39,21 +37,21 @@ No buttons execute/send-clearance; feature controllers call adapter only. Review
 
 **Implementation dependency:** [FE-01](../frontend/FE-01-typed-fixture-adapter-scaffold.md), [FE-03](../frontend/FE-03-source-context-runway-map.md), [FE-04](../frontend/FE-04-replay-timeline-audio-controls.md) Dependency lintas workstream dapat memakai stub; output runtime riil hanya diperlukan saat integrasi.
 
-**Mock/stub:** F-COMM-01/raw-corrected pair/linked vs possible_link, evaluator and training seat fixtures, 409 response and AI unavailable.
+**Fixture:** Raw/corrected authored pair, `linked`/`possible_link`, typed refs, evaluator/training view (`VITE_FLOWLENS_FIXTURE_VIEW`), AI unavailable notice, and a local conflict→refresh→explicit retry example. Fixture annotation receipts are in-memory only; no ASR/provider/server result/partner data is represented.
 
 **Integration dependency:** FE-02 API + BE-06/07 persisted results/revisions; AI real quality bukan UI pass.
 
 ## 5. Pendekatan implementasi
 
-1. Render raw ASR/corrected revision distinction, speaker/confidence unknowns, timestamps and source/model/rule versions; no false final transcript authority.
-2. Attach highlight to existing deterministic alert evidence panel when linked; possible_link explicit, no duplicate hazard card or severity alteration.
-3. Evaluator-only options show rationale/preconditions/unknowns/refs and analysis window; evidence selection updates timeline/audio using port, no command callback.
-4. Corrections/confirm/dismiss/unresolved pending state only accepted after server receipt; 409 preserves draft and refreshes revision, rejected requests not success.
-5. Debrief separates source facts/candidates/unknowns/reviewer annotations and restricted truth access; export labels/limits visible. AI outage panel degraded while replay usable.
+1. Source text/revision, provenance, channel/speaker/confidence nullable fields, audio-relative timebase and unknown alignment are shown separately.
+2. Highlights/options use typed refs; `linked`, `possible_link`, `unresolved`, and `unavailable` remain distinct. Selecting a resolved source ref loads read-only frame context through the adapter; audio-relative selection does not claim session alignment or send a replay command.
+3. Options/highlights appear only when evaluator capability is granted. No command, clearance, severity, alert, or lifecycle callback exists.
+4. Corrections and candidate decisions carry expected revision and request ID through the adapter. Conflict retains the draft; refresh/reconcile and explicit retry are separate actions. Fixture acceptance is labeled local memory only.
+5. Debrief separates source events/alerts, candidates, unknowns, and reviewer annotations; versions, analysis window, and usage limits are visible. Restricted truth report is not consumed or exported.
 
 ## 6. Output yang harus diserahkan
 
-Assist/reviewer/debrief components wired to typed port and eventual API, with append-only revision/history presentation.
+Assist/reviewer/debrief components wired to typed port/read models and explicit fixture/API behavior. Fixture revisions/history are authored and in-memory; server append-only persistence is unverified and currently unavailable.
 
 ## 7. Asumsi dan unknown
 
@@ -63,7 +61,13 @@ Assist/reviewer/debrief components wired to typed port and eventual API, with ap
 
 ## 8. Test dan kriteria lulus
 
-QA-05 owns browser workflow and no-command assertions. Seluruh command berikut adalah TARGET setelah test/runner dibuat; tidak dijalankan dalam penyusunan dokumentasi ini.
+Pemeriksaan aktual 6 Oktober 2026 dari `frontend/`:
+
+- `npm run typecheck` — lulus.
+- `npm run build` — lulus; Vite menghasilkan bundle lokal.
+- Automated QA/browser test tidak dijalankan; namespace `tests/` tidak diubah. Runtime API/browser, domain review, dan validasi operasional tidak diverifikasi.
+
+QA-05 owns browser workflow and no-command assertions. Command berikut tetap TARGET dan tidak dijalankan:
 
 Tests mandiri (dependency luar memakai stub):
 
@@ -79,4 +83,4 @@ Integration checks (memerlukan implementation riil yang disebut pada §4):
 |---|---|---|---|
 | Review persistence | BE-07 correction→refresh/restart→debrief | `python -m pytest tests/browser/test_review_debrief.py` | Raw ASR preserved, accepted annotations persist and exports source/model/review provenance. |
 
-Task memenuhi kriteria teknis ketika output §6 tersedia dan assertions relevan di atas lulus dengan bukti command/fixture/version. Stub pass dilaporkan terpisah dari integration/provider riil; tidak menyatakan fidelity mitra atau validasi operasional.
+Source/build criteria §6 terpenuhi untuk fixture UI; browser assertions dan API persistence/integration tetap pending. Typecheck/build bukan bukti runtime, QA browser, domain fidelity, atau validasi operasional.

@@ -1,0 +1,13 @@
+{
+  "schema_version": "assist-1",
+  "fixture_version": "qa01-2026-10-06.1",
+  "source_session_id": "SYN-COMM-01",
+  "replay_analysis_id": "AN-SYN-01",
+  "label": "SYNTHETIC / NOT OPERATIONALLY VALIDATED; candidate literals only, not ASR/provider output or structured clearance truth.",
+  "entities": [
+    {"segment_id":"SEG-TWR-006","entity_type":"callsign","candidate_value":"ARFF-2","normalized_value":"ARFF-2","confidence":null,"alternatives":[]},
+    {"segment_id":"SEG-TWR-006","entity_type":"runway","candidate_value":"27","normalized_value":"27","confidence":null,"alternatives":[]},
+    {"segment_id":"SEG-TWR-006","entity_type":"instruction","candidate_value":"HOLD_SHORT","normalized_value":"HOLD_SHORT","confidence":null,"alternatives":["instruction fragment only; no phraseology assertion"]},
+    {"segment_id":"SEG-TWR-006","entity_type":"negation","candidate_value":"ambiguous","normalized_value":null,"confidence":null,"alternatives":["negated","not_negated"]}
+  ]
+}

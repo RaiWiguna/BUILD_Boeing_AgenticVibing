@@ -1,0 +1,14 @@
+{
+  "schema_version": "replay-1",
+  "fixture_version": "qa01-2026-10-06.1",
+  "source_session_id": "SYN-COMM-01",
+  "label": "SYNTHETIC / NOT OPERATIONALLY VALIDATED",
+  "frame_policy": "Public source-only frames. Predictions and alerts are null unless a separately versioned analysis is supplied; no detector output is asserted here.",
+  "frames": [
+    {"requested_ms":72400,"frame_ms":72400,"source_event_ids":[],"track_ids":[],"clearance_event_ids":[],"predictions":null,"alerts":null},
+    {"requested_ms":73020,"frame_ms":73020,"source_event_ids":["EVT-CLR-021"],"track_ids":[],"clearance_event_ids":["EVT-CLR-021"],"predictions":null,"alerts":null},
+    {"requested_ms":74529,"frame_ms":73020,"source_event_ids":["EVT-CLR-021"],"track_ids":[],"clearance_event_ids":["EVT-CLR-021"],"predictions":null,"alerts":null},
+    {"requested_ms":74530,"frame_ms":74530,"source_event_ids":["EVT-CLR-021","EVT-TRK-088"],"track_ids":["ARFF-2"],"clearance_event_ids":["EVT-CLR-021"],"predictions":null,"alerts":null},
+    {"requested_ms":74600,"frame_ms":74530,"source_event_ids":["EVT-CLR-021","EVT-TRK-088"],"track_ids":["ARFF-2"],"clearance_event_ids":["EVT-CLR-021"],"predictions":null,"alerts":null}
+  ]
+}

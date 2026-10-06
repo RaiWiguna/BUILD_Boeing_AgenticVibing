@@ -1,0 +1,928 @@
+{
+  "schema_version": "qa06-benchmark-1",
+  "label": "FIXTURE/MOCK — current synthetic simulator and detector inputs; not an independent QA-01 oracle",
+  "status": "frozen-plan; measurements are generated only when the performance suite runs",
+  "source_dependencies": {
+    "qa01_canonical_bundle": "unavailable; scenario mapping below is authored QA-06 metadata based on the current source catalogue",
+    "qa04_launcher": "unavailable",
+    "current_source_catalogue": "backend/data/scenarios.json",
+    "current_source_hashes": {
+      "backend/data/scenarios.json": "a39054db26e734bbcb02d84806e138c0a37479a0da95e365089894e8e3dacea8",
+      "backend/detection.py": "639ab1267fdb814b7ad447cc2062111f891e8b5ef0ab986b11f6de253ba118fe",
+      "backend/simulator.py": "ff7a9572f4dce5bcc1143c6b3d0571e5b7924057cc45cab4078b2485905f57de",
+      "backend/models.py": "7657272f681d62e247e6f2dab873f32ca2a67f6559a00d19f19cb7ec83b8baf1"
+    }
+  },
+  "methodology": {
+    "plan_sections": [
+      "15.2",
+      "15.3",
+      "15.4",
+      "15.5",
+      "15.6",
+      "15.7",
+      "16.4",
+      "16.5",
+      "16.6"
+    ],
+    "scenario_count": 12,
+    "benchmark_eligible_scenarios": 10,
+    "run_count": 100,
+    "strata": {
+      "conflict": {
+        "count": 40,
+        "scenario_ids": [
+          "S01",
+          "S03",
+          "S05",
+          "S06",
+          "S07",
+          "S09"
+        ]
+      },
+      "safe": {
+        "count": 40,
+        "scenario_ids": [
+          "S02",
+          "S04"
+        ]
+      },
+      "delay_noise": {
+        "count": 10,
+        "scenario_ids": [
+          "S08"
+        ]
+      },
+      "dropout": {
+        "count": 10,
+        "scenario_ids": [
+          "S10"
+        ]
+      }
+    },
+    "warmup_detector_evaluations": 10,
+    "measured_detector_evaluations_per_run": 1,
+    "synthetic_duration_per_run_ms": 1000,
+    "intervention": "none",
+    "denominator_policy": "All 100 manifest runs stay in the denominator. Do not drop runs; stress and dropout strata are reported separately.",
+    "labels_policy": "Strata and scenario mapping are authored synthetic metadata, not independent ground truth; do not calculate recall, false-warning rate, or domain validity from this manifest.",
+    "workflow_scenarios": "S11 and S12 are retained in the 12-scenario catalogue but excluded from physical-hazard denominator, per plan §15.2."
+  },
+  "parameters": {
+    "seed_policy": "Explicit seed in each run; seed = 62061001 + zero_based_run_index.",
+    "expected_object_ids": [
+      "BAW123",
+      "SIA456",
+      "GA712",
+      "QZ804",
+      "JTA610",
+      "ARFF-2",
+      "OPS-1"
+    ],
+    "tick_ms": 100,
+    "sample_ms": 1000,
+    "per_stratum": {
+      "conflict": {
+        "tick_ms": 100,
+        "sample_ms": 1000,
+        "delay_ms": 500,
+        "noise_m": 0,
+        "dropout_targets": []
+      },
+      "safe": {
+        "tick_ms": 100,
+        "sample_ms": 1000,
+        "delay_ms": 500,
+        "noise_m": 0,
+        "dropout_targets": []
+      },
+      "delay_noise": {
+        "tick_ms": 100,
+        "sample_ms": 1000,
+        "delay_ms": 900,
+        "noise_m": 8,
+        "dropout_targets": []
+      },
+      "dropout": {
+        "tick_ms": 100,
+        "sample_ms": 1000,
+        "delay_ms": 500,
+        "noise_m": 0,
+        "dropout_targets": [
+          "ARFF-2"
+        ]
+      }
+    }
+  },
+  "scenarios": [
+    {
+      "id": "S01",
+      "source_scenario_id": "overlap",
+      "objective": "arrival and vehicle overlap",
+      "category": "conflict",
+      "benchmark_eligible": true
+    },
+    {
+      "id": "S02",
+      "source_scenario_id": "safe_cross",
+      "objective": "crossing with time margin",
+      "category": "safe",
+      "benchmark_eligible": true
+    },
+    {
+      "id": "S03",
+      "source_scenario_id": "stopped",
+      "objective": "vehicle stopped on runway",
+      "category": "conflict",
+      "benchmark_eligible": true
+    },
+    {
+      "id": "S04",
+      "source_scenario_id": "hold_line",
+      "objective": "vehicle holds outside protection",
+      "category": "safe",
+      "benchmark_eligible": true
+    },
+    {
+      "id": "S05",
+      "source_scenario_id": "unauthorized",
+      "objective": "crossing without clearance",
+      "category": "conflict",
+      "benchmark_eligible": true
+    },
+    {
+      "id": "S06",
+      "source_scenario_id": "hold_violation",
+      "objective": "hold-short violation",
+      "category": "conflict",
+      "benchmark_eligible": true
+    },
+    {
+      "id": "S07",
+      "source_scenario_id": "cancelled",
+      "objective": "cancelled crossing with continuing movement",
+      "category": "conflict",
+      "benchmark_eligible": true
+    },
+    {
+      "id": "S08",
+      "source_scenario_id": "delayed_goaround",
+      "objective": "delayed go-around response; stress parameters applied",
+      "category": "delay_noise",
+      "benchmark_eligible": true
+    },
+    {
+      "id": "S09",
+      "source_scenario_id": "reciprocal_departure",
+      "objective": "reciprocal runway use",
+      "category": "conflict",
+      "benchmark_eligible": true
+    },
+    {
+      "id": "S10",
+      "source_scenario_id": "dropout",
+      "objective": "track dropout during active threat",
+      "category": "dropout",
+      "benchmark_eligible": true
+    },
+    {
+      "id": "S11",
+      "source_scenario_id": "duplicate_command",
+      "objective": "concurrent command workflow",
+      "category": "workflow_only",
+      "benchmark_eligible": false
+    },
+    {
+      "id": "S12",
+      "source_scenario_id": "replay_sync",
+      "objective": "seek and synchronization workflow",
+      "category": "workflow_only",
+      "benchmark_eligible": false
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "B001",
+      "scenario_id": "S01",
+      "source_scenario_id": "overlap",
+      "stratum": "conflict",
+      "seed": 62061001
+    },
+    {
+      "run_id": "B002",
+      "scenario_id": "S03",
+      "source_scenario_id": "stopped",
+      "stratum": "conflict",
+      "seed": 62061002
+    },
+    {
+      "run_id": "B003",
+      "scenario_id": "S05",
+      "source_scenario_id": "unauthorized",
+      "stratum": "conflict",
+      "seed": 62061003
+    },
+    {
+      "run_id": "B004",
+      "scenario_id": "S06",
+      "source_scenario_id": "hold_violation",
+      "stratum": "conflict",
+      "seed": 62061004
+    },
+    {
+      "run_id": "B005",
+      "scenario_id": "S07",
+      "source_scenario_id": "cancelled",
+      "stratum": "conflict",
+      "seed": 62061005
+    },
+    {
+      "run_id": "B006",
+      "scenario_id": "S09",
+      "source_scenario_id": "reciprocal_departure",
+      "stratum": "conflict",
+      "seed": 62061006
+    },
+    {
+      "run_id": "B007",
+      "scenario_id": "S01",
+      "source_scenario_id": "overlap",
+      "stratum": "conflict",
+      "seed": 62061007
+    },
+    {
+      "run_id": "B008",
+      "scenario_id": "S03",
+      "source_scenario_id": "stopped",
+      "stratum": "conflict",
+      "seed": 62061008
+    },
+    {
+      "run_id": "B009",
+      "scenario_id": "S05",
+      "source_scenario_id": "unauthorized",
+      "stratum": "conflict",
+      "seed": 62061009
+    },
+    {
+      "run_id": "B010",
+      "scenario_id": "S06",
+      "source_scenario_id": "hold_violation",
+      "stratum": "conflict",
+      "seed": 62061010
+    },
+    {
+      "run_id": "B011",
+      "scenario_id": "S07",
+      "source_scenario_id": "cancelled",
+      "stratum": "conflict",
+      "seed": 62061011
+    },
+    {
+      "run_id": "B012",
+      "scenario_id": "S09",
+      "source_scenario_id": "reciprocal_departure",
+      "stratum": "conflict",
+      "seed": 62061012
+    },
+    {
+      "run_id": "B013",
+      "scenario_id": "S01",
+      "source_scenario_id": "overlap",
+      "stratum": "conflict",
+      "seed": 62061013
+    },
+    {
+      "run_id": "B014",
+      "scenario_id": "S03",
+      "source_scenario_id": "stopped",
+      "stratum": "conflict",
+      "seed": 62061014
+    },
+    {
+      "run_id": "B015",
+      "scenario_id": "S05",
+      "source_scenario_id": "unauthorized",
+      "stratum": "conflict",
+      "seed": 62061015
+    },
+    {
+      "run_id": "B016",
+      "scenario_id": "S06",
+      "source_scenario_id": "hold_violation",
+      "stratum": "conflict",
+      "seed": 62061016
+    },
+    {
+      "run_id": "B017",
+      "scenario_id": "S07",
+      "source_scenario_id": "cancelled",
+      "stratum": "conflict",
+      "seed": 62061017
+    },
+    {
+      "run_id": "B018",
+      "scenario_id": "S09",
+      "source_scenario_id": "reciprocal_departure",
+      "stratum": "conflict",
+      "seed": 62061018
+    },
+    {
+      "run_id": "B019",
+      "scenario_id": "S01",
+      "source_scenario_id": "overlap",
+      "stratum": "conflict",
+      "seed": 62061019
+    },
+    {
+      "run_id": "B020",
+      "scenario_id": "S03",
+      "source_scenario_id": "stopped",
+      "stratum": "conflict",
+      "seed": 62061020
+    },
+    {
+      "run_id": "B021",
+      "scenario_id": "S05",
+      "source_scenario_id": "unauthorized",
+      "stratum": "conflict",
+      "seed": 62061021
+    },
+    {
+      "run_id": "B022",
+      "scenario_id": "S06",
+      "source_scenario_id": "hold_violation",
+      "stratum": "conflict",
+      "seed": 62061022
+    },
+    {
+      "run_id": "B023",
+      "scenario_id": "S07",
+      "source_scenario_id": "cancelled",
+      "stratum": "conflict",
+      "seed": 62061023
+    },
+    {
+      "run_id": "B024",
+      "scenario_id": "S09",
+      "source_scenario_id": "reciprocal_departure",
+      "stratum": "conflict",
+      "seed": 62061024
+    },
+    {
+      "run_id": "B025",
+      "scenario_id": "S01",
+      "source_scenario_id": "overlap",
+      "stratum": "conflict",
+      "seed": 62061025
+    },
+    {
+      "run_id": "B026",
+      "scenario_id": "S03",
+      "source_scenario_id": "stopped",
+      "stratum": "conflict",
+      "seed": 62061026
+    },
+    {
+      "run_id": "B027",
+      "scenario_id": "S05",
+      "source_scenario_id": "unauthorized",
+      "stratum": "conflict",
+      "seed": 62061027
+    },
+    {
+      "run_id": "B028",
+      "scenario_id": "S06",
+      "source_scenario_id": "hold_violation",
+      "stratum": "conflict",
+      "seed": 62061028
+    },
+    {
+      "run_id": "B029",
+      "scenario_id": "S07",
+      "source_scenario_id": "cancelled",
+      "stratum": "conflict",
+      "seed": 62061029
+    },
+    {
+      "run_id": "B030",
+      "scenario_id": "S09",
+      "source_scenario_id": "reciprocal_departure",
+      "stratum": "conflict",
+      "seed": 62061030
+    },
+    {
+      "run_id": "B031",
+      "scenario_id": "S01",
+      "source_scenario_id": "overlap",
+      "stratum": "conflict",
+      "seed": 62061031
+    },
+    {
+      "run_id": "B032",
+      "scenario_id": "S03",
+      "source_scenario_id": "stopped",
+      "stratum": "conflict",
+      "seed": 62061032
+    },
+    {
+      "run_id": "B033",
+      "scenario_id": "S05",
+      "source_scenario_id": "unauthorized",
+      "stratum": "conflict",
+      "seed": 62061033
+    },
+    {
+      "run_id": "B034",
+      "scenario_id": "S06",
+      "source_scenario_id": "hold_violation",
+      "stratum": "conflict",
+      "seed": 62061034
+    },
+    {
+      "run_id": "B035",
+      "scenario_id": "S07",
+      "source_scenario_id": "cancelled",
+      "stratum": "conflict",
+      "seed": 62061035
+    },
+    {
+      "run_id": "B036",
+      "scenario_id": "S09",
+      "source_scenario_id": "reciprocal_departure",
+      "stratum": "conflict",
+      "seed": 62061036
+    },
+    {
+      "run_id": "B037",
+      "scenario_id": "S01",
+      "source_scenario_id": "overlap",
+      "stratum": "conflict",
+      "seed": 62061037
+    },
+    {
+      "run_id": "B038",
+      "scenario_id": "S03",
+      "source_scenario_id": "stopped",
+      "stratum": "conflict",
+      "seed": 62061038
+    },
+    {
+      "run_id": "B039",
+      "scenario_id": "S05",
+      "source_scenario_id": "unauthorized",
+      "stratum": "conflict",
+      "seed": 62061039
+    },
+    {
+      "run_id": "B040",
+      "scenario_id": "S06",
+      "source_scenario_id": "hold_violation",
+      "stratum": "conflict",
+      "seed": 62061040
+    },
+    {
+      "run_id": "B041",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061041
+    },
+    {
+      "run_id": "B042",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061042
+    },
+    {
+      "run_id": "B043",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061043
+    },
+    {
+      "run_id": "B044",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061044
+    },
+    {
+      "run_id": "B045",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061045
+    },
+    {
+      "run_id": "B046",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061046
+    },
+    {
+      "run_id": "B047",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061047
+    },
+    {
+      "run_id": "B048",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061048
+    },
+    {
+      "run_id": "B049",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061049
+    },
+    {
+      "run_id": "B050",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061050
+    },
+    {
+      "run_id": "B051",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061051
+    },
+    {
+      "run_id": "B052",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061052
+    },
+    {
+      "run_id": "B053",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061053
+    },
+    {
+      "run_id": "B054",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061054
+    },
+    {
+      "run_id": "B055",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061055
+    },
+    {
+      "run_id": "B056",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061056
+    },
+    {
+      "run_id": "B057",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061057
+    },
+    {
+      "run_id": "B058",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061058
+    },
+    {
+      "run_id": "B059",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061059
+    },
+    {
+      "run_id": "B060",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061060
+    },
+    {
+      "run_id": "B061",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061061
+    },
+    {
+      "run_id": "B062",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061062
+    },
+    {
+      "run_id": "B063",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061063
+    },
+    {
+      "run_id": "B064",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061064
+    },
+    {
+      "run_id": "B065",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061065
+    },
+    {
+      "run_id": "B066",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061066
+    },
+    {
+      "run_id": "B067",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061067
+    },
+    {
+      "run_id": "B068",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061068
+    },
+    {
+      "run_id": "B069",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061069
+    },
+    {
+      "run_id": "B070",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061070
+    },
+    {
+      "run_id": "B071",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061071
+    },
+    {
+      "run_id": "B072",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061072
+    },
+    {
+      "run_id": "B073",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061073
+    },
+    {
+      "run_id": "B074",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061074
+    },
+    {
+      "run_id": "B075",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061075
+    },
+    {
+      "run_id": "B076",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061076
+    },
+    {
+      "run_id": "B077",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061077
+    },
+    {
+      "run_id": "B078",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061078
+    },
+    {
+      "run_id": "B079",
+      "scenario_id": "S02",
+      "source_scenario_id": "safe_cross",
+      "stratum": "safe",
+      "seed": 62061079
+    },
+    {
+      "run_id": "B080",
+      "scenario_id": "S04",
+      "source_scenario_id": "hold_line",
+      "stratum": "safe",
+      "seed": 62061080
+    },
+    {
+      "run_id": "B081",
+      "scenario_id": "S08",
+      "source_scenario_id": "delayed_goaround",
+      "stratum": "delay_noise",
+      "seed": 62061081
+    },
+    {
+      "run_id": "B082",
+      "scenario_id": "S08",
+      "source_scenario_id": "delayed_goaround",
+      "stratum": "delay_noise",
+      "seed": 62061082
+    },
+    {
+      "run_id": "B083",
+      "scenario_id": "S08",
+      "source_scenario_id": "delayed_goaround",
+      "stratum": "delay_noise",
+      "seed": 62061083
+    },
+    {
+      "run_id": "B084",
+      "scenario_id": "S08",
+      "source_scenario_id": "delayed_goaround",
+      "stratum": "delay_noise",
+      "seed": 62061084
+    },
+    {
+      "run_id": "B085",
+      "scenario_id": "S08",
+      "source_scenario_id": "delayed_goaround",
+      "stratum": "delay_noise",
+      "seed": 62061085
+    },
+    {
+      "run_id": "B086",
+      "scenario_id": "S08",
+      "source_scenario_id": "delayed_goaround",
+      "stratum": "delay_noise",
+      "seed": 62061086
+    },
+    {
+      "run_id": "B087",
+      "scenario_id": "S08",
+      "source_scenario_id": "delayed_goaround",
+      "stratum": "delay_noise",
+      "seed": 62061087
+    },
+    {
+      "run_id": "B088",
+      "scenario_id": "S08",
+      "source_scenario_id": "delayed_goaround",
+      "stratum": "delay_noise",
+      "seed": 62061088
+    },
+    {
+      "run_id": "B089",
+      "scenario_id": "S08",
+      "source_scenario_id": "delayed_goaround",
+      "stratum": "delay_noise",
+      "seed": 62061089
+    },
+    {
+      "run_id": "B090",
+      "scenario_id": "S08",
+      "source_scenario_id": "delayed_goaround",
+      "stratum": "delay_noise",
+      "seed": 62061090
+    },
+    {
+      "run_id": "B091",
+      "scenario_id": "S10",
+      "source_scenario_id": "dropout",
+      "stratum": "dropout",
+      "seed": 62061091
+    },
+    {
+      "run_id": "B092",
+      "scenario_id": "S10",
+      "source_scenario_id": "dropout",
+      "stratum": "dropout",
+      "seed": 62061092
+    },
+    {
+      "run_id": "B093",
+      "scenario_id": "S10",
+      "source_scenario_id": "dropout",
+      "stratum": "dropout",
+      "seed": 62061093
+    },
+    {
+      "run_id": "B094",
+      "scenario_id": "S10",
+      "source_scenario_id": "dropout",
+      "stratum": "dropout",
+      "seed": 62061094
+    },
+    {
+      "run_id": "B095",
+      "scenario_id": "S10",
+      "source_scenario_id": "dropout",
+      "stratum": "dropout",
+      "seed": 62061095
+    },
+    {
+      "run_id": "B096",
+      "scenario_id": "S10",
+      "source_scenario_id": "dropout",
+      "stratum": "dropout",
+      "seed": 62061096
+    },
+    {
+      "run_id": "B097",
+      "scenario_id": "S10",
+      "source_scenario_id": "dropout",
+      "stratum": "dropout",
+      "seed": 62061097
+    },
+    {
+      "run_id": "B098",
+      "scenario_id": "S10",
+      "source_scenario_id": "dropout",
+      "stratum": "dropout",
+      "seed": 62061098
+    },
+    {
+      "run_id": "B099",
+      "scenario_id": "S10",
+      "source_scenario_id": "dropout",
+      "stratum": "dropout",
+      "seed": 62061099
+    },
+    {
+      "run_id": "B100",
+      "scenario_id": "S10",
+      "source_scenario_id": "dropout",
+      "stratum": "dropout",
+      "seed": 62061100
+    }
+  ],
+    "measurement": {
+      "current_source_components": [
+        "backend/simulator.py delivered observations",
+        "backend/detection.py detect()",
+        "backend/storage.py Archive.save()"
+      ],
+      "dropout_injection": "The QA-06 harness filters ARFF-2 after Simulator.delivered(); this is an authored missing-observation mock, not a measured network dropout.",
+    "metrics": [
+      "detector_compute_ms",
+      "sqlite_create_and_save_ms"
+    ],
+    "unavailable_or_not_run": {
+      "api_delivery_render": "unavailable for source replay; no additive replay API/QA-04 launcher and no browser render timing in this suite",
+      "reconnect": "not_run; source replay stream unavailable",
+      "lan_clock_synchronization": "not_run; localhost-only environment",
+      "endurance_30m": "not_run; no integrated source replay runtime",
+      "provider_ai_asr": "unavailable; no provider/model assets"
+    },
+    "hardware_and_runtime": "Capture CPU/RAM/OS/architecture/Python/SQLite plus dependency versions in actual run report.",
+    "target_comparison": "Report actual p95 against detector <50 ms as a measurement only; do not translate this synthetic-source microbenchmark into domain or operational readiness."
+  },
+  "domain_review_status": "not_reviewed",
+  "operational_validation_status": "not_validated"
+}
