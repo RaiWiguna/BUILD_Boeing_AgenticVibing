@@ -8,7 +8,7 @@
 | Kontrak produk | `.agent/PRD.md`; batas proyek dan aturan kerja tetap berlaku |
 | Current implementation phase | Belum ada fase implementasi yang dimulai dalam roadmap ini |
 | Next recommended phase | Phase 0, dimulai dari 0.1 — audit source dan gap requirement |
-| Deadline dan staffing | Tidak ditetapkan; owner pada dokumen adalah fungsi, bukan penugasan individu |
+| Deadline dan staffing | Deadline belum ditetapkan; backend dibagi kepada pihak A (Platform & Replay) dan pihak B (Analysis & AI), tanpa penetapan individu |
 | Baseline data | Sintetik berlabel; replay simulator mitra berizin jika tersedia |
 
 Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase serta subfase dimulai dengan status `planned`. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap ini tidak menjalankan build, test aplikasi, cloud inference, atau deployment.
@@ -20,6 +20,8 @@ Tiga gate berikut wajib dipenuhi secara berurutan:
 1. **G-BE — Backend Complete Gate:** seluruh backend scope v1 yang disepakati, persistence, auth, import/replay, detector, audio/jobs, Google STT, Gemini, association/memory, findings/options, review/export, observability, serta verifikasi kontrak selesai sebelum implementasi frontend dimulai.
 2. **G-FE — Frontend Complete Gate:** seluruh frontend scope v1 yang disepakati, integrasi API nyata, browser journeys, accessibility, dan full-stack checks selesai sebelum Dockerfiles aplikasi, Caddy/Compose, serta deployment mulai dibuat.
 3. **G-DELIVERY — Delivery Complete Gate:** images, Compose lokal, VM research deployment, konfigurasi provider nyata, migration, restart, backup/restore, dan release rehearsal terbukti sebelum menyatakan delivery v1 selesai.
+
+Backend memakai baseline kontrak bersama pada Phase 0–1, lalu dua jalur independen: pihak A dan B menyelesaikan seluruh task paket masing-masing tanpa integrasi bertahap atau menunggu implementasi pihak lain. Integrasi kedua paket hanya dilakukan pada Phase 10 setelah acceptance paket A dan B terpenuhi. Nomor Phase 2–9 mengelompokkan scope; dependency berlaku di dalam jalur masing-masing, bukan sebagai rantai serial lintas pihak.
 
 Urutan ini mencakup backend domain/geometri dan AI worker; keduanya bukan pekerjaan yang boleh ditinggalkan sampai tahap frontend. QA dilakukan dalam setiap fase, lalu diperiksa sebagai gate gabungan. Container dan deployment memiliki fase tersendiri setelah frontend.
 
@@ -34,7 +36,7 @@ Jika perubahan frontend menemukan gap backend, hentikan pekerjaan frontend yang 
 | Status | Makna |
 | --- | --- |
 | `planned` | Scope dan dependency diketahui; eksekusi belum dimulai |
-| `in_progress` | Eksekusi aktif dengan satu fase/subfase utama sebagai current focus |
+| `in_progress` | Eksekusi aktif dengan satu fase/subfase utama sebagai current focus; backend A dan B masing-masing dapat memiliki focus independen |
 | `blocked` | Pekerjaan tidak dapat dilanjutkan karena dependency atau keputusan spesifik yang dicatat |
 | `deferred` | Ditunda secara eksplisit dengan alasan, dampak, dan keputusan owner |
 | `done` | Deliverable tersedia dan seluruh acceptance relevan mempunyai evidence yang nyata |
@@ -49,7 +51,7 @@ Setiap subfase selesai harus mempunyai:
 - Limitations dan external dependency yang belum selesai, tanpa mengubahnya menjadi PASS.
 - Dokumentasi dan handoff yang diperbarui sesuai perubahan; ADR untuk keputusan arsitektur material.
 
-Parent phase menjadi `done` hanya setelah seluruh subfase wajib selesai. Scope P1 dapat ditunda secara eksplisit tanpa disebut tersedia; scope P0 tidak boleh dihilangkan tanpa keputusan produk dan perubahan acceptance. Tidak ada deadline buatan atau persentase progress berdasarkan jumlah file.
+Untuk backend, catat status per owner/subfase. Paket A atau B dapat selesai secara mandiri setelah acceptance paket dan contract tests lulus; acceptance lintas paket serta G-BE tetap menunggu Phase 10. Parent phase menjadi `done` hanya setelah seluruh subfase wajib selesai. Scope P1 dapat ditunda secara eksplisit tanpa disebut tersedia; scope P0 tidak boleh dihilangkan tanpa keputusan produk dan perubahan acceptance. Tidak ada deadline buatan atau persentase progress berdasarkan jumlah file.
 
 ## 3. Baseline Setelah Reset dan Inventaris Historis
 
@@ -76,16 +78,16 @@ Audit awal memeriksa kontrak dan scaffold yang benar-benar tersedia, lalu meneta
 | Phase | Track | Deliverable utama | Dependency wajib | Status |
 | --- | --- | --- | --- | --- |
 | 0 | Baseline | Audit gap, scope freeze, fixture/evaluation plan, dependency register | PRD dan rules | `planned` |
-| 1 | Backend | Toolchain, modular boundary, Pydantic/OpenAPI contracts | Phase 0 | `planned` |
-| 2 | Backend | SQLite migrations, accounts, grants, auth, audit foundation | Phase 1 | `planned` |
-| 3 | Backend | Import atomik, source provenance, clocks dan quality | Phase 2 | `planned` |
-| 4 | Backend | Replay/checkpoints, REST/WS, archive dan compatibility | Phase 3 | `planned` |
-| 5 | Backend | Footprint, occupancy, prediction, separation, rules/alerts | Phase 4 | `planned` |
-| 6 | Backend | Private audio, derivative mapping, durable jobs, worker isolation | Phase 5 | `planned` |
-| 7 | Backend | Google STT, transcript, correction, STT smoke/benchmark | Phase 6 dan GCP readiness untuk smoke | `planned` |
-| 8 | Backend | Gemini intent, scoped tools, association, memory/open loops | Phase 7 dan Gemini readiness untuk smoke | `planned` |
-| 9 | Backend | Findings, opsi, review, brief/export, query/metrics, ops | Phase 8 | `planned` |
-| 10 | Backend | Integrated verification, benchmark, API/client freeze, G-BE | Phase 1–9 | `planned` |
+| 1 | Baseline kontrak backend bersama | Runtime/harness, shared contracts dan module registration dibekukan | Phase 0 | `planned` |
+| 2 | Backend A | Platform persistence, accounts/grants/auth, audit, transaction infrastructure | Phase 1; tanpa dependency implementasi B | `planned` |
+| 3 | Backend A | Import atomik, provenance, clocks, quality dan source reader | Phase 2 (A) | `planned` |
+| 4 | Backend A | Replay/checkpoints, REST/WS, archive dan compatibility | Phase 3 (A) | `planned` |
+| 5 | Backend A | Footprint, occupancy, prediction, observed rules/alerts | Phase 4 (A) | `planned` |
+| 6 | Backend A / B | A: assets/jobs/internal API; B: audio processing/worker | A: Phase 2; B: Phase 1; keduanya memakai frozen contracts | `planned` |
+| 7 | Backend B | Google STT, transcript/corrections, analysis persistence dan benchmark | Phase 6.2/6.4 (B); GCP readiness untuk smoke | `planned` |
+| 8 | Backend B | Gemini intent, scoped tools, association, memory/open loops | Phase 7 (B); Gemini readiness untuk smoke | `planned` |
+| 9 | Backend A / B | A: artifact lifecycle/ops; B: findings/review/brief/report/query/provider diagnostics | A: Phase 2–6 bagian A; B: Phase 8; tanpa dependency lintas implementasi | `planned` |
+| 10 | Integrasi backend akhir | Composition/migrations nyata, integrated verification, contract freeze, G-BE | Seluruh task dan acceptance paket A serta B selesai | `planned` |
 | 11 | Frontend | React/Vite/shadcn foundation, auth/router, API data layer | G-BE `passed` | `planned` |
 | 12 | Frontend | Sessions/import, workspace, replay/audio, memory/situation | Phase 11 | `planned` |
 | 13 | Frontend | Evidence/review, options, debrief/export, settings | Phase 12 | `planned` |
@@ -96,8 +98,11 @@ Audit awal memeriksa kontrak dan scaffold yang benar-benar tersedia, lalu meneta
 
 ```mermaid
 flowchart LR
-  P0[0: Baseline] --> BE[1–9: Full backend]
-  BE --> GBE[10: G-BE]
+  P0[0: Baseline] --> P1[1: Frozen backend contracts]
+  P1 --> A[A: 2–5, 6.1/6.3, 9.4/9.6 platform]
+  P1 --> B[B: 6.2/6.4, 7–8, 9 analysis]
+  A --> GBE[10: Integrasi akhir / G-BE]
+  B --> GBE
   GBE --> FE[11–13: Full frontend]
   FE --> GFE[14: G-FE]
   GFE --> C[15: Containerization]
@@ -116,7 +121,7 @@ flowchart LR
 | 0.1 | Audit source, route, wire schema, auth/storage, test/tooling, serta compatibility gaps | Matriks reuse/modify/replace dengan file dan evidence statis | `planned` |
 | 0.2 | Bekukan replay offline; konfirmasi provider transport, P0/P1, permissions, readiness, dan batas authority | Keputusan scope serta daftar open decisions/impact | `planned` |
 | 0.3 | Rancang fixture audio/event, layout, clocks, labels terisolasi, dan expected outcomes independen | Fixture manifest/schema dan evaluation protocol | `planned` |
-| 0.4 | Petakan FR/AC, external dependencies, owner-function, gate evidence, serta milestone | Backlog terurut dan dependency register | `planned` |
+| 0.4 | Petakan FR/AC, external dependencies, ownership paket backend A/B, shared contract baseline dan acceptance integrasi akhir | Backlog dua jalur independen dan dependency register | `planned` |
 
 **Deliverables:** baseline source map; schema/lifecycle inventory; fixture/data-rights plan; compatibility/deprecation plan; documented provider-access path; handoff implementasi pertama.
 
@@ -134,28 +139,98 @@ flowchart LR
 
 Seluruh Phase 1–10 dilaksanakan sebelum implementasi frontend. Backend selesai berarti API/workers/domain nyata tersedia dan terverifikasi; bukan sekadar endpoint yang mengembalikan fixture.
 
+### 6.1 Model Eksekusi — Dua Paket Independen, Integrasi di Akhir
+
+Phase 0–1 menyediakan baseline kontrak bersama sebelum penugasan implementasi paket. Setelah baseline dibekukan, A dan B mengerjakan seluruh task masing-masing secara independen. Tidak ada kewajiban merge/integrasi bertahap, milestone lintas pihak, atau menunggu source pihak lain pada Phase 2–9. Dependency lokal tetap berlaku; credential, quota, hak sumber dan keputusan provider tetap merupakan external dependencies.
+
+| Paket | Owner dan scope | Fase/subfase |
+| --- | --- | --- |
+| A — Platform & Replay | FastAPI host, auth/grants, database runtime/transactions, import/source/clock, private assets, replay/WS, geometry/observed rules, evidence registry, job coordinator, artifact lifecycle, audit dan operability | 2–5; 6.1/6.3; bagian platform 9.4/9.6 |
+| B — Analysis & AI | Analysis module/config, analysis repositories/migrations, audio processing/worker, STT/transcript, Gemini/intent, association/memory/loops, semantic findings, review/reanalysis/journal, advisory/brief/query/metrics, report generation dan provider diagnostics | 6.2/6.4; 7–8; 9.1–9.3/9.5; bagian analisis 9.4/9.6 |
+| Baseline bersama | Runtime/dependency strategy, Pydantic contracts, ports, module registration, fake adapters dan contract harness yang siap dipakai kedua paket | 0–1 |
+| Integrasi akhir | Memasang implementasi A dan B nyata, memverifikasi seluruh alur serta memperbaiki incompatibility sebelum G-BE | 10; hanya setelah kedua paket selesai |
+
+**Boundary package:** gunakan modular packages dalam satu backend, bukan menambah microservices. Paket A menjadi host dan pemilik satu proses API writer. Paket B menyediakan registration entrypoint untuk routes/services/repositories/migrations/job handlers. Common contracts berada pada boundary bersama; A tidak mengimpor internal B dan B tidak mengimpor internal A. Composition root menghubungkan implementations melalui ports saat Phase 10.
+
+**Ownership persistence:** A memiliki transaction/unit-of-work infrastructure, migration runner dan tabel platform (accounts/grants, sources/assets, replay, runs/jobs/attempts, audit, artifact inventory dan receipts). B memiliki migrations/repositories tabel analisis (transcripts/revisions, intent/association, memory/loops, findings/options/briefs/queries, reviews/journal). Namespaces dan migration registration/order dibekukan pada Phase 1; setiap paket dapat menjalankan fresh/upgrade tests dengan SQLite disposable secara mandiri. Foreign key/unique constraints dan scoped reference validation lintas paket ditetapkan pada baseline. Standalone harness memasang minimal reference schemas/fixtures yang mengikuti kontrak bila diperlukan; jangan menonaktifkan constraints agar tests mandiri lulus. Aplikasi gabungan tetap memverifikasi seluruh referensi dalam transaksi.
+
+B menulis accepted state hanya sebagai service dalam proses API melalui unit-of-work yang sama. Worker B tidak mengakses SQLite, database writer, atau raw inventory unrestricted. B memvalidasi kandidat secara domain; A memvalidasi lease/status/input/config/rights lalu mengoordinasikan atomic accepted-result commit melalui handler B. Domain writes, evidence registration, audit/receipts dan stream events harus berbagi transaksi; event dipublikasikan setelah commit. Rollback tidak boleh meninggalkan projection/event setengah tersimpan.
+
+**Boundary yang rawan overlap:**
+
+| Area | Pihak A | Pihak B |
+| --- | --- | --- |
+| Media | Raw storage, access/range, controlled derivative promotion | Decode/resample/chunk, time mapping dan artifact submission |
+| Jobs | Lease/heartbeat/budget/cancel/retry coordinator dan internal endpoints | Executor, stage handlers, heartbeat/result client |
+| Evidence | Registry, resolution, scope/permission/hash/range validation | Evidence references dan pemeriksaan dukungan semantik |
+| Movement findings | Numeric geometry/eligibility/observed evidence | Instruction applicability, association dan finding assembly memakai geometry reader |
+| Review | Auth policy, atomic transaction, audit infrastructure | Domain decisions/corrections, stale dependencies, reanalysis dan revision routes |
+| Export | File submission/storage/download, expiry, permissions dan purge infrastructure | JSON/CSV/HTML rendering, factual references, capability-based redaction dan injection escaping |
+| Retention | Inventory, purge coordination, job cancellation dan minimal tombstones | Inventory/purge handler untuk seluruh sensitive analysis tables/artifacts |
+| Provider/ops | Admin profile storage/routes, budget/usage aggregation, health/backup | Provider validation/check handlers, sanitized diagnostics/usage, analysis readiness |
+| Stream | Envelope/sequence, snapshot/resync dan authorized transport | Typed domain events dan scoped analysis snapshot reader |
+
+### 6.2 Frozen Contracts dan Pengembangan Mandiri
+
+Kontrak adalah input awal kedua paket, bukan deliverable implementasi A yang ditunggu B. Phase 1 harus menyediakan signatures, versioned DTOs, error semantics, valid/invalid examples dan executable contract tests untuk:
+
+| Kontrak | Isi minimum |
+| --- | --- |
+| Request context/authorization | Actor, capabilities, server-bound session/run scope, input revision/hash, as-of dan request ID; permission tidak ditentukan model |
+| Source/context reader | Manifest/rights/quality, clock mapping, source events/tracks, active rules dan bounded as-known views; truth/future schedule terisolasi |
+| Asset access/artifact submission | Scoped audio range/checksum, limited input download, derivative hash/transform/time mapping dan atomic promotion |
+| Geometry reader | Numeric observations/results, eligibility, uncertainty, evidence, rule/layout version dan NOT_EVALUABLE reason |
+| Job protocol | Stage/job type, input/result envelope, attempt/lease/heartbeat/cancel/deadline, usage/budget, retries dan commit receipt |
+| Evidence service | Register/resolve scoped IDs, quote/span/audio/event ranges, source hash, access checks dan transaction participation |
+| Persistence/unit-of-work | Repository/transaction ports, migration registration/order, optimistic versions, idempotency, commit/rollback dan after-commit publication |
+| Module registration | Routes/services/repositories/migrations/job handlers, config, readiness, snapshot reader dan retention callbacks tanpa import internal lintas paket |
+| Event publication | Typed payload, schema/session/run/revision/time fields; sequence diberikan host di dalam transaction boundary |
+| Artifact lifecycle | Report submission/download/expiry, capability-based redaction, inventory dan purge contract |
+
+Perilaku atomic commit, duplicate/late/cancelled result, revoked permissions, stale revision, clock unknown, as-of filtering dan errors ikut dibekukan; schema-valid output saja tidak cukup. Perubahan breaking setelah freeze memerlukan versi baru dan compatibility adapter serta contract tests pada paket pengusul; jangan menjadikan perubahan tersebut kewajiban menunggu pihak lain. Jika perubahan tidak kompatibel tidak dapat dihindari, catat dampak/keputusan dan pekerjaan reconciliation pada Phase 10; jangan mengklaim kontrak tetap compatible.
+
+**Harness mandiri:** A memakai fake analysis module/handlers/snapshot/export/purge callbacks yang mengikuti kontrak. B memakai fake platform ports untuk source/geometry/assets/authorization/jobs/evidence/unit-of-work; repositories B juga diuji dengan SQLite disposable dan test transaction adapter yang memenuhi kontrak. Kedua paket menjalankan suite kontrak yang sama. Fake adapters berlabel MOCK, dibatasi ke tests/development harness, dan tidak dipilih diam-diam oleh composition production.
+
+Real STT/Gemini smoke dapat dijalankan oleh B dengan synthetic non-sensitive inputs pada standalone harness setelah akses/budget tersedia. Mock platform tidak menggantikan provider nyata; provider mocks tidak menutup smoke. Tidak ada status G-BE passed sebelum integrasi akhir.
+
+### 6.3 Urutan Lokal dan Acceptance Paket
+
+| Urutan | Jalur A | Jalur B |
+| --- | --- | --- |
+| 1 | Phase 2: host/config, transaction infrastructure, platform migrations/auth | Sesudah Phase 1: analysis module/config, analysis migrations/repositories dan registration |
+| 2 | Phase 3 dan 6.1: imports/source/clock/private assets; 6.3 jobs dapat dimulai sesudah Phase 2 | Phase 6.2/6.4: audio processing dan isolated worker memakai fake platform |
+| 3 | Phase 4: replay/REST/WS/checkpoints | Phase 7: STT/transcript/corrections dan provider verification |
+| 4 | Phase 5: geometry/observed rules/alerts | Phase 8: Gemini/association/memory/open loops |
+| 5 | Bagian A pada 9.4/9.6: artifact lifecycle/retention/audit/operability | Phase 9 bagian B: findings/review/options/brief/report/query/provider diagnostics |
+| 6 | Acceptance seluruh paket A, contract/security/recovery/performance tests dengan fake analysis | Acceptance seluruh paket B, contract/semantic/repository/failure tests dan real provider smoke dengan fake platform |
+| Akhir | Kedua paket selesai → Phase 10: merge/composition nyata dan integrated verification | Kedua paket selesai → Phase 10: merge/composition nyata dan integrated verification |
+
+Urutan lokal dapat disesuaikan selama dependency dalam paket dan acceptance tetap dipenuhi. Fixture waveform, observed inputs dan evaluator-only labels disediakan pada baseline; kedua pihak tidak menunggu generator/data pipeline milik pihak lain. Setiap paket mengirim manifest entrypoints/migrations/config/dependencies, contract version, candidate SHA, checks dan limitations pada handoff akhir.
+
+Status selesai paket berarti seluruh task wajib milik pihak tersebut dan acceptance mandirinya selesai; bukan parent phase bersama atau G-BE. Phase 6/9 yang dimiliki dua pihak mencatat status per subfase/owner. External blocker pada B tidak menahan implementasi A, tetapi Phase 10 menunggu keduanya siap dan G-BE tetap membutuhkan seluruh acceptance nyata.
+
 ### Phase 1 — Backend Foundation dan Shared Contracts
 
-**Status:** `planned` · **Owner-function:** backend lead · **Dependency:** Phase 0.
+**Status:** `planned` · **Owner:** baseline bersama A/B · **Dependency:** Phase 0; selesai sebelum implementasi dua paket dimulai.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
 | 1.1 | Rapikan package boundaries, runtime/dependency lock strategy, virtual environment, lint/type/test entrypoints | Setup backend reproducible | `planned` |
 | 1.2 | Definisikan Pydantic source/time/quality/evidence, run/job, transcript, intent/memory/finding/option/review DTOs | Versioned domain/wire schemas | `planned` |
-| 1.3 | Buat configuration schema, safe error envelope, IDs, request context, provider ports, composition root | Validated config dan injectable boundaries | `planned` |
-| 1.4 | Bangun contract fixtures, OpenAPI generation, TS client generation strategy, unit/negative harness | Contract verification foundation | `planned` |
+| 1.3 | Bekukan config/error/context/provider ports, transaction/migration ports dan module registration; sediakan bootstrap composition untuk standalone harness | Frozen interfaces dan injectable boundaries | `planned` |
+| 1.4 | Bangun shared contract suite, fake platform/analysis adapters, fixture inputs, OpenAPI/client generation strategy dan standalone test entrypoints | Harness mandiri A/B dan contract freeze record | `planned` |
 
 **Scope:** pisahkan domain dari FastAPI/storage/provider SDK; model SDK tidak menjadi public wire shape. Rancang clocks UTC/relative ms, null/unknown semantics, schema version, source/run scope, idempotency, serta optimistic version. Tidak membuat React workflow atau Dockerfiles.
 
 **Acceptance:** install backend reproducible; import/config/unit smoke lulus; invalid enums/nonfinite/time/range/scope ditolak; structured errors aman; generated contract tidak mempunyai hand-written duplicate wire definitions. Build/format/lint/type/test commands dipilih dari tooling yang benar-benar tersedia dan dicatat.
 
-### Phase 2 — Persistence, Identity, Authorization, dan Audit
+### Phase 2 — Paket A: Platform Persistence, Identity, Authorization, dan Audit
 
-**Status:** `planned` · **Owner-function:** backend/auth · **Dependency:** Phase 1.
+**Status:** `planned` · **Owner:** pihak A · **Dependency:** Phase 1; tidak membutuhkan implementasi B.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
-| 2.1 | Bangun migrations dan stores untuk accounts, grants, sources, runs/jobs, revisions, audit dan exports | Versioned SQLite schema/transactions | `planned` |
+| 2.1 | Bangun host/config, unit-of-work, migration runner dan stores platform untuk accounts/grants/sources/assets/replay/runs/jobs/attempts/audit/artifacts/receipts; analysis tables dimiliki B | Platform SQLite schema dan injectable transactions | `planned` |
 | 2.2 | Bootstrap admin, Argon2id, login/logout/reset/deactivation, cookie sessions, expiry dan rate limits | Individual account lifecycle | `planned` |
 | 2.3 | Session/raw-audio/export/truth grants, CSRF, WS origin/session checks, internal worker principal | Server-side policy dan serializers | `planned` |
 | 2.4 | Audit changes, optimistic concurrency, idempotency, atomic transaction/fault handling | Durable receipts dan audit events | `planned` |
@@ -166,7 +241,7 @@ Seluruh Phase 1–10 dilaksanakan sebelum implementasi frontend. Backend selesai
 
 ### Phase 3 — Atomic Import, Provenance, Clock, dan Quality
 
-**Status:** `planned` · **Owner-function:** backend/data · **Dependency:** Phase 2.
+**Status:** `planned` · **Owner:** pihak A · **Dependency:** Phase 2 (A); tidak membutuhkan implementasi B.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
@@ -181,7 +256,7 @@ Seluruh Phase 1–10 dilaksanakan sebelum implementasi frontend. Backend selesai
 
 ### Phase 4 — Replay Engine, Archive, API, dan WebSocket
 
-**Status:** `planned` · **Owner-function:** backend/replay · **Dependency:** Phase 3.
+**Status:** `planned` · **Owner:** pihak A · **Dependency:** Phase 3 (A); analysis snapshot/events memakai fake module sampai Phase 10.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
@@ -194,7 +269,7 @@ Seluruh Phase 1–10 dilaksanakan sebelum implementasi frontend. Backend selesai
 
 ### Phase 5 — Geometry, Occupancy, Prediction, Rules, dan Alert Lifecycle
 
-**Status:** `planned` · **Owner-function:** domain/detection · **Dependency:** Phase 4.
+**Status:** `planned` · **Owner:** pihak A · **Dependency:** Phase 4 (A); tidak membutuhkan STT/Gemini atau memory B.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
@@ -209,7 +284,7 @@ Seluruh Phase 1–10 dilaksanakan sebelum implementasi frontend. Backend selesai
 
 ### Phase 6 — Private Audio, Durable Jobs, dan Worker Boundary
 
-**Status:** `planned` · **Owner-function:** backend/media/worker · **Dependency:** Phase 5.
+**Status:** `planned` · **Owner:** A untuk 6.1/6.3; B untuk 6.2/6.4 · **Dependency:** A memakai Phase 2 dan source/asset contracts; B memakai Phase 1 dan baseline fixtures. Tidak bergantung pada penyelesaian Phase 5 atau implementasi pihak lain.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
@@ -222,13 +297,13 @@ Seluruh Phase 1–10 dilaksanakan sebelum implementasi frontend. Backend selesai
 
 ### Phase 7 — Google STT dan Transcript Lifecycle
 
-**Status:** `planned` · **Owner-function:** AI/transcription · **Dependency:** Phase 6; GCP access untuk real smoke.
+**Status:** `planned` · **Owner:** pihak B · **Dependency:** 6.2/6.4 (B), frozen platform ports dan standalone analysis persistence; GCP access untuk real smoke. Tidak menunggu 6.1/6.3 (A).
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
 | 7.1 | Implement SDK adapter, provider profile, locale/region/model/recognizer checks | Google STT V2 adapter | `planned` |
 | 7.2 | Transcribe chunks, preserve offsets/confidence/quality, overlap dedup dan partial results | Transcript hypotheses | `planned` |
-| 7.3 | Append-only corrections/attribution dengan reason/evidence dan stale dependencies | Transcript revision API | `planned` |
+| 7.3 | Analysis module registration, repositories/migrations dan append-only transcript corrections/attribution dengan reason/evidence/stale dependencies melalui transaction ports | Analysis persistence dan transcript revision API | `planned` |
 | 7.4 | Mock failures, real synthetic smoke, critical-slot/alignment baseline | STT verification/benchmark record | `planned` |
 
 **Scope:** initial chunk baseline ≤50 detik dan di bawah 10 MB untuk inline recognize; batas efektif diverifikasi pada API release. GCS/BatchRecognize bukan dependency default. Word timing dapat unavailable; chunk ranges tetap tersedia. Diarization tidak menjadi identity ground truth dan null confidence tidak dibuat menjadi angka.
@@ -239,7 +314,7 @@ Seluruh Phase 1–10 dilaksanakan sebelum implementasi frontend. Backend selesai
 
 ### Phase 8 — Gemini Intent, Orchestration, Association, dan Memory
 
-**Status:** `planned` · **Owner-function:** AI/backend domain · **Dependency:** Phase 7; Gemini access untuk real smoke.
+**Status:** `planned` · **Owner:** pihak B · **Dependency:** Phase 7 (B), frozen context/evidence/geometry ports; Gemini access untuk real smoke. Platform ports memakai fake adapters sampai Phase 10.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
@@ -257,34 +332,37 @@ Seluruh Phase 1–10 dilaksanakan sebelum implementasi frontend. Backend selesai
 
 ### Phase 9 — Findings, Options, Review, Debrief, dan Operability
 
-**Status:** `planned` · **Owner-function:** backend/advisory/ops · **Dependency:** Phase 8.
+**Status:** `planned` · **Owner:** B untuk 9.1–9.3/9.5 dan analysis parts 9.4/9.6; A untuk platform parts 9.4/9.6 · **Dependency:** B memakai Phase 8; A memakai Phase 2–6 bagian A. Tidak ada dependency implementasi lintas pihak.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
 | 9.1 | Readback discrepancy, critical-slot uncertainty, open-loop dan movement conformance findings | Evidence-linked finding lifecycle | `planned` |
 | 9.2 | Gemini options/brief dengan preconditions, unknowns, applicability dan bounded evidence | Versioned advisory outputs | `planned` |
 | 9.3 | Human confirm/dismiss/unresolved/relevance, append-only review, invalidation dan reanalysis | Durable review/journal APIs | `planned` |
-| 9.4 | JSON/CSV/HTML export, redaction, retention/purge/tombstones dan audit queries | Scoped debrief/export lifecycle | `planned` |
+| 9.4 | B: JSON/CSV/HTML rendering, evidence/versions, capability redaction dan injection escaping; A: artifact submission/storage/download/expiry, retention/purge/tombstones/audit queries; B mendaftarkan sensitive-data inventory/purge handler | Report renderer B dan artifact lifecycle A yang independently tested | `planned` |
 | 9.5 | P1 contextual query dan communication metrics sesuai disposition | Scoped read-only query/metric APIs | `planned` |
-| 9.6 | Health/ready/release, logs/usage/budget, disk checks, backup/restore CLI dan provider admin metadata | Backend operability/runbook | `planned` |
+| 9.6 | A: health/ready/release, log/audit/usage/budget infrastructure, disk/backup/restore dan provider admin profiles; B: provider check handlers, sanitized diagnostics/usage/latency dan analysis readiness | Platform ops A dan provider diagnostics B | `planned` |
 
 **Scope:** backend menyediakan semua fungsi Sessions/Workspace/Review/Debrief/Settings yang dijanjikan. Opsi tidak dapat dieksekusi; nol opsi dengan `INSUFFICIENT_CONTEXT` valid. Factual brief/query items mempunyai evidence IDs; query tidak mengubah operational memory. Metrik komunikasi tidak menjadi diagnosis. Branch/what-if tetap workflow evaluator opsional, tidak ditambahkan sebagai tool AI atau fitur wajib tanpa disposition.
 
 **Acceptance:** quote/audio/event dapat resolved sesuai grants; source alerts tetap utuh; stale review/version conflict ditolak; restart mempertahankan review, revisions dan receipts; findings/options/brief tidak menjadi data training atau truth tersembunyi. Export menjaga labels/versions/unknowns dan mencegah formula/HTML injection; audio export mempunyai izin terpisah. Provider failure menghasilkan `PARTIAL`/unavailable tanpa menghalangi cached replay. Backup konsisten dan recovery CLI dapat diuji pada disposable state sebelum containerization.
 
-### Phase 10 — Integrated Backend Verification dan Contract Freeze
+### Phase 10 — Integrasi Akhir, Integrated Backend Verification dan Contract Freeze
 
-**Status:** `planned` · **Owner-function:** backend/QA lead · **Dependency:** Phase 1–9.
+**Status:** `planned` · **Owner:** A/B bersama; A lead composition/platform checks, B lead analysis/provider benchmarks · **Dependency:** seluruh task dan acceptance mandiri paket A/B selesai pada frozen contract version yang compatible. Tidak ada integrasi kedua implementasi sebelum fase ini.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
-| 10.1 | Jalankan integrated API/SQLite/worker/domain flows dan failure injections | Backend integration evidence | `planned` |
+| 10.1 | Merge paket A/B; pasang module registration/routes/services/migrations/job handlers/snapshot/purge callbacks pada composition root; ganti fake adapters dengan implementations nyata, perbaiki incompatibility dan jalankan API/SQLite/worker/domain flows/failure injections | Backend nyata terintegrasi dan evidence gabungan | `planned` |
 | 10.2 | Jalankan canonical synthetic scenarios, audio/association cases dan held-out benchmark | Cohort/versioned benchmark report | `planned` |
 | 10.3 | Auth/media/truth/tool negative tests, migration/recovery, performance/usage profiling | Security/durability/performance evidence | `planned` |
 | 10.4 | Freeze OpenAPI/generated client, publish run/env/error/integration guide dan gate record | Backend handoff dan G-BE decision | `planned` |
 
+**Entry acceptance integrasi akhir:** kedua paket menyerahkan seluruh task/acceptance mandiri, passing shared contract tests, fresh/upgrade repository checks, manifest/config/migration versions dan real-provider smoke B. Mocks tidak membuktikan compatibility runtime gabungan. Sediakan pekerjaan reconciliation/fix/retest dalam Phase 10; merge yang berhasil belum berarti G-BE passed.
+
 **G-BE acceptance wajib:**
 
+- [ ] Composition nyata memakai implementations A/B dan seluruh module/migration/transaction/snapshot/purge registrations terpasang; fake adapters tidak aktif pada production profile.
 - [ ] Semua backend P0 tersedia tanpa placeholder business behavior; P1 disposition eksplisit.
 - [ ] Import → replay → STT → intent → association → memory → finding → option/review → brief/export dapat dijalankan melalui API dengan implementation nyata.
 - [ ] Fresh/upgrade SQLite migration mempertahankan historical IDs/events/evidence; restart dan storage-failure behavior terbukti.
@@ -562,6 +640,6 @@ Perbarui `.agent/sessionHandoff.md` untuk pekerjaan lintas sesi yang substantif,
 2. Catat build-new/reuse disposition beserta compatibility risks; source historis hanya dipakai ulang bila keputusan tersebut eksplisit. Prioritaskan single-writer transactions, truth isolation, serta timebase sebelum pipeline AI.
 3. Bekukan scope offline, provider transport, dan P1 disposition; inventaris akses GCP/Gemini untuk smoke mendatang.
 4. Siapkan synthetic manifest/audio/event serta independent labels/geometry oracle dan source split.
-5. Setelah Phase 0 acceptance terpenuhi, mulai Phase 1. Jangan memulai React workflows, images, Compose aplikasi, atau deployment lebih dahulu.
+5. Setelah Phase 0 acceptance terpenuhi, mulai Phase 1 untuk membekukan shared contracts dan menyediakan standalone harness A/B. Setelah baseline siap, jalankan task A dan B secara independen; integrasi kedua paket hanya pada Phase 10 setelah keduanya selesai. Jangan memulai React workflows, images, Compose aplikasi, atau deployment lebih dahulu.
 
 Urutan tersebut merupakan rencana berikutnya. Tidak ada perubahan source aplikasi, provisioning, commit/push, atau deployment yang dijalankan oleh pembuatan dokumen ini.
