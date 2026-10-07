@@ -51,9 +51,11 @@ Setiap subfase selesai harus mempunyai:
 
 Parent phase menjadi `done` hanya setelah seluruh subfase wajib selesai. Scope P1 dapat ditunda secara eksplisit tanpa disebut tersedia; scope P0 tidak boleh dihilangkan tanpa keputusan produk dan perubahan acceptance. Tidak ada deadline buatan atau persentase progress berdasarkan jumlah file.
 
-## 3. Current Baseline dan Reuse
+## 3. Baseline Setelah Reset dan Inventaris Historis
 
-Inspeksi statis terbatas pada 7 Oktober 2026 menemukan fondasi berikut. Belum ada build/runtime/test aplikasi yang dijalankan untuk roadmap ini.
+**Keadaan terkini, 7 Oktober 2026:** source dan dokumentasi lama telah dihapus pada commit reset `6e7bd3f`. Kontrak `.agent/` dipertahankan; struktur folder baru disiapkan dengan `.gitkeep` dan panduan ownership. Source aplikasi, dependency manifests, suites, Dockerfiles, Compose, dan workflow CI executable belum tersedia. Instruksi AGENTS.md sebelumnya tidak berlaku. Scaffold tidak menutup Phase 0 maupun Phase 1 dan tidak memberi izin implementasi frontend/container melampaui gate.
+
+Tabel berikut adalah **inventaris historis sebelum reset**, bukan source yang masih tersedia. Informasi ini dapat membantu disposition compatibility bila dibutuhkan; pemulihan source historis bukan tindakan default. Tidak ada build/runtime/test aplikasi yang dibuktikan oleh inventaris tersebut.
 
 | Area | Terlihat pada source/config | Implikasi roadmap |
 | --- | --- | --- |
@@ -67,7 +69,7 @@ Inspeksi statis terbatas pada 7 Oktober 2026 menemukan fondasi berikut. Belum ad
 | Packaging | Compose, Dockerfiles aplikasi, Caddy, dan CI workflow belum ditemukan | Semua merupakan deliverable tahap akhir |
 | Data/domain | Tidak ada akses mitra atau validasi operasional yang dikonfirmasi | Sintetik tetap memungkinkan implementasi teknis; partner/domain status terpisah |
 
-Audit awal wajib memeriksa ulang kondisi tersebut. Perilaku source, target requirement, serta hasil verifikasi tidak boleh dicampur. Task packet lama yang menyebut ASR/LLM lokal atau frontend paralel perlu disesuaikan pada pekerjaan terkait: target sekarang Google STT/Gemini dan sequencing backend-first. Modul yang independen secara desain tidak berarti boleh dikerjakan melampaui gate.
+Audit awal memeriksa kontrak dan scaffold yang benar-benar tersedia, lalu menetapkan apa yang dibangun baru atau dipakai ulang secara eksplisit. Perilaku source historis, target requirement, serta hasil verifikasi tidak boleh dicampur. Target sekarang Google STT/Gemini dan sequencing backend-first. Modul yang independen secara desain tidak berarti boleh dikerjakan melampaui gate. Lokasi package dan boundary tercatat di `docs/architecture/repository-structure.md`.
 
 ## 4. Ringkasan Fase dan Dependency
 
@@ -554,10 +556,10 @@ Perbarui `.agent/sessionHandoff.md` untuk pekerjaan lintas sesi yang substantif,
 
 ## 13. Next Recommended Action
 
-**Current recommendation: Phase 0.1 — audit source dan gap requirement. Belum `in_progress`.**
+**Current recommendation: Phase 0.1 — audit kontrak/scaffold dan gap requirement setelah reset. Belum `in_progress`.**
 
-1. Petakan source/route/auth/storage saat ini ke target Pydantic/OpenAPI, account/grants, replay, worker, dan evidence contracts.
-2. Catat reuse/modify/replace beserta compatibility risks; prioritaskan single-writer transactions, truth isolation, serta timebase sebelum pipeline AI.
+1. Petakan kontrak dan scaffold yang tersedia ke target Pydantic/OpenAPI, account/grants, replay, worker, dan evidence contracts; source aplikasi baru belum tersedia.
+2. Catat build-new/reuse disposition beserta compatibility risks; source historis hanya dipakai ulang bila keputusan tersebut eksplisit. Prioritaskan single-writer transactions, truth isolation, serta timebase sebelum pipeline AI.
 3. Bekukan scope offline, provider transport, dan P1 disposition; inventaris akses GCP/Gemini untuk smoke mendatang.
 4. Siapkan synthetic manifest/audio/event serta independent labels/geometry oracle dan source split.
 5. Setelah Phase 0 acceptance terpenuhi, mulai Phase 1. Jangan memulai React workflows, images, Compose aplikasi, atau deployment lebih dahulu.

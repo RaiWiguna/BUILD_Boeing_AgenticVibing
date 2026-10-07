@@ -3,7 +3,7 @@
 | Atribut | Nilai |
 | --- | --- |
 | Status dokumen | **Draft product contract v1.0 untuk review**; keputusan stack pengguna dikunci, asumsi produk dan keputusan terbuka ditandai |
-| Status implementasi | Requirement target. Fondasi source ada; pipeline audio–intent–memory–advisory, UI lengkap, dan deployment belum diverifikasi |
+| Status implementasi | Requirement target. Tree saat ini berupa dokumentasi dan scaffold folder setelah reset; source aplikasi, pipeline audio–intent–memory–advisory, UI, tests, dan deployment belum diimplementasikan |
 | Versi dokumen | 1.0 |
 | Tanggal | 7 Oktober 2026 |
 | Product owner | Tim ATC FlowLens; individu pemilik keputusan produk/domain belum ditetapkan |

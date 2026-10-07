@@ -3,43 +3,47 @@
 | Atribut | Nilai |
 | --- | --- |
 | Tanggal | 7 Oktober 2026 |
-| Objective | Menyiapkan reset repository dan dokumen agent untuk branch docs/new-agent |
-| Status | Hanya .agent/ dan metadata .git/ yang dipertahankan; implementasi aplikasi belum dimulai |
+| Objective | Menganalisis dan membuat struktur folder lengkap dengan .gitkeep, lalu mempublikasikannya ke docs/new-agent |
+| Status | Scaffold dan dokumentasi struktur tersedia; source aplikasi belum diimplementasikan |
 | Branch delivery | docs/new-agent |
-| Current focus berikutnya | Phase 0.1 — audit kontrak dan gap setelah reset repository |
+| Current focus berikutnya | Phase 0.1 — audit kontrak/scaffold dan gap requirement setelah reset |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
 
-## Keadaan Repository Saat Ini
+## Keadaan Repository
 
-Seluruh file/folder di luar .agent/ telah dihapus dari working tree sesuai keputusan reset proyek. Source backend/frontend, manifests, tests, scripts, docs, AGENTS.md, serta .gitignore tidak tersedia pada tree yang akan dipublikasikan. Jangan memulihkan file tersebut secara otomatis hanya karena dokumen lama menyebutnya.
+Reset pada commit 6e7bd3f menghapus tree proyek lama dan mempertahankan empat dokumen .agent/. Task sekarang menambahkan struktur baru yang terarah; source lama tidak direstore. Metadata .git tetap dipertahankan. Instruksi AGENTS.md sebelumnya telah dicabut dan tidak berlaku; file tersebut tidak dibuat kembali.
 
-Metadata Git dipulihkan dari origin ke commit dasar 266022254eb29f42205535f7b3f8828c89bcd174 pada main, kemudian branch docs/new-agent dibuat. History yang tersedia di remote dipertahankan; reflog, hooks, konfigurasi lokal, atau objek lokal yang tidak tersedia di remote tidak dijamin pulih. Push diotorisasi untuk branch docs/new-agent; tidak ada instruksi merge atau perubahan main.
+Tree baru memuat backend/flowlens modular package, frontend feature folders, generated-contract slots, tests/fixtures, evaluator-only materials, docs/adr dan area dokumentasi lain, scripts, reserved deployment/CI folders, serta private runtime/output directories. Folder implementasi berisi .gitkeep kosong; tidak ada executable app/test/script, manifests, dependency locks, Dockerfiles, Compose, atau CI workflow.
 
-## Dokumen yang Dipertahankan
+## Dokumen dan Keputusan
 
-- .agent/PRD.md: kontrak produk dan stack target yang berdiri sendiri.
-- .agent/rules.md: aturan engineering, AI/data/authority, verifikasi, Git dan cleanup.
-- .agent/implementationPhases.md: 18 fase, 75 subfase, dependencies, gate serta FR/AC coverage.
-- .agent/sessionHandoff.md: konteks reset dan next action terkini.
+- README.md dan docs/README.md memberi status serta navigation pada tree terkini.
+- docs/architecture/repository-structure.md memuat tree lengkap, module ownership, dependency/data boundaries, dan kapan folder diisi.
+- docs/adr/0001-modular-repository-layout.md menerima keputusan struktur; accepted decision bukan implemented capability.
+- .agent/rules.md kini menggunakan kontrak/dokumen yang tersedia dan tidak mewajibkan AGENTS.md atau dokumen sebelum reset.
+- .agent/PRD.md metadata dan .agent/implementationPhases.md baseline disesuaikan: aplikasi belum ada; inventaris source lama hanya historis.
+- .gitignore menjaga runtime DB/audio/exports/logs/secrets, generated artifacts, evaluator reports, env/keys, dependency caches dan build output; .gitkeep tetap dapat ditrack.
 
-Penyebutan source/config atau dokumen di luar .agent/ pada PRD/rules/roadmap adalah inventaris historis sebelum reset atau target untuk implementasi berikutnya. File tersebut kini tidak ada. Urutan membaca file yang telah dihapus tidak menjadi blocker; gunakan kontrak .agent/ yang tersedia dan keputusan eksplisit pengguna. Inspect kembali bila fondasi baru mulai dibuat.
+Backend memakai satu API writer/SQLite dan process-isolated worker. Worker tidak membuka DB atau menerima raw store unrestricted. Evaluator truth/labels di evaluation/ tidak diimpor detector/AI. Frontend hanya membaca API/WS. Generated schema/client tetap mengikuti backend Pydantic; frontend view types tidak menggandakan wire contract.
 
-## Keputusan Produk dan Sequencing
+## Scope dan Sequencing
 
-Frontend React/TypeScript/Vite/shadcn; backend FastAPI/Pydantic; transkripsi Google STT; intent/orchestration/output Gemini 3.8 Flash; deployment lokal/single VM memakai Docker Compose.
+Stack tetap React/TypeScript/Vite/shadcn, FastAPI/Pydantic, Google STT, Gemini 3.8 Flash, SQLite, dan Docker Compose lokal/single VM.
 
-Urutan wajib: backend lengkap dan G-BE → frontend lengkap dan G-FE → containerization → local/VM delivery dan G-DELIVERY. Seluruh fase masih planned. Real Google STT/Gemini smoke termasuk gate backend; mocks tidak menutup credential/access blockers.
+Urutan implementasi tetap backend lengkap/G-BE → frontend lengkap/G-FE → containerization → local/VM delivery/G-DELIVERY. Folder frontend/deploy/.github yang sudah ada tidak memulai track tersebut. Seluruh fase/subfase tetap planned; scaffold tidak menutup Phase 0 atau Phase 1.
 
-Scope tetap replay offline research dengan synthetic baseline selama mitra belum tersedia. Controller memegang keputusan/clearance. Partner fidelity, domain review, dan operational validation terpisah dari technical delivery. Tidak ada authorization live ATC integration.
+V1 tetap replay offline research dengan synthetic baseline sampai akses mitra tersedia. Controller memegang keputusan/clearance. Domain/operational validation dan live integration tidak disimpulkan dari directory scaffold.
 
 ## Verifikasi dan Delivery
 
-Untuk commit reset, periksa struktur Markdown, internal navigation, phase/subphase IDs, FR/AC coverage, whitespace, serta credential patterns pada empat dokumen yang dipertahankan. Dedicated secret scanner Gitleaks tidak ditemukan pada host; pemeriksaan pola lokal tidak setara dengan coverage scanner tersebut.
+Checks struktur lulus: 125 zero-byte .gitkeep dapat ditrack, tidak ada direktori kosong yang hilang dari Git, dan tidak ada executable/app/manifest/workflow stubs. Private/runtime/generated/credential paths di-ignore; placeholder dan source/schema/fixture paths yang dituju tetap dapat ditrack.
 
-Build/test aplikasi dan provider inference tidak dijalankan: source aplikasi telah dihapus dan tugas ini adalah publikasi dokumen/reset tree. Hasil commit/push dan remote SHA harus diverifikasi melalui Git/GitHub, bukan disimpulkan dari handoff ini. Tidak ada server, worker, atau container tugas yang dimulai.
+Delapan dokumen Markdown lulus pemeriksaan tables/fences/local links dan navigation. PRD tetap 40 bagian dan berdiri sendiri; roadmap tetap 18 fase, 75 subfase planned, serta 20 FR/20 AC. Whitespace dan local credential-pattern checks lulus. Dedicated Gitleaks belum tersedia pada baseline host; pattern check tidak menggantikan coverage scanner tersebut.
 
-## External Dependencies dan Next Action
+Build/test aplikasi, cloud inference, corpus download, provisioning, dan deploy tidak dijalankan. Tidak ada long-running server/worker/container tugas yang dimulai. Commit/push ke docs/new-agent diotorisasi; remote SHA dan hosted run status diperiksa setelah push. Tidak ada instruksi merge atau perubahan main.
 
-GCP/Gemini account/model/API/quota/budget, hak corpus nyata, simulator partner, VM/domain/TLS, backup target/operator, dan reviewer domain tidak dianggap tersedia.
+## Next Action
 
-Mulai Phase 0.1 dengan baseline tree baru: petakan requirement dan historical compatibility disposition, pastikan scope/provider/P1 decisions, lalu rancang synthetic audio/event fixtures serta independent geometry/time/semantic oracles. Phase 1 membangun fondasi backend dari kontrak yang disepakati; jangan memulai React workflows atau packaging aplikasi sebelum gate yang berlaku terpenuhi.
+Mulai Phase 0.1 pada tree baru: petakan contracts/ownership/data flow, build-new/reuse disposition, auth/time/evidence boundaries, P1/provider transport decisions, synthetic fixture dan independent-oracle plan, serta external dependency register. Setelah baseline terpenuhi, Phase 1 membangun package/backend config/actual Pydantic contracts dan tests.
+
+GCP/Gemini account/model/API/quota/budget, hak corpus nyata, simulator partner, VM/domain/TLS, backup target/operator, dan reviewer domain tidak dianggap tersedia. Mock/profile placeholders tidak menutup blocker real-provider gates.

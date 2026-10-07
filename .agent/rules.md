@@ -23,28 +23,26 @@ Folder ini menyimpan kontrak produk dan konteks eksekusi lintas sesi agar keputu
 
 Untuk memulai pekerjaan:
 
-1. Baca `AGENTS.md` dan `docs/README.md` terlebih dahulu.
-2. Baca `.agent/rules.md`.
-3. Baca bagian `.agent/PRD.md` yang sesuai dengan tugas, termasuk requirement dan acceptance terkait.
-4. Baca `.agent/sessionHandoff.md` dan `.agent/implementationPhases.md` jika tersedia.
-5. Muat bagian rencana teknis, AI advisory, shared contracts, atau task packet yang relevan melalui peta dokumen.
-6. Periksa source, konfigurasi, dan test pada area yang akan diubah.
-7. Baca release checklist, deployment runbook, dan ADR yang relevan jika tersedia dan diperlukan.
+1. Baca `.agent/rules.md`.
+2. Baca bagian `.agent/PRD.md` yang sesuai dengan tugas, termasuk requirement dan acceptance terkait.
+3. Baca `.agent/sessionHandoff.md` dan `.agent/implementationPhases.md`.
+4. Gunakan `docs/README.md` serta `docs/architecture/repository-structure.md` untuk memuat konteks yang relevan.
+5. Periksa source, konfigurasi, dan test pada area yang akan diubah jika implementasinya sudah tersedia.
+6. Baca release checklist, deployment runbook, dan ADR yang relevan jika tersedia dan diperlukan.
 
-Tidak perlu memuat semua dokumen setiap sesi. File opsional yang belum ada bukan blocker dan tidak boleh diperlakukan sebagai bukti bahwa prosesnya sudah berjalan.
+Tidak perlu memuat semua dokumen setiap sesi. File opsional yang belum ada bukan blocker dan tidak boleh diperlakukan sebagai bukti bahwa prosesnya sudah berjalan. Instruksi AGENTS.md sebelumnya telah dicabut; jangan memulihkan atau memperlakukannya sebagai aturan aktif.
 
 ## 3. Otoritas dan Status Informasi
 
 | Area | Otoritas dan penggunaan |
 | --- | --- |
-| Batas proyek dan penggunaan | `AGENTS.md` serta keputusan eksplisit pengguna |
-| Target produk, arsitektur, dan core requirements | `docs/Knowledge-Review/ATC_FlowLens_Rencana_Teknis_MVP.md` |
-| Target AI advisory dan batas replay/live | `docs/Knowledge-Review/ATC_FlowLens_AI_Assist_Buddy_MVP_Prompt.md` |
-| Kontrak v1, stack pilihan pengguna, fitur, data/API, UX, dan acceptance | `.agent/PRD.md` |
-| Evidence domain | `docs/Knowledge-Review/ATC_FlowLens_Operational_Reality_Research.md`; pertahankan cakupan, tanggal, dan tingkat kepastian |
-| Rencana implementasi | Paket yang relevan di `docs/Technical-Implementation/`; rencana bukan bukti implementasi |
+| Batas proyek, kontrak v1, stack, fitur, data/API, UX dan acceptance | `.agent/PRD.md` serta keputusan eksplisit pengguna |
+| Target AI advisory dan batas replay/live | Bagian AI/data/authority pada `.agent/PRD.md` |
+| Evidence domain | Dokumentasi riset/evaluasi yang benar-benar tersedia; pertahankan cakupan, tanggal, dan tingkat kepastian, jangan menganggap folder kosong sebagai evidence |
+| Rencana implementasi | `.agent/implementationPhases.md`; rencana bukan bukti implementasi |
+| Struktur dan boundary | `docs/architecture/repository-structure.md` serta accepted ADR terkait |
 | Perilaku saat ini | Source, konfigurasi, dan hasil pemeriksaan yang relevan |
-| Inventaris implementasi | `docs/IMPLEMENTATION_STATUS.md`; inventaris bertanggal, bukan pengganti inspeksi source |
+| Status repository | README/handoff dan performed checks; scaffold bukan implementasi aplikasi |
 | Progress lintas sesi | Handoff dan roadmap jika tersedia |
 | Keputusan arsitektur | ADR jika tersedia; status proposed tidak berarti accepted |
 
@@ -103,7 +101,7 @@ Jangan menambah PostgreSQL, Redis, vector database, Kubernetes, microservices, a
 - Local deployment tetap membutuhkan internet untuk analisis cloud baru. Cached replay tanpa provider harus dibedakan dari inferensi lokal dan instalasi offline.
 - Mock profile wajib berlabel `MOCK`; kegagalan provider nyata tidak boleh berubah menjadi fixture yang tampak seperti hasil nyata.
 
-Gunakan manifest dan lockfile yang ada. Baseline repository memiliki `frontend/package-lock.json` dan `pyproject.toml`; jangan mengganti package manager atau mengarang versi pinned tanpa keputusan dan verifikasi kompatibilitas. Python runtime mengikuti batas di `pyproject.toml`, dengan virtual environment untuk pengembangan host.
+Gunakan manifest dan lockfile saat fondasi implementasi tersedia. Setelah reset, `pyproject.toml` dan `frontend/package-lock.json` belum dibuat kembali; jangan menganggap dependency terpasang. Phase 1 menetapkan Python runtime/dependency locks dan setup virtual environment. Phase 11 menetapkan manifest/lockfile npm frontend. Jangan mengganti package manager atau mengarang versi pinned tanpa alasan dan verifikasi kompatibilitas.
 
 ### 4.4 Data, Clock, dan Bukti
 
@@ -192,7 +190,7 @@ Periksa manifest, scripts, test paths, dan konfigurasi yang tersedia sebelum men
 | Deployment/database | Compose validation/image smoke, migration fresh/upgrade, restart, backup/restore, dan config checks yang relevan |
 | Release/security | Secret/dependency scanning dan security negative cases dengan tooling yang tersedia; hosted jobs jika sudah diprovision |
 
-Baseline scripts frontend yang ditemukan pada 7 Oktober 2026 adalah `dev`, `build`, `typecheck`, dan `preview`. `pyproject.toml` mendeklarasikan pytest dengan `testpaths = ["tests"]`, tetapi suite tidak ditemukan pada inspeksi baseline. Compose, provider pipeline, dan CI belum diprovision dalam baseline. Periksa ulang sebelum memakai inventaris ini sebagai keadaan terbaru.
+Pada tree scaffold 7 Oktober 2026, source/test/manifests/scripts/CI executable belum tersedia. `dev`, `build`, `typecheck`, `preview`, pytest, dan commands lain pada strategi verifikasi adalah target yang harus diprovision pada fase terkait. `.gitkeep` tidak membuktikan suite atau script siap dijalankan. Compose dan provider pipeline juga belum diimplementasikan.
 
 Gunakan `npm ci` bila setup atau perubahan lockfile memerlukannya. Jangan menginstal ulang dependency atau mengulang seluruh test tanpa perubahan input, failure, atau concern yang relevan.
 
@@ -229,7 +227,7 @@ Perbarui dokumen yang benar-benar terdampak jika ada perubahan material pada:
 
 Pertahankan PRD sebagai kontrak yang lengkap dan berdiri sendiri. Jangan menambahkan cerita asal template, riwayat percakapan, atau daftar bacaan ke PRD. Dokumentasi teknis khusus menyimpan rincian implementasi tanpa menggandakan seluruh kontrak produk.
 
-Perbarui rencana teknis/addendum yang relevan dan `docs/IMPLEMENTATION_STATUS.md` ketika keputusan target atau evidence implementasi berubah secara berarti. Catat tanggal serta metode pemeriksaan; perubahan dokumentasi saja tidak menaikkan status aplikasi.
+Perbarui PRD/roadmap, handoff dan dokumen di area `docs/` yang relevan ketika keputusan target atau evidence implementasi berubah secara berarti. Dokumen kanonis sebelum reset tidak lagi tersedia sebagai kontrak aktif. Catat tanggal serta metode pemeriksaan; perubahan dokumentasi saja tidak menaikkan status aplikasi.
 
 ### 6.1 Handoff dan Progress
 
