@@ -1,0 +1,15 @@
+{
+  "expected_semantics_from_script": {
+    "action": "HOLD_SHORT",
+    "callsign": "FLN214",
+    "runway": "27"
+  },
+  "label_version": "baseline-1",
+  "not_for_provider_context": true,
+  "pronunciation_audit": "PENDING",
+  "script_intention": "Flow lens two one four, hold short of runway two seven. Holding short of runway two seven, Flow lens two one four.",
+  "speaker": "macOS Samantha TTS",
+  "split": "tuning",
+  "status": "NOT_GOLD_NOT_DOMAIN_VALIDATED",
+  "waveform": "tests/fixtures/audio/hold-short.wav"
+}

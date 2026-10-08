@@ -101,7 +101,7 @@ Jangan menambah PostgreSQL, Redis, vector database, Kubernetes, microservices, a
 - Local deployment tetap membutuhkan internet untuk analisis cloud baru. Cached replay tanpa provider harus dibedakan dari inferensi lokal dan instalasi offline.
 - Mock profile wajib berlabel `MOCK`; kegagalan provider nyata tidak boleh berubah menjadi fixture yang tampak seperti hasil nyata.
 
-Gunakan manifest dan lockfile saat fondasi implementasi tersedia. Setelah reset, `pyproject.toml` dan `frontend/package-lock.json` belum dibuat kembali; jangan menganggap dependency terpasang. Phase 1 menetapkan Python runtime/dependency locks dan setup virtual environment. Phase 11 menetapkan manifest/lockfile npm frontend. Jangan mengganti package manager atau mengarang versi pinned tanpa alasan dan verifikasi kompatibilitas.
+Gunakan manifest dan lockfile saat fondasi implementasi tersedia. Pada 8 Oktober 2026, root `pyproject.toml` dan `uv.lock` tersedia untuk foundation Python 3.12; `frontend/package-lock.json` belum dibuat kembali; jangan menganggap dependency terpasang. Phase 1 menetapkan Python runtime/dependency locks dan setup virtual environment. Phase 11 menetapkan manifest/lockfile npm frontend. Jangan mengganti package manager atau mengarang versi pinned tanpa alasan dan verifikasi kompatibilitas.
 
 ### 4.4 Data, Clock, dan Bukti
 

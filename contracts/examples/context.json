@@ -1,0 +1,16 @@
+{
+  "actor_id": "00000000-0000-0000-0000-000000000003",
+  "analysis_run_id": "00000000-0000-0000-0000-000000000002",
+  "as_of_ms": 20000,
+  "capabilities": [
+    "read",
+    "audio",
+    "review",
+    "analysis"
+  ],
+  "input_hash": "cf3baa73bc59e37ddbd16e99e8a5f7493c22057d01c02b4030585b88486ba044",
+  "input_revision": 1,
+  "mode": "AS_KNOWN",
+  "request_id": "00000000-0000-0000-0000-000000000004",
+  "session_id": "00000000-0000-0000-0000-000000000001"
+}

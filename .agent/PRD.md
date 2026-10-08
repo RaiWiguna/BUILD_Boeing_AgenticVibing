@@ -3,7 +3,7 @@
 | Atribut | Nilai |
 | --- | --- |
 | Status dokumen | **Draft product contract v1.0 untuk review**; keputusan stack pengguna dikunci, asumsi produk dan keputusan terbuka ditandai |
-| Status implementasi | Requirement target. Tree saat ini berupa dokumentasi dan scaffold folder setelah reset; source aplikasi, pipeline audio–intent–memory–advisory, UI, tests, dan deployment belum diimplementasikan |
+| Status implementasi | Requirement target. Phase 0–1 foundation/contracts/fixtures/MOCK harness/tests tersedia (8 Oktober 2026); business pipeline A/B, provider adapters nyata, UI dan deployment belum diimplementasikan |
 | Versi dokumen | 1.0 |
 | Tanggal | 7 Oktober 2026 |
 | Product owner | Tim ATC FlowLens; individu pemilik keputusan produk/domain belum ditetapkan |
@@ -1195,7 +1195,7 @@ Target pengguna jangka panjang adalah controller Tower/Ground. Baseline v1 repla
 
 ### 40.3 Handoff implementasi
 
-Tugas berikutnya adalah membekukan Q-01/Q-02, menurunkan FR/AC ke implementation packets, membuat fixture/annotation protocol, lalu membangun vertical slice **import → STT → Gemini intent → association → memory → finding → evidence/review**. Slice kedua menambahkan options/brief/export dan deployment/recovery. Existing source diperiksa serta dipetakan sebelum reuse; tidak menyatakan seluruhnya siap hanya karena modul ada.
+Phase 0–1 selesai pada 8 Oktober 2026 dengan scope/FR–AC packets, fixture/evaluation protocol, shared contracts 1.0.0 dan MOCK harness. Langkah berikutnya mengikuti implementationPhases: paket A (Platform & Replay) dan B (Analysis & AI) dikerjakan independen sampai acceptance masing-masing terpenuhi, lalu diintegrasikan pada Phase 10 untuk memverifikasi alur **import → replay → STT → Gemini intent → association → memory → finding → option/review → brief/export**. Frontend menunggu G-BE; containerization dan deployment menunggu gate berikutnya. Source historis tidak direstore sebagai default.
 
 Versi PRD, requirement, dan acceptance criteria harus diperbarui ketika keputusan target berubah. Setiap perubahan mencatat alasan, dampak, pemilik keputusan, serta pemeriksaan yang diperlukan. Status implementasi dilaporkan berdasarkan evidence terbaru; perubahan desain tidak otomatis membuktikan fitur sudah berjalan.
 

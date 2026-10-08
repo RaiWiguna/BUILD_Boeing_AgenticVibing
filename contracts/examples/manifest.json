@@ -1,0 +1,44 @@
+{
+  "assets": [
+    {
+      "channels": 1,
+      "duration_ms": 8021,
+      "fixture_path": "tests/fixtures/audio/hold-short.wav",
+      "id": "00000000-0000-0000-0000-000000000010",
+      "media_type": "audio/wav",
+      "sample_rate_hz": 16000,
+      "sha256": "cf3baa73bc59e37ddbd16e99e8a5f7493c22057d01c02b4030585b88486ba044"
+    }
+  ],
+  "clock": {
+    "offset_ms": 0,
+    "timezone": "UTC",
+    "uncertainty_ms": 0
+  },
+  "coordinate_system": "FICTIONAL_LOCAL_XY",
+  "coverage": {
+    "audio": true,
+    "gaps": [],
+    "quality": "AMBIGUOUS",
+    "speaker_identity": null,
+    "tracks": false,
+    "vehicles": null
+  },
+  "domain_validation": "NOT_DOMAIN_VALIDATED",
+  "id": "00000000-0000-0000-0000-000000000006",
+  "layout_version": null,
+  "permissions": {
+    "audio_export": true,
+    "basis": "Project-authored fictional TTS fixture",
+    "cloud": true,
+    "export": true,
+    "local": true,
+    "retention_days": 30
+  },
+  "revision": 1,
+  "session_id": "00000000-0000-0000-0000-000000000001",
+  "source_hash": "cf3baa73bc59e37ddbd16e99e8a5f7493c22057d01c02b4030585b88486ba044",
+  "source_kind": "SYNTHETIC",
+  "source_label": "Synthetic TTS / NOT_DOMAIN_VALIDATED",
+  "units": "m"
+}

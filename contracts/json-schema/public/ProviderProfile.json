@@ -1,0 +1,104 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "locale": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Locale"
+    },
+    "model": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Model",
+      "type": "string"
+    },
+    "provider": {
+      "enum": [
+        "GOOGLE_STT",
+        "GEMINI"
+      ],
+      "title": "Provider",
+      "type": "string"
+    },
+    "readiness": {
+      "enum": [
+        "UNVERIFIED",
+        "READY",
+        "UNAVAILABLE"
+      ],
+      "title": "Readiness",
+      "type": "string"
+    },
+    "region": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Region"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "store": {
+      "const": false,
+      "default": false,
+      "title": "Store",
+      "type": "boolean"
+    },
+    "timeout_seconds": {
+      "maximum": 300,
+      "minimum": 1,
+      "title": "Timeout Seconds",
+      "type": "integer"
+    },
+    "transport": {
+      "enum": [
+        "STT_V2_INLINE",
+        "GEMINI_DEVELOPER_INTERACTIONS"
+      ],
+      "title": "Transport",
+      "type": "string"
+    },
+    "version": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "provider",
+    "model",
+    "transport",
+    "version",
+    "region",
+    "locale",
+    "timeout_seconds",
+    "readiness"
+  ],
+  "title": "ProviderProfile",
+  "type": "object"
+}

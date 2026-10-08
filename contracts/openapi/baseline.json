@@ -1,0 +1,5731 @@
+{
+  "components": {
+    "schemas": {
+      "AnalysisRun": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "api_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Api Version",
+            "type": "string"
+          },
+          "config_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Config Hash",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "input_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Input Hash",
+            "type": "string"
+          },
+          "model_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Model Version",
+            "type": "string"
+          },
+          "prompt_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Prompt Version",
+            "type": "string"
+          },
+          "reducer_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Reducer Version",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "rule_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Rule Version",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "sdk_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Sdk Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "QUEUED",
+              "RUNNING",
+              "PARTIAL",
+              "COMPLETED",
+              "FAILED",
+              "CANCELLED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "usage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Usage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "id",
+          "status",
+          "input_hash",
+          "config_hash",
+          "model_version",
+          "api_version",
+          "sdk_version",
+          "prompt_version",
+          "reducer_version",
+          "rule_version",
+          "usage"
+        ],
+        "title": "AnalysisRun",
+        "type": "object"
+      },
+      "ArtifactSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "derivative_range": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimeRange"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "AUDIO_DERIVATIVE",
+              "JSON_REPORT",
+              "CSV_REPORT",
+              "HTML_REPORT"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "required_capability": {
+            "enum": [
+              "audio",
+              "export"
+            ],
+            "title": "Required Capability",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          },
+          "size_bytes": {
+            "minimum": 0.0,
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "source_asset_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Asset Id"
+          },
+          "source_range": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimeRange"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "transform_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Transform Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "id",
+          "kind",
+          "sha256",
+          "size_bytes",
+          "source_asset_id",
+          "transform_version",
+          "source_range",
+          "derivative_range",
+          "expires_at",
+          "required_capability"
+        ],
+        "title": "ArtifactSubmission",
+        "type": "object"
+      },
+      "Asset": {
+        "additionalProperties": false,
+        "properties": {
+          "channels": {
+            "maximum": 2.0,
+            "minimum": 1.0,
+            "title": "Channels",
+            "type": "integer"
+          },
+          "duration_ms": {
+            "minimum": 0.0,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "fixture_path": {
+            "anyOf": [
+              {
+                "pattern": "^tests/fixtures/audio/[A-Za-z0-9_.-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixture Path"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "media_type": {
+            "enum": [
+              "audio/wav",
+              "audio/flac",
+              "audio/mpeg",
+              "audio/aiff"
+            ],
+            "title": "Media Type",
+            "type": "string"
+          },
+          "sample_rate_hz": {
+            "maximum": 192000.0,
+            "minimum": 8000.0,
+            "title": "Sample Rate Hz",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sha256",
+          "duration_ms",
+          "channels",
+          "sample_rate_hz",
+          "media_type",
+          "fixture_path"
+        ],
+        "title": "Asset",
+        "type": "object"
+      },
+      "Association": {
+        "additionalProperties": false,
+        "properties": {
+          "alternatives": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Alternatives",
+            "type": "array"
+          },
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "available_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Time Ms"
+          },
+          "entity_candidates": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Entity Candidates",
+            "type": "array"
+          },
+          "event_time_ms": {
+            "minimum": 0.0,
+            "title": "Event Time Ms",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "relationship": {
+            "enum": [
+              "READBACK_OF",
+              "REPORT_FOR",
+              "CORRECTION_OF",
+              "CANCELS",
+              "POSSIBLE_LINK"
+            ],
+            "title": "Relationship",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "source_intent_id": {
+            "format": "uuid",
+            "title": "Source Intent Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "PROPOSED",
+              "ACCEPTED_BY_VALIDATION",
+              "CONFIRMED_BY_REVIEW",
+              "AMBIGUOUS",
+              "REJECTED",
+              "SUPERSEDED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "target_intent_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Intent Id"
+          },
+          "unknowns": {
+            "items": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "title": "Unknowns",
+            "type": "array"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "event_time_ms",
+          "available_time_ms",
+          "recorded_at",
+          "evidence",
+          "id",
+          "source_intent_id",
+          "target_intent_id",
+          "entity_candidates",
+          "relationship",
+          "status",
+          "alternatives",
+          "unknowns"
+        ],
+        "title": "Association",
+        "type": "object"
+      },
+      "Brief": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "as_of_ms": {
+            "minimum": 0.0,
+            "title": "As Of Ms",
+            "type": "integer"
+          },
+          "available_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Time Ms"
+          },
+          "event_time_ms": {
+            "minimum": 0.0,
+            "title": "Event Time Ms",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FactualItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "labels": {
+            "items": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "title": "Labels",
+            "type": "array"
+          },
+          "model_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Model Version",
+            "type": "string"
+          },
+          "prompt_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Prompt Version",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "event_time_ms",
+          "available_time_ms",
+          "recorded_at",
+          "evidence",
+          "id",
+          "as_of_ms",
+          "items",
+          "labels",
+          "model_version",
+          "prompt_version"
+        ],
+        "title": "Brief",
+        "type": "object"
+      },
+      "ClockMapping": {
+        "additionalProperties": false,
+        "properties": {
+          "mapping_version": {
+            "default": "clock-1",
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Mapping Version",
+            "type": "string"
+          },
+          "offset_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offset Ms"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "timezone": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Timezone",
+            "type": "string"
+          },
+          "uncertainty_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uncertainty Ms"
+          }
+        },
+        "required": [
+          "offset_ms",
+          "uncertainty_ms",
+          "timezone"
+        ],
+        "title": "ClockMapping",
+        "type": "object"
+      },
+      "CommitReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "attempt_id": {
+            "format": "uuid",
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "output_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Output Hash",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "sequence": {
+            "minimum": 1.0,
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "id",
+          "job_id",
+          "attempt_id",
+          "output_hash",
+          "sequence"
+        ],
+        "title": "CommitReceipt",
+        "type": "object"
+      },
+      "Coverage": {
+        "additionalProperties": false,
+        "properties": {
+          "audio": {
+            "title": "Audio",
+            "type": "boolean"
+          },
+          "gaps": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TimeRange"
+            },
+            "title": "Gaps",
+            "type": "array"
+          },
+          "quality": {
+            "enum": [
+              "SUPPORTED",
+              "AMBIGUOUS",
+              "MISSING",
+              "CONFLICTING"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "speaker_identity": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speaker Identity"
+          },
+          "tracks": {
+            "title": "Tracks",
+            "type": "boolean"
+          },
+          "vehicles": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vehicles"
+          }
+        },
+        "required": [
+          "audio",
+          "tracks",
+          "vehicles",
+          "speaker_identity",
+          "quality"
+        ],
+        "title": "Coverage",
+        "type": "object"
+      },
+      "CriticalSlot": {
+        "additionalProperties": false,
+        "properties": {
+          "alternatives": {
+            "items": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "title": "Alternatives",
+            "type": "array"
+          },
+          "evidence_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Evidence Ids",
+            "type": "array"
+          },
+          "quality": {
+            "enum": [
+              "SUPPORTED",
+              "AMBIGUOUS",
+              "MISSING",
+              "CONFLICTING"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "unknowns": {
+            "items": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "title": "Unknowns",
+            "type": "array"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "value",
+          "quality",
+          "evidence_ids",
+          "alternatives",
+          "unknowns"
+        ],
+        "title": "CriticalSlot",
+        "type": "object"
+      },
+      "Evidence": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "end_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Ms"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "AUDIO",
+              "TRANSCRIPT",
+              "EVENT",
+              "TRACK",
+              "POLICY"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "quote": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quote"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "segment_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segment Id"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "source_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Source Hash",
+            "type": "string"
+          },
+          "source_id": {
+            "format": "uuid",
+            "title": "Source Id",
+            "type": "string"
+          },
+          "span_end": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Span End"
+          },
+          "span_start": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Span Start"
+          },
+          "start_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Ms"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "id",
+          "kind",
+          "source_id",
+          "segment_id",
+          "start_ms",
+          "end_ms",
+          "quote",
+          "span_start",
+          "span_end",
+          "source_hash"
+        ],
+        "title": "Evidence",
+        "type": "object"
+      },
+      "FactualItem": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Evidence Ids",
+            "type": "array"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "statement": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Statement",
+            "type": "string"
+          },
+          "unknowns": {
+            "items": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "title": "Unknowns",
+            "type": "array"
+          }
+        },
+        "required": [
+          "statement",
+          "evidence_ids",
+          "unknowns"
+        ],
+        "title": "FactualItem",
+        "type": "object"
+      },
+      "Finding": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "applicability": {
+            "enum": [
+              "LAB_ONLY",
+              "PARTNER_REPLAY_REVIEW"
+            ],
+            "title": "Applicability",
+            "type": "string"
+          },
+          "available_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Time Ms"
+          },
+          "category": {
+            "enum": [
+              "CRITICAL_SLOT_UNCERTAIN",
+              "READBACK_DISCREPANCY",
+              "OPEN_LOOP",
+              "SPEECH_RECORD_DISCREPANCY",
+              "MOVEMENT_DIVERGENCE",
+              "QUALITY_GAP"
+            ],
+            "title": "Category",
+            "type": "string"
+          },
+          "entity_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Entity Ids",
+            "type": "array"
+          },
+          "event_time_ms": {
+            "minimum": 0.0,
+            "title": "Event Time Ms",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "priority": {
+            "enum": [
+              "INFO",
+              "NOTICE",
+              "ATTENTION"
+            ],
+            "title": "Priority",
+            "type": "string"
+          },
+          "quality": {
+            "enum": [
+              "SUPPORTED",
+              "AMBIGUOUS",
+              "MISSING",
+              "CONFLICTING"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "rule_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Rule Version",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "stale": {
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "statement": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Statement",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "UNDER_REVIEW",
+              "CONFIRMED",
+              "DISMISSED",
+              "UNRESOLVED",
+              "SUPERSEDED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "unknowns": {
+            "items": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "title": "Unknowns",
+            "type": "array"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "event_time_ms",
+          "available_time_ms",
+          "recorded_at",
+          "evidence",
+          "id",
+          "category",
+          "statement",
+          "priority",
+          "status",
+          "entity_ids",
+          "rule_version",
+          "model_version",
+          "quality",
+          "applicability",
+          "unknowns",
+          "stale"
+        ],
+        "title": "Finding",
+        "type": "object"
+      },
+      "GeometryResult": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "intervals": {
+            "items": {
+              "$ref": "#/components/schemas/TimeRange"
+            },
+            "title": "Intervals",
+            "type": "array"
+          },
+          "layout_version": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layout Version"
+          },
+          "occupied": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occupied"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "rule_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Rule Version",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "EVALUATED",
+              "NOT_EVALUABLE"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "uncertainty_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uncertainty Ms"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "entity_id",
+          "status",
+          "reason",
+          "occupied",
+          "intervals",
+          "uncertainty_ms",
+          "rule_version",
+          "layout_version",
+          "evidence"
+        ],
+        "title": "GeometryResult",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Intent": {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "items": {
+              "enum": [
+                "HOLD_SHORT",
+                "CROSS_RUNWAY",
+                "LINE_UP_WAIT",
+                "TAKEOFF",
+                "LAND",
+                "TAXI",
+                "VACATE",
+                "CONTACT",
+                "REPORT",
+                "UNKNOWN"
+              ],
+              "type": "string"
+            },
+            "title": "Actions",
+            "type": "array"
+          },
+          "alternatives": {
+            "items": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "title": "Alternatives",
+            "type": "array"
+          },
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "available_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Time Ms"
+          },
+          "callsign": {
+            "$ref": "#/components/schemas/CriticalSlot"
+          },
+          "condition": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Condition"
+          },
+          "entity_candidates": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Entity Candidates",
+            "type": "array"
+          },
+          "event_time_ms": {
+            "minimum": 0.0,
+            "title": "Event Time Ms",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "negation": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Negation"
+          },
+          "quality": {
+            "enum": [
+              "SUPPORTED",
+              "AMBIGUOUS",
+              "MISSING",
+              "CONFLICTING"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "role_candidate": {
+            "enum": [
+              "CONTROLLER",
+              "PILOT",
+              "VEHICLE",
+              "UNKNOWN"
+            ],
+            "title": "Role Candidate",
+            "type": "string"
+          },
+          "runway": {
+            "$ref": "#/components/schemas/CriticalSlot"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "segment_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Segment Ids",
+            "type": "array"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "speech_act": {
+            "enum": [
+              "REQUEST",
+              "INSTRUCTION",
+              "READBACK",
+              "REPORT",
+              "CORRECTION",
+              "CANCELLATION",
+              "COORDINATION",
+              "HANDOFF",
+              "INFORMATION",
+              "UNKNOWN"
+            ],
+            "title": "Speech Act",
+            "type": "string"
+          },
+          "unknowns": {
+            "items": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "title": "Unknowns",
+            "type": "array"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "event_time_ms",
+          "available_time_ms",
+          "recorded_at",
+          "evidence",
+          "id",
+          "segment_ids",
+          "speech_act",
+          "role_candidate",
+          "entity_candidates",
+          "actions",
+          "callsign",
+          "runway",
+          "condition",
+          "negation",
+          "quality",
+          "alternatives",
+          "unknowns"
+        ],
+        "title": "Intent",
+        "type": "object"
+      },
+      "JobLease": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "asset_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Asset Ids",
+            "type": "array"
+          },
+          "attempt_id": {
+            "format": "uuid",
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "budget_microunits": {
+            "minimum": 0.0,
+            "title": "Budget Microunits",
+            "type": "integer"
+          },
+          "config_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Config Hash",
+            "type": "string"
+          },
+          "deadline_ms": {
+            "minimum": 0.0,
+            "title": "Deadline Ms",
+            "type": "integer"
+          },
+          "expires_ms": {
+            "minimum": 0.0,
+            "title": "Expires Ms",
+            "type": "integer"
+          },
+          "input_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Input Hash",
+            "type": "string"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "lease_id": {
+            "format": "uuid",
+            "title": "Lease Id",
+            "type": "string"
+          },
+          "owner_id": {
+            "format": "uuid",
+            "title": "Owner Id",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "stage": {
+            "enum": [
+              "AUDIO",
+              "STT",
+              "INTENT",
+              "ASSOCIATION",
+              "MEMORY",
+              "FINDINGS",
+              "BRIEF",
+              "QUERY",
+              "EXPORT"
+            ],
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "job_id",
+          "attempt_id",
+          "lease_id",
+          "owner_id",
+          "stage",
+          "input_hash",
+          "config_hash",
+          "expires_ms",
+          "deadline_ms",
+          "budget_microunits",
+          "asset_ids"
+        ],
+        "title": "JobLease",
+        "type": "object"
+      },
+      "JobProgress": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "completed_units": {
+            "minimum": 0.0,
+            "title": "Completed Units",
+            "type": "integer"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "stage": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Stage",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "QUEUED",
+              "RUNNING",
+              "PARTIAL",
+              "COMPLETED",
+              "FAILED",
+              "CANCELLED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "total_units": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Units"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "job_id",
+          "stage",
+          "status",
+          "completed_units",
+          "total_units"
+        ],
+        "title": "JobProgress",
+        "type": "object"
+      },
+      "JobResult": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "artifacts": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ArtifactSubmission"
+            },
+            "title": "Artifacts",
+            "type": "array"
+          },
+          "attempt_id": {
+            "format": "uuid",
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "config_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Config Hash",
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "failure_code": {
+            "anyOf": [
+              {
+                "enum": [
+                  "PROVIDER_UNAVAILABLE",
+                  "PROVIDER_QUOTA_EXCEEDED",
+                  "INVALID_AI_OUTPUT",
+                  "BUDGET_EXCEEDED"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Code"
+          },
+          "input_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Input Hash",
+            "type": "string"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "lease_id": {
+            "format": "uuid",
+            "title": "Lease Id",
+            "type": "string"
+          },
+          "output_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Output Hash",
+            "type": "string"
+          },
+          "outputs": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TranscriptSegment"
+                },
+                {
+                  "$ref": "#/components/schemas/Intent"
+                },
+                {
+                  "$ref": "#/components/schemas/Association"
+                },
+                {
+                  "$ref": "#/components/schemas/MemoryEvent"
+                },
+                {
+                  "$ref": "#/components/schemas/OpenLoop"
+                },
+                {
+                  "$ref": "#/components/schemas/Finding"
+                },
+                {
+                  "$ref": "#/components/schemas/Option"
+                },
+                {
+                  "$ref": "#/components/schemas/Brief"
+                },
+                {
+                  "$ref": "#/components/schemas/QueryAnswer"
+                }
+              ]
+            },
+            "title": "Outputs",
+            "type": "array"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "COMPLETE",
+              "PARTIAL",
+              "FAILED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/Usage"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "job_id",
+          "attempt_id",
+          "lease_id",
+          "input_hash",
+          "config_hash",
+          "output_hash",
+          "status",
+          "outputs",
+          "evidence",
+          "usage",
+          "failure_code"
+        ],
+        "title": "JobResult",
+        "type": "object"
+      },
+      "MemoryEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "available_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Time Ms"
+          },
+          "dependency_hashes": {
+            "items": {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            "title": "Dependency Hashes",
+            "type": "array"
+          },
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "event_time_ms": {
+            "minimum": 0.0,
+            "title": "Event Time Ms",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "instruction": {
+            "enum": [
+              "ACTIVE",
+              "SUPERSEDED",
+              "CANCELLED",
+              "COMPLETED_REPORTED",
+              "UNKNOWN"
+            ],
+            "title": "Instruction",
+            "type": "string"
+          },
+          "intent_id": {
+            "format": "uuid",
+            "title": "Intent Id",
+            "type": "string"
+          },
+          "interpretation": {
+            "enum": [
+              "CANDIDATE",
+              "SUPPORTED",
+              "AMBIGUOUS",
+              "REVIEWED",
+              "REJECTED"
+            ],
+            "title": "Interpretation",
+            "type": "string"
+          },
+          "movement": {
+            "enum": [
+              "NOT_EVALUABLE",
+              "CONSISTENT",
+              "DIVERGENCE_CANDIDATE",
+              "UNKNOWN"
+            ],
+            "title": "Movement",
+            "type": "string"
+          },
+          "readback": {
+            "enum": [
+              "NOT_OBSERVED",
+              "MATCHED",
+              "PARTIAL",
+              "MISMATCH",
+              "AMBIGUOUS",
+              "CORRECTED"
+            ],
+            "title": "Readback",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "reducer_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Reducer Version",
+            "type": "string"
+          },
+          "reviewer": {
+            "enum": [
+              "UNREVIEWED",
+              "CONFIRMED",
+              "DISMISSED",
+              "UNRESOLVED"
+            ],
+            "title": "Reviewer",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "event_time_ms",
+          "available_time_ms",
+          "recorded_at",
+          "evidence",
+          "id",
+          "entity_id",
+          "intent_id",
+          "interpretation",
+          "instruction",
+          "readback",
+          "movement",
+          "reviewer",
+          "dependency_hashes",
+          "reducer_version"
+        ],
+        "title": "MemoryEvent",
+        "type": "object"
+      },
+      "OpenLoop": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "available_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Time Ms"
+          },
+          "closing_evidence_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Closing Evidence Ids",
+            "type": "array"
+          },
+          "coverage_known": {
+            "title": "Coverage Known",
+            "type": "boolean"
+          },
+          "entity_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Entity Ids",
+            "type": "array"
+          },
+          "event_time_ms": {
+            "minimum": 0.0,
+            "title": "Event Time Ms",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "expected_window_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Window Ms"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "REQUEST_RESPONSE",
+              "REPORT_EXPECTED",
+              "COORDINATION_PENDING",
+              "READBACK_EXPECTED"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "originating_id": {
+            "format": "uuid",
+            "title": "Originating Id",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "started_ms": {
+            "minimum": 0.0,
+            "title": "Started Ms",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "PARTIAL",
+              "CLOSED_WITH_EVIDENCE",
+              "CANCELLED",
+              "SUPERSEDED",
+              "UNKNOWN"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "timer_profile_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Timer Profile Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "event_time_ms",
+          "available_time_ms",
+          "recorded_at",
+          "evidence",
+          "id",
+          "originating_id",
+          "entity_ids",
+          "kind",
+          "status",
+          "started_ms",
+          "expected_window_ms",
+          "coverage_known",
+          "closing_evidence_ids",
+          "timer_profile_version"
+        ],
+        "title": "OpenLoop",
+        "type": "object"
+      },
+      "Option": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "applicability": {
+            "enum": [
+              "LAB_ONLY",
+              "PARTNER_REPLAY_REVIEW"
+            ],
+            "title": "Applicability",
+            "type": "string"
+          },
+          "as_of_ms": {
+            "minimum": 0.0,
+            "title": "As Of Ms",
+            "type": "integer"
+          },
+          "available_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Time Ms"
+          },
+          "consequences": {
+            "items": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "title": "Consequences",
+            "type": "array"
+          },
+          "event_time_ms": {
+            "minimum": 0.0,
+            "title": "Event Time Ms",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "input_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Input Hash",
+            "type": "string"
+          },
+          "model_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Model Version",
+            "type": "string"
+          },
+          "preconditions": {
+            "items": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "title": "Preconditions",
+            "type": "array"
+          },
+          "prompt_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Prompt Version",
+            "type": "string"
+          },
+          "rationale": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Rationale",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "review_status": {
+            "enum": [
+              "UNREVIEWED",
+              "RELEVANT",
+              "NOT_RELEVANT",
+              "UNSUPPORTED",
+              "UNRESOLVED"
+            ],
+            "title": "Review Status",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "statement": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Statement",
+            "type": "string"
+          },
+          "unknowns": {
+            "items": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "title": "Unknowns",
+            "type": "array"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "event_time_ms",
+          "available_time_ms",
+          "recorded_at",
+          "evidence",
+          "id",
+          "as_of_ms",
+          "statement",
+          "rationale",
+          "preconditions",
+          "unknowns",
+          "consequences",
+          "applicability",
+          "review_status",
+          "model_version",
+          "prompt_version",
+          "input_hash"
+        ],
+        "title": "Option",
+        "type": "object"
+      },
+      "Permissions": {
+        "additionalProperties": false,
+        "properties": {
+          "audio_export": {
+            "title": "Audio Export",
+            "type": "boolean"
+          },
+          "basis": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Basis",
+            "type": "string"
+          },
+          "cloud": {
+            "title": "Cloud",
+            "type": "boolean"
+          },
+          "export": {
+            "title": "Export",
+            "type": "boolean"
+          },
+          "local": {
+            "title": "Local",
+            "type": "boolean"
+          },
+          "retention_days": {
+            "minimum": 1.0,
+            "title": "Retention Days",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "local",
+          "cloud",
+          "export",
+          "audio_export",
+          "basis",
+          "retention_days"
+        ],
+        "title": "Permissions",
+        "type": "object"
+      },
+      "PlaybackState": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "cursor_ms": {
+            "minimum": 0.0,
+            "title": "Cursor Ms",
+            "type": "integer"
+          },
+          "leader_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leader Id"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "speed": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 16.0,
+            "title": "Speed",
+            "type": "number"
+          },
+          "status": {
+            "enum": [
+              "PAUSED",
+              "PLAYING",
+              "SEEKING",
+              "ENDED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "view": {
+            "enum": [
+              "LEADER",
+              "FOLLOW",
+              "LOCAL"
+            ],
+            "title": "View",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "status",
+          "cursor_ms",
+          "speed",
+          "leader_id",
+          "view"
+        ],
+        "title": "PlaybackState",
+        "type": "object"
+      },
+      "ProviderProfile": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "locale": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locale"
+          },
+          "model": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Model",
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "GOOGLE_STT",
+              "GEMINI"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "readiness": {
+            "enum": [
+              "UNVERIFIED",
+              "READY",
+              "UNAVAILABLE"
+            ],
+            "title": "Readiness",
+            "type": "string"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "store": {
+            "const": false,
+            "default": false,
+            "title": "Store",
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "maximum": 300.0,
+            "minimum": 1.0,
+            "title": "Timeout Seconds",
+            "type": "integer"
+          },
+          "transport": {
+            "enum": [
+              "STT_V2_INLINE",
+              "GEMINI_DEVELOPER_INTERACTIONS"
+            ],
+            "title": "Transport",
+            "type": "string"
+          },
+          "version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "provider",
+          "model",
+          "transport",
+          "version",
+          "region",
+          "locale",
+          "timeout_seconds",
+          "readiness"
+        ],
+        "title": "ProviderProfile",
+        "type": "object"
+      },
+      "QueryAnswer": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "as_of_ms": {
+            "minimum": 0.0,
+            "title": "As Of Ms",
+            "type": "integer"
+          },
+          "available_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Time Ms"
+          },
+          "event_time_ms": {
+            "minimum": 0.0,
+            "title": "Event Time Ms",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FactualItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "labels": {
+            "items": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "title": "Labels",
+            "type": "array"
+          },
+          "model_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Model Version",
+            "type": "string"
+          },
+          "prompt_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Prompt Version",
+            "type": "string"
+          },
+          "question": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Question",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "COMPLETE",
+              "PARTIAL",
+              "INSUFFICIENT_CONTEXT",
+              "UNAVAILABLE"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "event_time_ms",
+          "available_time_ms",
+          "recorded_at",
+          "evidence",
+          "id",
+          "as_of_ms",
+          "items",
+          "labels",
+          "model_version",
+          "prompt_version",
+          "question",
+          "status"
+        ],
+        "title": "QueryAnswer",
+        "type": "object"
+      },
+      "RequestContext": {
+        "additionalProperties": false,
+        "properties": {
+          "actor_id": {
+            "format": "uuid",
+            "title": "Actor Id",
+            "type": "string"
+          },
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "as_of_ms": {
+            "minimum": 0.0,
+            "title": "As Of Ms",
+            "type": "integer"
+          },
+          "capabilities": {
+            "items": {
+              "enum": [
+                "read",
+                "audio",
+                "review",
+                "export",
+                "truth",
+                "analysis",
+                "admin",
+                "worker"
+              ],
+              "type": "string"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "input_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Input Hash",
+            "type": "string"
+          },
+          "input_revision": {
+            "minimum": 1.0,
+            "title": "Input Revision",
+            "type": "integer"
+          },
+          "mode": {
+            "enum": [
+              "AS_KNOWN",
+              "DEBRIEF"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "actor_id",
+          "capabilities",
+          "session_id",
+          "analysis_run_id",
+          "input_revision",
+          "input_hash",
+          "as_of_ms",
+          "mode",
+          "request_id"
+        ],
+        "title": "RequestContext",
+        "type": "object"
+      },
+      "ResyncRequired": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "reason": {
+            "enum": [
+              "SEQUENCE_GAP",
+              "REVISION_CHANGED",
+              "PERMISSION_CHANGED"
+            ],
+            "title": "Reason",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "snapshot_sequence": {
+            "minimum": 0.0,
+            "title": "Snapshot Sequence",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "reason",
+          "snapshot_sequence"
+        ],
+        "title": "ResyncRequired",
+        "type": "object"
+      },
+      "Review": {
+        "additionalProperties": false,
+        "properties": {
+          "actor_id": {
+            "format": "uuid",
+            "title": "Actor Id",
+            "type": "string"
+          },
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "available_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Time Ms"
+          },
+          "decision": {
+            "enum": [
+              "CONFIRMED",
+              "DISMISSED",
+              "UNRESOLVED",
+              "RELEVANT",
+              "NOT_RELEVANT",
+              "UNSUPPORTED",
+              "CORRECTION"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "event_time_ms": {
+            "minimum": 0.0,
+            "title": "Event Time Ms",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "reason": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Reason",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "supersedes_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supersedes Id"
+          },
+          "target_id": {
+            "format": "uuid",
+            "title": "Target Id",
+            "type": "string"
+          },
+          "target_revision": {
+            "minimum": 1.0,
+            "title": "Target Revision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "event_time_ms",
+          "available_time_ms",
+          "recorded_at",
+          "evidence",
+          "id",
+          "target_id",
+          "target_revision",
+          "actor_id",
+          "expected_version",
+          "decision",
+          "reason",
+          "supersedes_id"
+        ],
+        "title": "Review",
+        "type": "object"
+      },
+      "Snapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "as_of_ms": {
+            "minimum": 0.0,
+            "title": "As Of Ms",
+            "type": "integer"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/SourceEvent"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            },
+            "title": "Findings",
+            "type": "array"
+          },
+          "memory": {
+            "items": {
+              "$ref": "#/components/schemas/MemoryEvent"
+            },
+            "title": "Memory",
+            "type": "array"
+          },
+          "mode": {
+            "enum": [
+              "AS_KNOWN",
+              "DEBRIEF"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "quality": {
+            "enum": [
+              "SUPPORTED",
+              "AMBIGUOUS",
+              "MISSING",
+              "CONFLICTING"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "sequence": {
+            "minimum": 0.0,
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "as_of_ms",
+          "mode",
+          "sequence",
+          "events",
+          "memory",
+          "findings",
+          "quality"
+        ],
+        "title": "Snapshot",
+        "type": "object"
+      },
+      "SourceEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "available_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Time Ms"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "event_time_ms": {
+            "minimum": 0.0,
+            "title": "Event Time Ms",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "INSTRUCTION",
+              "TRACK",
+              "ALERT",
+              "QUALITY",
+              "REPORT"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "quality": {
+            "enum": [
+              "SUPPORTED",
+              "AMBIGUOUS",
+              "MISSING",
+              "CONFLICTING"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "source_event_id": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Source Event Id",
+            "type": "string"
+          },
+          "source_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Source Hash",
+            "type": "string"
+          },
+          "source_id": {
+            "format": "uuid",
+            "title": "Source Id",
+            "type": "string"
+          },
+          "statement": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Statement",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "event_time_ms",
+          "available_time_ms",
+          "recorded_at",
+          "id",
+          "source_id",
+          "source_event_id",
+          "kind",
+          "entity_id",
+          "source_hash",
+          "quality",
+          "statement"
+        ],
+        "title": "SourceEvent",
+        "type": "object"
+      },
+      "SourceManifest": {
+        "additionalProperties": false,
+        "properties": {
+          "assets": {
+            "items": {
+              "$ref": "#/components/schemas/Asset"
+            },
+            "title": "Assets",
+            "type": "array"
+          },
+          "clock": {
+            "$ref": "#/components/schemas/ClockMapping"
+          },
+          "coordinate_system": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Coordinate System",
+            "type": "string"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/Coverage"
+          },
+          "domain_validation": {
+            "enum": [
+              "NOT_DOMAIN_VALIDATED",
+              "DOMAIN_REVIEWED"
+            ],
+            "title": "Domain Validation",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "layout_version": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layout Version"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/Permissions"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "source_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Source Hash",
+            "type": "string"
+          },
+          "source_kind": {
+            "enum": [
+              "SYNTHETIC",
+              "ROLEPLAY",
+              "PUBLIC_CORPUS",
+              "PARTNER_REPLAY"
+            ],
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "source_label": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Source Label",
+            "type": "string"
+          },
+          "units": {
+            "const": "m",
+            "title": "Units",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "session_id",
+          "source_kind",
+          "source_label",
+          "source_hash",
+          "revision",
+          "permissions",
+          "clock",
+          "coverage",
+          "units",
+          "coordinate_system",
+          "layout_version",
+          "assets",
+          "domain_validation"
+        ],
+        "title": "SourceManifest",
+        "type": "object"
+      },
+      "SourceQualityChanged": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/Coverage"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "source_id": {
+            "format": "uuid",
+            "title": "Source Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "source_id",
+          "coverage"
+        ],
+        "title": "SourceQualityChanged",
+        "type": "object"
+      },
+      "StreamEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "payload": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Snapshot"
+              },
+              {
+                "$ref": "#/components/schemas/PlaybackState"
+              },
+              {
+                "$ref": "#/components/schemas/JobProgress"
+              },
+              {
+                "$ref": "#/components/schemas/TranscriptSegment"
+              },
+              {
+                "$ref": "#/components/schemas/MemoryEvent"
+              },
+              {
+                "$ref": "#/components/schemas/Finding"
+              },
+              {
+                "$ref": "#/components/schemas/Option"
+              },
+              {
+                "$ref": "#/components/schemas/Review"
+              },
+              {
+                "$ref": "#/components/schemas/SourceQualityChanged"
+              },
+              {
+                "$ref": "#/components/schemas/ResyncRequired"
+              }
+            ],
+            "title": "Payload"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "sequence": {
+            "minimum": 1.0,
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "SNAPSHOT",
+              "PLAYBACK_CHANGED",
+              "JOB_PROGRESS",
+              "TRANSCRIPT_REVISION",
+              "MEMORY_CHANGED",
+              "FINDING_CHANGED",
+              "OPTION_READY",
+              "REVIEW_ADDED",
+              "SOURCE_QUALITY_CHANGED",
+              "RESYNC_REQUIRED"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "sequence",
+          "type",
+          "recorded_at",
+          "payload"
+        ],
+        "title": "StreamEvent",
+        "type": "object"
+      },
+      "TimeRange": {
+        "additionalProperties": false,
+        "properties": {
+          "end_ms": {
+            "minimum": 0.0,
+            "title": "End Ms",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "start_ms": {
+            "minimum": 0.0,
+            "title": "Start Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "start_ms",
+          "end_ms"
+        ],
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "ToolRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "evidence_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Id"
+          },
+          "limit": {
+            "default": 50,
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "name": {
+            "enum": [
+              "get_entity_memory",
+              "get_transcript_window",
+              "get_session_events",
+              "get_observed_tracks",
+              "get_active_rule_context",
+              "get_evidence"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "window": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimeRange"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "entity_id",
+          "evidence_id",
+          "window"
+        ],
+        "title": "ToolRequest",
+        "type": "object"
+      },
+      "Track": {
+        "additionalProperties": false,
+        "properties": {
+          "age_ms": {
+            "minimum": 0.0,
+            "title": "Age Ms",
+            "type": "integer"
+          },
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "available_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Time Ms"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "event_time_ms": {
+            "minimum": 0.0,
+            "title": "Event Time Ms",
+            "type": "integer"
+          },
+          "heading_deg": {
+            "exclusiveMaximum": 360.0,
+            "minimum": 0.0,
+            "title": "Heading Deg",
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "TRACK",
+            "default": "TRACK",
+            "title": "Kind",
+            "type": "string"
+          },
+          "layout_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Layout Version",
+            "type": "string"
+          },
+          "length_m": {
+            "exclusiveMinimum": 0.0,
+            "title": "Length M",
+            "type": "number"
+          },
+          "quality": {
+            "enum": [
+              "SUPPORTED",
+              "AMBIGUOUS",
+              "MISSING",
+              "CONFLICTING"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "source_event_id": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Source Event Id",
+            "type": "string"
+          },
+          "source_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Source Hash",
+            "type": "string"
+          },
+          "source_id": {
+            "format": "uuid",
+            "title": "Source Id",
+            "type": "string"
+          },
+          "speed_mps": {
+            "minimum": 0.0,
+            "title": "Speed Mps",
+            "type": "number"
+          },
+          "statement": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Statement",
+            "type": "string"
+          },
+          "width_m": {
+            "exclusiveMinimum": 0.0,
+            "title": "Width M",
+            "type": "number"
+          },
+          "x_m": {
+            "title": "X M",
+            "type": "number"
+          },
+          "y_m": {
+            "title": "Y M",
+            "type": "number"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "event_time_ms",
+          "available_time_ms",
+          "recorded_at",
+          "id",
+          "source_id",
+          "source_event_id",
+          "entity_id",
+          "source_hash",
+          "quality",
+          "statement",
+          "x_m",
+          "y_m",
+          "heading_deg",
+          "speed_mps",
+          "length_m",
+          "width_m",
+          "age_ms",
+          "layout_version"
+        ],
+        "title": "Track",
+        "type": "object"
+      },
+      "TranscriptSegment": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "available_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Time Ms"
+          },
+          "channel": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Channel",
+            "type": "integer"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "end_ms": {
+            "minimum": 0.0,
+            "title": "End Ms",
+            "type": "integer"
+          },
+          "event_time_ms": {
+            "minimum": 0.0,
+            "title": "Event Time Ms",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "origin": {
+            "enum": [
+              "GOOGLE_STT",
+              "HUMAN_CORRECTION",
+              "MOCK"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "provider_profile_version": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Provider Profile Version",
+            "type": "string"
+          },
+          "quality": {
+            "enum": [
+              "SUPPORTED",
+              "AMBIGUOUS",
+              "MISSING",
+              "CONFLICTING"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "source_id": {
+            "format": "uuid",
+            "title": "Source Id",
+            "type": "string"
+          },
+          "speaker_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speaker Id"
+          },
+          "start_ms": {
+            "minimum": 0.0,
+            "title": "Start Ms",
+            "type": "integer"
+          },
+          "supersedes_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supersedes Id"
+          },
+          "text": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "analysis_run_id",
+          "revision",
+          "event_time_ms",
+          "available_time_ms",
+          "recorded_at",
+          "evidence",
+          "id",
+          "source_id",
+          "start_ms",
+          "end_ms",
+          "channel",
+          "text",
+          "speaker_id",
+          "confidence",
+          "quality",
+          "origin",
+          "provider_profile_version",
+          "supersedes_id",
+          "reason"
+        ],
+        "title": "TranscriptSegment",
+        "type": "object"
+      },
+      "Usage": {
+        "additionalProperties": false,
+        "properties": {
+          "audio_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Ms"
+          },
+          "cost_microunits": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Microunits"
+          },
+          "input_tokens": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Tokens"
+          },
+          "latency_ms": {
+            "minimum": 0.0,
+            "title": "Latency Ms",
+            "type": "integer"
+          },
+          "output_tokens": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Tokens"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "audio_ms",
+          "input_tokens",
+          "output_tokens",
+          "cost_microunits",
+          "latency_ms"
+        ],
+        "title": "Usage",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Phase 1 contract validation only; no production business routes.",
+    "title": "FlowLens baseline contract harness (MOCK)",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/_harness/module": {
+      "get": {
+        "operationId": "mock_metadata__harness_module_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Mock Metadata  Harness Module Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Mock Metadata"
+      }
+    },
+    "/_harness/validate/analysisrun": {
+      "post": {
+        "operationId": "validateAnalysisRun",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalysisRun"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisRun"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/artifactsubmission": {
+      "post": {
+        "operationId": "validateArtifactSubmission",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtifactSubmission"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/association": {
+      "post": {
+        "operationId": "validateAssociation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Association"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Association"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/brief": {
+      "post": {
+        "operationId": "validateBrief",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Brief"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Brief"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/clockmapping": {
+      "post": {
+        "operationId": "validateClockMapping",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClockMapping"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClockMapping"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/commitreceipt": {
+      "post": {
+        "operationId": "validateCommitReceipt",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommitReceipt"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommitReceipt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/context": {
+      "post": {
+        "operationId": "validateRequestContext",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestContext"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestContext"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/coverage": {
+      "post": {
+        "operationId": "validateCoverage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Coverage"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coverage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/criticalslot": {
+      "post": {
+        "operationId": "validateCriticalSlot",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriticalSlot"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CriticalSlot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/evidence": {
+      "post": {
+        "operationId": "validateEvidence",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Evidence"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Evidence"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/finding": {
+      "post": {
+        "operationId": "validateFinding",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Finding"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Finding"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/geometryresult": {
+      "post": {
+        "operationId": "validateGeometryResult",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeometryResult"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeometryResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/intent": {
+      "post": {
+        "operationId": "validateIntent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Intent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Intent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/job_result": {
+      "post": {
+        "operationId": "validateJobResult",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobResult"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/joblease": {
+      "post": {
+        "operationId": "validateJobLease",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobLease"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobLease"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/jobprogress": {
+      "post": {
+        "operationId": "validateJobProgress",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobProgress"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobProgress"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/manifest": {
+      "post": {
+        "operationId": "validateSourceManifest",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceManifest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceManifest"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/memoryevent": {
+      "post": {
+        "operationId": "validateMemoryEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryEvent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/openloop": {
+      "post": {
+        "operationId": "validateOpenLoop",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenLoop"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenLoop"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/option": {
+      "post": {
+        "operationId": "validateOption",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Option"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Option"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/permissions": {
+      "post": {
+        "operationId": "validatePermissions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Permissions"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Permissions"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/playbackstate": {
+      "post": {
+        "operationId": "validatePlaybackState",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaybackState"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackState"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/providerprofile": {
+      "post": {
+        "operationId": "validateProviderProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderProfile"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderProfile"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/queryanswer": {
+      "post": {
+        "operationId": "validateQueryAnswer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryAnswer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryAnswer"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/resyncrequired": {
+      "post": {
+        "operationId": "validateResyncRequired",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResyncRequired"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResyncRequired"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/review": {
+      "post": {
+        "operationId": "validateReview",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/snapshot": {
+      "post": {
+        "operationId": "validateSnapshot",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Snapshot"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/sourceevent": {
+      "post": {
+        "operationId": "validateSourceEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceEvent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/sourcequalitychanged": {
+      "post": {
+        "operationId": "validateSourceQualityChanged",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceQualityChanged"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceQualityChanged"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/streamevent": {
+      "post": {
+        "operationId": "validateStreamEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamEvent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/timerange": {
+      "post": {
+        "operationId": "validateTimeRange",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimeRange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeRange"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/toolrequest": {
+      "post": {
+        "operationId": "validateToolRequest",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolRequest"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/track": {
+      "post": {
+        "operationId": "validateTrack",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Track"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Track"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/transcript": {
+      "post": {
+        "operationId": "validateTranscriptSegment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranscriptSegment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscriptSegment"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/_harness/validate/usage": {
+      "post": {
+        "operationId": "validateUsage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Usage"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Usage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate",
+        "tags": [
+          "MOCK contract validation"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Health Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/ready": {
+      "get": {
+        "operationId": "ready_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  },
+                  "title": "Response Ready Ready Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Ready"
+      }
+    },
+    "/release.json": {
+      "get": {
+        "operationId": "release_release_json_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Release Release Json Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Release"
+      }
+    }
+  }
+}

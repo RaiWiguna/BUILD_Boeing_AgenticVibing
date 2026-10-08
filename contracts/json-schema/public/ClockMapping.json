@@ -1,0 +1,54 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "mapping_version": {
+      "default": "clock-1",
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Mapping Version",
+      "type": "string"
+    },
+    "offset_ms": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Offset Ms"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "timezone": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Timezone",
+      "type": "string"
+    },
+    "uncertainty_ms": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Uncertainty Ms"
+    }
+  },
+  "required": [
+    "offset_ms",
+    "uncertainty_ms",
+    "timezone"
+  ],
+  "title": "ClockMapping",
+  "type": "object"
+}

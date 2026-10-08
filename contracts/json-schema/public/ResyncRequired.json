@@ -1,0 +1,56 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "analysis_run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Analysis Run Id"
+    },
+    "reason": {
+      "enum": [
+        "SEQUENCE_GAP",
+        "REVISION_CHANGED",
+        "PERMISSION_CHANGED"
+      ],
+      "title": "Reason",
+      "type": "string"
+    },
+    "revision": {
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "snapshot_sequence": {
+      "minimum": 0,
+      "title": "Snapshot Sequence",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "session_id",
+    "analysis_run_id",
+    "revision",
+    "reason",
+    "snapshot_sequence"
+  ],
+  "title": "ResyncRequired",
+  "type": "object"
+}

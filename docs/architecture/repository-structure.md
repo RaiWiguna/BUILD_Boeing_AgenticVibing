@@ -1,6 +1,6 @@
 # Struktur Repository ATC FlowLens
 
-Tanggal: 7 Oktober 2026. Status: **directory scaffold tersedia; aplikasi belum diimplementasikan**.
+Tanggal: 8 Oktober 2026. Status: **Phase 0–1 foundation tersedia; aplikasi bisnis A/B belum diimplementasikan**. Tree lengkap di bawah mencatat scaffold awal 7 Oktober; daftar source terkini ada di baseline evidence dan workflow.
 
 ## Dasar penempatan
 
@@ -335,7 +335,7 @@ BUILD_Boeing_AgenticVibing/
 | `prompts/intent/association/options/brief/query/` | Templates, output/schema policy dan non-secret version metadata; tidak menyimpan raw participant transcript |
 | `cli/` | Bootstrap/migration/maintenance/recovery entrypoints saat diimplementasikan; bukan AI tools |
 
-Nama module bukan kewajiban memecah aplikasi menjadi service baru. Subpackage tambahan hanya dibuat saat responsibility memang membesar. `__init__.py`, app factory, entrypoints, serta `backend/pyproject.toml` dan lock strategy ditentukan pada foundation backend; belum dibuat oleh scaffold ini.
+Nama module bukan kewajiban memecah aplikasi menjadi service baru. Subpackage tambahan hanya dibuat saat responsibility memang membesar. `__init__.py`, contract-only app factory, standalone harness CLI dan root `pyproject.toml`/`uv.lock` kini tersedia pada foundation. Business API/worker entrypoints tetap owner phases A/B.
 
 ### Dependency dan authority
 

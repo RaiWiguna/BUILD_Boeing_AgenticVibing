@@ -1,0 +1,69 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "alternatives": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Alternatives",
+      "type": "array"
+    },
+    "evidence_ids": {
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "quality": {
+      "enum": [
+        "SUPPORTED",
+        "AMBIGUOUS",
+        "MISSING",
+        "CONFLICTING"
+      ],
+      "title": "Quality",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "unknowns": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Unknowns",
+      "type": "array"
+    },
+    "value": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Value"
+    }
+  },
+  "required": [
+    "value",
+    "quality",
+    "evidence_ids",
+    "alternatives",
+    "unknowns"
+  ],
+  "title": "CriticalSlot",
+  "type": "object"
+}

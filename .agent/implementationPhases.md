@@ -2,16 +2,16 @@
 
 | Atribut | Nilai |
 | --- | --- |
-| Status dokumen | Roadmap implementasi lengkap; belum merupakan hasil implementasi |
-| Tanggal | 7 Oktober 2026 |
+| Status dokumen | Roadmap dan progress; Phase 0–1 memiliki evidence implementasi, fase berikutnya planned |
+| Tanggal | 8 Oktober 2026 |
 | Urutan delivery | **Backend lengkap → frontend lengkap → containerization → deployment lokal dan satu VM** |
 | Kontrak produk | `.agent/PRD.md`; batas proyek dan aturan kerja tetap berlaku |
-| Current implementation phase | Belum ada fase implementasi yang dimulai dalam roadmap ini |
-| Next recommended phase | Phase 0, dimulai dari 0.1 — audit source dan gap requirement |
+| Current implementation phase | Phase 0–1 selesai: baseline kontrak/harness 1.0.0; implementasi paket A/B belum dimulai |
+| Next recommended phase | Paket A Phase 2 dan paket B foundation/6.2/6.4 secara independen |
 | Deadline dan staffing | Deadline belum ditetapkan; backend dibagi kepada pihak A (Platform & Replay) dan pihak B (Analysis & AI), tanpa penetapan individu |
 | Baseline data | Sintetik berlabel; replay simulator mitra berizin jika tersedia |
 
-Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase serta subfase dimulai dengan status `planned`. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap ini tidak menjalankan build, test aplikasi, cloud inference, atau deployment.
+Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase/subfase awalnya `planned`; Phase 0–1 kini `done` berdasarkan [baseline evidence](../docs/testing/phase01-evidence.md). Phase 2–17 tetap `planned`. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap ini tidak menjalankan build, test aplikasi, cloud inference, atau deployment.
 
 ## 1. Sequencing Gates
 
@@ -55,7 +55,9 @@ Untuk backend, catat status per owner/subfase. Paket A atau B dapat selesai seca
 
 ## 3. Baseline Setelah Reset dan Inventaris Historis
 
-**Keadaan terkini, 7 Oktober 2026:** source dan dokumentasi lama telah dihapus pada commit reset `6e7bd3f`. Kontrak `.agent/` dipertahankan; struktur folder baru disiapkan dengan `.gitkeep` dan panduan ownership. Source aplikasi, dependency manifests, suites, Dockerfiles, Compose, dan workflow CI executable belum tersedia. Instruksi AGENTS.md sebelumnya tidak berlaku. Scaffold tidak menutup Phase 0 maupun Phase 1 dan tidak memberi izin implementasi frontend/container melampaui gate.
+**Baseline reset, 7 Oktober 2026:** source dan dokumentasi lama telah dihapus pada commit reset `6e7bd3f`. Kontrak `.agent/` dipertahankan; struktur folder baru disiapkan dengan `.gitkeep` dan panduan ownership. Source aplikasi, dependency manifests, suites, Dockerfiles, Compose, dan workflow CI executable belum tersedia. Instruksi AGENTS.md sebelumnya tidak berlaku. Scaffold tidak menutup Phase 0 maupun Phase 1 dan tidak memberi izin implementasi frontend/container melampaui gate.
+
+**Keadaan terkini, 8 Oktober 2026:** Phase 0–1 menyediakan pyproject/uv.lock, Python package, strict Pydantic schemas/ports, module registration, generated contract artifacts, synthetic inputs dan standalone MOCK harness/tests. Aplikasi bisnis A/B, real provider adapters, frontend/container/deployment belum diimplementasikan. Evidence foundation: `docs/testing/phase01-evidence.md`; contract freeze 1.0.0.
 
 Tabel berikut adalah **inventaris historis sebelum reset**, bukan source yang masih tersedia. Informasi ini dapat membantu disposition compatibility bila dibutuhkan; pemulihan source historis bukan tindakan default. Tidak ada build/runtime/test aplikasi yang dibuktikan oleh inventaris tersebut.
 
@@ -77,8 +79,8 @@ Audit awal memeriksa kontrak dan scaffold yang benar-benar tersedia, lalu meneta
 
 | Phase | Track | Deliverable utama | Dependency wajib | Status |
 | --- | --- | --- | --- | --- |
-| 0 | Baseline | Audit gap, scope freeze, fixture/evaluation plan, dependency register | PRD dan rules | `planned` |
-| 1 | Baseline kontrak backend bersama | Runtime/harness, shared contracts dan module registration dibekukan | Phase 0 | `planned` |
+| 0 | Baseline | Audit gap, scope freeze, fixture/evaluation plan, dependency register | PRD dan rules | `done` |
+| 1 | Baseline kontrak backend bersama | Runtime/harness, shared contracts dan module registration dibekukan | Phase 0 | `done` |
 | 2 | Backend A | Platform persistence, accounts/grants/auth, audit, transaction infrastructure | Phase 1; tanpa dependency implementasi B | `planned` |
 | 3 | Backend A | Import atomik, provenance, clocks, quality dan source reader | Phase 2 (A) | `planned` |
 | 4 | Backend A | Replay/checkpoints, REST/WS, archive dan compatibility | Phase 3 (A) | `planned` |
@@ -112,16 +114,16 @@ flowchart LR
 
 ## 5. Phase 0 — Product, Contract, dan Execution Baseline
 
-**Status:** `planned` · **Owner-function:** product/engineering lead · **Dependency:** PRD dan rules.
+**Status:** `done` · **Owner-function:** product/engineering lead · **Dependency:** PRD dan rules.
 
 **Tujuan:** memastikan implementasi dimulai dari scope yang jelas tanpa menganggap fondasi lama sudah memenuhi kontrak baru.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
-| 0.1 | Audit source, route, wire schema, auth/storage, test/tooling, serta compatibility gaps | Matriks reuse/modify/replace dengan file dan evidence statis | `planned` |
-| 0.2 | Bekukan replay offline; konfirmasi provider transport, P0/P1, permissions, readiness, dan batas authority | Keputusan scope serta daftar open decisions/impact | `planned` |
-| 0.3 | Rancang fixture audio/event, layout, clocks, labels terisolasi, dan expected outcomes independen | Fixture manifest/schema dan evaluation protocol | `planned` |
-| 0.4 | Petakan FR/AC, external dependencies, ownership paket backend A/B, shared contract baseline dan acceptance integrasi akhir | Backlog dua jalur independen dan dependency register | `planned` |
+| 0.1 | Audit source, route, wire schema, auth/storage, test/tooling, serta compatibility gaps | Matriks reuse/modify/replace dengan file dan evidence statis | `done` |
+| 0.2 | Bekukan replay offline; konfirmasi provider transport, P0/P1, permissions, readiness, dan batas authority | Keputusan scope serta daftar open decisions/impact | `done` |
+| 0.3 | Rancang fixture audio/event, layout, clocks, labels terisolasi, dan expected outcomes independen | Fixture manifest/schema dan evaluation protocol | `done` |
+| 0.4 | Petakan FR/AC, external dependencies, ownership paket backend A/B, shared contract baseline dan acceptance integrasi akhir | Backlog dua jalur independen dan dependency register | `done` |
 
 **Deliverables:** baseline source map; schema/lifecycle inventory; fixture/data-rights plan; compatibility/deprecation plan; documented provider-access path; handoff implementasi pertama.
 
@@ -211,14 +213,14 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 1 — Backend Foundation dan Shared Contracts
 
-**Status:** `planned` · **Owner:** baseline bersama A/B · **Dependency:** Phase 0; selesai sebelum implementasi dua paket dimulai.
+**Status:** `done` · **Owner:** baseline bersama A/B · **Dependency:** Phase 0; selesai sebelum implementasi dua paket dimulai.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
-| 1.1 | Rapikan package boundaries, runtime/dependency lock strategy, virtual environment, lint/type/test entrypoints | Setup backend reproducible | `planned` |
-| 1.2 | Definisikan Pydantic source/time/quality/evidence, run/job, transcript, intent/memory/finding/option/review DTOs | Versioned domain/wire schemas | `planned` |
-| 1.3 | Bekukan config/error/context/provider ports, transaction/migration ports dan module registration; sediakan bootstrap composition untuk standalone harness | Frozen interfaces dan injectable boundaries | `planned` |
-| 1.4 | Bangun shared contract suite, fake platform/analysis adapters, fixture inputs, OpenAPI/client generation strategy dan standalone test entrypoints | Harness mandiri A/B dan contract freeze record | `planned` |
+| 1.1 | Rapikan package boundaries, runtime/dependency lock strategy, virtual environment, lint/type/test entrypoints | Setup backend reproducible | `done` |
+| 1.2 | Definisikan Pydantic source/time/quality/evidence, run/job, transcript, intent/memory/finding/option/review DTOs | Versioned domain/wire schemas | `done` |
+| 1.3 | Bekukan config/error/context/provider ports, transaction/migration ports dan module registration; sediakan bootstrap composition untuk standalone harness | Frozen interfaces dan injectable boundaries | `done` |
+| 1.4 | Bangun shared contract suite, fake platform/analysis adapters, fixture inputs, OpenAPI/client generation strategy dan standalone test entrypoints | Harness mandiri A/B dan contract freeze record | `done` |
 
 **Scope:** pisahkan domain dari FastAPI/storage/provider SDK; model SDK tidak menjadi public wire shape. Rancang clocks UTC/relative ms, null/unknown semantics, schema version, source/run scope, idempotency, serta optimistic version. Tidak membuat React workflow atau Dockerfiles.
 
@@ -634,12 +636,19 @@ Perbarui `.agent/sessionHandoff.md` untuk pekerjaan lintas sesi yang substantif,
 
 ## 13. Next Recommended Action
 
-**Current recommendation: Phase 0.1 — audit kontrak/scaffold dan gap requirement setelah reset. Belum `in_progress`.**
+**Current recommendation: mulai dua paket independen setelah baseline 1.0.0 selesai. Paket A/B belum `in_progress`.**
 
-1. Petakan kontrak dan scaffold yang tersedia ke target Pydantic/OpenAPI, account/grants, replay, worker, dan evidence contracts; source aplikasi baru belum tersedia.
-2. Catat build-new/reuse disposition beserta compatibility risks; source historis hanya dipakai ulang bila keputusan tersebut eksplisit. Prioritaskan single-writer transactions, truth isolation, serta timebase sebelum pipeline AI.
-3. Bekukan scope offline, provider transport, dan P1 disposition; inventaris akses GCP/Gemini untuk smoke mendatang.
-4. Siapkan synthetic manifest/audio/event serta independent labels/geometry oracle dan source split.
-5. Setelah Phase 0 acceptance terpenuhi, mulai Phase 1 untuk membekukan shared contracts dan menyediakan standalone harness A/B. Setelah baseline siap, jalankan task A dan B secara independen; integrasi kedua paket hanya pada Phase 10 setelah keduanya selesai. Jangan memulai React workflows, images, Compose aplikasi, atau deployment lebih dahulu.
+1. Gunakan [packet handoff](../docs/development/backend-packets.md), [shared contracts](../docs/api/shared-contracts.md), dan [foundation workflow](../docs/development/backend-foundation.md).
+2. A mulai Phase 2 (host/platform transactions/auth/migrations); B mulai analysis registration/repositories lalu Phase 6.2/6.4 memakai fake platform dan fixtures baseline.
+3. Jalankan shared contract suite sesuai track. Perubahan breaking mengikuti version policy; jangan mengimpor internals pihak lain.
+4. Tutup credential/model/API/budget readiness sebelum real STT/Gemini smoke. Baseline tidak melakukan provider calls dan tidak menghapus external blocker.
+5. Integrasi implementations A/B hanya Phase 10 setelah seluruh task/acceptance mandiri selesai; G-BE tetap `not_started`. Frontend/container/deployment menunggu gate masing-masing.
 
-Urutan tersebut merupakan rencana berikutnya. Tidak ada perubahan source aplikasi, provisioning, commit/push, atau deployment yang dijalankan oleh pembuatan dokumen ini.
+## 14. Phase 0–1 Completion Record — 8 Oktober 2026
+
+- Status: Phase 0.1–0.4 dan 1.1–1.4 `done`; shared contract 1.0.0. Evidence: [checks dan limits](../docs/testing/phase01-evidence.md).
+- Input parent: fb1e1f7; changed files/candidate berupa working tree tugas ini, belum commit/push.
+- Deliverables: FR/AC audit, scope/dependencies, evaluation protocol/oracles/fixtures, A/B packets, ADR 0002, pyproject/lock/tooling, schema/ports/registration, MOCK reference repositories/SQLite/harness, generation/drift tests.
+- Limitations: provider model/API/access unverified; TTS script NOT_GOLD (pronunciation audit pending), NOT_DOMAIN_VALIDATED; reference migration bukan historical archive migration; business APIs/domain detectors/AI worker belum ada.
+- Runtime: tests memakai temp SQLite; tidak ada server/worker/container persisten dimulai. Tidak ada cloud inference/provisioning/deployment.
+- Gate impact: baseline memungkinkan A/B mulai independen; tidak memberi G-BE passed.

@@ -1,6 +1,6 @@
 # Peta Dokumentasi ATC FlowLens
 
-Tanggal: 7 Oktober 2026. Tree saat ini adalah scaffold setelah reset repository. Dokumen lama tidak dipulihkan sebagai spesifikasi aktif, dan instruksi AGENTS.md sebelumnya tidak berlaku.
+Tanggal: 8 Oktober 2026. Tree reset sudah dilengkapi foundation Phase 0–1; implementation A/B belum dimulai. Dokumen lama tidak dipulihkan sebagai spesifikasi aktif, dan instruksi AGENTS.md sebelumnya tidak berlaku.
 
 ## Kontrak dan konteks kerja
 
@@ -12,6 +12,13 @@ Tanggal: 7 Oktober 2026. Tree saat ini adalah scaffold setelah reset repository.
 | [Handoff](../.agent/sessionHandoff.md) | Keadaan repository, hasil pekerjaan, blockers, dan next action |
 | [Repository structure](architecture/repository-structure.md) | Tree folder lengkap, responsibility, boundary, dan kapan diisi |
 | [ADR modular layout](adr/0001-modular-repository-layout.md) | Keputusan arsitektur struktur repository |
+
+## Baseline Phase 0–1
+
+- [Audit requirements/source](product/requirement-audit.md) dan [scope/dependencies](product/baseline-scope.md).
+- [Backend baseline](architecture/backend-baseline.md) dan [ADR 0002](adr/0002-frozen-backend-contracts.md).
+- [Shared contracts](api/shared-contracts.md), [developer workflow](development/backend-foundation.md), dan [A/B packets](development/backend-packets.md).
+- [Evaluation protocol](../evaluation/protocols/baseline.md) dan [checks/evidence](testing/phase01-evidence.md).
 
 ## Area dokumentasi
 
