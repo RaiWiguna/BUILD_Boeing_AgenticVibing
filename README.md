@@ -2,13 +2,15 @@
 
 Workspace untuk membangun replay offline berbukti bagi review komunikasi dan kondisi runway oleh evaluator Tower/Ground.
 
-**Status saat ini (8 Oktober 2026):** Phase 0–1 selesai: Python foundation, dependency lock, shared contracts 1.0.0, fixtures, generated schemas/OpenAPI dan standalone MOCK harness/tests tersedia. Paket bisnis A/B, provider adapters nyata, frontend, Dockerfiles/Compose dan deployment belum diimplementasikan. G-BE belum passed; baseline bukan validasi domain/operasional.
+**Status saat ini (9 Oktober 2026):** Phase 0–1 dan Paket A A01/Phase 2.1 selesai (host, SQLite/UOW dan audited historical conversion). Phase 2 masih in_progress; next A02.1 accounts/bootstrap/reset/deactivation. Dependency lock/contracts 1.0.0 tetap. Auth/business pipeline, provider adapters nyata, frontend dan deployment belum tersedia. G-BE belum passed; baseline bukan validasi domain/operasional.
 
 Stack target: React, TypeScript, Vite, shadcn/ui; Python, FastAPI, Pydantic; Google Speech-to-Text dan Gemini 3.8 Flash; SQLite; Docker Compose lokal/single VM.
 
 Mulai dari:
 
 - [Foundation workflow](docs/development/backend-foundation.md), [A/B packets](docs/development/backend-packets.md), dan [baseline evidence](docs/testing/phase01-evidence.md).
+- [Paket A per unit sesi](docs/development/package-a-execution.md) dan [evidence A01.1](docs/testing/a011-evidence.md).
+- [Evidence persistence A01.2](docs/testing/a012-evidence.md).
 
 - [PRD](.agent/PRD.md): requirement produk dan acceptance.
 - [Implementation phases](.agent/implementationPhases.md): backend lengkap → frontend lengkap → containerization → deployment.

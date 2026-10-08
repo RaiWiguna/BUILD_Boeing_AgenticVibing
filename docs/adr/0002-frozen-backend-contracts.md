@@ -9,3 +9,17 @@ Decision: root pyproject/uv.lock, Python 3.12, canonical strict Pydantic contrac
 Consequence: fixtures, reference schemas dan contract behavior dapat digunakan A/B sebelum real implementations. Contract/fake pass hanya foundation acceptance; provider smoke, geometry/domain correctness dan integration tetap wajib pada owner phases/10. Breaking contract perubahan memerlukan versioned reconciliation/adapter. SQLite harness bukan production job/persistence engine.
 
 Validation: shared suite both tracks, strict/negative examples, scope/as-of/evidence checks, atomic rollback/receipt/publication, fresh/upgrade reference schema, module/migration registration, schema drift, lint/type/build/dependency scans. Real A/B migrations and provider SDK compatibility are verified later.
+
+## Platform persistence elaboration — 9 Oktober 2026
+
+Status: accepted implementation detail untuk ownership/transaction decision yang sama. Paket A menyediakan local POSIX advisory lock sepanjang DB lifespan; API serializes UOW, memakai WAL/FULL synchronous/FK dan explicit commit. Checksum migration mencakup ID/owner/dependency/SQL; applied manifest mismatch, downgrade dan unversioned archive ditolak. Pending migrations diterapkan dalam satu transaksi, bukan sqlite executescript yang dapat memutus batas transaksi.
+
+Platform schema memakai scoped composite FKs dan unique receipts. Tabel minimal disempurnakan melalui migrations baru saat lifecycle domain dibangun. B meng-inject repository factories melalui same connection/UOW guard; tidak ada worker DB mount atau analysis tables dari Paket A. After-commit publication berlangsung setelah transaksi/connection dilepas; failure dilaporkan sebagai durable commit dengan kebutuhan resync, tidak rollback data.
+
+Consequences: owner lock bekerja pada local canonical paths untuk process yang mematuhinya; Windows/network filesystem/hard-link aliases belum didukung/verified. Unversioned historical mapping tetap pekerjaan terpisah; optional host database path tidak otomatis membuktikan full readiness. [Validation dan limits A01.2](../testing/a012-evidence.md) mencatat fresh/upgrade, rollback, process lock, concurrent sequence dan real host restart; G-BE tetap belum passed.
+
+## Historical archive preservation — 9 Oktober 2026
+
+Audited pre-reset profile dikonversi dari read-only snapshot ke separate target lewat UOW. Original short IDs dan JSON text dipertahankan pada quarantine tables; canonical session UUID adalah deterministic UUIDv5 alias, bukan penggantian diam-diam pada source. Private checkpoints terpisah dari public archive rows, tanpa observer/provider adapters. Logical digest termasuk WAL-visible data menghasilkan idempotent receipt; changed same-ID archive ditolak. Unversioned in-place startup upgrade tetap ditolak.
+
+Old operator keys/seat tokens bukan individual identities dan tidak di-grandfather menjadi accounts/grants. Public/training compatibility tetap perlu scoped readers/serializers pada replay phase; source label public historis tidak membuktikan seed/assessment safe bagi observer/AI. [Evidence A01.3](../testing/a013-evidence.md) dan [compatibility mapping](../development/legacy-compatibility.md) membuktikan preservation/atomicity/deprecation pada sintetik.

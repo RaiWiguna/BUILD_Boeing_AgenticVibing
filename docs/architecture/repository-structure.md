@@ -1,6 +1,6 @@
 # Struktur Repository ATC FlowLens
 
-Tanggal: 8 Oktober 2026. Status: **Phase 0–1 foundation tersedia; aplikasi bisnis A/B belum diimplementasikan**. Tree lengkap di bawah mencatat scaffold awal 7 Oktober; daftar source terkini ada di baseline evidence dan workflow.
+Tanggal: 9 Oktober 2026. Status: **Phase 0–1 foundation, host A01.1 dan persistence A01.2 tersedia; auth/business pipeline belum diimplementasikan**. Tree lengkap di bawah mencatat scaffold awal 7 Oktober; daftar source terkini ada di baseline evidence, [host](../testing/a011-evidence.md), [persistence](../testing/a012-evidence.md) dan workflow.
 
 ## Dasar penempatan
 

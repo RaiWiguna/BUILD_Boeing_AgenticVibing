@@ -2,16 +2,16 @@
 
 | Atribut | Nilai |
 | --- | --- |
-| Status dokumen | Roadmap dan progress; Phase 0–1 memiliki evidence implementasi, fase berikutnya planned |
-| Tanggal | 8 Oktober 2026 |
+| Status dokumen | Roadmap dan progress; Phase 0–1 done, Paket A Phase 2 in_progress (A01/Phase 2.1 done), fase lain planned |
+| Tanggal | 9 Oktober 2026 |
 | Urutan delivery | **Backend lengkap → frontend lengkap → containerization → deployment lokal dan satu VM** |
 | Kontrak produk | `.agent/PRD.md`; batas proyek dan aturan kerja tetap berlaku |
-| Current implementation phase | Phase 0–1 selesai: baseline kontrak/harness 1.0.0; implementasi paket A/B belum dimulai |
-| Next recommended phase | Paket A Phase 2 dan paket B foundation/6.2/6.4 secara independen |
-| Deadline dan staffing | Deadline belum ditetapkan; backend dibagi kepada pihak A (Platform & Replay) dan pihak B (Analysis & AI), tanpa penetapan individu |
+| Current implementation phase | Paket A Phase 2 in_progress: A01/2.1 done; next A02.1 (Phase 2.2); contract 1.0.0 tetap |
+| Next recommended phase | Paket A A02.1 accounts/bootstrap/reset/deactivation; paket B tetap independen |
+| Deadline dan staffing | Deadline belum ditetapkan; pengguna adalah pihak A (Platform & Replay); individu pihak B (Analysis & AI) belum ditetapkan |
 | Baseline data | Sintetik berlabel; replay simulator mitra berizin jika tersedia |
 
-Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase/subfase awalnya `planned`; Phase 0–1 kini `done` berdasarkan [baseline evidence](../docs/testing/phase01-evidence.md). Phase 2–17 tetap `planned`. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap ini tidak menjalankan build, test aplikasi, cloud inference, atau deployment.
+Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase/subfase awalnya `planned`; Phase 0–1 kini `done` berdasarkan [baseline evidence](../docs/testing/phase01-evidence.md). Phase 2 `in_progress`, Phase 2.1 `done` berdasarkan [A01.3 evidence](../docs/testing/a013-evidence.md); Phase 3–17 tetap `planned`. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap sendiri tidak membuktikan runtime atau gate.
 
 ## 1. Sequencing Gates
 
@@ -81,7 +81,7 @@ Audit awal memeriksa kontrak dan scaffold yang benar-benar tersedia, lalu meneta
 | --- | --- | --- | --- | --- |
 | 0 | Baseline | Audit gap, scope freeze, fixture/evaluation plan, dependency register | PRD dan rules | `done` |
 | 1 | Baseline kontrak backend bersama | Runtime/harness, shared contracts dan module registration dibekukan | Phase 0 | `done` |
-| 2 | Backend A | Platform persistence, accounts/grants/auth, audit, transaction infrastructure | Phase 1; tanpa dependency implementasi B | `planned` |
+| 2 | Backend A | Platform persistence, accounts/grants/auth, audit, transaction infrastructure | Phase 1; tanpa dependency implementasi B | `in_progress` |
 | 3 | Backend A | Import atomik, provenance, clocks, quality dan source reader | Phase 2 (A) | `planned` |
 | 4 | Backend A | Replay/checkpoints, REST/WS, archive dan compatibility | Phase 3 (A) | `planned` |
 | 5 | Backend A | Footprint, occupancy, prediction, observed rules/alerts | Phase 4 (A) | `planned` |
@@ -140,6 +140,8 @@ flowchart LR
 ## 6. Backend Track
 
 Seluruh Phase 1–10 dilaksanakan sebelum implementasi frontend. Backend selesai berarti API/workers/domain nyata tersedia dan terverifikasi; bukan sekadar endpoint yang mengembalikan fixture.
+
+Paket A memiliki [rincian eksekusi A01–A10](../docs/development/package-a-execution.md) dalam 26 unit sesi untuk mengendalikan scope dan handoff. A01.1–A01.3/A01 `done`, unit lain `planned`; nomor ini merinci fase yang sudah ada dan tidak mengubah gate/ownership.
 
 ### 6.1 Model Eksekusi — Dua Paket Independen, Integrasi di Akhir
 
@@ -228,11 +230,11 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 2 — Paket A: Platform Persistence, Identity, Authorization, dan Audit
 
-**Status:** `planned` · **Owner:** pihak A · **Dependency:** Phase 1; tidak membutuhkan implementasi B.
+**Status:** `in_progress` · **Owner:** pihak A · **Dependency:** Phase 1; tidak membutuhkan implementasi B. A01 done, next A02.1; [host evidence](../docs/testing/a011-evidence.md) dan [persistence evidence](../docs/testing/a012-evidence.md) dan [compatibility evidence](../docs/testing/a013-evidence.md).
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
-| 2.1 | Bangun host/config, unit-of-work, migration runner dan stores platform untuk accounts/grants/sources/assets/replay/runs/jobs/attempts/audit/artifacts/receipts; analysis tables dimiliki B | Platform SQLite schema dan injectable transactions | `planned` |
+| 2.1 | Bangun host/config, unit-of-work, migration runner dan stores platform untuk accounts/grants/sources/assets/replay/runs/jobs/attempts/audit/artifacts/receipts; analysis tables dimiliki B | Host/platform schema/UOW dan audited historical archive conversion tersedia | `done` |
 | 2.2 | Bootstrap admin, Argon2id, login/logout/reset/deactivation, cookie sessions, expiry dan rate limits | Individual account lifecycle | `planned` |
 | 2.3 | Session/raw-audio/export/truth grants, CSRF, WS origin/session checks, internal worker principal | Server-side policy dan serializers | `planned` |
 | 2.4 | Audit changes, optimistic concurrency, idempotency, atomic transaction/fault handling | Durable receipts dan audit events | `planned` |
@@ -636,10 +638,10 @@ Perbarui `.agent/sessionHandoff.md` untuk pekerjaan lintas sesi yang substantif,
 
 ## 13. Next Recommended Action
 
-**Current recommendation: mulai dua paket independen setelah baseline 1.0.0 selesai. Paket A/B belum `in_progress`.**
+**Current recommendation: A lanjut A02.1 setelah A01/Phase 2.1 done; B dapat mulai independen dari baseline 1.0.0. Paket A Phase 2 in_progress; B belum dimulai.**
 
 1. Gunakan [packet handoff](../docs/development/backend-packets.md), [shared contracts](../docs/api/shared-contracts.md), dan [foundation workflow](../docs/development/backend-foundation.md).
-2. A mulai Phase 2 (host/platform transactions/auth/migrations); B mulai analysis registration/repositories lalu Phase 6.2/6.4 memakai fake platform dan fixtures baseline.
+2. A lanjut A02.1 account/bootstrap/reset/deactivation; B mulai analysis registration/repositories lalu Phase 6.2/6.4 memakai fake platform dan fixtures baseline.
 3. Jalankan shared contract suite sesuai track. Perubahan breaking mengikuti version policy; jangan mengimpor internals pihak lain.
 4. Tutup credential/model/API/budget readiness sebelum real STT/Gemini smoke. Baseline tidak melakukan provider calls dan tidak menghapus external blocker.
 5. Integrasi implementations A/B hanya Phase 10 setelah seluruh task/acceptance mandiri selesai; G-BE tetap `not_started`. Frontend/container/deployment menunggu gate masing-masing.
