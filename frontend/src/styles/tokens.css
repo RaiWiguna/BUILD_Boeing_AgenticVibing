@@ -1,0 +1,70 @@
+/*
+ * FlowLens design tokens — derived from docs/design/2026-10-08-flowlens/tokens.json
+ * and adapted to the Margin reference screens (pale shell, charcoal active nav,
+ * white 24px cards, hatched data language). Light theme only (decision D-5).
+ */
+:root {
+  /* Surfaces */
+  --canvas: #f5f6f7;
+  --canvas-outer: #ecedef;
+  --surface: #ffffff;
+  --surface-sunken: #f7f8f9;
+  --track: #eef0f2;
+
+  /* Text — tertiary only for non-essential text >= 13px */
+  --text: #191b20;
+  --text-secondary: #616975;
+  --text-tertiary: #687080;
+
+  /* Lines */
+  --hairline-soft: #eceef1;
+  --hairline: #e4e7eb;
+  --hairline-strong: #d5d9df;
+  --control-boundary: #7e8999;
+
+  /* Action */
+  --action: #2b2d31;
+  --action-hover: #3a3d43;
+  --on-action: #ffffff;
+
+  /* Semantic */
+  --data: #2563eb;
+  --data-strong: #1d4fd7;
+  --data-tint: #eaf1ff;
+  --data-soft: #d6e4ff;
+  --discrepancy: #b82b69;
+  --discrepancy-tint: #fcebf3;
+  --discrepancy-soft: #f7d3e3;
+  --notice: #96610b;
+  --notice-tint: #fff4de;
+  --notice-soft: #fbe3b4;
+  --ready: #167b46;
+  --ready-tint: #eaf7ef;
+  --muted: #596273;
+  --muted-tint: #eef0f3;
+  --badge: #ea6a1f;
+  --focus: #2563eb;
+
+  /* Hatch colours */
+  --data-hatch: rgba(37, 99, 235, 0.62);
+  --data-hatch-soft: rgba(37, 99, 235, 0.3);
+  --discrepancy-hatch: rgba(214, 51, 132, 0.72);
+  --muted-hatch: rgba(89, 98, 115, 0.28);
+  --notice-hatch: rgba(150, 97, 11, 0.36);
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px rgba(25, 27, 32, 0.03), 0 2px 8px rgba(25, 27, 32, 0.025);
+  --shadow-control: 0 1px 2px rgba(25, 27, 32, 0.06), 0 1px 1px rgba(25, 27, 32, 0.03);
+  --shadow-pop: 0 10px 28px rgba(25, 27, 32, 0.1), 0 2px 6px rgba(25, 27, 32, 0.05);
+  --shadow-action: 0 6px 14px rgba(25, 27, 32, 0.16), 0 1px 2px rgba(25, 27, 32, 0.2);
+
+  /* Layout */
+  --sidebar-width: 232px;
+  --sidebar-collapsed: 72px;
+  --main-padding: 28px;
+  --gutter: 20px;
+
+  /* Motion */
+  --motion-hover: 140ms;
+  --motion-sheet: 200ms;
+}
