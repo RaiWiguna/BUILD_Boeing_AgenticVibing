@@ -20,6 +20,7 @@ def main() -> None:
         workers=1,
         reload=False,
         access_log=False,
+        proxy_headers=False,
     )
 
 

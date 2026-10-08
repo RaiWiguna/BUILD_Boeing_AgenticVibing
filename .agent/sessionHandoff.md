@@ -3,13 +3,37 @@
 | Atribut | Nilai |
 | --- | --- |
 | Tanggal | 9 Oktober 2026 |
-| Objective | Paket A A01.3: historical archive conversion/auth deprecation |
-| Status | Phase 0–1 done; A01.1–A01.3/A01/Phase 2.1 done; Phase 2 in_progress; B belum dimulai; contract 1.0.0 |
-| Candidate | Input e24acf5804363dfdb8fb21c3b7a40eecd2abe6ef; perubahan A01 dan perencanaan dicommit lokal atas instruksi pengguna 9 Oktober 2026; SHA akhir tersedia di Git log; tanpa push |
-| Next focus | A02.1 account/bootstrap/reset/deactivation; B tetap dapat mulai independen |
+| Objective | Paket A A02.2: HTTP login/logout, cookie sessions, expiry/rate limits |
+| Status | Phase 0–1 done; A01/A02 dan Phase 2.1/2.2 done; Phase 2 in_progress; B belum dimulai; contract 1.0.0 |
+| Candidate | Input c36cf04; perubahan A02.1–A02.2 dicommit lokal atas instruksi pengguna 9 Oktober 2026; SHA akhir tersedia di Git log; tanpa push |
+| Next focus | A03.1 grants/RequestContext/worker principal; B tetap independen |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
 
-## Handoff terkini — A01.3
+## Handoff terkini — A02.2
+
+- Deliverables: auth/sessions.py + routes.py, platform.0005, host session/router lifecycle, exact origin config, launcher forwarding disabled, Account successful rehash/password-version guard, session HTTP/service tests dan auth/evidence docs.
+- Cookie-only opaque sessions: random raw token hanya Set-Cookie HttpOnly/SameSiteLax/Secure pada configured HTTPS; SQLite menyimpan digest/stamp/timing/revocation. CSRF token derived HMAC, Origin/CSRF pada auth mutations, responses/errors no-store. No bearer/query fallback.
+- Login/logout/session/password endpoints nyata. Restricted forced-change flow, cookie rotation, persistent logout, idle60min/absolute8h, reset/deactivation/version rechecks. Successful verification rehashes older Argon2 parameters tanpa revoking stamp untuk representation-only update.
+- Durable fixed-window account5/peer20 attempts per60s sebelum hashing, termasuk password-change account budget; max10k subjects, two concurrent HTTP hashing slots, no hashing in write UOW. RATE_LIMITED429 + safe Retry-After.
+- Checks: 110 platform tests (22 session cases) + shared contracts66 masing-masing A/B PASS; lint/format/mypy24/schema drift/Bandit0/build/real loopback HTTP login/session/CSRF logout/revocation/forwarding smoke PASS. [Evidence](../docs/testing/a022-evidence.md), [contract/limits](../docs/development/authentication.md).
+- Versions: contract1.0.0; platform.0001–.0005; dependency lock A02.1 unchanged. Auth DTOs local host OpenAPI; final frontend generation/freeze remains Phase10.
+- Limits: auth-specific CSRF prerequisite implemented; generic mutation/WS/media/export/internal policy, grants/RequestContext and worker auth remain A03/A07. No UI/TLS VM/WS disconnect/performance or operational/domain validation.
+- Runtime: disposable DB/synthetic admin/TestClient/actual subprocess smoke cleaned; build artifact a022-dist ignored. No persistent server/worker/container, real account change/provider calls. Commit lokal diizinkan pengguna; tidak ada push/deploy. Gitleaks unavailable; scoped patterns checks only.
+- Gate/next: A02.1–A02.2/A02/Phase2.2 done; Phase2 still in_progress. Next A03.1 grants/capabilities, trusted RequestContext and worker principal; all gates not_started.
+
+## Rekam A02.1 — 9 Oktober 2026
+
+- Deliverables: auth/accounts.py, cli/bootstrap_admin.py, platform.0004, host internal account service, account tests, manifest/lock dan workflow/evidence docs.
+- One-time private bootstrap, strict canonical logins, actual Argon2id/random salts, active admin create/reset/deactivate, forced password change dan monotonic credential_version. Safe account view tidak memuat hash/password; account audit menggunakan IDs/actions/UTC dalam transaksi yang sama.
+- Hashing/verification di luar writer transaction, actor/target version diperiksa kembali sebelum commit. Pending admin mutation ditolak bila credential berubah; audit/marker failure rollback; last-admin guard.
+- CLI memakai getpass terminal atau owner-only regular secret file; no default password/secret arguments/output. Tests seluruhnya synthetic/disposable, tidak membuat akun nyata pada DB pengguna.
+- Checks: 88 platform + 66 contracts masing-masing A/B PASS; lint/format/mypy 22 files/schema drift/Bandit 0/dependency audit/build/private bootstrap CLI checks PASS. [Evidence A02.1](../docs/testing/a021-evidence.md), [account workflow](../docs/development/account-lifecycle.md).
+- Dependency: argon2-cffi 25.1.0, bindings 26.1.0/cffi 2.1.1/pycparser 3.1 locked; contract 1.0.0, platform migrations .0001–.0004. SQLite ALTER CHECK read-only quick_check diizinkan authorizer; writable PRAGMA/transaction/ledger safeguards tetap aktif.
+- Limits: service actor IDs trusted server input; belum ada HTTP login/users/session/cookie/expiry/rate limiting. Credential snapshot revocation terbukti, actual session/stream invalidation transport menunggu A02.2/A03/A07. Gitleaks unavailable, scoped patterns/Bandit bukan audit penuh; unpublished app skipped pip-audit.
+- Runtime/cleanup: temporary DB/private secret fixtures dan CLI subprocess selesai; ignored build artifacts a021-dist tersedia. Tidak ada persistent server/worker/container, provider call, real account/data migration, commit/push/merge/deploy untuk unit ini.
+- Gate/next: A02.1 done, A02/Phase 2.2 in_progress; next A02.2. Semua gates tetap not_started.
+
+## Rekam A01.3 — 9 Oktober 2026
 
 - Deliverables: `backend/flowlens/storage/sqlite/legacy.py`, migration platform.0003, `backend/flowlens/cli/migrate_archive.py`, `tests/platform/test_legacy.py` dan compatibility/evidence docs. Source pre-reset diaudit lewat Git (2660222); tidak dipulihkan sebagai runtime.
 - Read-only source snapshot → explicit separate target conversion; original string IDs/JSON/ordinals/frame times/sequence/commands tetap di quarantine tables, UUIDv5 alias untuk platform ID. Private checkpoints terpisah; tidak masuk observed records/streams/AI. Active statuses diberi runtime_status INTERRUPTED tanpa menimpa original status atau auto-resume.
@@ -65,8 +89,8 @@ Tidak ada server/worker/container persisten dimulai. Disposable DB/clean install
 
 ## Next action
 
-A lanjut A02.1 setelah host/persistence/compatibility A01 selesai dan frozen baseline 1.0.0; B dapat mulai mandiri. Reconcile/version perubahan breaking sebelum Phase 10; credential/model readiness sebelum real smoke. Frontend tetap menunggu G-BE; container/deployment menunggu gate sesudahnya.
+A lanjut A03.1 setelah A02/account+HTTP auth selesai dan frozen baseline 1.0.0; B dapat mulai mandiri. Reconcile/version perubahan breaking sebelum Phase 10; credential/model readiness sebelum real smoke. Frontend tetap menunggu G-BE; container/deployment menunggu gate sesudahnya.
 
 ## Perencanaan Paket A — 8 Oktober 2026
 
-Pengguna adalah Pihak A. [Rencana eksekusi Paket A](../docs/development/package-a-execution.md) merinci scope A menjadi 10 tahap/26 unit sesi dengan acceptance dan handoff. Saat perencanaan seluruh unit planned; setelah eksekusi A01 done dan next A02.1. Status foundation dan gate di atas tetap berlaku.
+Pengguna adalah Pihak A. [Rencana eksekusi Paket A](../docs/development/package-a-execution.md) merinci scope A menjadi 10 tahap/26 unit sesi dengan acceptance dan handoff. Saat perencanaan seluruh unit planned; setelah eksekusi A01/A02 done dan next A03.1. Status foundation dan gate di atas tetap berlaku.

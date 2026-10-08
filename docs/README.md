@@ -1,6 +1,6 @@
 # Peta Dokumentasi ATC FlowLens
 
-Tanggal: 9 Oktober 2026. Foundation Phase 0–1, host/persistence/legacy conversion A01 selesai; Phase 2 in_progress, next A02.1. Business pipeline dan Paket B belum diimplementasikan. Dokumen lama tidak dipulihkan sebagai spesifikasi aktif, dan instruksi AGENTS.md sebelumnya tidak berlaku.
+Tanggal: 9 Oktober 2026. Foundation Phase 0–1, host/persistence/legacy conversion A01 selesai; A02/accounts+HTTP auth tersedia; next A03.1 grants/context. Business pipeline dan Paket B belum diimplementasikan. Dokumen lama tidak dipulihkan sebagai spesifikasi aktif, dan instruksi AGENTS.md sebelumnya tidak berlaku.
 
 ## Kontrak dan konteks kerja
 
@@ -18,10 +18,14 @@ Tanggal: 9 Oktober 2026. Foundation Phase 0–1, host/persistence/legacy convers
 - [Audit requirements/source](product/requirement-audit.md) dan [scope/dependencies](product/baseline-scope.md).
 - [Backend baseline](architecture/backend-baseline.md) dan [ADR 0002](adr/0002-frozen-backend-contracts.md).
 - [Shared contracts](api/shared-contracts.md), [developer workflow](development/backend-foundation.md), dan [A/B packets](development/backend-packets.md).
-- [Rencana eksekusi Paket A per sesi](development/package-a-execution.md): A01 done, next A02.1; [evidence host](testing/a011-evidence.md) dan [persistence](testing/a012-evidence.md).
+- [Rencana eksekusi Paket A per sesi](development/package-a-execution.md): A01/A02 done, next A03.1; [evidence host](testing/a011-evidence.md) dan [persistence](testing/a012-evidence.md).
 - [Evaluation protocol](../evaluation/protocols/baseline.md) dan [checks/evidence](testing/phase01-evidence.md).
 
 ## Area dokumentasi
+
+HTTP auth/cookies: [workflow](development/authentication.md) dan [evidence A02.2](testing/a022-evidence.md).
+
+Account lifecycle: [workflow](development/account-lifecycle.md) dan [evidence A02.1](testing/a021-evidence.md).
 
 Paket A A01 juga menyediakan [historical compatibility guide](development/legacy-compatibility.md) dan [evidence A01.3](testing/a013-evidence.md).
 

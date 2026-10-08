@@ -4,6 +4,7 @@ from collections.abc import Mapping
 from ipaddress import ip_address
 from pathlib import Path
 from typing import Literal, Self
+from urllib.parse import urlsplit
 
 from flowlens.core.config import Profile
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -17,6 +18,35 @@ class HostSettings(BaseModel):
     port: int = Field(default=8000, ge=1, le=65535)
     contract_version: Literal["1.0.0"] = "1.0.0"
     database_path: Path | None = None
+    public_origin: str | None = None
+
+    @field_validator("public_origin")
+    @classmethod
+    def valid_origin(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        parsed = urlsplit(value)
+        if (
+            parsed.scheme not in ("http", "https")
+            or not parsed.hostname
+            or parsed.username
+            or parsed.password
+            or parsed.path not in ("", "/")
+            or parsed.query
+            or parsed.fragment
+        ):
+            raise ValueError("A single HTTP(S) origin is required.")
+        if parsed.port is not None and not 1 <= parsed.port <= 65535:
+            raise ValueError("Invalid origin port.")
+        if parsed.scheme == "http" and parsed.hostname != "localhost":
+            if not ip_address(parsed.hostname).is_loopback:
+                raise ValueError("HTTP auth is restricted to loopback origins.")
+        return value.rstrip("/")
+
+    @property
+    def origin(self) -> str:
+        host = f"[{self.host}]" if ":" in self.host else self.host
+        return self.public_origin or f"http://{host}:{self.port}"
 
     @field_validator("api_workers", "port", mode="before")
     @classmethod
@@ -47,6 +77,7 @@ class HostSettings(BaseModel):
             "FLOWLENS_HOST": "host",
             "FLOWLENS_PORT": "port",
             "FLOWLENS_DB_PATH": "database_path",
+            "FLOWLENS_ORIGIN": "public_origin",
         }
         if any(key.startswith("FLOWLENS_") and key not in fields for key in environment):
             raise ValueError("Unsupported host configuration key.")

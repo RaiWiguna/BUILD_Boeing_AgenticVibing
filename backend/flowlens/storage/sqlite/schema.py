@@ -134,4 +134,42 @@ PLATFORM_MIGRATIONS = (
             PRIMARY KEY(session_id,command_id));
     """,
     ),
+    MigrationSpec(
+        "platform.0004",
+        "A",
+        ("platform.0003",),
+        """
+        ALTER TABLE platform_accounts ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0
+            CHECK(is_admin IN (0,1));
+        ALTER TABLE platform_accounts ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 1
+            CHECK(must_change_password IN (0,1));
+        ALTER TABLE platform_accounts ADD COLUMN credential_version INTEGER NOT NULL DEFAULT 1
+            CHECK(credential_version>=1);
+        CREATE TABLE platform_security_state(name TEXT PRIMARY KEY NOT NULL,value TEXT NOT NULL);
+        CREATE TABLE platform_account_audit(
+            id INTEGER PRIMARY KEY, actor_id TEXT REFERENCES platform_accounts(id),
+            target_id TEXT NOT NULL REFERENCES platform_accounts(id),
+            action TEXT NOT NULL, recorded_at TEXT NOT NULL);
+    """,
+    ),
+    MigrationSpec(
+        "platform.0005",
+        "A",
+        ("platform.0004",),
+        """
+        CREATE TABLE platform_auth_sessions(
+            token_hash TEXT PRIMARY KEY NOT NULL CHECK(length(token_hash)=64),
+            account_id TEXT NOT NULL REFERENCES platform_accounts(id),
+            credential_version INTEGER NOT NULL CHECK(credential_version>=1),
+            created_ms INTEGER NOT NULL CHECK(created_ms>=0),
+            last_seen_ms INTEGER NOT NULL CHECK(last_seen_ms>=created_ms),
+            expires_ms INTEGER NOT NULL CHECK(expires_ms>created_ms),
+            revoked INTEGER NOT NULL DEFAULT 0 CHECK(revoked IN (0,1)));
+        CREATE INDEX platform_auth_account ON platform_auth_sessions(account_id);
+        CREATE TABLE platform_login_limits(
+            key_digest TEXT PRIMARY KEY NOT NULL CHECK(length(key_digest)=64),
+            window_ms INTEGER NOT NULL CHECK(window_ms>=0),
+            attempts INTEGER NOT NULL CHECK(attempts>=1));
+    """,
+    ),
 )

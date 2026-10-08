@@ -10,7 +10,7 @@ python3.12 -m venv .venv
 .venv/bin/uv sync --locked
 ```
 
-Gunakan Python 3.12 yang tersedia pada mesin; jangan memakai system Python 3.9. `.venv` lokal di-ignore. Runtime dependencies foundation hanya FastAPI/Pydantic/Uvicorn. Google SDK, Shapely, Argon2 dan FFmpeg akan ditambahkan oleh owner A/B pada fase implementasinya, dengan lock dan compatibility checks; foundation tidak mengklaim adapter tersebut tersedia.
+Gunakan Python 3.12 yang tersedia pada mesin; jangan memakai system Python 3.9. `.venv` lokal di-ignore. Runtime dependencies kini FastAPI/Pydantic/Uvicorn dan argon2-cffi (A02.1). Google SDK, Shapely dan FFmpeg akan ditambahkan oleh owner A/B pada fase implementasinya, dengan lock dan compatibility checks; foundation tidak mengklaim adapter tersebut tersedia.
 
 ## Checks
 
@@ -72,7 +72,15 @@ Checks: `.venv/bin/pytest tests/platform -q`. [Evidence A01.2](../testing/a012-e
 
 Migrasi unversioned archive tetap action eksplisit ke file berbeda: `.venv/bin/python -m flowlens.cli.migrate_archive --source /private/old.sqlite3 --target /private/new.sqlite3`. [Compatibility guide](legacy-compatibility.md) menetapkan audited profile, original-ID mapping, quarantine/private boundary dan auth deprecation; [evidence A01.3](../testing/a013-evidence.md) mencatat preservation/rollback/WAL/CLI tests. Host tidak otomatis meng-upgrade format lama atau menerima credential/operator token lama.
 
-## Regenerate contract artifacts
+## Accounts — A02.1
+
+Private one-time bootstrap: `.venv/bin/python -m flowlens.cli.bootstrap_admin --database data/database/flowlens.sqlite3 --login admin`, password via interactive getpass. Untuk secret deployment, optional owner-only `--password-file`; jangan memberi password lewat argv. [Account lifecycle guide](account-lifecycle.md) menetapkan Argon2 parameters, force-change dan credential-version checks. [Evidence](../testing/a021-evidence.md) mencatat disposable tests/dependency compatibility; tidak ada akun nyata dibuat oleh task ini. Record A02.1 mencakup service/CLI; HTTP lifecycle tersedia melalui A02.2 di bawah. Readiness tetap 503.
+
+## HTTP auth — A02.2
+
+Host dengan DB/individual bootstrap kini memasang login/session/password/logout routes. [Authentication guide](authentication.md) menetapkan Origin/CSRF, opaque HttpOnly cookies, Secure HTTPS, durable expiry/revoke, fixed-window limits, forwarding policy dan local DTOs. Origin default mengikuti host/port; optional FLOWLENS_ORIGIN adalah exact HTTP(S) origin. Supported launcher kini proxy_headers=false; VM trusted proxy topology tetap Phase15. [Evidence A02.2](../testing/a022-evidence.md) membuktikan service/HTTP/real process smoke; grants/context/WS/media policy berikutnya A03/A07. Readiness tetap503.
+
+## Regenerate shared artifacts
 
 ```sh
 .venv/bin/python scripts/fixtures/build_baseline.py

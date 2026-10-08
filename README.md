@@ -2,7 +2,7 @@
 
 Workspace untuk membangun replay offline berbukti bagi review komunikasi dan kondisi runway oleh evaluator Tower/Ground.
 
-**Status saat ini (9 Oktober 2026):** Phase 0–1 dan Paket A A01/Phase 2.1 selesai (host, SQLite/UOW dan audited historical conversion). Phase 2 masih in_progress; next A02.1 accounts/bootstrap/reset/deactivation. Dependency lock/contracts 1.0.0 tetap. Auth/business pipeline, provider adapters nyata, frontend dan deployment belum tersedia. G-BE belum passed; baseline bukan validasi domain/operasional.
+**Status saat ini (9 Oktober 2026):** Phase 0–1 dan Paket A A01/Phase 2.1 selesai (host, SQLite/UOW dan audited historical conversion). A02/accounts+HTTP auth juga selesai; Phase 2.1/2.2 done, next A03.1 grants/RequestContext. Dependency lock/contracts 1.0.0 tetap. Domain grants/business pipeline, provider adapters nyata, frontend dan deployment belum tersedia. G-BE belum passed; baseline bukan validasi domain/operasional.
 
 Stack target: React, TypeScript, Vite, shadcn/ui; Python, FastAPI, Pydantic; Google Speech-to-Text dan Gemini 3.8 Flash; SQLite; Docker Compose lokal/single VM.
 

@@ -1,6 +1,6 @@
 # Rencana Eksekusi Paket A — Platform & Replay
 
-Tanggal: 9 Oktober 2026. Owner: pengguna sebagai Pihak A. A01 `done`: A01.1–A01.3 `done`; A02–A10 `planned`. Baseline bersama: contract 1.0.0, Phase 0–1 selesai. Evidence: [A01.1](../testing/a011-evidence.md), [A01.2](../testing/a012-evidence.md), [A01.3](../testing/a013-evidence.md).
+Tanggal: 9 Oktober 2026. Owner: pengguna sebagai Pihak A. A01 `done`: A01.1–A01.3 `done`; A02 `done` (A02.1–A02.2 done); A03–A10 `planned`. Baseline bersama: contract 1.0.0, Phase 0–1 selesai. Evidence: [A01.1](../testing/a011-evidence.md), [A01.2](../testing/a012-evidence.md), [A01.3](../testing/a013-evidence.md).
 
 ## Pendekatan dan scope
 
@@ -13,7 +13,7 @@ Urutan rekomendasi: A01 → A02 → A03 → A04 → A05 → A06 → A07 → A08 
 ## Checklist tahap
 
 - [x] A01: Bangun host, persistence dan migrations platform — Phase 2.1.
-- [ ] A02: Bangun lifecycle akun dan autentikasi — Phase 2.2.
+- [x] A02: Bangun lifecycle akun dan autentikasi — Phase 2.2.
 - [ ] A03: Terapkan grants, transport policy, audit dan mutation consistency — Phase 2.3–2.4.
 - [ ] A04: Bangun import/provenance/clock dan commit atomik — Phase 3.1–3.4.
 - [ ] A05: Bangun akses aset privat dan registry evidence — Phase 6.1 serta boundary evidence Paket A.
@@ -27,7 +27,7 @@ Urutan rekomendasi: A01 → A02 → A03 → A04 → A05 → A06 → A07 → A08 
 
 **Prasyarat:** baseline 1.0.0 dan [ownership platform/analysis](../architecture/backend-baseline.md).
 
-Progress: A01.1–A01.3/A01 `done`; next A02.1. Audited legacy archive conversion tersedia; legacy credentials/routes tetap deprecated, public compatibility readers tetap A07.
+Progress: A01.1–A01.3/A01 `done`; next A03.1 setelah A02 done. Audited legacy archive conversion tersedia; legacy credentials/routes tetap deprecated, public compatibility readers tetap A07.
 
 | Unit sesi | Pekerjaan terbatas | Bukti selesai |
 | --- | --- | --- |
@@ -40,6 +40,8 @@ Jangan memakai `flowlens.testing.SQLiteHarness` sebagai storage aplikasi. Jangan
 ## A02 — Akun dan autentikasi
 
 **Prasyarat:** A01.1–A01.2.
+
+Progress: A02.1–A02.2/A02 done ([accounts](../testing/a021-evidence.md), [HTTP sessions](../testing/a022-evidence.md)); next A03.1. [Account/CLI workflow](account-lifecycle.md) menjelaskan trusted internal boundary dan session revocation yang masih perlu dihubungkan ke transport.
 
 | Unit sesi | Pekerjaan terbatas | Bukti selesai |
 | --- | --- | --- |

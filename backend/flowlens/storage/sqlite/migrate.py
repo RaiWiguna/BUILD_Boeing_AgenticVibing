@@ -32,6 +32,9 @@ def checksum(spec: MigrationSpec) -> str:
 def authorize(
     action: int, arg1: str | None, arg2: str | None, db: str | None, trigger: str | None
 ) -> int:
+    # SQLite implements ALTER TABLE ... CHECK validation using read-only quick_check.
+    if action == sqlite3.SQLITE_PRAGMA and arg1 == "quick_check":
+        return sqlite3.SQLITE_OK
     denied = (
         sqlite3.SQLITE_TRANSACTION,
         sqlite3.SQLITE_SAVEPOINT,

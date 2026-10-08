@@ -197,6 +197,7 @@ def test_launcher_uses_one_process_and_no_reload(monkeypatch):
     assert captured["reload"] is False
     assert captured["host"] == "127.0.0.1"
     assert captured["access_log"] is False
+    assert captured["proxy_headers"] is False
 
 
 def test_launcher_rejects_config_without_printing_values():

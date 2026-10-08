@@ -4,7 +4,7 @@ Start after Phase 0/1 evidence; independent implementation until final Phase 10 
 
 ## Package A — Platform & Replay
 
-Rincian eksekusi per sesi: [Paket A: A01–A10](package-a-execution.md). A01.1–A01.3/A01/Phase 2.1 `done`; Phase 2 `in_progress`. Next A02.1 accounts/bootstrap/reset/deactivation; remaining units planned. Paket B belum dimulai.
+Rincian eksekusi per sesi: [Paket A: A01–A10](package-a-execution.md). A01.1–A01.3/A01/Phase 2.1 `done`; Phase 2 `in_progress`. A02/accounts+HTTP sessions done; next A03.1 grants/RequestContext/worker principal; remaining units planned. Paket B belum dimulai.
 
 1. Phase 2: host/config; platform schemas/migration runner/UOW; accounts/grants/cookie/CSRF/worker principal; audit/idempotency/versioning. Tests fresh/upgrade/auth/cross-scope/rollback.
 2. Phase 3 + 6.1: import preview/atomic commit, immutable source manifest/rights/clock/coverage, private assets/ranges. Tests malformed/path/hash/duplicate/conflict/forbidden transfer.

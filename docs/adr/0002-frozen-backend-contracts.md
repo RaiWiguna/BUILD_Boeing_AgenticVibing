@@ -23,3 +23,15 @@ Consequences: owner lock bekerja pada local canonical paths untuk process yang m
 Audited pre-reset profile dikonversi dari read-only snapshot ke separate target lewat UOW. Original short IDs dan JSON text dipertahankan pada quarantine tables; canonical session UUID adalah deterministic UUIDv5 alias, bukan penggantian diam-diam pada source. Private checkpoints terpisah dari public archive rows, tanpa observer/provider adapters. Logical digest termasuk WAL-visible data menghasilkan idempotent receipt; changed same-ID archive ditolak. Unversioned in-place startup upgrade tetap ditolak.
 
 Old operator keys/seat tokens bukan individual identities dan tidak di-grandfather menjadi accounts/grants. Public/training compatibility tetap perlu scoped readers/serializers pada replay phase; source label public historis tidak membuktikan seed/assessment safe bagi observer/AI. [Evidence A01.3](../testing/a013-evidence.md) dan [compatibility mapping](../development/legacy-compatibility.md) membuktikan preservation/atomicity/deprecation pada sintetik.
+
+## Individual account lifecycle — 9 Oktober 2026
+
+Platform.0004 menambahkan admin/forced-change/credential-version fields, durable one-time bootstrap marker dan account audit terpisah dari replay-session audit. Password memakai pinned argon2-cffi dengan explicit Argon2id parameters/random salts; password hashing dilakukan di luar write transactions, kemudian authority/credential version diperiksa kembali sebelum commit. Reset/change/deactivation menaikkan credential_version; transport session implementation harus memeriksa stamp tersebut setiap akses pada A02.2.
+
+Bootstrap lewat local private getpass/secret file dan tidak memberikan replay/truth grants otomatis. Existing accounts tidak dipromosikan menjadi admin pada upgrade; public Account view tidak memuat hashes. HTTP/session/CSRF/grant boundaries masih fase berikutnya. [Account evidence](../testing/a021-evidence.md) membuktikan active-admin guards, race/rollback, forced change dan private CLI.
+
+## Opaque HTTP sessions — 9 Oktober 2026
+
+Platform.0005 menyimpan token digest, account credential stamp, UTC wall-clock timing dan revocation, bukan provider conversation state atau raw cookie. Supported local launcher tidak mempercayai forwarding headers; exact configured Origin menentukan auth policy/cookie Secure mode. Auth mutations memiliki Origin/CSRF guards sebagai prerequisite transport; generalized object/worker/WS/media policy tetap A03/A07.
+
+Idle60min/absolute8h dengan durable stamp checks, forced-change restricted flow, cookie rotation/logout dan rehash-on-success disertai rate reservations sebelum hashing. Fixed-window account/peer limits serta two-slot hashing gate adalah initial engineering baseline, bukan VM capacity claim. [Auth evidence](../testing/a022-evidence.md) dan [contract](../development/authentication.md) mencatat SQL/HTTP/restart/throttle/CSRF tests dan live loopback smoke; production readiness tetap belum passed.
