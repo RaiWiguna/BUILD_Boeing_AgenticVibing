@@ -20,6 +20,10 @@ Tanggal: 8 Oktober 2026. Tree reset sudah dilengkapi foundation Phase 0–1; imp
 - [Shared contracts](api/shared-contracts.md), [developer workflow](development/backend-foundation.md), dan [A/B packets](development/backend-packets.md).
 - [Evaluation protocol](../evaluation/protocols/baseline.md) dan [checks/evidence](testing/phase01-evidence.md).
 
+## Acuan desain frontend
+
+[Delapan referensi halaman ATC FlowLens](design/2026-10-08-flowlens/README.md) menyediakan analisis UX, gambar horizontal per halaman, galeri, token usulan, dan prompt generasi. Statusnya DESIGN_REFERENCE_ONLY; tidak mengubah sequencing backend-first atau menyatakan frontend/gate telah selesai.
+
 ## Area dokumentasi
 
 | Folder | Isi yang dituju |
@@ -27,6 +31,7 @@ Tanggal: 8 Oktober 2026. Tree reset sudah dilengkapi foundation Phase 0–1; imp
 | `architecture/` | Boundary, dependency, state ownership, clocks, storage, dan diagram |
 | `adr/` | Keputusan arsitektur tahan lama, dengan status dan validation plan |
 | `product/` | Penjelasan fitur, scenario, usability, dan requirement detail yang melengkapi PRD |
+| `design/` | Referensi visual, analisis UX, token usulan, dan handoff desain; bukan implementasi frontend |
 | `api/` | REST/WS/internal API, errors, authentication, dan client compatibility |
 | `data/` | Import profiles, provenance, source rights, clocks, coverage, retention |
 | `evaluation/` | Protocol, metrics, split/cohorts, reviewer rubric, dan limitations |

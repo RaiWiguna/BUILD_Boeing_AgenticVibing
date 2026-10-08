@@ -1,0 +1,95 @@
+{
+  "status": "DESIGN_REFERENCE_ONLY",
+  "generator": "built-in image_gen",
+  "count": 8,
+  "pages": [
+    {
+      "slug": "01-sessions",
+      "title": "Katalog Sesi",
+      "source": "/Users/khalfanishaquille/.codex/generated_images/01a11a51-9769-7021-80fa-44f7e616c7ab/exec-030ab024-3a6c-4e27-a39e-fac4919e6db3.png",
+      "file": "images/01-sessions.png",
+      "repairPrompt": null,
+      "width": 1586,
+      "height": 992,
+      "sha256": "b941f23bf343ab13960776c41cd744119cd1c226ab55e66704c904c05d1d4212",
+      "bytes": 1381653
+    },
+    {
+      "slug": "02-import-readiness",
+      "title": "Import & Readiness",
+      "source": "/Users/khalfanishaquille/.codex/generated_images/01a11a51-9769-7021-80fa-44f7e616c7ab/exec-9bcb30f7-7bd5-4545-a180-396760fff45a.png",
+      "file": "images/02-import-readiness.png",
+      "repairPrompt": null,
+      "width": 1586,
+      "height": 992,
+      "sha256": "1d7e85ea9499bf657aa51c35f37713aefd8358304a81202ec0a1469d5e582b8e",
+      "bytes": 1385697
+    },
+    {
+      "slug": "03-replay-workspace",
+      "title": "Replay Workspace",
+      "source": "/Users/khalfanishaquille/.codex/generated_images/01a11a51-9769-7021-80fa-44f7e616c7ab/exec-e12bb7e4-6734-4c6d-8113-19786ab7cde8.png",
+      "file": "images/03-replay-workspace.png",
+      "repairPrompt": "Use case: ui-mockup. Asset type: correctness edit to Page 3 of 8 ATC FlowLens Replay Workspace. Input image 1 is edit target. Preserve exact layout, palette, logo, typography, components and unaffected text. Make ONLY these detail corrections:\n1. FLN214 memory strip Movement/Gerakan currently says \"Belum dapat dinilai\". Replace that short text with \"NOT_EVALUABLE\", and add a small readable helper \"Footprint belum tersedia\" below it within the same cell. Its fresh observed centre-point trace on map is allowed, but physical conformance is not.\n2. In map upper-right, remove the hollow point-like VEH03 location symbol. Instead place a compact neutral inset text notice in the same corner: \"VEH03 · Posisi tidak tersedia\", with a small question/unknown icon; it must not imply coordinates.\n3. Map legend must be three compact entries \"Observed\" with blue solid stroke, \"Predicted\" with blue dashed stroke, \"Missing\" with hollow neutral mark. Dashed blue path is a prediction candidate, solid blue is observed trace. Predicted is visually labeled, never treated as actual movement.\n4. Add a tiny text \"Gap audio\" next to the gray hatched region of bottom waveform.\n5. Add compact \"Replay offline\" badge beside SYNTHETIC in header.\n6. Rail second item subtitle should be \"Report clear belum teramati pada coverage tersimpan.\" Avoid saying pilot never reported. Its priority uses NOTICE amber tag, not pink safety severity.\n7. Keep all objects and quotations fictional. No clearance actions.\nOne horizontal 16:10 image. No redesign.",
+      "width": 1586,
+      "height": 992,
+      "sha256": "aa04ffb8f32b3d0d805b478c684d3d7d5ffa43bca11b1ae3a9b560f5c4b7b0de",
+      "bytes": 1548195
+    },
+    {
+      "slug": "04-operational-memory",
+      "title": "Memori Objek & Runway",
+      "source": "/Users/khalfanishaquille/.codex/generated_images/01a11a51-9769-7021-80fa-44f7e616c7ab/exec-e0e68815-6335-46c3-abf8-fce366e9f7e2.png",
+      "file": "images/04-operational-memory.png",
+      "repairPrompt": null,
+      "width": 1586,
+      "height": 992,
+      "sha256": "245ad8e7a1c27ae3686ca2526cf5acb59c7c80059351f807f70856eb0d2cecd5",
+      "bytes": 1410730
+    },
+    {
+      "slug": "05-transcript-association",
+      "title": "Review Transcript & Association",
+      "source": "/Users/khalfanishaquille/.codex/generated_images/01a11a51-9769-7021-80fa-44f7e616c7ab/exec-8be55d24-bbc3-47c5-acee-7ba2bfa96e94.png",
+      "file": "images/05-transcript-association.png",
+      "repairPrompt": null,
+      "width": 1586,
+      "height": 992,
+      "sha256": "ab3e847951748e16e0c16d26b7346e8946064453d0212ccdaa82283334d9d0e1",
+      "bytes": 1362419
+    },
+    {
+      "slug": "06-findings-evidence",
+      "title": "Temuan & Evidence",
+      "source": "/Users/khalfanishaquille/.codex/generated_images/01a11a51-9769-7021-80fa-44f7e616c7ab/exec-776da0a5-8723-4b40-a07d-2c2e9a4db664.png",
+      "file": "images/06-findings-evidence.png",
+      "repairPrompt": "Use case: ui-mockup. Asset type: correction of Page 6 of 8, ATC FlowLens Temuan & Evidence. Input image 1 is the edit target. Preserve EXACTLY its complete layout, logo, colors, typography, components, spacing, all unaffected content.\nChange only these textual and decision-state details for correctness:\n1. Left queue F-04 FLN402 timestamp \"12:18.5\" MUST become \"05:21.0\". F-05 VEH03 timestamp \"18:03.2\" MUST become \"05:18.0\". The header replay position remains \"05:22.0\"; no future items may appear.\n2. In the Heard quote block, \"Pilot · FLN214\" MUST become \"Kandidat · FLN214\", because speaker identity is unresolved.\n3. Under \"Keputusan reviewer\", show all three decision radio buttons unselected. No default confirm selection.\n4. Label reason field \"Alasan (wajib)\". Show primary \"Simpan review\" disabled in neutral pale gray until a decision and reason are entered.\n5. Replace two optional top-right buttons \"Bagikan\" and \"Ekspor\" with a single ghost \"Buka workspace\"; preserve date control.\n6. Center metadata replace generic \"Waktu temuan 05:22.0\" with \"Event time 05:19.0\"; add a compact adjacent \"Available 05:22.0\". Times are session offsets, not wall-clock.\nKeep original two English quotes exactly; keep separate alert source and finding priority. No visual redesign. One horizontal 16:10 image.",
+      "width": 1586,
+      "height": 992,
+      "sha256": "139b27a7c9b5836168f99440592a28f4bd730fa63eb257bc118fe9990f41aca6",
+      "bytes": 1567012
+    },
+    {
+      "slug": "07-options-review",
+      "title": "Review Kandidat Opsi",
+      "source": "/Users/khalfanishaquille/.codex/generated_images/01a11a51-9769-7021-80fa-44f7e616c7ab/exec-873fa387-1335-44f9-90f7-5a38bf3d4798.png",
+      "file": "images/07-options-review.png",
+      "repairPrompt": "Use case: ui-mockup. Asset type: precise correctness edit to Page 7 of 8 ATC FlowLens Kandidat opsi. Input image 1 is edit target; preserve every layout, logo, color, spacing, type and all unaffected text.\nOnly change the evaluator decision form:\n1. The \"Relevan\" row should have an empty unselected radio circle, with same neutral background as the other rows. All four ratings begin unselected.\n2. Field label \"Alasan penilaian\" becomes \"Alasan penilaian (wajib)\".\n3. Placeholder \"Tulis alasan penilaian (opsional)...\" becomes \"Tuliskan alasan berbasis bukti\".\n4. \"Simpan penilaian\" button is disabled and pale gray until rating and reason are provided. The \"Buka bukti\" secondary action remains enabled.\n5. Add a short small readable helper under the reason field: \"Pilih penilaian dan isi alasan sebelum menyimpan.\"\nNo other modifications. Keep hypothetical/LAB_ONLY context and evidence links, no execute action. One horizontal 16:10 output.",
+      "width": 1586,
+      "height": 992,
+      "sha256": "0cc578afdc99b8d7afee1c274410991253e97bf02697e0c3c14ffa8bc81c3354",
+      "bytes": 1596536
+    },
+    {
+      "slug": "08-debrief-export",
+      "title": "Debrief & Export",
+      "source": "/Users/khalfanishaquille/.codex/generated_images/01a11a51-9769-7021-80fa-44f7e616c7ab/exec-5a543348-4076-437b-b55f-dabf5522afba.png",
+      "file": "images/08-debrief-export.png",
+      "repairPrompt": "Use case: ui-mockup. Asset type: precise text correctness edit to Page 8 of 8 ATC FlowLens Debrief. Input image 1 is the edit target. Preserve complete layout, logo, typography, palette, all components and all unaffected text EXACTLY.\nOnly correct these text details:\n1. At top, control \"As-of 8 Okt 2026, 18:40\" becomes \"As-of replay 18:40\". This is elapsed session time, not wall-clock.\n2. Journal entry 05:16 Readback E-13 must contain exact English quote: \"Holding short runway zero nine.\" It MUST say zero nine, not runway 27.\n3. Journal entry 05:19 Temuan F-03 body becomes \"Perbedaan runway pada instruksi dan readback kandidat.\" It is runway discrepancy, NOT callsign discrepancy.\n4. Journal entry 05:24 Correction E-14 body becomes \"Correction berikutnya menyebut RWY 27.\" Do not invent controller/pilot speaker attribution.\n5. Main report section \"Masih terbuka\" must keep exact wording \"Report clear FLN402 belum teramati pada coverage tersimpan.\" It is non-observation, not proof of no report.\n6. Bottom session footer becomes \"SYNTHETIC · Durasi replay 18:40\".\n7. \"Sertakan provenance\" toggle is locked ON, add small lock icon and helper \"Metadata wajib\"; keep other report toggles unchanged. Disabled audio remains off.\n8. Make expiry label \"Masa berlaku: profil 24 jam\" to signal configured illustrative expiry.\nOutput one horizontal 16:10 page. No other changes, no promotional elements.",
+      "width": 1586,
+      "height": 992,
+      "sha256": "fc54a6333e8420c57a4ba68886061f64471c3c4341a8c2edc0a709973d481c79",
+      "bytes": 1591533
+    }
+  ]
+}

@@ -32,3 +32,7 @@ Tidak ada server/worker/container persisten dimulai. Disposable DB/clean install
 ## Next action
 
 A/B dapat mulai dari frozen baseline 1.0.0 dan menjalankan pytest --track A/B mandiri. Reconcile/version perubahan breaking sebelum Phase 10; credential/model readiness sebelum real smoke. Frontend tetap menunggu G-BE; container/deployment menunggu gate sesudahnya.
+
+## Acuan desain frontend — 8 Oktober 2026
+
+Permintaan desain pengguna menghasilkan [8 referensi halaman](../docs/design/2026-10-08-flowlens/README.md), galeri lokal, token usulan, prompt dan manifest. Visual mengikuti screenshot pengguna dan disesuaikan dengan research replay, evidence/review, unknowns, serta Said–Heard–Observed. Data ilustratif SYNTHETIC; status DESIGN_REFERENCE_ONLY. Tidak ada implementasi React, pipeline/provider call, atau perubahan gate/roadmap. Gunakan spesifikasi semantics/state bersama PRD ketika frontend dimulai setelah G-BE.
