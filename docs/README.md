@@ -24,6 +24,10 @@ Tanggal: 8 Oktober 2026. Tree reset sudah dilengkapi foundation Phase 0–1; imp
 
 [Delapan referensi halaman ATC FlowLens](design/2026-10-08-flowlens/README.md) menyediakan analisis UX, gambar horizontal per halaman, galeri, token usulan, dan prompt generasi. Statusnya DESIGN_REFERENCE_ONLY; tidak mengubah sequencing backend-first atau menyatakan frontend/gate telah selesai.
 
+## Frontend MOCK track
+
+Frontend penuh tersedia di `frontend/` dengan adapter MOCK in-browser (Phase 11–13 `in_progress (MOCK)`; G-FE tetap `blocked`). Lihat [rencana implementasi](development/frontend-implementation-plan.md), [panduan pengembang dan penggantian adapter ke HTTP](development/frontend-mock.md), [evidence MOCK](testing/frontend-mock-evidence.md), dan [skrip demo](demo/frontend-mock-demo.md).
+
 ## Area dokumentasi
 
 | Folder | Isi yang dituju |

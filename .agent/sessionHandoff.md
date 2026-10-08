@@ -36,3 +36,13 @@ A/B dapat mulai dari frozen baseline 1.0.0 dan menjalankan pytest --track A/B ma
 ## Acuan desain frontend — 8 Oktober 2026
 
 Permintaan desain pengguna menghasilkan [8 referensi halaman](../docs/design/2026-10-08-flowlens/README.md), galeri lokal, token usulan, prompt dan manifest. Visual mengikuti screenshot pengguna dan disesuaikan dengan research replay, evidence/review, unknowns, serta Said–Heard–Observed. Data ilustratif SYNTHETIC; status DESIGN_REFERENCE_ONLY. Tidak ada implementasi React, pipeline/provider call, atau perubahan gate/roadmap. Gunakan spesifikasi semantics/state bersama PRD ketika frontend dimulai setelah G-BE.
+
+## Frontend MOCK track — 8 Oktober 2026
+
+Atas keputusan pengguna, frontend penuh diimplementasikan di `frontend/` memakai mock data in-browser (Phase 11–13 `in_progress (MOCK)`; G-FE tetap `blocked`). Seluruh layar comp 01–08 plus Login/role switcher, Metrics dan Ask (P1), Settings (account + admin) dan Help tersedia; audio visual-only, UI English light theme. Data layer memakai port `ApiClient` dengan `MockApiClient`; integrasi nanti cukup mengganti adapter di `ApiProvider`.
+
+Checks: typecheck, ESLint, contract type drift, copy guard (85 files), Vitest 41 tests (unit mock engine, component journeys, axe per route), build dengan route code-splitting, scan audio/secret/path pada `dist`, serta 15 Python Playwright MOCK journeys PASS. Detail, cakupan yang belum otomatis, dan batasan: [frontend MOCK evidence](../docs/testing/frontend-mock-evidence.md).
+
+M3 QA (9 Oktober): 15 MOCK journeys (termasuk import, E2E-01–05, connection lost, keyboard) lulus terhadap `vite preview`; axe per route (20 route) tanpa pelanggaran serious/critical; sweep console 77 route bersih; tanpa overflow horizontal di 390/720/1024 px. Delapan bug UI/mock ditemukan dan diperbaiki (seleksi transcript setelah revisi, label run duplikat, sidebar 1280×720, path NaN, fokus evidence drawer, tiga temuan axe, overflow ponsel). Panduan: [frontend MOCK developer guide](../docs/development/frontend-mock.md).
+
+Next: tambahkan `pytest-playwright` via `uv add --dev pytest-playwright` (uv tidak tersedia di sesi ini); walkthrough keyboard-only penuh dan uji screen reader nyata; ganti adapter MOCK ke HTTP setelah G-BE `passed`. Belum commit/push.

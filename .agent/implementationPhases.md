@@ -6,7 +6,7 @@
 | Tanggal | 8 Oktober 2026 |
 | Urutan delivery | **Backend lengkap → frontend lengkap → containerization → deployment lokal dan satu VM** |
 | Kontrak produk | `.agent/PRD.md`; batas proyek dan aturan kerja tetap berlaku |
-| Current implementation phase | Phase 0–1 selesai: baseline kontrak/harness 1.0.0; implementasi paket A/B belum dimulai |
+| Current implementation phase | Phase 0–1 selesai: baseline kontrak/harness 1.0.0; implementasi paket A/B belum dimulai. Paralel atas keputusan pengguna 8 Okt 2026: Phase 11–13 `in_progress` sebagai MOCK frontend track |
 | Next recommended phase | Paket A Phase 2 dan paket B foundation/6.2/6.4 secara independen |
 | Deadline dan staffing | Deadline belum ditetapkan; backend dibagi kepada pihak A (Platform & Replay) dan pihak B (Analysis & AI), tanpa penetapan individu |
 | Baseline data | Sintetik berlabel; replay simulator mitra berizin jika tersedia |
@@ -90,10 +90,10 @@ Audit awal memeriksa kontrak dan scaffold yang benar-benar tersedia, lalu meneta
 | 8 | Backend B | Gemini intent, scoped tools, association, memory/open loops | Phase 7 (B); Gemini readiness untuk smoke | `planned` |
 | 9 | Backend A / B | A: artifact lifecycle/ops; B: findings/review/brief/report/query/provider diagnostics | A: Phase 2–6 bagian A; B: Phase 8; tanpa dependency lintas implementasi | `planned` |
 | 10 | Integrasi backend akhir | Composition/migrations nyata, integrated verification, contract freeze, G-BE | Seluruh task dan acceptance paket A serta B selesai | `planned` |
-| 11 | Frontend | React/Vite/shadcn foundation, auth/router, API data layer | G-BE `passed` | `planned` |
-| 12 | Frontend | Sessions/import, workspace, replay/audio, memory/situation | Phase 11 | `planned` |
-| 13 | Frontend | Evidence/review, options, debrief/export, settings | Phase 12 | `planned` |
-| 14 | Frontend | Full-stack/browser/accessibility/performance, G-FE | Phase 11–13 | `planned` |
+| 11 | Frontend | React/Vite/shadcn foundation, auth/router, API data layer | G-BE `passed` (dikecualikan untuk MOCK track, lihat §7.0) | `in_progress` (MOCK) |
+| 12 | Frontend | Sessions/import, workspace, replay/audio, memory/situation | Phase 11 | `in_progress` (MOCK) |
+| 13 | Frontend | Evidence/review, options, debrief/export, settings | Phase 12 | `in_progress` (MOCK) |
+| 14 | Frontend | Full-stack/browser/accessibility/performance, G-FE | Phase 11–13 dan G-BE | `blocked` (G-FE memerlukan backend nyata; hanya MOCK journeys yang dapat dijalankan) |
 | 15 | Container | Reproducible images, Caddy, base/local/vm Compose | G-FE `passed` | `planned` |
 | 16 | Local delivery | Local full-stack acceptance, migration/restart/restore | Phase 15 | `planned` |
 | 17 | VM delivery | VM research deployment, rehearsal, G-DELIVERY | Phase 16 dan VM readiness | `planned` |
@@ -381,6 +381,12 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 G-BE tidak mencakup UI/browser rendering, images, TLS VM, atau VM performance final; itu diverifikasi pada tahap berikutnya. Tidak ada partner atau reviewer domain tidak menghalangi gate teknis sintetik, tetapi label domain/operational validation tetap belum selesai.
 
 ## 7. Frontend Track
+
+### 7.0 MOCK frontend track — keputusan pengguna 8 Oktober 2026
+
+Pengguna secara eksplisit menginstruksikan implementasi frontend penuh sekarang, tanpa menunggu G-BE, memakai mock data yang hanya berjalan di stack frontend. Phase 11–13 berstatus `in_progress` sebagai **MOCK track**; seluruh data berlabel `SYNTHETIC` + `MOCK`. Keputusan terkait: audio replay visual-only (tanpa file audio di bundle), UI English dan light theme, scope mencakup Login/Settings, P1 query/metrics, dan role switcher demo. Rencana: [frontend implementation plan](../docs/development/frontend-implementation-plan.md).
+
+Batas yang tetap berlaku: data layer memakai port `ApiClient` dengan adapter mock yang dapat diganti adapter HTTP; logika simulasi server hanya berada di adapter mock dan dihapus saat integrasi; G-FE tetap `blocked` sampai G-BE passed dan journeys berjalan terhadap backend nyata. Subfase Phase 11–13 tidak diberi `done` atas dasar MOCK saja; evidence MOCK dicatat terpisah. Evidence MOCK: [frontend MOCK evidence](../docs/testing/frontend-mock-evidence.md).
 
 Phase 11–14 baru dimulai setelah G-BE `passed`. Gunakan backend/client yang sudah dibekukan. Mocks untuk component/failure tests tetap diberi label; release journeys memakai backend nyata.
 

@@ -169,7 +169,7 @@ Angka berikut adalah target engineering usulan, bukan hasil pengukuran atau bata
 
 ### 5.3 Bahasa, layout, dan coverage
 
-English aviation menjadi baseline audio v1. UI memakai Bahasa Indonesia untuk navigasi/penjelasan dan mempertahankan istilah, callsign, serta quote audio asli. Dukungan code-switching Indonesia–English harus diuji sebagai cohort terpisah, bukan diiklankan hanya karena provider mendukung kedua bahasa.
+English aviation menjadi baseline audio v1. UI memakai English untuk navigasi/penjelasan (keputusan pengguna 8 Oktober 2026; sebelumnya Bahasa Indonesia) dan mempertahankan istilah, callsign, serta quote audio asli. Dokumentasi proyek tetap berbahasa Indonesia. Dukungan code-switching Indonesia–English harus diuji sebagai cohort terpisah, bukan diiklankan hanya karena provider mendukung kedua bahasa.
 
 Fixture menggunakan layout fiktif berunit meter dan koordinat yang diketahui. Layout nyata opsional untuk eksperimen; asal, versi, lisensi, dan keterbatasannya wajib tercatat. Tidak menganggap peta umum setara chart operasional.
 
@@ -725,7 +725,7 @@ Komponen awal: Button, Card, Badge, Tabs, Table, Sheet/Drawer, Dialog, Tooltip, 
 - Timeline/player: audio/event tracks, playback controls, gaps dan selected evidence range.
 - Evidence drawer: quotes berdampingan, play range, source event/track, alternatives, quality, dan review actions.
 
-Example synthetic copy: “FLN214 · runway pada instruksi: 27 · pada readback kandidat: 09.” Unknown copy: “Posisi tidak tersedia; kesesuaian gerakan belum dapat dinilai.” Action copy: “Dengar bukti”, “Koreksi”, “Konfirmasi temuan”, “Belum dapat dipastikan”. Tidak menampilkan “runway aman” dari absence of findings.
+Example synthetic copy: “FLN214 · runway in instruction: 27 · in candidate readback: 09.” Unknown copy: “Position not available; movement conformance cannot be assessed yet.” Action copy: “Listen to evidence”, “Correct”, “Confirm finding”, “Cannot be determined yet”. Tidak menampilkan “runway safe/clear” dari absence of findings.
 
 ### 23.3 Common states
 
