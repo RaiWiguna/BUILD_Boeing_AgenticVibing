@@ -4,7 +4,7 @@ Start after Phase 0/1 evidence; independent implementation until final Phase 10 
 
 ## Package A — Platform & Replay
 
-Rincian eksekusi per sesi: [Paket A: A01–A10](package-a-execution.md). A01.1–A01.3/A01/Phase 2.1 `done`; Phase 2 `in_progress`. A02/accounts+HTTP sessions done; next A03.1 grants/RequestContext/worker principal; remaining units planned. Paket B belum dimulai.
+Rincian eksekusi per sesi: [Paket A: A01–A10](package-a-execution.md). A01.1–A01.3/A01/Phase 2.1 `done`; Phase 2 `in_progress`. A02/accounts+HTTP sessions done; next A03.1 grants/RequestContext/worker principal; remaining units planned. Paket B B01/B02 standalone acceptance done; B03 partial/in_progress; B04–B06 planned.
 
 1. Phase 2: host/config; platform schemas/migration runner/UOW; accounts/grants/cookie/CSRF/worker principal; audit/idempotency/versioning. Tests fresh/upgrade/auth/cross-scope/rollback.
 2. Phase 3 + 6.1: import preview/atomic commit, immutable source manifest/rights/clock/coverage, private assets/ranges. Tests malformed/path/hash/duplicate/conflict/forbidden transfer.
@@ -15,6 +15,13 @@ Rincian eksekusi per sesi: [Paket A: A01–A10](package-a-execution.md). A01.1�
 7. Run shared contract suite with fake analysis and package-owned security/recovery/performance tests. Submit manifest + evidence.
 
 ## Package B — Analysis & AI
+
+[Rencana B01–B06](package-b-execution.md), [evidence B01](../testing/b01-evidence.md),
+[B02.1](../testing/b021-evidence.md), [B02.2](../testing/b022-evidence.md),
+[B03](../testing/b03-evidence.md). B01 foundation, B02.1 real FFmpeg dan B02.2 isolated
+worker standalone acceptance done. B03 STT V2 adapter/transcript lifecycle deterministic
+acceptance tersedia; approved real GCP profile/smoke, audited benchmark dan worker/
+artifact reconciliation masih terbuka. Readiness false; no real A/B composition.
 
 1. After Phase 1: analysis module/config/migrations/repositories/registration via transaction ports; reference FK schemas supplied harness. Do not import A internals.
 2. Phase 6.2/6.4: controlled FFmpeg processing/chunks/time mapping and isolated worker using fake platform ports; no SQLite import/mount in worker.
