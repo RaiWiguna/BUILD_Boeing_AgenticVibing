@@ -87,7 +87,8 @@ def test_default_host_is_separate_from_contract_harness():
         assert release["contract_version"] == "1.0.0"
         assert release["implementation"] == "HOST_ONLY"
         assert client.post("/_harness/validate/intent", json={}).status_code == 404
-        assert "/api/v1/sessions" not in client.get("/openapi.json").json()["paths"]
+        assert "/api/v1/sessions" in client.get("/openapi.json").json()["paths"]
+        assert client.get("/api/v1/sessions").status_code == 401
 
 
 def test_fake_b_registration_is_explicit_and_only_allowed_in_test():

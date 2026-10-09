@@ -4,12 +4,20 @@
 | --- | --- |
 | Tanggal | 9 Oktober 2026 |
 | Objective | Persistent goal A07.1–A09.3, berurutan/local commit per unit; berhenti sebelum A10 |
-| Status | A01–A06 verified; A07.1–A07.2 done; A07 in_progress; A07.3 next; B/Phase10 tidak dimulai |
-| Candidate | A07.1 commit1d48791ab19c567aa88a6439b53e585bb0f30e1b; A07.2 local commit dilaporkan setelah checks |
-| Next focus | A07.3 catalogue/source/history REST dan typed WS/resync; checkout sama feat/backend-aben |
+| Status | A01–A06 verified; A07.1–A07.3/A07 done; A08.1 next; B/Phase10 tidak dimulai |
+| Candidate | A07.2 commit52a6954aca3ab1e20ea4effc9aab99701277e5ad; A07.3 local SHA reported after final checks |
+| Next focus | A08.1 footprint transforms/runway/hold line/protection/swept movement; checkout sama feat/backend-aben |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
 
-## Handoff terkini — A07.2
+## Handoff terkini — A07.3
+
+- Input `52a6954aca3ab1e20ea4effc9aab99701277e5ad`, clean; A07.1–A07.2 previously accepted/committed. A01–A06 source/check verified baseline retained.
+- A07.3 REST catalogue/source/history/snapshot/playback/legacy metadata + typed WS incremental/initial snapshot/resync tersedia ([evidence](../docs/testing/a073-evidence.md), [workflow](../docs/development/replay.md)). Fake B via frozen snapshot port, real A SQLite/assets/auth. Native loopback Upgrade/resync/idle revoke/oversize proved; no provider/real B.
+- Fixed cursor0 duplicate proof without relaxing uniqueness; temporal/cross-scope/body/authority negative cases remain. WS recheck250ms + before publication, incremental window100, max32/4account, three race retries then1013. Frozen1.0.0/migrations14 unchanged; wsproto1.3.2 added, Uvicorn0.54.0 locked native frame bound1024.
+- Final496 platform/66contracts each track A/B/Ruff73/mypy50/drift/Bandit -ll/build/lock/dependency audit PASS. All14 migration SQL unchanged; scan/review/local SHA recorded from actual results. No persistent runtime; native listener/server threads/clients closed. No push/merge/amend/destructive Git/B/Phase10/frontend/deploy. Phase4 A done; parent B phases/release gates remain incomplete/not_started.
+- Next A08.1 after commit A07.3, automatic. Read evaluation protocol/numeric oracle and relevant PRD/Phase5 before code. Goal remains until A09.3 committed then A10.1 next only; A10 implementation prohibited in this goal.
+
+## Rekam A07.2
 
 - A07.1 local commit `1d48791ab19c567aa88a6439b53e585bb0f30e1b`; clean before A07.2. PrasyaratA01–A06 dan A07.1 tetap source/check verified ([entry evidence](../docs/testing/a071-evidence.md)).
 - A07.2 controls leader/follow/local/archive/recovery dan metadata-only LegacyHistory tersedia ([evidence](../docs/testing/a072-evidence.md), [workflow](../docs/development/replay.md)). Frozen1.0.0/lock unchanged; migration0014. Real A sources/SQLite, optional fake B snapshot via frozen port; controls tidak memanggil B/provider.

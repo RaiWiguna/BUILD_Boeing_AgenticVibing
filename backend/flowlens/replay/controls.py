@@ -173,8 +173,9 @@ class Controls:
             state = self._effective(uow, c, row)
             if view == "LEADER" and state.leader_id != c.actor_id:
                 raise ContractError("ACCESS_DENIED")
-            c = c.model_copy(update={"as_of_ms": state.cursor_ms})
-            self.permissions._receipt(uow, c, "HUMAN", token_hash(token))
+            if state.cursor_ms != c.as_of_ms:
+                c = c.model_copy(update={"as_of_ms": state.cursor_ms})
+                self.permissions._receipt(uow, c, "HUMAN", token_hash(token))
             uow.commit()
             return c
 

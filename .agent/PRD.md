@@ -3,7 +3,7 @@
 | Atribut | Nilai |
 | --- | --- |
 | Status dokumen | **Draft product contract v1.0 untuk review**; keputusan stack pengguna dikunci, asumsi produk dan keputusan terbuka ditandai |
-| Status implementasi | Requirement target. Phase 0–1 baseline serta Paket A A01 host/SQLite/UOW dan historical archive conversion tersedia (9 Oktober 2026); accounts serta login/cookie sessions A02 tersedia; grants/business pipeline, provider adapters nyata, UI dan deployment belum diimplementasikan |
+| Status implementasi | Requirement target. A01–A07 Paket A tersedia dan standalone checks lulus (9 Oktober 2026): host/persistence/auth/grants/import/private assets/evidence/jobs/replay/REST/WS; analisis memakai fake B melalui frozen ports. A08–A10, B/provider pipeline nyata, UI dan deployment belum diimplementasikan; release gates belum passed |
 | Versi dokumen | 1.0 |
 | Tanggal | 7 Oktober 2026 |
 | Product owner | Tim ATC FlowLens; individu pemilik keputusan produk/domain belum ditetapkan |

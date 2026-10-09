@@ -21,6 +21,8 @@ def main() -> None:
         reload=False,
         access_log=False,
         proxy_headers=False,
+        ws="wsproto",
+        ws_max_size=1024,
     )
 
 

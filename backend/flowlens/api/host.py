@@ -29,6 +29,7 @@ from flowlens.jobs.coordinator import Jobs, StagePolicy
 from flowlens.jobs.routes import build_router as build_job_router
 from flowlens.replay.compatibility import LegacyHistory
 from flowlens.replay.controls import Controls
+from flowlens.replay.routes import build_router as build_replay_router
 from flowlens.replay.snapshots import Replay
 from flowlens.sources.store import Sources
 from flowlens.storage.sqlite.database import Database, RepositoryFactory
@@ -284,6 +285,7 @@ def create_host(
     app.include_router(build_import_router())
     app.include_router(build_asset_router())
     app.include_router(build_job_router())
+    app.include_router(build_replay_router())
     occupied: set[tuple[str, str]] = set()
     for route in app.routes:
         occupied.update(route_keys(route))

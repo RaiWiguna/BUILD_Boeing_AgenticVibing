@@ -52,7 +52,7 @@ def transport(tmp_path):
         touched.append(ctx)
         return {"actor": str(ctx.actor_id), "session": str(ctx.session_id)}
 
-    @router.websocket("/api/v1/sessions/{session_id}/stream")
+    @router.websocket("/api/v1/sessions/{session_id}/transport-probe")
     async def stream(websocket: WebSocket, session_id: UUID):
         from flowlens.auth.transport import websocket_context
 
@@ -244,7 +244,7 @@ def test_websocket_denied_before_accept(transport, bad):
     _, client, _, sid, other, _, _, touched = transport
     browser_login(transport)
     headers = {"Origin": ORIGIN}
-    path = f"/api/v1/sessions/{sid}/stream"
+    path = f"/api/v1/sessions/{sid}/transport-probe"
     if bad == "missing_origin":
         headers.clear()
     elif bad == "foreign_origin":
@@ -252,7 +252,7 @@ def test_websocket_denied_before_accept(transport, bad):
     elif bad == "no_cookie":
         client.cookies.clear()
     elif bad == "cross_session":
-        path = f"/api/v1/sessions/{other}/stream"
+        path = f"/api/v1/sessions/{other}/transport-probe"
     elif bad == "bearer":
         headers["Authorization"] = "Bearer synthetic-secret"
     else:
@@ -269,7 +269,7 @@ def test_websocket_policy_recheck_rejects_revoked_principal_or_grant(transport, 
     app, client, auth, sid, _, _, now, _ = transport
     browser_login(transport)
     with client.websocket_connect(
-        f"/api/v1/sessions/{sid}/stream", headers={"Origin": ORIGIN}
+        f"/api/v1/sessions/{sid}/transport-probe", headers={"Origin": ORIGIN}
     ) as ws:
         assert ws.receive_json()["actor"] == str(auth.account.id)
         if cause == "logout":

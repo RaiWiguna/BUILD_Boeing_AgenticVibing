@@ -1,6 +1,6 @@
 # HTTP/WS transport dan public projection — A03.2
 
-Tanggal: 9 Oktober 2026. Host memasang generic transport guard dan menyediakan scoped helpers serta public serializer. Contract 1.0.0, migrations platform.0001–.0006 dan dependency lock tetap. Tidak menambah route domain, jobs, media/export atau replay stream nyata.
+Tanggal: 9 Oktober 2026. Host memasang generic transport guard dan menyediakan scoped helpers serta public serializer. Contract 1.0.0, migrations platform.0001–.0006 dan dependency lock tetap. A03.2 tidak menambah route domain; sesudahnya A05/A06 dan A07 menambah media/jobs/replay nyata. Current [replay REST/WS](replay.md) dan [A07.3 evidence](../testing/a073-evidence.md); generic policy tetap berlaku.
 
 ## Boundary host
 
@@ -21,7 +21,7 @@ Guard HTTP berjalan di threadpool sebelum route dispatch. Liveness/readiness/rel
 
 `worker_context(request, scope_id)` hanya berlaku pada internal path, memakai bearer dan scope yang dibuktikan milik principal tersebut. Scope ID adalah selector, bukan authority. Principal-only authentication dipakai sebagai fondasi lease endpoint berikutnya; A06 tetap harus memeriksa actual lease, attempt, deadline/cancel, source rights dan accepted commit.
 
-`await websocket_context(websocket, session_id, run_id=..., required=...)` dipanggil sebelum accept, dan kembali sebelum publikasi berikutnya. Policy memeriksa logout/reset/expiry/grant revocation dari durable state. TestClient probe membuktikan recheck; belum ada scheduler/subscription/push disconnect atau sequence/snapshot/resync untuk replay nyata. Semuanya tetap A07.3. Gunakan context baru hasil recheck untuk DTO berikutnya; jangan hanya menyimpan context handshake.
+`await websocket_context(websocket, session_id, run_id=..., required=...)` dipanggil sebelum accept, dan kembali sebelum publikasi berikutnya. Policy memeriksa logout/reset/expiry/grant revocation dari durable state. A03 TestClient probe membuktikan recheck; A07.3 kini memakai browser_principal + Controls.context untuk selected server playback view/run/mode, dengan idle polling250ms, real typed sequence/snapshot/resync dan disconnect pada akses yang hilang. Native loopback tests lulus; [evidence](../testing/a073-evidence.md). Gunakan context baru hasil recheck untuk DTO berikutnya; jangan hanya menyimpan context handshake.
 
 Principal guard host tidak menggantikan object/operation authorization. Setiap handler harus memilih capability yang tepat, membangun context dan memakai guarded UOW/repositories; media/export/source juga memeriksa rights spesifik. HTTP helpers dipanggil dari handler dengan konstanta server, bukan dipasang langsung sebagai Depends yang mengekspos parameter policy sebagai query.
 
