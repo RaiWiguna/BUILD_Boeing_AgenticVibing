@@ -30,7 +30,7 @@ Contract fixtures preserve known transform/clock; synthetic event availability i
 | Scope | Cross-session/run/truth/raw media/unauthorized tool | Zero successful forbidden accesses |
 | Recovery | Atomic import failure, upgrade/restart, late result, disk full, expiry/purge/restore | No partial readable commit; preserve durable history |
 
-These rows are requirement coverage, not implemented detector tests. Actual input/output labeling is completed in owner phases 3/5/7/8/10. Baseline already supplies waveform, events, layout, invalid contracts and small independent numeric oracles. Full S01–S12 generator, detector, noisy audio derivatives and held-out benchmark runs are downstream implementation.
+The table records baseline requirements. A08.3 now supplies source-observed lab S01–S10 tests with independent time/geometry expectations ([technical evidence](../../docs/testing/a083-evidence.md)); S11–S12 transport technical checks are in A03/A07. This does not complete Phase10 cross-boundary/provider/domain evaluation. Actual input/output labeling is completed in owner phases 3/5/7/8/10. Baseline already supplies waveform, events, layout, invalid contracts and small independent numeric oracles. Additional seeded/noisy/held-out scenario generators, real B/provider integration, and held-out benchmark runs remain downstream work.
 
 ## Split and measurements
 

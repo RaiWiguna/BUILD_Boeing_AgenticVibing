@@ -4,12 +4,20 @@
 | --- | --- |
 | Tanggal | 9 Oktober 2026 |
 | Objective | Persistent goal A07.1–A09.3, berurutan/local commit per unit; berhenti sebelum A10 |
-| Status | A01–A06 verified; A07.1–A07.3/A07 done; A08.1–A08.2 done; A08.3 next; B/Phase10 tidak dimulai |
-| Candidate | A08.1 commitc8c042299c152f0837e14119c48d587825b6ae56; A08.2 SHA reported after checks/commit |
-| Next focus | A08.3 observed-only rules, alert lifecycle/ack, S01–S10; checkout sama feat/backend-aben |
+| Status | A01–A06 verified; A07.1–A07.3/A07 done; A08.1–A08.2 done; A08.3/A08 done; A09.1 next; B/Phase10 tidak dimulai |
+| Candidate | A08.2 commitec63841f1d97b6c8c794d754ea63a95b36382388; A08.3 SHA reported after actual checks/commit |
+| Next focus | A09.1 artifacts/retention/purge/tombstones/audit; checkout sama feat/backend-aben |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
 
-## Handoff terkini — A08.2
+## Handoff terkini — A08.3
+
+- Input ec63841f1d97b6c8c794d754ea63a95b36382388, clean before unit; previous goal turns produced WIP/test evidence, then durable lifecycle/indicators/transport. A08.3/Phase5 deliverables are ready after actual checks/commit ([evidence](../docs/testing/a083-evidence.md), [workflow](../docs/development/geometry.md)).
+- Explicit lab-source-1 codec/lab-rules-1 default fictional-1/H1/allowed side/protection5m and5000ms lab response window. Actual SourceReader/GeometryReader/EvidenceRegistry scope/time/clock/identity/coverage integration; physical occupancy independent of cancellation/report. Source severity vs deterministic priority separate; simultaneous contradictory source alerts UNKNOWN with all original variants; seen means SEEN_ONLY.
+- New0015 durable head/revisions/receipts, optimistic/idempotent publication/event/audit atomic; backward publish rejected, read history allowed. Fault/revoke/concurrent/reopen/mode/run/session and real strict REST/host cleanup checks. Indicators are EXPERIMENTAL_NOT_WORKLOAD; measured annotations/source-reported intervals, optional fake frozen ContextReader loop count, missing VAD stays unknown. Frozen WS markers trigger resync + scoped REST fetch, no new frozen vocabulary.
+- 54 scoped cases/620 platform/66contracts each track/Ruff88/mypy58/drift/Bandit/lock/build PASS. Review/Markdown/whitespace and scoped signature scan25 staged files0 matches; dedicated scanners unavailable.14 migration definitions/frozen1.0.0/dependency locks unchanged;0015 added. Local commit SHA reported from actual Git. No persistent runtime/private data/B implementation/Phase10/frontend/deploy/push/merge/amend/destructive Git; parent B phases/gates not completed.
+- Next A09.1 artifact/retention/purge/tombstone/audit, automatically after A08.3 local commit; then A09.2 and A09.3. Goal remains active until A09.3 committed, A10.1 final handoff only.
+
+## Rekam A08.2
 
 - Input c8c042299c152f0837e14119c48d587825b6ae56, clean. Source-scoped Occupancy implements frozen GeometryReader, rich model-observed/predicted timing, bounded eligibility/uncertainty/version/hash and authenticated replay geometry REST ([evidence](../docs/testing/a082-evidence.md), [workflow](../docs/development/geometry.md)).
 - Canonical source-track evidence indexing atomic/live rechecked; read-only does not receive arbitrary registration rights. Unknown/stale/dropout/coverage/expiry/conflicting speed never converts to clearance. 33 synthetic scoped oracles including timing/concave/source/evidence/rollback/authority/HTTP. Final566 platform/66contracts each track/Ruff78/mypy53/drift/Bandit/lock/build PASS;14 migrations unchanged; staged16-file signature scan0 matches. Local commit SHA reported from actual Git, no retained runtime.

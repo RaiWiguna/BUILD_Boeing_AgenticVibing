@@ -22,6 +22,13 @@ from pydantic import ValidationError
 class EvidenceRegistry:
     def index_track(self, context: RequestContext, track: Track, uow: UnitOfWork) -> Evidence:
         """Cache only a server-derived canonical source anchor, under current read authority."""
+        return self.index_source(context, track, uow)
+
+    def index_source(
+        self, context: RequestContext, record: SourceEvent, uow: UnitOfWork
+    ) -> Evidence:
+        """A source-derived reference cache, with no arbitrary quote or policy ingestion."""
+        track = record
         checked = self.resolve_in_uow(
             context,
             Evidence(
@@ -32,7 +39,7 @@ class EvidenceRegistry:
                 session_id=context.session_id,
                 analysis_run_id=context.analysis_run_id,
                 revision=context.input_revision,
-                kind="TRACK",
+                kind="TRACK" if isinstance(record, Track) else "EVENT",
                 source_id=track.source_id,
                 source_hash=track.source_hash,
                 segment_id=track.id,

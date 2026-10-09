@@ -584,4 +584,65 @@ PLATFORM_MIGRATIONS = (
             BEGIN SELECT RAISE(ABORT,'Immutable receipt.'); END;
         """,
     ),
+    MigrationSpec(
+        "platform.0015",
+        "A",
+        ("platform.0014",),
+        """
+        CREATE TABLE platform_rule_heads(
+            session_id TEXT NOT NULL, revision INTEGER NOT NULL, run_scope TEXT NOT NULL,
+            run_id TEXT, mode TEXT NOT NULL CHECK(mode IN ('AS_KNOWN','DEBRIEF')),
+            version INTEGER NOT NULL CHECK(version>=0), as_of_ms INTEGER NOT NULL,
+            CHECK(run_scope=COALESCE(run_id,'')),
+            PRIMARY KEY(session_id,revision,run_scope,mode),
+            FOREIGN KEY(session_id,revision) REFERENCES platform_revisions(session_id,revision),
+            FOREIGN KEY(session_id,run_id,revision)
+                REFERENCES platform_runs(session_id,id,revision));
+        CREATE TABLE platform_alert_revisions(
+            session_id TEXT NOT NULL, revision INTEGER NOT NULL, run_scope TEXT NOT NULL,
+            mode TEXT NOT NULL, alert_id TEXT NOT NULL, version INTEGER NOT NULL CHECK(version>0),
+            as_of_ms INTEGER NOT NULL CHECK(as_of_ms>=0), revision_id TEXT NOT NULL,
+            payload TEXT NOT NULL, PRIMARY KEY(session_id,revision,run_scope,mode,alert_id,version),
+            UNIQUE(session_id,revision,run_scope,mode,revision_id),
+            FOREIGN KEY(session_id,revision,run_scope,mode)
+                REFERENCES platform_rule_heads(session_id,revision,run_scope,mode));
+        CREATE TABLE platform_rule_receipts(
+            session_id TEXT NOT NULL REFERENCES platform_sessions(id),
+            actor_id TEXT NOT NULL REFERENCES platform_accounts(id),
+            key_hash TEXT NOT NULL CHECK(length(key_hash)=64),
+            fingerprint TEXT NOT NULL CHECK(length(fingerprint)=64), payload TEXT NOT NULL,
+            PRIMARY KEY(session_id,actor_id,key_hash));
+        CREATE TABLE platform_alert_seen(
+            session_id TEXT NOT NULL REFERENCES platform_sessions(id),
+            actor_id TEXT NOT NULL REFERENCES platform_accounts(id),
+            key_hash TEXT NOT NULL CHECK(length(key_hash)=64),
+            fingerprint TEXT NOT NULL CHECK(length(fingerprint)=64), payload TEXT NOT NULL,
+            PRIMARY KEY(session_id,actor_id,key_hash));
+        CREATE TRIGGER platform_alert_revisions_update BEFORE UPDATE ON platform_alert_revisions
+            BEGIN SELECT RAISE(ABORT,'Immutable alert revision.'); END;
+        CREATE TRIGGER platform_alert_revisions_delete BEFORE DELETE ON platform_alert_revisions
+            BEGIN SELECT RAISE(ABORT,'Immutable alert revision.'); END;
+        CREATE TRIGGER platform_alert_revisions_replace BEFORE INSERT ON platform_alert_revisions
+            WHEN EXISTS(SELECT 1 FROM platform_alert_revisions WHERE session_id=NEW.session_id
+            AND revision=NEW.revision AND run_scope=NEW.run_scope AND mode=NEW.mode
+            AND alert_id=NEW.alert_id AND version=NEW.version)
+            BEGIN SELECT RAISE(ABORT,'Immutable alert revision.'); END;
+        CREATE TRIGGER platform_rule_receipts_update BEFORE UPDATE ON platform_rule_receipts
+            BEGIN SELECT RAISE(ABORT,'Immutable rule receipt.'); END;
+        CREATE TRIGGER platform_rule_receipts_delete BEFORE DELETE ON platform_rule_receipts
+            BEGIN SELECT RAISE(ABORT,'Immutable rule receipt.'); END;
+        CREATE TRIGGER platform_rule_receipts_replace BEFORE INSERT ON platform_rule_receipts
+            WHEN EXISTS(SELECT 1 FROM platform_rule_receipts WHERE session_id=NEW.session_id
+            AND actor_id=NEW.actor_id AND key_hash=NEW.key_hash)
+            BEGIN SELECT RAISE(ABORT,'Immutable rule receipt.'); END;
+        CREATE TRIGGER platform_alert_seen_update BEFORE UPDATE ON platform_alert_seen
+            BEGIN SELECT RAISE(ABORT,'Immutable seen receipt.'); END;
+        CREATE TRIGGER platform_alert_seen_delete BEFORE DELETE ON platform_alert_seen
+            BEGIN SELECT RAISE(ABORT,'Immutable seen receipt.'); END;
+        CREATE TRIGGER platform_alert_seen_replace BEFORE INSERT ON platform_alert_seen
+            WHEN EXISTS(SELECT 1 FROM platform_alert_seen WHERE session_id=NEW.session_id
+            AND actor_id=NEW.actor_id AND key_hash=NEW.key_hash)
+            BEGIN SELECT RAISE(ABORT,'Immutable seen receipt.'); END;
+        """,
+    ),
 )

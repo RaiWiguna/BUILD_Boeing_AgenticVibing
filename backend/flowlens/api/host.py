@@ -17,13 +17,15 @@ from flowlens.auth.permissions import Permissions
 from flowlens.auth.routes import build_router
 from flowlens.auth.sessions import Sessions
 from flowlens.auth.transport import WebSocketPolicy, check_http_transport
-from flowlens.contracts.ports import AnalysisModule
+from flowlens.contracts.ports import AnalysisModule, ContextReader
 from flowlens.core.errors import HTTP_STATUS, ContractError, ErrorResponse
 from flowlens.core.host_config import HostSettings
 from flowlens.core.modules import ModuleRegistration, ModuleRegistry
 from flowlens.evidence.registry import EvidenceRegistry
 from flowlens.geometry.occupancy import Occupancy
+from flowlens.geometry.route_rules import build_router as build_rule_router
 from flowlens.geometry.routes import build_router as build_geometry_router
+from flowlens.geometry.service import Rules
 from flowlens.imports.commit import ImportCommit
 from flowlens.imports.routes import build_router as build_import_router
 from flowlens.imports.staging import ImportFailure, Imports
@@ -48,6 +50,7 @@ def create_host(
     modules: Sequence[ModuleRegistration] = (),
     mutation_operations: Sequence[MutationOperation] = (),
     analysis_module: AnalysisModule | None = None,
+    context_reader: ContextReader | None = None,
     job_policies: Sequence[StagePolicy] = (),
     repository_factories: Mapping[str, RepositoryFactory] | None = None,
 ) -> FastAPI:
@@ -122,6 +125,9 @@ def create_host(
                         app.state.assets.recover_artifacts()
                         app.state.evidence = EvidenceRegistry(app.state.sources, app.state.assets)
                         app.state.geometry = Occupancy(app.state.sources, app.state.evidence)
+                        app.state.rules = Rules(
+                            app.state.geometry, app.state.evidence, context_reader=context_reader
+                        )
                     except Exception:
                         raise RuntimeError("Committed source storage startup failed.") from None
                 if analysis_module is not None:
@@ -145,6 +151,7 @@ def create_host(
                 app.state.assets = None
                 app.state.evidence = None
                 app.state.geometry = None
+                app.state.rules = None
                 app.state.raw_files = None
                 app.state.import_commits = None
                 app.state.controls = None
@@ -180,6 +187,7 @@ def create_host(
     app.state.assets = None
     app.state.evidence = None
     app.state.geometry = None
+    app.state.rules = None
     app.state.raw_files = None
     app.state.import_commits = None
     app.state.controls = None
@@ -292,6 +300,7 @@ def create_host(
     app.include_router(build_job_router())
     app.include_router(build_replay_router())
     app.include_router(build_geometry_router())
+    app.include_router(build_rule_router())
     occupied: set[tuple[str, str]] = set()
     for route in app.routes:
         occupied.update(route_keys(route))

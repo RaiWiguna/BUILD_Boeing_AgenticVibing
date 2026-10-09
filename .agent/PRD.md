@@ -3,7 +3,7 @@
 | Atribut | Nilai |
 | --- | --- |
 | Status dokumen | **Draft product contract v1.0 untuk review**; keputusan stack pengguna dikunci, asumsi produk dan keputusan terbuka ditandai |
-| Status implementasi | Requirement target. A01–A07 Paket A tersedia dan standalone checks lulus (9 Oktober 2026): host/persistence/auth/grants/import/private assets/evidence/jobs/replay/REST/WS; analisis memakai fake B melalui frozen ports. A08.1–A08.2 metric geometry, occupancy/ETA/exit/eligibility tersedia; A08.3–A10, B/provider pipeline nyata, UI dan deployment belum diimplementasikan; release gates belum passed |
+| Status implementasi | Requirement target. A01–A07 Paket A tersedia dan standalone checks lulus (9 Oktober 2026): host/persistence/auth/grants/import/private assets/evidence/jobs/replay/REST/WS; analisis memakai fake B melalui frozen ports. A08.1–A08.3 metric geometry/occupancy/ETA/exit/eligibility/rules/alerts tersedia; A09–A10, B/provider pipeline nyata, UI dan deployment belum diimplementasikan; release gates belum passed |
 | Versi dokumen | 1.0 |
 | Tanggal | 7 Oktober 2026 |
 | Product owner | Tim ATC FlowLens; individu pemilik keputusan produk/domain belum ditetapkan |
