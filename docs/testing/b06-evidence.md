@@ -200,3 +200,53 @@ tetap platform. Synchronous frozen ports memerlukan timeout/bounded implementati
 harness tidak membuktikan penghentian adapter production yang macet. Public snapshots,
 REST routes/job handlers dan accepted projections tetap belum dipasang. Build/mock
 contracts tidak menutup gap tersebut atau G-BE/G-FE/G-DELIVERY.
+
+## Continuation — evaluator, package, capacity, compatibility (9 Oktober 2026)
+
+Local continuation menutup gap tooling independen dari acceptance eksternal. Source
+baru adalah `scripts/semantic_scoring.py`, `scripts/evaluation_semantic.py`,
+`scripts/package_smoke.py`, `scripts/capacity_b.py`, fixture
+`evaluation/fixtures/semantic-test-only.json`, protocol
+`evaluation/protocols/semantic-evaluation.md`, matrix
+`docs/development/package-b-compatibility.md`, serta tests
+`tests/analysis/test_semantic_scoring.py` dan `test_local_tooling.py`.
+Runtime/provider, frozen contracts1.0.0 dan Paket A tidak diubah. `pyproject.toml`
+mengecualikan `docs/pitch`, `tests/browser`, dan `tmp` dari sdist.
+
+Evaluator strict memvalidasi scope/session/run/revision/source/family/speaker/split,
+annotation/prediction/evidence/provenance/reviewer, hashes, availability, required
+evidence dan reviewer relevance. Duplicate IDs/JSON keys, cross-scope/future
+evidence, split leakage, unsupported evidence, malformed/nonfinite input, missing
+provenance, wrong relationship, premature/false closure dan TEST_ONLY pretending
+real provider ditolak. Metrics descriptive memisahkan known/ambiguous/unknown,
+missing/abstained, coverage, semantic exactness, wrong pairing, closure support,
+finding precision/recall dan reviewer relevance. Thresholds `UNSET`, verdict `null`.
+Default CLI **BLOCKED/metrics=null**; TEST_ONLY memakai MOCK/calls0 dan nested
+external benchmark BLOCKED. Raw acquired mode memerlukan envelope/hash binding dan
+`--raw-output`, belum dijalankan karena audited corpus/provider output tidak ada.
+Actual evaluator+boundary tests **42 PASS**, Ruff/mypy/Bandit scoped PASS.
+
+Clean-install smoke: wheel/sdist dibangun, locked requirements diekspor, venv
+disposable di luar checkout dibuat, wheel dipasang dengan `python -I`, enam
+standalone MOCK entrypoints berjalan dari site-packages, import/PYTHONPATH leak
+tidak ditemukan, dan `uv pip check` PASS. Evaluator truth/fixtures tidak masuk wheel;
+sdist mengecualikan untracked pitch/browser/tmp. Repo-local acceptance runner tetap
+memerlukan source/tests dan sengaja terpisah.
+
+Capacity: `scripts/capacity_b.py --execute --sizes 16 128 512 --repetitions 3
+--seed 214` memakai generator `b-capacity-mock-1`, Windows11/Python3.12.15/
+SQLite3.53.1, disposable storage dan window advisory maksimum8 event. Semua
+reconstruction order, Said/Heard/Observed, no-false-closure, FK, output hash dan
+cleanup invariant PASS. Median ms (16/128/512): append 7.427/30.553/124.557,
+inventory 3.749/19.251/86.360, reconstruction 0.546/3.182/13.883, loops
+0.835/5.652/24.791, brief MOCK 7.585/8.497/12.363. Peak Python tracemalloc
+1.32/4.89/17.87MB; final DB 258048/724992/2314240 bytes. Synthetic baseline
+only; targets UNSET, bukan operational capacity/provider latency/safety benefit.
+
+WSL2 kernel tersedia, tetapi `docker-desktop` tidak memiliki Python/uv/FFmpeg dan
+Docker daemon unavailable; Linux runtime **NOT_RUN**. `mypy --platform linux` adalah
+static check saja. Compatibility matrix dan negative tests mencakup public
+projection, evidence availability/as-of, alias/role/coverage/geometry authority,
+artifact ACL/TTL/promotion, attempts/receipts/idempotency/cancellation dan Phase10
+projection gaps. External B03/B04/B05 tetap pending, real calls0, smoke NOT_RUN,
+benchmark BLOCKED/metrics null, integrated readiness false.

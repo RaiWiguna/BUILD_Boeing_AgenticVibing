@@ -1,0 +1,1470 @@
+{
+  "version": "b045-semantic-bundle-1",
+  "protocol": "b045-semantic-1",
+  "purpose": "TEST_ONLY",
+  "rights_record": "TEST_ONLY-SYNTHETIC",
+  "rubric_record": "TEST_ONLY-ARITHMETIC-NOT-DOMAIN",
+  "protocol_review": null,
+  "thresholds": "UNSET",
+  "domain_status": "NOT_DOMAIN_VALIDATED",
+  "annotations": [
+    {
+      "id": "speech_act-0",
+      "subject_id": "TEST_ONLY-speech_act-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "speech_act",
+      "label_status": "KNOWN",
+      "expected": "INSTRUCTION",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "callsign-0",
+      "subject_id": "TEST_ONLY-callsign-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "callsign",
+      "label_status": "KNOWN",
+      "expected": "FLN214",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "runway-0",
+      "subject_id": "TEST_ONLY-runway-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "runway",
+      "label_status": "KNOWN",
+      "expected": "27",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "action-0",
+      "subject_id": "TEST_ONLY-action-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "action",
+      "label_status": "KNOWN",
+      "expected": "HOLD_SHORT",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "negation-0",
+      "subject_id": "TEST_ONLY-negation-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "negation",
+      "label_status": "KNOWN",
+      "expected": "ABSENT",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "condition-0",
+      "subject_id": "TEST_ONLY-condition-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "condition",
+      "label_status": "KNOWN",
+      "expected": "after departure",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "correction-0",
+      "subject_id": "TEST_ONLY-correction-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "correction",
+      "label_status": "KNOWN",
+      "expected": "PRESENT",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "cancellation-0",
+      "subject_id": "TEST_ONLY-cancellation-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "cancellation",
+      "label_status": "KNOWN",
+      "expected": "PRESENT",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "association-0",
+      "subject_id": "TEST_ONLY-association-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "association",
+      "label_status": "KNOWN",
+      "expected": "target-a",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": "READBACK_OF",
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "association-1",
+      "subject_id": "TEST_ONLY-association-1",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "association",
+      "label_status": "KNOWN",
+      "expected": "target-b",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": "READBACK_OF",
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "association-2",
+      "subject_id": "TEST_ONLY-association-2",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "association",
+      "label_status": "KNOWN",
+      "expected": "target-b",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": "READBACK_OF",
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "association-3",
+      "subject_id": "TEST_ONLY-association-3",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "association",
+      "label_status": "AMBIGUOUS",
+      "expected": null,
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": "READBACK_OF",
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "association-4",
+      "subject_id": "TEST_ONLY-association-4",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "association",
+      "label_status": "UNKNOWN",
+      "expected": null,
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": "READBACK_OF",
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "open_loop-0",
+      "subject_id": "TEST_ONLY-open_loop-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "open_loop",
+      "label_status": "KNOWN",
+      "expected": "CLOSED",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": 5000,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "open_loop-1",
+      "subject_id": "TEST_ONLY-open_loop-1",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "open_loop",
+      "label_status": "KNOWN",
+      "expected": "CLOSED",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": 5000,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "open_loop-2",
+      "subject_id": "TEST_ONLY-open_loop-2",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "open_loop",
+      "label_status": "KNOWN",
+      "expected": "OPEN",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "open_loop-3",
+      "subject_id": "TEST_ONLY-open_loop-3",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "open_loop",
+      "label_status": "KNOWN",
+      "expected": "OPEN",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "open_loop-4",
+      "subject_id": "TEST_ONLY-open_loop-4",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "open_loop",
+      "label_status": "UNKNOWN",
+      "expected": null,
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "open_loop-5",
+      "subject_id": "TEST_ONLY-open_loop-5",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "open_loop",
+      "label_status": "AMBIGUOUS",
+      "expected": null,
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "finding-0",
+      "subject_id": "TEST_ONLY-finding-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "finding",
+      "label_status": "KNOWN",
+      "expected": "PRESENT",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "finding-1",
+      "subject_id": "TEST_ONLY-finding-1",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "finding",
+      "label_status": "KNOWN",
+      "expected": "PRESENT",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "finding-2",
+      "subject_id": "TEST_ONLY-finding-2",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "finding",
+      "label_status": "KNOWN",
+      "expected": "ABSENT",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "finding-3",
+      "subject_id": "TEST_ONLY-finding-3",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "finding",
+      "label_status": "KNOWN",
+      "expected": "PRESENT",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": null,
+      "reviews": [],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "brief_relevance-0",
+      "subject_id": "TEST_ONLY-brief_relevance-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "brief_relevance",
+      "label_status": "KNOWN",
+      "expected": "RELEVANT",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": "c4d2f050fe1baa888dfc3ebdeb9e33f6ca6f40582ec41ffebe0dc1891e88cc37",
+      "reviews": [
+        {
+          "reviewer": "TEST_ONLY-NOT-A-PERSON",
+          "experience_record": "TEST_ONLY-NO-DOMAIN-REVIEW",
+          "reviewed_at": "2026-10-09T01:00:00Z",
+          "record_id": "TEST_ONLY-arithmetic"
+        }
+      ],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "brief_relevance-1",
+      "subject_id": "TEST_ONLY-brief_relevance-1",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "brief_relevance",
+      "label_status": "KNOWN",
+      "expected": "IRRELEVANT",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": "bad958f77d777ca75816049fe3e0cf278e7adef4814b9201d2ec4b3910e72d33",
+      "reviews": [
+        {
+          "reviewer": "TEST_ONLY-NOT-A-PERSON",
+          "experience_record": "TEST_ONLY-NO-DOMAIN-REVIEW",
+          "reviewed_at": "2026-10-09T01:00:00Z",
+          "record_id": "TEST_ONLY-arithmetic"
+        }
+      ],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    },
+    {
+      "id": "option_relevance-0",
+      "subject_id": "TEST_ONLY-option_relevance-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "task": "option_relevance",
+      "label_status": "KNOWN",
+      "expected": "IRRELEVANT",
+      "acceptable_evidence": [
+        "e-support"
+      ],
+      "earliest_close_ms": null,
+      "output_sha256": "a18972a3c83aecd04966b13d8fe3e3fef46d84eddda17635ff4f493a54caa78f",
+      "reviews": [
+        {
+          "reviewer": "TEST_ONLY-NOT-A-PERSON",
+          "experience_record": "TEST_ONLY-NO-DOMAIN-REVIEW",
+          "reviewed_at": "2026-10-09T01:00:00Z",
+          "record_id": "TEST_ONLY-arithmetic"
+        }
+      ],
+      "adjudication": null,
+      "relationship": null,
+      "required_evidence": [
+        "e-support"
+      ]
+    }
+  ],
+  "predictions": [
+    {
+      "id": "speech_act-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "INSTRUCTION",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "78888457d41840b5a36a8243e5ad22dee251a1786f6b951346eebf6d34896600",
+      "relationship": null
+    },
+    {
+      "id": "callsign-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "FLN214",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "6b95415394fb624cba6458566066b2b7fdce05ba51fe3e2446080c93150d60b7",
+      "relationship": null
+    },
+    {
+      "id": "runway-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "27",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "4152f42cfaed23a222915737631347924beebb4373ec5dcddd5b7f18ca75565a",
+      "relationship": null
+    },
+    {
+      "id": "action-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "HOLD_SHORT",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "56aab995e4e0f093a4e94621dd00cb85bd036fb83b7af03ae485b51c96a006aa",
+      "relationship": null
+    },
+    {
+      "id": "negation-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "ABSENT",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "ac958659ca523e1feb9fd6cfa9bc8087f48c8f0e12a400f970b6fbb74d96f664",
+      "relationship": null
+    },
+    {
+      "id": "condition-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "after departure",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "f57b7d16b843edd13f2f79700ed6c5f18c3864d0146a0fadc5da241165f129ea",
+      "relationship": null
+    },
+    {
+      "id": "correction-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "PRESENT",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "afaea8d488c2e938125c2afeefd7147e12f2e5d5038b6b568b2c64752ae34d4a",
+      "relationship": null
+    },
+    {
+      "id": "cancellation-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "PRESENT",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "083cb44ff9e0388aa95040b11f1abfc60b530fba897996aa1f13a5a59914501d",
+      "relationship": null
+    },
+    {
+      "id": "association-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "target-a",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "7215d96df37a9b76d8c792628969d1c0904df5546446b20a57f53aadf2473c1c",
+      "relationship": "READBACK_OF"
+    },
+    {
+      "id": "association-1",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "target-a",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "6c42fa86df4f428e88bf1eec3acb2ff73805f59c38c3130f40b6084090761fdf",
+      "relationship": "READBACK_OF"
+    },
+    {
+      "id": "association-3",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ABSTAINED",
+      "value": null,
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "93fa749dc5a3f2103629f88d4aa4bbf3eb74abdb534279dfad5af6717d266edf",
+      "relationship": null
+    },
+    {
+      "id": "association-4",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "target-a",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "5cedb19016880acf8e1ced096e48390cbf80bb07508b61002514bb8c098b0e8a",
+      "relationship": "READBACK_OF"
+    },
+    {
+      "id": "open_loop-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "CLOSED",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": 5000,
+      "output_sha256": "a7f38aa90d0ae751264b9371aaa95c270d01dc3f8877e84f7aedbb196d91fae6",
+      "relationship": null
+    },
+    {
+      "id": "open_loop-1",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "CLOSED",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": 4000,
+      "output_sha256": "02f5ff15872ae322c8d039c424caa885d5779cc51813773e4f5d52a88130d6e3",
+      "relationship": null
+    },
+    {
+      "id": "open_loop-2",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "CLOSED",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": 5000,
+      "output_sha256": "c50f73337e65e16f29a3f0833d7aefda77a9db3ae4dfe852c03c35941745eb4a",
+      "relationship": null
+    },
+    {
+      "id": "open_loop-4",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "OPEN",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "ae1077d84420997c88130cf1e9eaa11e2f02f9a8dce501caf238c3190f2fb896",
+      "relationship": null
+    },
+    {
+      "id": "open_loop-5",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ABSTAINED",
+      "value": null,
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "8babfda4d18bc1feaefe6482a5bf2953ddff496f775ab03f49ffe3ee85091674",
+      "relationship": null
+    },
+    {
+      "id": "finding-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "PRESENT",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "45c5812802b6c3da63eea8950e11223fa05189057186d4cafedf0a15a2d5ca36",
+      "relationship": null
+    },
+    {
+      "id": "finding-1",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "PRESENT",
+      "evidence_ids": [
+        "e-other"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "a40e98d6ca146f2c28cb061df5e992ea0c2c155031cb627adc2a3691f23eb6c5",
+      "relationship": null
+    },
+    {
+      "id": "finding-2",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "PRESENT",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "d8eb6f07df706608208a2f3d9c5926f16e37c628d028609a512ebf041def5307",
+      "relationship": null
+    },
+    {
+      "id": "finding-3",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "UNKNOWN",
+      "value": null,
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "4a5abd840045decb8fee45efe9b2a592aa8ecd96ca38b003a35d5e8a8dbf1d2c",
+      "relationship": null
+    },
+    {
+      "id": "brief_relevance-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "not-a-grade",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "c4d2f050fe1baa888dfc3ebdeb9e33f6ca6f40582ec41ffebe0dc1891e88cc37",
+      "relationship": null
+    },
+    {
+      "id": "brief_relevance-1",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "not-a-grade",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "bad958f77d777ca75816049fe3e0cf278e7adef4814b9201d2ec4b3910e72d33",
+      "relationship": null
+    },
+    {
+      "id": "option_relevance-0",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "status": "ANSWERED",
+      "value": "not-a-grade",
+      "evidence_ids": [
+        "e-support"
+      ],
+      "closed_at_ms": null,
+      "output_sha256": "a18972a3c83aecd04966b13d8fe3e3fef46d84eddda17635ff4f493a54caa78f",
+      "relationship": null
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-support",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "content_sha256": "34bc4267e208e40321911513016ed5bcab05bcba2a9ddc3e7772697e86cd7a1b",
+      "available_ms": 5000
+    },
+    {
+      "id": "e-other",
+      "scope": {
+        "session": "TEST_ONLY-session",
+        "run": "TEST_ONLY-run",
+        "revision": 1,
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "family": "TEST_ONLY-family",
+        "speakers": [
+          "TEST_ONLY-speaker"
+        ],
+        "split": "TUNING",
+        "as_of_ms": 10000
+      },
+      "content_sha256": "af8178b11bdfa1250bd01530323ed990d31991e279ff8e88258c528bc7860856",
+      "available_ms": 5000
+    }
+  ],
+  "provenance": {
+    "profile": "MOCK",
+    "model": "MOCK",
+    "api_version": "MOCK",
+    "sdk_version": "MOCK",
+    "prompt_version": "MOCK",
+    "schema_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "config_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "raw_output_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "predictions_sha256": "52beabaca2b954155dfb513bb6750eb882d03edc186f49eb24139bbfc4465186",
+    "execution_record": "TEST_ONLY-NO-PROVIDER-EXECUTION",
+    "calls": 0,
+    "executed_at": "2026-10-09T00:00:00Z",
+    "operator_review": null
+  }
+}

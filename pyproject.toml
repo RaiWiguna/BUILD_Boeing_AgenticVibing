@@ -32,6 +32,9 @@ dev = [
 [tool.hatch.build.targets.wheel]
 packages = ["backend/flowlens"]
 
+[tool.hatch.build.targets.sdist]
+exclude = ["/docs/pitch", "/tests/browser", "/tmp"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["backend"]
@@ -49,4 +52,3 @@ python_version = "3.12"
 strict = true
 mypy_path = "backend"
 files = ["backend/flowlens"]
-

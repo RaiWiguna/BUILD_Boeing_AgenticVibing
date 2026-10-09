@@ -5,8 +5,8 @@
 | Tanggal | 9 Oktober 2026 |
 | Objective | B05 local engineering/standalone MOCK accepted; B04 tetap in_progress; external acceptance open; B03 external acceptance tetap pending; konteks B01/B02/B03 dan A02.2 dipertahankan |
 | Status | Phase0–1 done; A01/A02 dan Phase2.1/2.2 done; Phase2 in_progress; B01/B02.1 done; B02.2/6.4 done untuk standalone MOCK acceptance; B03 in_progress (D1/D2/D3 standalone accepted); B04 in_progress (local MOCK accepted); B05 in_progress (local standalone MOCK); B06 in_progress (acceptance lokal); contract1.0.0 |
-| Candidate | HEAD/upstream feat/backend-rai = da279281f1698197df1efef569f578adb1610cef; B01/B02/B03 baseline committed/pushed. Continuation D3/tooling/docs working tree belum stage/commit/push; rekam A02 dipertahankan |
-| Next focus | B06 lokal; external B03/B04 smoke dan audited/domain B05 acceptance terbuka; real A/B transport Phase10 belum dimulai; A tetap A03.1 independen |
+| Candidate | HEAD/upstream feat/backend-rai = 5beeffd5726aae0321574ba8e302d47db6c46171 sebelum continuation; evaluator/package/capacity/compatibility continuation siap di-commit setelah final checks |
+| Next focus | External B03/B04 smoke dan audited/domain B05 acceptance terbuka; Linux runtime bila host tersedia; real A/B transport Phase10 belum dimulai; A tetap A03.1 independen |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
 
 ## Handoff terkini — B05 local engineering, 9 Oktober 2026
@@ -424,3 +424,22 @@ AUDITED_BENCHMARK_PENDING), B04_EXTERNAL_ACCEPTANCE_PENDING
 AUDITED_SEMANTIC_BENCHMARK_PENDING), GEMINI_EXTERNAL_ACCEPTANCE_PENDING tetap.
 Real STT/Gemini0, smoke NOT_RUN, external benchmark BLOCKED/metrics=null,
 integrated readiness=false; B03/B04/B05/B06/parent phases/gates tidak ditutup.
+
+### Continuation tooling — 9 Oktober 2026
+
+Evaluator semantic offline, clean-install smoke, bounded synthetic capacity baseline
+dan compatibility matrix selesai di working tree. Final `pytest tests/analysis
+tests/contracts --track B -q`: **718 PASS**, tanpa skip; 42 test baru mencakup
+evaluator dan compatibility. Ruff116 files, scoped mypy tooling, schema drift,
+Bandit zero issues, pip-audit, build dan clean-install pass. Wheel/sdist smoke berjalan
+di luar checkout dengan locked requirements, enam installed MOCK entrypoints, tanpa
+source/PYTHONPATH leak, dan disposable environment bersih. sdist mengecualikan
+untracked pitch/browser/tmp.
+
+Capacity 16/128/512 ×3 pass invariant dan cleanup; hasil synthetic MOCK baseline
+dengan target UNSET, bukan kapasitas operasional. Linux runtime **NOT_RUN**: WSL2
+kernel ada, tetapi docker-desktop tidak memiliki Python/uv/FFmpeg dan Docker daemon
+unavailable. `mypy --platform linux` static-only. External B03/B04/B05 acceptance,
+audited corpus/reviewer/domain review, real STT/Gemini smoke, public projections,
+coordinator/Phase10 dan parent gates tetap terbuka. Real calls0, smoke NOT_RUN,
+benchmark BLOCKED/metrics null, integrated readiness false.
