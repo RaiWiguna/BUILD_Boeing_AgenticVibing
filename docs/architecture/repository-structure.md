@@ -1,6 +1,6 @@
 # Struktur Repository ATC FlowLens
 
-Tanggal: 9 Oktober 2026. Status: **A01–A06 tersedia dan standalone platform acceptance selesai; B/provider/domain pipeline, A07–A10, frontend/deployment belum diimplementasikan**. Tree di bawah adalah snapshot scaffold7 Oktober; source terkini dirujuk melalui [A04](../testing/a04-evidence.md), [A05](../testing/a05-evidence.md) dan [A06](../testing/a06-evidence.md).
+Tanggal: 9 Oktober 2026. Status: **A01–A06 tersedia dan standalone platform acceptance selesai; B/provider/domain pipeline, A07.1 replay/checkpoints tersedia; A07.2–A10, frontend/deployment belum diimplementasikan**. Tree di bawah adalah snapshot scaffold7 Oktober; source terkini dirujuk melalui [A04](../testing/a04-evidence.md), [A05](../testing/a05-evidence.md) dan [A06](../testing/a06-evidence.md).
 
 ## Dasar penempatan
 

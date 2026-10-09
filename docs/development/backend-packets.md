@@ -4,7 +4,7 @@ Start after Phase 0/1 evidence; independent implementation until final Phase 10 
 
 ## Package A — Platform & Replay
 
-Rincian eksekusi per sesi: [Paket A: A01–A10](package-a-execution.md). A01–A06 `done`; A07–A10 `planned`. Import/source/private assets/evidence/jobs dan atomic result boundary diverifikasi mandiri dengan fake AnalysisModule; B belum dimulai. G-BE tetap not_started; seluruh paket A belum selesai.
+Rincian eksekusi per sesi: [Paket A: A01–A10](package-a-execution.md). A01–A06 `done`; A07.1 `done` ([evidence](../testing/a071-evidence.md)); A07 `in_progress`; A07.2–A10 `planned`. Import/source/private assets/evidence/jobs dan atomic result boundary diverifikasi mandiri dengan fake AnalysisModule; B belum dimulai. G-BE tetap not_started; seluruh paket A belum selesai.
 
 1. Phase 2: host/config; platform schemas/migration runner/UOW; accounts/grants/cookie/CSRF/worker principal; audit/idempotency/versioning. Tests fresh/upgrade/auth/cross-scope/rollback.
 2. Phase 3 + 6.1: import preview/atomic commit, immutable source manifest/rights/clock/coverage, private assets/ranges. Tests malformed/path/hash/duplicate/conflict/forbidden transfer.

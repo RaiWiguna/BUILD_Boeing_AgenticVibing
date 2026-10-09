@@ -539,4 +539,19 @@ PLATFORM_MIGRATIONS = (
             BEGIN SELECT RAISE(ABORT,'Immutable receipt.'); END;
         """,
     ),
+    MigrationSpec(
+        "platform.0013",
+        "A",
+        ("platform.0012",),
+        """
+        CREATE TABLE platform_replay_snapshots(
+            session_id TEXT NOT NULL, revision INTEGER NOT NULL,
+            cache_key TEXT NOT NULL CHECK(length(cache_key)=64),
+            checkpoint_ms INTEGER NOT NULL CHECK(checkpoint_ms>=0),
+            reducer_version TEXT NOT NULL, payload TEXT NOT NULL,
+            payload_hash TEXT NOT NULL CHECK(length(payload_hash)=64),
+            PRIMARY KEY(session_id,revision,cache_key,checkpoint_ms),
+            FOREIGN KEY(session_id,revision) REFERENCES platform_revisions(session_id,revision));
+        """,
+    ),
 )

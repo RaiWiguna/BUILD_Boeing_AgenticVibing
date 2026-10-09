@@ -11,7 +11,7 @@
 | Deadline dan staffing | Deadline belum ditetapkan; pengguna adalah pihak A (Platform & Replay); individu pihak B (Analysis & AI) belum ditetapkan |
 | Baseline data | Sintetik berlabel; replay simulator mitra berizin jika tersedia |
 
-Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase/subfase awalnya `planned`; Phase 0–1 kini `done` berdasarkan [baseline evidence](../docs/testing/phase01-evidence.md). Phase2 `done` berdasarkan A01–A03 evidence; Phase3/A04 `done` berdasarkan [A04 phase evidence](../docs/testing/a04-evidence.md); Phase3.1–3.3/A04.1–A04.2 `done` berdasarkan [A04.1 evidence](../docs/testing/a041-evidence.md) dan [A04.2 evidence](../docs/testing/a042-evidence.md); Phase6.1/A05 dan6.3/A06 `done` berdasarkan [A05](../docs/testing/a05-evidence.md)/[A06](../docs/testing/a06-evidence.md); shared Phase6 `in_progress` karena B6.2/6.4 `planned`; Phase4–5/7–17 `planned`. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap sendiri tidak membuktikan runtime atau gate.
+Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase/subfase awalnya `planned`; Phase 0–1 kini `done` berdasarkan [baseline evidence](../docs/testing/phase01-evidence.md). Phase2 `done` berdasarkan A01–A03 evidence; Phase3/A04 `done` berdasarkan [A04 phase evidence](../docs/testing/a04-evidence.md); Phase3.1–3.3/A04.1–A04.2 `done` berdasarkan [A04.1 evidence](../docs/testing/a041-evidence.md) dan [A04.2 evidence](../docs/testing/a042-evidence.md); Phase6.1/A05 dan6.3/A06 `done` berdasarkan [A05](../docs/testing/a05-evidence.md)/[A06](../docs/testing/a06-evidence.md); shared Phase6 `in_progress` karena B6.2/6.4 `planned`; Phase4 `in_progress` (4.1 done); Phase5/7–17 `planned`. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap sendiri tidak membuktikan runtime atau gate.
 
 ## 1. Sequencing Gates
 
@@ -83,7 +83,7 @@ Audit awal memeriksa kontrak dan scaffold yang benar-benar tersedia, lalu meneta
 | 1 | Baseline kontrak backend bersama | Runtime/harness, shared contracts dan module registration dibekukan | Phase 0 | `done` |
 | 2 | Backend A | Platform persistence, accounts/grants/auth, audit, transaction infrastructure | Phase 1; tanpa dependency implementasi B | `done` |
 | 3 | Backend A | Import atomik, provenance, clocks, quality dan source reader | Phase 2 (A) | `done` |
-| 4 | Backend A | Replay/checkpoints, REST/WS, archive dan compatibility | Phase 3 (A) | `planned` |
+| 4 | Backend A | Replay/checkpoints, REST/WS, archive dan compatibility | Phase 3 (A) | `in_progress` |
 | 5 | Backend A | Footprint, occupancy, prediction, observed rules/alerts | Phase 4 (A) | `planned` |
 | 6 | Backend A / B | A: assets/jobs/internal API; B: audio processing/worker | A: Phase 2; B: Phase 1; keduanya memakai frozen contracts | `in_progress` (A6.1/6.3 done; B planned) |
 | 7 | Backend B | Google STT, transcript/corrections, analysis persistence dan benchmark | Phase 6.2/6.4 (B); GCP readiness untuk smoke | `planned` |
@@ -260,11 +260,11 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 4 — Replay Engine, Archive, API, dan WebSocket
 
-**Status:** `planned` · **Owner:** pihak A · **Dependency:** Phase 3 (A); analysis snapshot/events memakai fake module sampai Phase 10.
+**Status:** `in_progress` · **Owner:** pihak A · **Dependency:** Phase 3 (A); A07.1/4.1 done ([evidence](../docs/testing/a071-evidence.md)); A07.2 next. Analysis snapshot/events memakai fake module sampai Phase 10.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
-| 4.1 | Event source/reducer, checkpoints, as-of snapshots, AS_KNOWN/DEBRIEF filtering | Deterministic historical read service | `planned` |
+| 4.1 | Event source/reducer, checkpoints, as-of snapshots, AS_KNOWN/DEBRIEF filtering | Deterministic historical read service | `done` |
 | 4.2 | Play/pause/seek/step/speed dan leader/follow/local-view contract | Shared replay controls | `planned` |
 | 4.3 | Catalogue/source/history REST, typed stream sequence, snapshot/resync, pagination | Authorized replay transport | `planned` |
 | 4.4 | Archive/checkpoint/restart behavior dan training-route compatibility | Durable replay/compatibility tests | `planned` |

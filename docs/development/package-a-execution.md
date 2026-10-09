@@ -1,6 +1,6 @@
 # Rencana Eksekusi Paket A — Platform & Replay
 
-Tanggal: 9 Oktober 2026. Owner: pengguna sebagai Pihak A. A01 `done`: A01.1–A01.3 `done`; A02 `done` (A02.1–A02.2 done); A03 `done` (A03.1–A03.3 done); A04 `done` (A04.1–A04.3 done); A05 `done`; A06 `done`; A07–A10 `planned`. Baseline bersama: contract 1.0.0, Phase 0–1 selesai. Evidence: [A01.1](../testing/a011-evidence.md), [A01.2](../testing/a012-evidence.md), [A01.3](../testing/a013-evidence.md).
+Tanggal: 9 Oktober 2026. Owner: pengguna sebagai Pihak A. A01 `done`: A01.1–A01.3 `done`; A02 `done` (A02.1–A02.2 done); A03 `done` (A03.1–A03.3 done); A04 `done` (A04.1–A04.3 done); A05 `done`; A06 `done`; A07 `in_progress` (A07.1 done; A07.2–A07.3 planned); A08–A10 `planned`. Baseline bersama: contract 1.0.0, Phase 0–1 selesai. Evidence: [A01.1](../testing/a011-evidence.md), [A01.2](../testing/a012-evidence.md), [A01.3](../testing/a013-evidence.md).
 
 ## Pendekatan dan scope
 
@@ -93,7 +93,7 @@ Semantik interpretasi evidence milik B; A memverifikasi sumber, referensi, range
 
 ## A06 — Jobs dan accepted results
 
-Progress: `done`; [workflow](durable-jobs.md), [phase evidence](../testing/a06-evidence.md). A07 belum dimulai.
+Progress: `done`; [workflow](durable-jobs.md), [phase evidence](../testing/a06-evidence.md). A07.1 done; A07.2 next.
 
 **Prasyarat:** A01–A05. Gunakan `AnalysisModule` fake dan handlers terdaftar; tidak mengimpor internals B.
 
@@ -105,6 +105,8 @@ Progress: `done`; [workflow](durable-jobs.md), [phase evidence](../testing/a06-e
 Provider call tidak berlangsung dalam replay/DB lock. Exactly-once local commit tidak menjamin exactly-once provider billing. Worker process dan SDK adapters bukan deliverable A.
 
 ## A07 — Replay, REST dan WebSocket
+
+Progress: A07.1 `done` ([evidence](../testing/a071-evidence.md), [workflow](replay.md)); A07.2–A07.3 planned.
 
 **Prasyarat:** A01–A05. Snapshot/events analisis masih melalui fake B.
 

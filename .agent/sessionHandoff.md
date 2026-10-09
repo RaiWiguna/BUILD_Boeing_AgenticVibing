@@ -3,11 +3,18 @@
 | Atribut | Nilai |
 | --- | --- |
 | Tanggal | 9 Oktober 2026 |
-| Objective | Authorized A04.3→A06 selesai; A01–A06 done |
-| Status | A01–A06 done; A07–A10 planned; B belum dimulai; contract1.0.0 |
+| Objective | Persistent goal A07.1–A09.3, berurutan/local commit per unit; berhenti sebelum A10 |
+| Status | A01–A06 verified; A07.1 done; A07 in_progress; A07.2 next; B/Phase10 tidak dimulai |
 | Candidate | Implementation commit 7328ae8e420a7b86bfd19b7e788ba71741822e28 (feat/backend-aben), parent cdb2b9d; local only, tidak push |
-| Next focus | Chat baru fresh context pada project/checkout yang sama: goal A07.1–A09.3; chat lama berhenti di A06 |
+| Next focus | A07.2 controls/leader/follow/local view/compatibility, checkout sama feat/backend-aben |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
+
+## Handoff terkini — A07.1
+
+- Input21457f3, working tree clean; A01–A06 source/evidence diperiksa, baseline425 platform/66contracts each A/B/Ruff63/mypy44/drift/Bandit -ll PASS. A06.1–A06.2 acceptance diverifikasi pada coordinator + actual restart/crash/race/atomic checks.
+- A07.1 deterministic observed replay/derived checkpoints/host composition tersedia; [evidence](../docs/testing/a071-evidence.md), [workflow](../docs/development/replay.md). Source immutable, fake B frozen snapshot port, no provider. Shared1.0.0/lock unchanged; platform0013, observed-replay-1. Track snapshot header mengikuti frozen contract, source tracks tetap penuh.
+- Checks final:444 platform PASS,66contracts each A/B, Ruff65/mypy45/drift/Bandit -ll/build PASS,12 prior migration SQL unchanged. Local commit SHA dilaporkan dari Git setelah commit; commit hanya file unit, tanpa push/merge/amend. Runtime hanya disposable tests, seluruh owner/clients selesai.
+- Next A07.2 setelah commit A07.1, otomatis tanpa konfirmasi. Scope goal tetap sampai A09.3; A10.1 handoff only setelah A09.3. Tidak mengerjakan B/Phase10/frontend/deploy; parent Phase6/9 B tidak dinaikkan selesai.
 
 ## Handoff terkini — A06 selesai, local commit dan fresh-chat handover
 

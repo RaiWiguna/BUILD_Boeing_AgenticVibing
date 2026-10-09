@@ -880,7 +880,9 @@ def test_upgrade_previous_schema_preserves_source_and_migration_history(tmp_path
             after = dict(
                 uow.connection.execute("SELECT id,checksum FROM platform_schema_migrations")
             )
-            assert len(after) == 12 and all(after[k] == v for k, v in before.items())
+            assert len(after) == len(PLATFORM_MIGRATIONS) and all(
+                after[k] == v for k, v in before.items()
+            )
             assert uow.connection.execute("SELECT id FROM platform_sessions").fetchone()[0] == str(
                 sid
             )

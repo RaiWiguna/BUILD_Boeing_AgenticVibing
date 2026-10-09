@@ -2,7 +2,7 @@
 
 Workspace untuk membangun replay offline berbukti bagi review komunikasi dan kondisi runway oleh evaluator Tower/Ground.
 
-**Status saat ini (9 Oktober 2026):** baseline Phase0–1 dan Paket A A01–A06 selesai untuk scope platform mandiri. Import commit/source reader, private audio/evidence, durable jobs dan atomic accepted results tersedia. A06 diuji dengan AnalysisModule fake melalui frozen ports; B/provider pipeline nyata, replay/geometri A07/A08, ops A09, frontend dan deployment belum tersedia. Contract1.0.0 tetap, current platform migrations0012. Final425 platform tests +66 contracts masing-masing A/B, lint/type/schema/build PASS. Readiness HOST_ONLY503; semua release gates not_started, belum validasi domain/operasional.
+**Status saat ini (9 Oktober 2026):** baseline Phase0–1 dan Paket A A01–A06 selesai untuk scope platform mandiri. Import commit/source reader, private audio/evidence, durable jobs dan atomic accepted results tersedia. A06 diuji dengan AnalysisModule fake melalui frozen ports; A07.1 observed replay/checkpoints tersedia ([evidence](docs/testing/a071-evidence.md)); controls/REST/WS A07.2–A07.3, B/provider pipeline nyata, geometri A08, ops A09, frontend dan deployment belum tersedia. Contract1.0.0 tetap, current platform migrations0013. Final444 platform tests +66 contracts masing-masing A/B, lint/type/schema/build PASS. Readiness HOST_ONLY503; semua release gates not_started, belum validasi domain/operasional.
 
 Stack target: React, TypeScript, Vite, shadcn/ui; Python, FastAPI, Pydantic; Google Speech-to-Text dan Gemini 3.8 Flash; SQLite; Docker Compose lokal/single VM.
 

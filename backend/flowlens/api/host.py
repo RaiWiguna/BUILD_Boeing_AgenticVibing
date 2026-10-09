@@ -27,6 +27,7 @@ from flowlens.imports.routes import build_router as build_import_router
 from flowlens.imports.staging import ImportFailure, Imports
 from flowlens.jobs.coordinator import Jobs, StagePolicy
 from flowlens.jobs.routes import build_router as build_job_router
+from flowlens.replay.snapshots import Replay
 from flowlens.sources.store import Sources
 from flowlens.storage.sqlite.database import Database, RepositoryFactory
 from flowlens.storage.sqlite.mutations import MutationOperation, Mutations
@@ -55,6 +56,14 @@ def create_host(
         if module.mock and config.profile != "test":
             raise ValueError("MOCK modules are allowed only in the test profile.")
         registry.register(module)
+
+    snapshot_readers = [
+        m.snapshot_reader for m in registry.modules if m.snapshot_reader is not None
+    ]
+    if analysis_module is not None:
+        snapshot_readers.append(analysis_module.snapshot)
+    if len(snapshot_readers) > 1:
+        raise ValueError("One analysis snapshot reader required")
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -95,6 +104,10 @@ def create_host(
                         app.state.sources = Sources(
                             database, app.state.permissions, app.state.raw_files
                         )
+                        app.state.replay = Replay(
+                            app.state.sources,
+                            snapshot_reader=snapshot_readers[0] if snapshot_readers else None,
+                        )
                         if config.artifact_staging_path is not None:
                             app.state.artifact_files = PrivateFiles(config.artifact_staging_path)
                         app.state.assets = Assets(app.state.sources, app.state.artifact_files)
@@ -124,6 +137,7 @@ def create_host(
                 app.state.evidence = None
                 app.state.raw_files = None
                 app.state.import_commits = None
+                app.state.replay = None
                 app.state.sources = None
                 if app.state.imports is not None:
                     app.state.imports.close()
@@ -155,6 +169,7 @@ def create_host(
     app.state.evidence = None
     app.state.raw_files = None
     app.state.import_commits = None
+    app.state.replay = None
     app.state.sources = None
     app.state.jobs = None
     profile = (
