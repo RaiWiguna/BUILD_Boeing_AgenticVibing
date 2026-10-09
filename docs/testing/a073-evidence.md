@@ -17,3 +17,5 @@ Scoped transport30 PASS (13.02s); final full platform496 PASS (102.97s). Ruff73/
 No real B/provider smoke, domain/operational fidelity, off-host recovery, A08 geometry/rules, frontend/deployment, capacity/performance claim. Readiness503/HOST_ONLY and release gates not_started. Legacy metadata remains NOT_EVALUABLE/unknown availability; full legacy monitoring/simulator restoration not performed. Poll interval250ms is configured recheck scheduling, not measured realtime SLA; network delivery is resync/idempotent replacement, not exactly-once delivery.
 
 Final source/tests/docs diff reviewed; staged whitespace dan Markdown links/fences PASS. Dedicated gitleaks/trufflehog/git-secrets absent; scoped known-secret signature scan23 staged files:0 matches, ignored metadata `artifacts/reports/a073-secret-scan.json`. Cakupan terbatas, bukan dedicated/history/entropy scan. Stage hanya23 related files, no runtime/private data/secrets.
+
+Local conventional commit: `8941ef904f4ac6d3fdff60a5355333d81b1d0137` — `feat(replay): serve scoped REST views and typed WebSocket resync`; clean after commit, no push/merge/amend.

@@ -1,0 +1,17 @@
+# Geometri observed Paket A
+
+A08.1 menyediakan kernel numeric `flowlens.geometry.kernel`; `GEOMETRY_VERSION=footprint-xy-1`. Input Track frozen yang dinormalisasi dalam meter dan Layout source-metadata-1. Pose/shape calculation tidak mengimpor evaluator labels/schedule, tidak mengubah source, dan tidak memanggil B/provider. Context/evidence/observed-predicted intervals/eligibility serta GeometryReader port adalah A08.2; rules/alert lifecycle A08.3.
+
+## Frame, footprint dan resources
+
+Frame canonical LOCAL_CARTESIAN memakai X/Y meter, heading0 sepanjang +X,90 sepanjang +Y, counterclockwise. Konvensi ini cocok dengan fixture independent-1/fictional-1 dan source historis2660222 (`atan2(dy,dx)`), bukan implicit geographic/compass adapter. Track.heading_deg valid0≤h<360. Incoming compass/WGS84 memerlukan adapter teruji sebelum menjadi canonical Track; kernel tidak mengarang proyeksi. Layout m/ft dinormalisasi oleh existing Layout.metric (exact0.3048 conversion), sedangkan fields Track `*_m` sudah canonical meter.
+
+Footprint rectangle memakai length pada heading dan width melintang, lalu rotation/translation seluruh vertices; center bukan proxy clearance. Cardinal angles memakai exact basis untuk menghindari epsilon palsu pada tangent. Polygon validity/nonzero finite area diperiksa setelah transform. Boundary contact termasuk occupied. Local numeric envelope centre/layout coordinates ±10,000,000m dan dimensions/margin≤100,000m; out-of-range, collapsed shape atau hold segment≤1e-9m menghasilkan NOT_EVALUABLE, copied invalid DTO INVALID_INPUT. Envelope adalah batas perhitungan, bukan batas operasional aircraft.
+
+Runway polygon tetap nominal. Protection geometry adalah explicit mitered offset sebanyak configured lab margin + layout spatial uncertainty, termasuk conservative corner extension; parameter/version disimpan oleh caller berikutnya. Source polygon tidak diperbaiki diam-diam dengan buffer0. Layout version/validity harus cocok pose. Hold line memerlukan allowed-side reference point eksplisit yang tidak berada pada line; finite lateral corridor memotong footprint sebelum signed-distance classification BEHIND/TOUCHING/STRADDLING/BEYOND/OUTSIDE_SEGMENT. Tidak menebak arah larangan dari urutan endpoints atau clearance text.
+
+## Swept movement model
+
+Dua poses wajib satu session/run/revision/source/hash/entity/layout/dimensions, identity diketahui, dan event time strictly increasing. Constant heading + linear centre translation memakai convex hull footprints: exact untuk model itu, sehingga endpoint clear tidak menyebabkan tunneling. Stationary pose tetap memiliki footprint. Perubahan heading memakai circumscribed half-diagonal disk sepanjang linear centre path; buffer64 vertices dikompensasi terhadap inward polygon approximation. `Sweep.exact=False`/LINEAR_ROTATION_BOUND mempertahankan conservative possibility; endpoint hull saja tidak cukup untuk rotating corner. Changing dimensions/ambiguous links ditolak, bukan dipaksakan menjadi movement.
+
+`crosses_hold` memerlukan movement dari allowed/touching menuju straddling/beyond dan finite segment intersect oleh sweep. Numeric interpolation/bound bukan bukti empiris path lengkap di antara samples; gaps, stale/unknown clock/coverage/identity serta predicted-vs-observed labels ditangani A08.2. Source permissions/operational clearance tidak diciptakan oleh polygon intersection. Synthetic technical checks belum domain/operational validation.

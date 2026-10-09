@@ -33,3 +33,5 @@ Response `code`, safe message, field_issues (locations only), request_id UUID, r
 | evidence unavailable | 404 | Inspect scope/retention |
 
 Harness uses safe handlers; authentication/cookie/CSRF/internal transport implementation remains Phase 2/6. Successful schema validation is not authority, semantic acceptance or provider success.
+
+Canonical Track metric frame clarified by A08.1: local XY, heading0+X/90+Y counterclockwise, matching frozen aligned-X fixtures and audited historical atan2 convention. Geographic/compass sources require an explicit tested adapter; shared1.0.0 payload/schema unchanged. [Geometry workflow](../development/geometry.md).

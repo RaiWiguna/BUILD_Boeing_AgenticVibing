@@ -4,12 +4,20 @@
 | --- | --- |
 | Tanggal | 9 Oktober 2026 |
 | Objective | Persistent goal A07.1–A09.3, berurutan/local commit per unit; berhenti sebelum A10 |
-| Status | A01–A06 verified; A07.1–A07.3/A07 done; A08.1 next; B/Phase10 tidak dimulai |
-| Candidate | A07.2 commit52a6954aca3ab1e20ea4effc9aab99701277e5ad; A07.3 local SHA reported after final checks |
-| Next focus | A08.1 footprint transforms/runway/hold line/protection/swept movement; checkout sama feat/backend-aben |
+| Status | A01–A06 verified; A07.1–A07.3/A07 done; A08.1 done; A08.2 next; B/Phase10 tidak dimulai |
+| Candidate | A07.3 commit8941ef904f4ac6d3fdff60a5355333d81b1d0137; A08.1 SHA reported after checks/commit |
+| Next focus | A08.2 observed/predicted occupancy, ETA/exit/margins/eligibility; checkout sama feat/backend-aben |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
 
-## Handoff terkini — A07.3
+## Handoff terkini — A08.1
+
+- Input `8941ef904f4ac6d3fdff60a5355333d81b1d0137`, clean. A07.3 committed/accepted; current goal progress verified from Git/source/checks.
+- A08.1/Phase5.1 metric kernel tersedia ([evidence](../docs/testing/a081-evidence.md), [workflow](../docs/development/geometry.md)): XY heading0+X/90+Y CCW from actual baseline/historical atan2; rotated footprint/finite hold corridor/protection miter buffer; exact linear translation vs conservative rotation envelope, no source mutation/evaluator/provider.
+- Independent37 oracle cases, final533 platform/66contracts each track/Ruff75/mypy51/drift/Bandit -ll/lock/build/dependency audit PASS;14 migrations unchanged, frozen1.0.0 unchanged; Shapely2.2.0/GEOS3.14.1/types-shapely2.1.0.20260728 locked. Finite clip/collapsed shape bugs RED→GREEN, no weakened assertions.
+- Review/secret scan/local commit SHA reported from actual results. Runtime only disposable tests; no geometry daemon/worker/API retained, full-suite native owners/threads/clients closed. No push/merge/amend/destructive Git/B/Phase10/frontend/deploy; parent B phases/gates not completed.
+- Next A08.2 after local commit, automatically: real SourceReader + source declaration/clock/layout/identity/coverage/evidence, GeometryReader frozen port, observed/predicted occupancy/ETA/exit/margins. Kernel model alone is not eligibility or observed path certification. A08.3 and S01–S10 rules not done yet. Goal until A09.3 committed, then A10.1 handoff only.
+
+## Rekam A07.3
 
 - Input `52a6954aca3ab1e20ea4effc9aab99701277e5ad`, clean; A07.1–A07.2 previously accepted/committed. A01–A06 source/check verified baseline retained.
 - A07.3 REST catalogue/source/history/snapshot/playback/legacy metadata + typed WS incremental/initial snapshot/resync tersedia ([evidence](../docs/testing/a073-evidence.md), [workflow](../docs/development/replay.md)). Fake B via frozen snapshot port, real A SQLite/assets/auth. Native loopback Upgrade/resync/idle revoke/oversize proved; no provider/real B.

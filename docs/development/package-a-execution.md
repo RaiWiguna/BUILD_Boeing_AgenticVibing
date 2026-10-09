@@ -1,6 +1,6 @@
 # Rencana Eksekusi Paket A — Platform & Replay
 
-Tanggal: 9 Oktober 2026. Owner: pengguna sebagai Pihak A. A01 `done`: A01.1–A01.3 `done`; A02 `done` (A02.1–A02.2 done); A03 `done` (A03.1–A03.3 done); A04 `done` (A04.1–A04.3 done); A05 `done`; A06 `done`; A07 `done` (A07.1–A07.3 done); A08–A10 `planned`. Baseline bersama: contract 1.0.0, Phase 0–1 selesai. Evidence: [A01.1](../testing/a011-evidence.md), [A01.2](../testing/a012-evidence.md), [A01.3](../testing/a013-evidence.md).
+Tanggal: 9 Oktober 2026. Owner: pengguna sebagai Pihak A. A01 `done`: A01.1–A01.3 `done`; A02 `done` (A02.1–A02.2 done); A03 `done` (A03.1–A03.3 done); A04 `done` (A04.1–A04.3 done); A05 `done`; A06 `done`; A07 `done` (A07.1–A07.3 done); A08 `in_progress` (A08.1 done); A08.2–A10 `planned`. Baseline bersama: contract 1.0.0, Phase 0–1 selesai. Evidence: [A01.1](../testing/a011-evidence.md), [A01.2](../testing/a012-evidence.md), [A01.3](../testing/a013-evidence.md).
 
 ## Pendekatan dan scope
 
@@ -93,7 +93,7 @@ Semantik interpretasi evidence milik B; A memverifikasi sumber, referensi, range
 
 ## A06 — Jobs dan accepted results
 
-Progress: `done`; [workflow](durable-jobs.md), [phase evidence](../testing/a06-evidence.md). A07 done; A08.1 next.
+Progress: `done`; [workflow](durable-jobs.md), [phase evidence](../testing/a06-evidence.md). A07 done; A08.1 done/A08.2 next.
 
 **Prasyarat:** A01–A05. Gunakan `AnalysisModule` fake dan handlers terdaftar; tidak mengimpor internals B.
 
@@ -119,6 +119,8 @@ Progress: A07.1–A07.3/A07 `done` ([snapshots](../testing/a071-evidence.md), [c
 Replay test memakai input observed, tanpa evaluator schedule/labels. Training command yang dipertahankan berada pada boundary latihan dan bukan tool AI.
 
 ## A08 — Geometri, occupancy dan rules
+
+Progress: A08.1 `done` ([kernel evidence](../testing/a081-evidence.md), [workflow](geometry.md)); A08.2–A08.3 planned.
 
 **Prasyarat:** A07; baca oracle/protocol evaluasi sebelum menulis perhitungan.
 

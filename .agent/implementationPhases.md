@@ -6,12 +6,12 @@
 | Tanggal | 9 Oktober 2026 |
 | Urutan delivery | **Backend lengkap → frontend lengkap → containerization → deployment lokal dan satu VM** |
 | Kontrak produk | `.agent/PRD.md`; batas proyek dan aturan kerja tetap berlaku |
-| Current implementation phase | A07/Phase4 done; A08.1 next in persistent goal sampai A09.3; contract1.0.0 |
-| Next recommended phase | A08.1 geometry; persistent goal sampai A09.3; B tetap independen |
+| Current implementation phase | A07/Phase4 done; A08.1/5.1 done, A08/Phase5 in_progress; goal sampai A09.3; contract1.0.0 |
+| Next recommended phase | A08.2 occupancy/eligibility; persistent goal sampai A09.3; B tetap independen |
 | Deadline dan staffing | Deadline belum ditetapkan; pengguna adalah pihak A (Platform & Replay); individu pihak B (Analysis & AI) belum ditetapkan |
 | Baseline data | Sintetik berlabel; replay simulator mitra berizin jika tersedia |
 
-Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase/subfase awalnya `planned`; Phase 0–1 kini `done` berdasarkan [baseline evidence](../docs/testing/phase01-evidence.md). Phase2 `done` berdasarkan A01–A03 evidence; Phase3/A04 `done` berdasarkan [A04 phase evidence](../docs/testing/a04-evidence.md); Phase3.1–3.3/A04.1–A04.2 `done` berdasarkan [A04.1 evidence](../docs/testing/a041-evidence.md) dan [A04.2 evidence](../docs/testing/a042-evidence.md); Phase6.1/A05 dan6.3/A06 `done` berdasarkan [A05](../docs/testing/a05-evidence.md)/[A06](../docs/testing/a06-evidence.md); shared Phase6 `in_progress` karena B6.2/6.4 `planned`; Phase4/A07 `done` ([transport evidence](../docs/testing/a073-evidence.md)); Phase5/7–17 `planned`. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap sendiri tidak membuktikan runtime atau gate.
+Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase/subfase awalnya `planned`; Phase 0–1 kini `done` berdasarkan [baseline evidence](../docs/testing/phase01-evidence.md). Phase2 `done` berdasarkan A01–A03 evidence; Phase3/A04 `done` berdasarkan [A04 phase evidence](../docs/testing/a04-evidence.md); Phase3.1–3.3/A04.1–A04.2 `done` berdasarkan [A04.1 evidence](../docs/testing/a041-evidence.md) dan [A04.2 evidence](../docs/testing/a042-evidence.md); Phase6.1/A05 dan6.3/A06 `done` berdasarkan [A05](../docs/testing/a05-evidence.md)/[A06](../docs/testing/a06-evidence.md); shared Phase6 `in_progress` karena B6.2/6.4 `planned`; Phase4/A07 `done` ([transport evidence](../docs/testing/a073-evidence.md)); Phase5 `in_progress` (5.1 done); Phase7–17 `planned`. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap sendiri tidak membuktikan runtime atau gate.
 
 ## 1. Sequencing Gates
 
@@ -84,7 +84,7 @@ Audit awal memeriksa kontrak dan scaffold yang benar-benar tersedia, lalu meneta
 | 2 | Backend A | Platform persistence, accounts/grants/auth, audit, transaction infrastructure | Phase 1; tanpa dependency implementasi B | `done` |
 | 3 | Backend A | Import atomik, provenance, clocks, quality dan source reader | Phase 2 (A) | `done` |
 | 4 | Backend A | Replay/checkpoints, REST/WS, archive dan compatibility | Phase 3 (A) | `done` |
-| 5 | Backend A | Footprint, occupancy, prediction, observed rules/alerts | Phase 4 (A) | `planned` |
+| 5 | Backend A | Footprint, occupancy, prediction, observed rules/alerts | Phase 4 (A) | `in_progress` |
 | 6 | Backend A / B | A: assets/jobs/internal API; B: audio processing/worker | A: Phase 2; B: Phase 1; keduanya memakai frozen contracts | `in_progress` (A6.1/6.3 done; B planned) |
 | 7 | Backend B | Google STT, transcript/corrections, analysis persistence dan benchmark | Phase 6.2/6.4 (B); GCP readiness untuk smoke | `planned` |
 | 8 | Backend B | Gemini intent, scoped tools, association, memory/open loops | Phase 7 (B); Gemini readiness untuk smoke | `planned` |
@@ -273,11 +273,11 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 5 — Geometry, Occupancy, Prediction, Rules, dan Alert Lifecycle
 
-**Status:** `planned` · **Owner:** pihak A · **Dependency:** Phase 4 (A); tidak membutuhkan STT/Gemini atau memory B.
+**Status:** `in_progress` · **Owner:** pihak A · **Dependency:** Phase 4 (A); A08.1/5.1 done ([evidence](../docs/testing/a081-evidence.md)); A08.2 next. Tidak membutuhkan STT/Gemini atau memory B.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
-| 5.1 | Footprint transforms, runway/hold-line/protection geometry, swept movement checks | Explicit geometry contract | `planned` |
+| 5.1 | Footprint transforms, runway/hold-line/protection geometry, swept movement checks | Explicit geometry contract | `done` |
 | 5.2 | Observed/predicted occupancy intervals, exit/ETA estimates, uncertainty/margins dan separation | Deterministic numeric outputs | `planned` |
 | 5.3 | Observed-only rule library, applicability, no-data/stale behavior, evidence/severity | Versioned detector results | `planned` |
 | 5.4 | Alert lifecycle, acknowledgment, source authority dan task-complexity indicators | Durable alert/indicator events | `planned` |

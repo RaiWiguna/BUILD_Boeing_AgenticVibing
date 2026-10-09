@@ -1,6 +1,6 @@
 # Observed replay Paket A
 
-A07.1 tersedia; controls dan REST/WS masih unit berikutnya. `flowlens.replay.snapshots.Replay` memakai real `Sources` dan optional satu `ModuleRegistration.snapshot_reader` atau `AnalysisModule.snapshot` melalui frozen port. Host mengaktifkannya hanya ketika committed source storage tersedia. Tidak mengimpor internals B atau evaluator schedule/labels; tidak memanggil provider/job pada snapshot.
+A07.1–A07.3 tersedia: snapshots/checkpoints, controls, REST dan typed WS. `flowlens.replay.snapshots.Replay` memakai real `Sources` dan optional satu `ModuleRegistration.snapshot_reader` atau `AnalysisModule.snapshot` melalui frozen port. Host mengaktifkannya hanya ketika committed source storage tersedia. Tidak mengimpor internals B atau evaluator schedule/labels; tidak memanggil provider/job pada snapshot.
 
 Reducer `observed-replay-1` memeriksa scope/revision dan revalidasi copied DTO, mengurutkan `(event_time_ms, UUID)`, menerima duplicate identik dan menolak ID dengan payload berbeda. AS_KNOWN hanya memasukkan event time serta available time <= as-of; unknown availability tetap excluded. DEBRIEF memasukkan historical unknown/delayed availability dengan mode eksplisit, tetap membatasi event time. Quality mempertahankan missing/ambiguous/conflicting; empty snapshot MISSING.
 
