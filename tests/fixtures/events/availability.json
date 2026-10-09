@@ -1,0 +1,50 @@
+[
+  {
+    "analysis_run_id": null,
+    "available_time_ms": 200,
+    "entity_id": "00000000-0000-0000-0000-000000000009",
+    "event_time_ms": 100,
+    "id": "00000000-0000-0000-0000-000000000014",
+    "kind": "INSTRUCTION",
+    "quality": "SUPPORTED",
+    "recorded_at": "2026-10-08T00:00:00Z",
+    "revision": 1,
+    "session_id": "00000000-0000-0000-0000-000000000001",
+    "source_event_id": "instruction-1",
+    "source_hash": "cf3baa73bc59e37ddbd16e99e8a5f7493c22057d01c02b4030585b88486ba044",
+    "source_id": "00000000-0000-0000-0000-000000000006",
+    "statement": "Synthetic source instruction"
+  },
+  {
+    "analysis_run_id": null,
+    "available_time_ms": 40000,
+    "entity_id": "00000000-0000-0000-0000-000000000009",
+    "event_time_ms": 300,
+    "id": "00000000-0000-0000-0000-000000000015",
+    "kind": "INSTRUCTION",
+    "quality": "SUPPORTED",
+    "recorded_at": "2026-10-08T00:00:00Z",
+    "revision": 1,
+    "session_id": "00000000-0000-0000-0000-000000000001",
+    "source_event_id": "later-available",
+    "source_hash": "cf3baa73bc59e37ddbd16e99e8a5f7493c22057d01c02b4030585b88486ba044",
+    "source_id": "00000000-0000-0000-0000-000000000006",
+    "statement": "Synthetic source instruction"
+  },
+  {
+    "analysis_run_id": null,
+    "available_time_ms": null,
+    "entity_id": "00000000-0000-0000-0000-000000000009",
+    "event_time_ms": 500,
+    "id": "00000000-0000-0000-0000-000000000016",
+    "kind": "INSTRUCTION",
+    "quality": "SUPPORTED",
+    "recorded_at": "2026-10-08T00:00:00Z",
+    "revision": 1,
+    "session_id": "00000000-0000-0000-0000-000000000001",
+    "source_event_id": "unknown-availability",
+    "source_hash": "cf3baa73bc59e37ddbd16e99e8a5f7493c22057d01c02b4030585b88486ba044",
+    "source_id": "00000000-0000-0000-0000-000000000006",
+    "statement": "Synthetic source instruction"
+  }
+]

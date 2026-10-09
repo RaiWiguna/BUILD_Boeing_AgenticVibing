@@ -1,0 +1,119 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "analysis_run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Analysis Run Id"
+    },
+    "asset_ids": {
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Asset Ids",
+      "type": "array"
+    },
+    "attempt_id": {
+      "format": "uuid",
+      "title": "Attempt Id",
+      "type": "string"
+    },
+    "budget_microunits": {
+      "minimum": 0,
+      "title": "Budget Microunits",
+      "type": "integer"
+    },
+    "config_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Config Hash",
+      "type": "string"
+    },
+    "deadline_ms": {
+      "minimum": 0,
+      "title": "Deadline Ms",
+      "type": "integer"
+    },
+    "expires_ms": {
+      "minimum": 0,
+      "title": "Expires Ms",
+      "type": "integer"
+    },
+    "input_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Input Hash",
+      "type": "string"
+    },
+    "job_id": {
+      "format": "uuid",
+      "title": "Job Id",
+      "type": "string"
+    },
+    "lease_id": {
+      "format": "uuid",
+      "title": "Lease Id",
+      "type": "string"
+    },
+    "owner_id": {
+      "format": "uuid",
+      "title": "Owner Id",
+      "type": "string"
+    },
+    "revision": {
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "stage": {
+      "enum": [
+        "AUDIO",
+        "STT",
+        "INTENT",
+        "ASSOCIATION",
+        "MEMORY",
+        "FINDINGS",
+        "BRIEF",
+        "QUERY",
+        "EXPORT"
+      ],
+      "title": "Stage",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "analysis_run_id",
+    "revision",
+    "job_id",
+    "attempt_id",
+    "lease_id",
+    "owner_id",
+    "stage",
+    "input_hash",
+    "config_hash",
+    "expires_ms",
+    "deadline_ms",
+    "budget_microunits",
+    "asset_ids"
+  ],
+  "title": "JobLease",
+  "type": "object"
+}

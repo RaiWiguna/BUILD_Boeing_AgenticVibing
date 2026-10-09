@@ -1,0 +1,55 @@
+# Machine/editor state
+.DS_Store
+.idea/
+.vscode/
+
+# Python environment and generated caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Frontend dependencies/build output
+node_modules/
+frontend/dist/
+frontend/coverage/
+*.tsbuildinfo
+
+# Local credentials/configuration; only a future sanitized example is allowed
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+service-account*.json
+application_default_credentials.json
+
+# Private runtime data: directories and placeholders are tracked, payloads are not
+/data/**
+!/data/**/
+!/data/**/.gitkeep
+
+# Generated test/debug outputs
+/artifacts/**
+!/artifacts/**/
+!/artifacts/**/.gitkeep
+
+# Evaluation report outputs may contain restricted source/participant material
+/evaluation/reports/**
+!/evaluation/reports/**/
+!/evaluation/reports/**/.gitkeep
+
+# Legacy temporary paths must not be reintroduced as tracked runtime content
+/runtime/
+/outputs/
+/.codex-build/
+*.log

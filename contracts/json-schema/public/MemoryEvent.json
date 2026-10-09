@@ -1,0 +1,318 @@
+{
+  "$defs": {
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_run_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Analysis Run Id"
+        },
+        "end_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "End Ms"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "AUDIO",
+            "TRANSCRIPT",
+            "EVENT",
+            "TRACK",
+            "POLICY"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Quote"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "segment_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Segment Id"
+        },
+        "session_id": {
+          "format": "uuid",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "source_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Source Hash",
+          "type": "string"
+        },
+        "source_id": {
+          "format": "uuid",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "span_end": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Span End"
+        },
+        "span_start": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Span Start"
+        },
+        "start_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Start Ms"
+        }
+      },
+      "required": [
+        "session_id",
+        "analysis_run_id",
+        "revision",
+        "id",
+        "kind",
+        "source_id",
+        "segment_id",
+        "start_ms",
+        "end_ms",
+        "quote",
+        "span_start",
+        "span_end",
+        "source_hash"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "analysis_run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Analysis Run Id"
+    },
+    "available_time_ms": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Available Time Ms"
+    },
+    "dependency_hashes": {
+      "items": {
+        "pattern": "^[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "title": "Dependency Hashes",
+      "type": "array"
+    },
+    "entity_id": {
+      "format": "uuid",
+      "title": "Entity Id",
+      "type": "string"
+    },
+    "event_time_ms": {
+      "minimum": 0,
+      "title": "Event Time Ms",
+      "type": "integer"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "minItems": 1,
+      "title": "Evidence",
+      "type": "array"
+    },
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "instruction": {
+      "enum": [
+        "ACTIVE",
+        "SUPERSEDED",
+        "CANCELLED",
+        "COMPLETED_REPORTED",
+        "UNKNOWN"
+      ],
+      "title": "Instruction",
+      "type": "string"
+    },
+    "intent_id": {
+      "format": "uuid",
+      "title": "Intent Id",
+      "type": "string"
+    },
+    "interpretation": {
+      "enum": [
+        "CANDIDATE",
+        "SUPPORTED",
+        "AMBIGUOUS",
+        "REVIEWED",
+        "REJECTED"
+      ],
+      "title": "Interpretation",
+      "type": "string"
+    },
+    "movement": {
+      "enum": [
+        "NOT_EVALUABLE",
+        "CONSISTENT",
+        "DIVERGENCE_CANDIDATE",
+        "UNKNOWN"
+      ],
+      "title": "Movement",
+      "type": "string"
+    },
+    "readback": {
+      "enum": [
+        "NOT_OBSERVED",
+        "MATCHED",
+        "PARTIAL",
+        "MISMATCH",
+        "AMBIGUOUS",
+        "CORRECTED"
+      ],
+      "title": "Readback",
+      "type": "string"
+    },
+    "recorded_at": {
+      "format": "date-time",
+      "title": "Recorded At",
+      "type": "string"
+    },
+    "reducer_version": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Reducer Version",
+      "type": "string"
+    },
+    "reviewer": {
+      "enum": [
+        "UNREVIEWED",
+        "CONFIRMED",
+        "DISMISSED",
+        "UNRESOLVED"
+      ],
+      "title": "Reviewer",
+      "type": "string"
+    },
+    "revision": {
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "analysis_run_id",
+    "revision",
+    "event_time_ms",
+    "available_time_ms",
+    "recorded_at",
+    "evidence",
+    "id",
+    "entity_id",
+    "intent_id",
+    "interpretation",
+    "instruction",
+    "readback",
+    "movement",
+    "reviewer",
+    "dependency_hashes",
+    "reducer_version"
+  ],
+  "title": "MemoryEvent",
+  "type": "object"
+}

@@ -1,0 +1,54 @@
+{
+  "cases": [
+    {
+      "center_xy": [
+        0,
+        0
+      ],
+      "expected_occupied": true,
+      "id": "footprint-overlap",
+      "size_xy": [
+        20,
+        4
+      ]
+    },
+    {
+      "center_xy": [
+        105,
+        0
+      ],
+      "expected_occupied": true,
+      "id": "center-outside-footprint-overlap",
+      "size_xy": [
+        20,
+        4
+      ]
+    },
+    {
+      "center_xy": [
+        120,
+        0
+      ],
+      "expected_occupied": false,
+      "id": "fully-outside",
+      "size_xy": [
+        20,
+        4
+      ]
+    },
+    {
+      "expected_overlap_ms": 100,
+      "id": "time-overlap",
+      "interval_a_ms": [
+        100,
+        300
+      ],
+      "interval_b_ms": [
+        200,
+        400
+      ]
+    }
+  ],
+  "method": "Hand-derived rectangle/time examples",
+  "oracle_version": "independent-1"
+}

@@ -1,0 +1,48 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "audio_export": {
+      "title": "Audio Export",
+      "type": "boolean"
+    },
+    "basis": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Basis",
+      "type": "string"
+    },
+    "cloud": {
+      "title": "Cloud",
+      "type": "boolean"
+    },
+    "export": {
+      "title": "Export",
+      "type": "boolean"
+    },
+    "local": {
+      "title": "Local",
+      "type": "boolean"
+    },
+    "retention_days": {
+      "minimum": 1,
+      "title": "Retention Days",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "local",
+    "cloud",
+    "export",
+    "audio_export",
+    "basis",
+    "retention_days"
+  ],
+  "title": "Permissions",
+  "type": "object"
+}

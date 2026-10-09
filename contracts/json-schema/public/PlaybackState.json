@@ -1,0 +1,87 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "analysis_run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Analysis Run Id"
+    },
+    "cursor_ms": {
+      "minimum": 0,
+      "title": "Cursor Ms",
+      "type": "integer"
+    },
+    "leader_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Leader Id"
+    },
+    "revision": {
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "speed": {
+      "exclusiveMinimum": 0,
+      "maximum": 16,
+      "title": "Speed",
+      "type": "number"
+    },
+    "status": {
+      "enum": [
+        "PAUSED",
+        "PLAYING",
+        "SEEKING",
+        "ENDED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "view": {
+      "enum": [
+        "LEADER",
+        "FOLLOW",
+        "LOCAL"
+      ],
+      "title": "View",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "analysis_run_id",
+    "revision",
+    "status",
+    "cursor_ms",
+    "speed",
+    "leader_id",
+    "view"
+  ],
+  "title": "PlaybackState",
+  "type": "object"
+}

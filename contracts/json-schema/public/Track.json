@@ -1,0 +1,175 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "age_ms": {
+      "minimum": 0,
+      "title": "Age Ms",
+      "type": "integer"
+    },
+    "analysis_run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Analysis Run Id"
+    },
+    "available_time_ms": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Available Time Ms"
+    },
+    "entity_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Entity Id"
+    },
+    "event_time_ms": {
+      "minimum": 0,
+      "title": "Event Time Ms",
+      "type": "integer"
+    },
+    "heading_deg": {
+      "exclusiveMaximum": 360,
+      "minimum": 0,
+      "title": "Heading Deg",
+      "type": "number"
+    },
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "const": "TRACK",
+      "default": "TRACK",
+      "title": "Kind",
+      "type": "string"
+    },
+    "layout_version": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Layout Version",
+      "type": "string"
+    },
+    "length_m": {
+      "exclusiveMinimum": 0,
+      "title": "Length M",
+      "type": "number"
+    },
+    "quality": {
+      "enum": [
+        "SUPPORTED",
+        "AMBIGUOUS",
+        "MISSING",
+        "CONFLICTING"
+      ],
+      "title": "Quality",
+      "type": "string"
+    },
+    "recorded_at": {
+      "format": "date-time",
+      "title": "Recorded At",
+      "type": "string"
+    },
+    "revision": {
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "source_event_id": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Source Event Id",
+      "type": "string"
+    },
+    "source_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Source Hash",
+      "type": "string"
+    },
+    "source_id": {
+      "format": "uuid",
+      "title": "Source Id",
+      "type": "string"
+    },
+    "speed_mps": {
+      "minimum": 0,
+      "title": "Speed Mps",
+      "type": "number"
+    },
+    "statement": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Statement",
+      "type": "string"
+    },
+    "width_m": {
+      "exclusiveMinimum": 0,
+      "title": "Width M",
+      "type": "number"
+    },
+    "x_m": {
+      "title": "X M",
+      "type": "number"
+    },
+    "y_m": {
+      "title": "Y M",
+      "type": "number"
+    }
+  },
+  "required": [
+    "session_id",
+    "analysis_run_id",
+    "revision",
+    "event_time_ms",
+    "available_time_ms",
+    "recorded_at",
+    "id",
+    "source_id",
+    "source_event_id",
+    "entity_id",
+    "source_hash",
+    "quality",
+    "statement",
+    "x_m",
+    "y_m",
+    "heading_deg",
+    "speed_mps",
+    "length_m",
+    "width_m",
+    "age_ms",
+    "layout_version"
+  ],
+  "title": "Track",
+  "type": "object"
+}

@@ -1,0 +1,383 @@
+{
+  "$defs": {
+    "Asset": {
+      "additionalProperties": false,
+      "properties": {
+        "channels": {
+          "maximum": 2,
+          "minimum": 1,
+          "title": "Channels",
+          "type": "integer"
+        },
+        "duration_ms": {
+          "minimum": 0,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "fixture_path": {
+          "anyOf": [
+            {
+              "pattern": "^tests/fixtures/audio/[A-Za-z0-9_.-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Fixture Path"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "media_type": {
+          "enum": [
+            "audio/wav",
+            "audio/flac",
+            "audio/mpeg",
+            "audio/aiff"
+          ],
+          "title": "Media Type",
+          "type": "string"
+        },
+        "sample_rate_hz": {
+          "maximum": 192000,
+          "minimum": 8000,
+          "title": "Sample Rate Hz",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "sha256",
+        "duration_ms",
+        "channels",
+        "sample_rate_hz",
+        "media_type",
+        "fixture_path"
+      ],
+      "title": "Asset",
+      "type": "object"
+    },
+    "ClockMapping": {
+      "additionalProperties": false,
+      "properties": {
+        "mapping_version": {
+          "default": "clock-1",
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Mapping Version",
+          "type": "string"
+        },
+        "offset_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Offset Ms"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "timezone": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Timezone",
+          "type": "string"
+        },
+        "uncertainty_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uncertainty Ms"
+        }
+      },
+      "required": [
+        "offset_ms",
+        "uncertainty_ms",
+        "timezone"
+      ],
+      "title": "ClockMapping",
+      "type": "object"
+    },
+    "Coverage": {
+      "additionalProperties": false,
+      "properties": {
+        "audio": {
+          "title": "Audio",
+          "type": "boolean"
+        },
+        "gaps": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TimeRange"
+          },
+          "title": "Gaps",
+          "type": "array"
+        },
+        "quality": {
+          "enum": [
+            "SUPPORTED",
+            "AMBIGUOUS",
+            "MISSING",
+            "CONFLICTING"
+          ],
+          "title": "Quality",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "speaker_identity": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Speaker Identity"
+        },
+        "tracks": {
+          "title": "Tracks",
+          "type": "boolean"
+        },
+        "vehicles": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Vehicles"
+        }
+      },
+      "required": [
+        "audio",
+        "tracks",
+        "vehicles",
+        "speaker_identity",
+        "quality"
+      ],
+      "title": "Coverage",
+      "type": "object"
+    },
+    "Permissions": {
+      "additionalProperties": false,
+      "properties": {
+        "audio_export": {
+          "title": "Audio Export",
+          "type": "boolean"
+        },
+        "basis": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Basis",
+          "type": "string"
+        },
+        "cloud": {
+          "title": "Cloud",
+          "type": "boolean"
+        },
+        "export": {
+          "title": "Export",
+          "type": "boolean"
+        },
+        "local": {
+          "title": "Local",
+          "type": "boolean"
+        },
+        "retention_days": {
+          "minimum": 1,
+          "title": "Retention Days",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "local",
+        "cloud",
+        "export",
+        "audio_export",
+        "basis",
+        "retention_days"
+      ],
+      "title": "Permissions",
+      "type": "object"
+    },
+    "TimeRange": {
+      "additionalProperties": false,
+      "properties": {
+        "end_ms": {
+          "minimum": 0,
+          "title": "End Ms",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "start_ms": {
+          "minimum": 0,
+          "title": "Start Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start_ms",
+        "end_ms"
+      ],
+      "title": "TimeRange",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "assets": {
+      "items": {
+        "$ref": "#/$defs/Asset"
+      },
+      "title": "Assets",
+      "type": "array"
+    },
+    "clock": {
+      "$ref": "#/$defs/ClockMapping"
+    },
+    "coordinate_system": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Coordinate System",
+      "type": "string"
+    },
+    "coverage": {
+      "$ref": "#/$defs/Coverage"
+    },
+    "domain_validation": {
+      "enum": [
+        "NOT_DOMAIN_VALIDATED",
+        "DOMAIN_REVIEWED"
+      ],
+      "title": "Domain Validation",
+      "type": "string"
+    },
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "layout_version": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Layout Version"
+    },
+    "permissions": {
+      "$ref": "#/$defs/Permissions"
+    },
+    "revision": {
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "source_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Source Hash",
+      "type": "string"
+    },
+    "source_kind": {
+      "enum": [
+        "SYNTHETIC",
+        "ROLEPLAY",
+        "PUBLIC_CORPUS",
+        "PARTNER_REPLAY"
+      ],
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "source_label": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Source Label",
+      "type": "string"
+    },
+    "units": {
+      "const": "m",
+      "title": "Units",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "session_id",
+    "source_kind",
+    "source_label",
+    "source_hash",
+    "revision",
+    "permissions",
+    "clock",
+    "coverage",
+    "units",
+    "coordinate_system",
+    "layout_version",
+    "assets",
+    "domain_validation"
+  ],
+  "title": "SourceManifest",
+  "type": "object"
+}

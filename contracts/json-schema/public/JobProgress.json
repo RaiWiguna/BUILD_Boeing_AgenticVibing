@@ -1,0 +1,85 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "analysis_run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Analysis Run Id"
+    },
+    "completed_units": {
+      "minimum": 0,
+      "title": "Completed Units",
+      "type": "integer"
+    },
+    "job_id": {
+      "format": "uuid",
+      "title": "Job Id",
+      "type": "string"
+    },
+    "revision": {
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "stage": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Stage",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "QUEUED",
+        "RUNNING",
+        "PARTIAL",
+        "COMPLETED",
+        "FAILED",
+        "CANCELLED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "total_units": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Total Units"
+    }
+  },
+  "required": [
+    "session_id",
+    "analysis_run_id",
+    "revision",
+    "job_id",
+    "stage",
+    "status",
+    "completed_units",
+    "total_units"
+  ],
+  "title": "JobProgress",
+  "type": "object"
+}

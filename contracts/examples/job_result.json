@@ -1,0 +1,101 @@
+{
+  "analysis_run_id": "00000000-0000-0000-0000-000000000002",
+  "attempt_id": "00000000-0000-0000-0000-00000000000e",
+  "config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "evidence": [
+    {
+      "analysis_run_id": "00000000-0000-0000-0000-000000000002",
+      "end_ms": 8021,
+      "id": "00000000-0000-0000-0000-000000000005",
+      "kind": "TRANSCRIPT",
+      "quote": "Flow lens two one four, hold short of runway two seven.",
+      "revision": 1,
+      "segment_id": "00000000-0000-0000-0000-000000000007",
+      "session_id": "00000000-0000-0000-0000-000000000001",
+      "source_hash": "cf3baa73bc59e37ddbd16e99e8a5f7493c22057d01c02b4030585b88486ba044",
+      "source_id": "00000000-0000-0000-0000-000000000006",
+      "span_end": 55,
+      "span_start": 0,
+      "start_ms": 0
+    }
+  ],
+  "failure_code": null,
+  "input_hash": "cf3baa73bc59e37ddbd16e99e8a5f7493c22057d01c02b4030585b88486ba044",
+  "job_id": "00000000-0000-0000-0000-00000000000d",
+  "lease_id": "00000000-0000-0000-0000-00000000000f",
+  "output_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "outputs": [
+    {
+      "actions": [
+        "HOLD_SHORT"
+      ],
+      "alternatives": [],
+      "analysis_run_id": "00000000-0000-0000-0000-000000000002",
+      "available_time_ms": 200,
+      "callsign": {
+        "alternatives": [],
+        "evidence_ids": [
+          "00000000-0000-0000-0000-000000000005"
+        ],
+        "quality": "SUPPORTED",
+        "unknowns": [],
+        "value": "FLN214"
+      },
+      "condition": null,
+      "entity_candidates": [
+        "00000000-0000-0000-0000-000000000009"
+      ],
+      "event_time_ms": 100,
+      "evidence": [
+        {
+          "analysis_run_id": "00000000-0000-0000-0000-000000000002",
+          "end_ms": 8021,
+          "id": "00000000-0000-0000-0000-000000000005",
+          "kind": "TRANSCRIPT",
+          "quote": "Flow lens two one four, hold short of runway two seven.",
+          "revision": 1,
+          "segment_id": "00000000-0000-0000-0000-000000000007",
+          "session_id": "00000000-0000-0000-0000-000000000001",
+          "source_hash": "cf3baa73bc59e37ddbd16e99e8a5f7493c22057d01c02b4030585b88486ba044",
+          "source_id": "00000000-0000-0000-0000-000000000006",
+          "span_end": 55,
+          "span_start": 0,
+          "start_ms": 0
+        }
+      ],
+      "id": "00000000-0000-0000-0000-000000000008",
+      "negation": null,
+      "quality": "AMBIGUOUS",
+      "recorded_at": "2026-10-08T00:00:00Z",
+      "revision": 1,
+      "role_candidate": "CONTROLLER",
+      "runway": {
+        "alternatives": [],
+        "evidence_ids": [
+          "00000000-0000-0000-0000-000000000005"
+        ],
+        "quality": "SUPPORTED",
+        "unknowns": [],
+        "value": "27"
+      },
+      "segment_ids": [
+        "00000000-0000-0000-0000-000000000007"
+      ],
+      "session_id": "00000000-0000-0000-0000-000000000001",
+      "speech_act": "INSTRUCTION",
+      "unknowns": [
+        "MOCK intent, not provider verified"
+      ]
+    }
+  ],
+  "revision": 1,
+  "session_id": "00000000-0000-0000-0000-000000000001",
+  "status": "COMPLETE",
+  "usage": {
+    "audio_ms": 8021,
+    "cost_microunits": null,
+    "input_tokens": null,
+    "latency_ms": 0,
+    "output_tokens": null
+  }
+}
