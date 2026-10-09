@@ -22,6 +22,8 @@ from flowlens.core.errors import HTTP_STATUS, ContractError, ErrorResponse
 from flowlens.core.host_config import HostSettings
 from flowlens.core.modules import ModuleRegistration, ModuleRegistry
 from flowlens.evidence.registry import EvidenceRegistry
+from flowlens.geometry.occupancy import Occupancy
+from flowlens.geometry.routes import build_router as build_geometry_router
 from flowlens.imports.commit import ImportCommit
 from flowlens.imports.routes import build_router as build_import_router
 from flowlens.imports.staging import ImportFailure, Imports
@@ -119,6 +121,7 @@ def create_host(
                         app.state.assets = Assets(app.state.sources, app.state.artifact_files)
                         app.state.assets.recover_artifacts()
                         app.state.evidence = EvidenceRegistry(app.state.sources, app.state.assets)
+                        app.state.geometry = Occupancy(app.state.sources, app.state.evidence)
                     except Exception:
                         raise RuntimeError("Committed source storage startup failed.") from None
                 if analysis_module is not None:
@@ -141,6 +144,7 @@ def create_host(
                     app.state.raw_files.close()
                 app.state.assets = None
                 app.state.evidence = None
+                app.state.geometry = None
                 app.state.raw_files = None
                 app.state.import_commits = None
                 app.state.controls = None
@@ -175,6 +179,7 @@ def create_host(
     app.state.artifact_files = None
     app.state.assets = None
     app.state.evidence = None
+    app.state.geometry = None
     app.state.raw_files = None
     app.state.import_commits = None
     app.state.controls = None
@@ -286,6 +291,7 @@ def create_host(
     app.include_router(build_asset_router())
     app.include_router(build_job_router())
     app.include_router(build_replay_router())
+    app.include_router(build_geometry_router())
     occupied: set[tuple[str, str]] = set()
     for route in app.routes:
         occupied.update(route_keys(route))

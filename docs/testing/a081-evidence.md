@@ -13,3 +13,5 @@ Final checks: `python -m pytest tests/platform -q`533 PASS (101.43s); scoped geo
 No S01–S10 full rules claim, source eligibility/prediction/evidence registry integration, real B/provider/domain/operational/capacity claim. A08 in_progress; A08.2 next. Parent Phase6/9 portions B incomplete, release gates not_started/readiness503 unchanged. Goal remains through A09.3, no A10 implementation/push/merge/amend/destructive Git/frontend/deploy.
 
 Final source/tests/docs diff reviewed; staged whitespace/Markdown links/fences PASS. Dedicated gitleaks/trufflehog/git-secrets remain absent; scoped known-secret signature scan17 staged files:0 matches, ignored metadata `artifacts/reports/a081-secret-scan.json`. Limited signatures, not dedicated/history/entropy scan. Stage only17 related files, no runtime/private data/secrets.
+
+Actual local commit: `c8c042299c152f0837e14119c48d587825b6ae56` (`feat(geometry): add metric footprints and conservative motion sweeps`).

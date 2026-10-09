@@ -4,12 +4,18 @@
 | --- | --- |
 | Tanggal | 9 Oktober 2026 |
 | Objective | Persistent goal A07.1–A09.3, berurutan/local commit per unit; berhenti sebelum A10 |
-| Status | A01–A06 verified; A07.1–A07.3/A07 done; A08.1 done; A08.2 next; B/Phase10 tidak dimulai |
-| Candidate | A07.3 commit8941ef904f4ac6d3fdff60a5355333d81b1d0137; A08.1 SHA reported after checks/commit |
-| Next focus | A08.2 observed/predicted occupancy, ETA/exit/margins/eligibility; checkout sama feat/backend-aben |
+| Status | A01–A06 verified; A07.1–A07.3/A07 done; A08.1–A08.2 done; A08.3 next; B/Phase10 tidak dimulai |
+| Candidate | A08.1 commitc8c042299c152f0837e14119c48d587825b6ae56; A08.2 SHA reported after checks/commit |
+| Next focus | A08.3 observed-only rules, alert lifecycle/ack, S01–S10; checkout sama feat/backend-aben |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
 
-## Handoff terkini — A08.1
+## Handoff terkini — A08.2
+
+- Input c8c042299c152f0837e14119c48d587825b6ae56, clean. Source-scoped Occupancy implements frozen GeometryReader, rich model-observed/predicted timing, bounded eligibility/uncertainty/version/hash and authenticated replay geometry REST ([evidence](../docs/testing/a082-evidence.md), [workflow](../docs/development/geometry.md)).
+- Canonical source-track evidence indexing atomic/live rechecked; read-only does not receive arbitrary registration rights. Unknown/stale/dropout/coverage/expiry/conflicting speed never converts to clearance. 33 synthetic scoped oracles including timing/concave/source/evidence/rollback/authority/HTTP. Final566 platform/66contracts each track/Ruff78/mypy53/drift/Bandit/lock/build PASS;14 migrations unchanged; staged16-file signature scan0 matches. Local commit SHA reported from actual Git, no retained runtime.
+- No frozen schema/dependency/migration changes, B/provider/domain validation or operational/capacity claims; gates not_started/readiness503. Next A08.3 automatically after local commit; goal remains through A09.3, then A10.1 handoff only. No push/merge/amend/destructive Git/Phase10/frontend/deploy.
+
+## Rekam A08.1
 
 - Input `8941ef904f4ac6d3fdff60a5355333d81b1d0137`, clean. A07.3 committed/accepted; current goal progress verified from Git/source/checks.
 - A08.1/Phase5.1 metric kernel tersedia ([evidence](../docs/testing/a081-evidence.md), [workflow](../docs/development/geometry.md)): XY heading0+X/90+Y CCW from actual baseline/historical atan2; rotated footprint/finite hold corridor/protection miter buffer; exact linear translation vs conservative rotation envelope, no source mutation/evaluator/provider.

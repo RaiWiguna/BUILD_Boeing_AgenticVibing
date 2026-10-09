@@ -6,8 +6,8 @@
 | Tanggal | 9 Oktober 2026 |
 | Urutan delivery | **Backend lengkap → frontend lengkap → containerization → deployment lokal dan satu VM** |
 | Kontrak produk | `.agent/PRD.md`; batas proyek dan aturan kerja tetap berlaku |
-| Current implementation phase | A07/Phase4 done; A08.1/5.1 done, A08/Phase5 in_progress; goal sampai A09.3; contract1.0.0 |
-| Next recommended phase | A08.2 occupancy/eligibility; persistent goal sampai A09.3; B tetap independen |
+| Current implementation phase | A07/Phase4 done; A08.1–A08.2/5.1–5.2 done, A08/Phase5 in_progress; goal sampai A09.3; contract1.0.0 |
+| Next recommended phase | A08.3 observed-only rules/alerts; persistent goal sampai A09.3; B tetap independen |
 | Deadline dan staffing | Deadline belum ditetapkan; pengguna adalah pihak A (Platform & Replay); individu pihak B (Analysis & AI) belum ditetapkan |
 | Baseline data | Sintetik berlabel; replay simulator mitra berizin jika tersedia |
 
@@ -260,7 +260,7 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 4 — Replay Engine, Archive, API, dan WebSocket
 
-**Status:** `done` · **Owner:** pihak A · **Dependency:** Phase 3 (A); A07.1–A07.3/4.1–4.4 done ([snapshot evidence](../docs/testing/a071-evidence.md), [controls evidence](../docs/testing/a072-evidence.md), [transport evidence](../docs/testing/a073-evidence.md)); A08.1 next. Analysis snapshot/events memakai fake module sampai Phase 10.
+**Status:** `done` · **Owner:** pihak A · **Dependency:** Phase 3 (A); A07.1–A07.3/4.1–4.4 done ([snapshot evidence](../docs/testing/a071-evidence.md), [controls evidence](../docs/testing/a072-evidence.md), [transport evidence](../docs/testing/a073-evidence.md)); A08.1–A08.2 done; A08.3 next. Analysis snapshot/events memakai fake module sampai Phase 10.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
@@ -273,12 +273,12 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 5 — Geometry, Occupancy, Prediction, Rules, dan Alert Lifecycle
 
-**Status:** `in_progress` · **Owner:** pihak A · **Dependency:** Phase 4 (A); A08.1/5.1 done ([evidence](../docs/testing/a081-evidence.md)); A08.2 next. Tidak membutuhkan STT/Gemini atau memory B.
+**Status:** `in_progress` · **Owner:** pihak A · **Dependency:** Phase 4 (A); A08.1/5.1 done ([evidence](../docs/testing/a081-evidence.md)); A08.2/5.2 done ([evidence](../docs/testing/a082-evidence.md)); A08.3 next. Tidak membutuhkan STT/Gemini atau memory B.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
 | 5.1 | Footprint transforms, runway/hold-line/protection geometry, swept movement checks | Explicit geometry contract | `done` |
-| 5.2 | Observed/predicted occupancy intervals, exit/ETA estimates, uncertainty/margins dan separation | Deterministic numeric outputs | `planned` |
+| 5.2 | Observed/predicted occupancy intervals, exit/ETA estimates, uncertainty/margins dan separation | Deterministic numeric outputs | `done` |
 | 5.3 | Observed-only rule library, applicability, no-data/stale behavior, evidence/severity | Versioned detector results | `planned` |
 | 5.4 | Alert lifecycle, acknowledgment, source authority dan task-complexity indicators | Durable alert/indicator events | `planned` |
 

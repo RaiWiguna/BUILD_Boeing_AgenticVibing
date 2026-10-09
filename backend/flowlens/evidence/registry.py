@@ -1,6 +1,6 @@
 """Scope/hash/time/range/quote verification; semantic interpretation belongs to B."""
 
-from uuid import UUID
+from uuid import UUID, uuid5
 
 from flowlens.assets.access import Assets
 from flowlens.contracts.models import (
@@ -20,6 +20,51 @@ from pydantic import ValidationError
 
 
 class EvidenceRegistry:
+    def index_track(self, context: RequestContext, track: Track, uow: UnitOfWork) -> Evidence:
+        """Cache only a server-derived canonical source anchor, under current read authority."""
+        checked = self.resolve_in_uow(
+            context,
+            Evidence(
+                id=uuid5(
+                    track.id,
+                    f"geometry:{context.session_id}:{context.analysis_run_id}:{context.input_revision}",
+                ),
+                session_id=context.session_id,
+                analysis_run_id=context.analysis_run_id,
+                revision=context.input_revision,
+                kind="TRACK",
+                source_id=track.source_id,
+                source_hash=track.source_hash,
+                segment_id=track.id,
+                start_ms=track.event_time_ms,
+                end_ms=track.event_time_ms + 1,
+                quote=None,
+                span_start=None,
+                span_end=None,
+            ),
+            uow,
+        )
+        old = uow.connection.execute(
+            "SELECT payload FROM platform_evidence WHERE namespace='evidence' AND id=?",
+            (str(checked.id),),
+        ).fetchone()
+        if old and old[0] != checked.model_dump_json():
+            raise ContractError("IDEMPOTENCY_CONFLICT")
+        if not old:
+            uow.connection.execute(
+                "INSERT INTO platform_evidence VALUES ('evidence',?,?,?,?,?,?,?)",
+                (
+                    str(checked.id),
+                    str(checked.session_id),
+                    str(checked.analysis_run_id) if checked.analysis_run_id else None,
+                    checked.revision,
+                    "Evidence",
+                    checked.model_dump_json(),
+                    str(checked.source_id),
+                ),
+            )
+        return checked
+
     def __init__(
         self,
         sources: Sources,
