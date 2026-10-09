@@ -219,6 +219,83 @@ def map_response(
     )
 
 
+def validate_authorization(config: STTConfig, binding: AuthorizedChunk) -> None:
+    ctx, lease, prep = binding.context, binding.lease, binding.preparation
+    if binding.local_permission != "ALLOWED" or binding.cloud_permission != "ALLOWED":
+        raise STTFailure("STT_PERMISSION_DENIED")
+    if (
+        binding.approval.compatibility != "VERIFIED"
+        or not binding.approval.api_enabled
+        or not binding.approval.identity_authorized
+        or not binding.approval.billing_authorized
+        or binding.approval.data_logging != "DISABLED"
+    ):
+        raise STTFailure("STT_PROFILE_UNVERIFIED")
+    if (
+        lease.stage != "STT"
+        or lease.analysis_run_id is None
+        or (ctx.session_id, ctx.analysis_run_id, ctx.input_revision, ctx.input_hash)
+        != (lease.session_id, lease.analysis_run_id, lease.revision, lease.input_hash)
+        or ctx.actor_id != lease.owner_id
+        or set(ctx.capabilities) != {"worker", "audio"}
+        or lease.config_hash != config.digest()
+        or binding.approval.config_hash != config.digest()
+        or lease.asset_ids != [binding.chunk_id]
+        or lease.budget_microunits <= 0
+        or binding.chunk_index >= len(prep.chunks)
+    ):
+        raise STTFailure("STT_BINDING_INVALID")
+
+
+def validate_binding(config: STTConfig, binding: AuthorizedChunk, audio: bytes) -> None:
+    validate_authorization(config, binding)
+    prep = binding.preparation
+    if (
+        prep.config_sha256 != prep.config.digest()
+        or prep.source_after_sha256 != prep.source_sha256
+        or prep.output_rate != prep.config.output_rate
+        or prep.output_channels != 1
+        or prep.sample_width_bytes != 2
+    ):
+        raise STTFailure("STT_BINDING_INVALID")
+    plans = plan_chunks(
+        decoded_frames=prep.decoded_frames,
+        source_rate=prep.probe.sample_rate,
+        channels=prep.probe.channels,
+        limits=prep.config,
+        clock=prep.clock,
+        source_gaps=prep.source_gaps,
+    )
+    if tuple(c.plan for c in prep.chunks) != plans:
+        raise STTFailure("STT_BINDING_INVALID")
+    chunk = prep.chunks[binding.chunk_index]
+    frames = chunk.plan.derivative_frames.end - chunk.plan.derivative_frames.start
+    if (
+        type(audio) is not bytes
+        or len(audio) != chunk.byte_count
+        or len(audio) > 9_999_999
+        or len(audio) != chunk.plan.expected_bytes
+        or len(audio) != 44 + frames * 2
+        or hashlib.sha256(audio).hexdigest() != chunk.sha256
+        or chunk.local_frames.start != 0
+        or chunk.local_frames.end != frames
+        or frames > 60 * prep.output_rate
+    ):
+        raise STTFailure("STT_AUDIO_INVALID")
+    try:
+        with wave.open(io.BytesIO(audio), "rb") as wav:
+            if (
+                wav.getnchannels(),
+                wav.getsampwidth(),
+                wav.getframerate(),
+                wav.getnframes(),
+                wav.getcomptype(),
+            ) != (1, 2, prep.output_rate, frames, "NONE"):
+                raise STTFailure("STT_AUDIO_INVALID")
+    except (wave.Error, EOFError):
+        raise STTFailure("STT_AUDIO_INVALID") from None
+
+
 class STTExecutor:
     def __init__(
         self,
@@ -236,76 +313,9 @@ class STTExecutor:
         self.closed = False
 
     def validate(self, binding: AuthorizedChunk, audio: bytes) -> None:
-        ctx, lease, prep = binding.context, binding.lease, binding.preparation
-        if binding.local_permission != "ALLOWED" or binding.cloud_permission != "ALLOWED":
-            raise STTFailure("STT_PERMISSION_DENIED")
-        if (
-            binding.approval.compatibility != "VERIFIED"
-            or not binding.approval.api_enabled
-            or not binding.approval.identity_authorized
-            or not binding.approval.billing_authorized
-            or binding.approval.data_logging != "DISABLED"
-        ):
-            raise STTFailure("STT_PROFILE_UNVERIFIED")
-        if (
-            lease.stage != "STT"
-            or lease.analysis_run_id is None
-            or (ctx.session_id, ctx.analysis_run_id, ctx.input_revision, ctx.input_hash)
-            != (lease.session_id, lease.analysis_run_id, lease.revision, lease.input_hash)
-            or ctx.actor_id != lease.owner_id
-            or set(ctx.capabilities) != {"worker", "audio"}
-            or lease.config_hash != self.config.digest()
-            or binding.approval.config_hash != self.config.digest()
-            or lease.asset_ids != [binding.chunk_id]
-            or lease.budget_microunits <= 0
-            or binding.chunk_index >= len(prep.chunks)
-            or self.closed
-        ):
+        if self.closed:
             raise STTFailure("STT_BINDING_INVALID")
-        if (
-            prep.config_sha256 != prep.config.digest()
-            or prep.source_after_sha256 != prep.source_sha256
-            or prep.output_rate != prep.config.output_rate
-            or prep.output_channels != 1
-            or prep.sample_width_bytes != 2
-        ):
-            raise STTFailure("STT_BINDING_INVALID")
-        plans = plan_chunks(
-            decoded_frames=prep.decoded_frames,
-            source_rate=prep.probe.sample_rate,
-            channels=prep.probe.channels,
-            limits=prep.config,
-            clock=prep.clock,
-            source_gaps=prep.source_gaps,
-        )
-        if tuple(c.plan for c in prep.chunks) != plans:
-            raise STTFailure("STT_BINDING_INVALID")
-        chunk = prep.chunks[binding.chunk_index]
-        frames = chunk.plan.derivative_frames.end - chunk.plan.derivative_frames.start
-        if (
-            type(audio) is not bytes
-            or len(audio) != chunk.byte_count
-            or len(audio) > 9_999_999
-            or len(audio) != chunk.plan.expected_bytes
-            or len(audio) != 44 + frames * 2
-            or hashlib.sha256(audio).hexdigest() != chunk.sha256
-            or chunk.local_frames.start != 0
-            or chunk.local_frames.end != frames
-            or frames > 60 * prep.output_rate
-        ):
-            raise STTFailure("STT_AUDIO_INVALID")
-        try:
-            with wave.open(io.BytesIO(audio), "rb") as wav:
-                if (
-                    wav.getnchannels(),
-                    wav.getsampwidth(),
-                    wav.getframerate(),
-                    wav.getnframes(),
-                    wav.getcomptype(),
-                ) != (1, 2, prep.output_rate, frames, "NONE"):
-                    raise STTFailure("STT_AUDIO_INVALID")
-        except (wave.Error, EOFError):
-            raise STTFailure("STT_AUDIO_INVALID") from None
+        validate_binding(self.config, binding, audio)
 
     async def controlled(
         self,
