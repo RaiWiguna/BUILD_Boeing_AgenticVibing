@@ -24,3 +24,5 @@ Scoped replay19 + prior upgrade1:20 PASS. Full platform444 PASS (82.10s); contra
 Synthetic/disposable source WAV/events/SQLite/TestClient, fake B. Contract1.0.0/lock unchanged; reducer observed-replay-1; migrations13. No live provider/domain validation, capacity claim, real WS/controls atau archive compatibility reader; A07.2–A07.3 belum dilakukan. Runtime test owners/clients selesai; no persistent API/worker/server/deployment. Readiness503/gates not_started; parent phases B tetap tidak selesai.
 
 Diff source/tests/docs reviewed; `git diff --cached --check` dan Markdown links/fences PASS. Dedicated gitleaks/trufflehog/git-secrets tidak tersedia. Scoped known-secret signature scan14 staged candidate files:0 matches; metadata ignored `artifacts/reports/a071-secret-scan.json`. Cakupan terbatas, bukan history/entropy/dedicated scan. Stage hanya14 related files; tidak menyertakan runtime/private data/secrets.
+
+Local conventional commit: `1d48791ab19c567aa88a6439b53e585bb0f30e1b` — `feat(replay): add deterministic observed snapshots and checkpoints`; clean after commit, no push/merge/amend.

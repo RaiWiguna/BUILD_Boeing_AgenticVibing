@@ -27,6 +27,8 @@ from flowlens.imports.routes import build_router as build_import_router
 from flowlens.imports.staging import ImportFailure, Imports
 from flowlens.jobs.coordinator import Jobs, StagePolicy
 from flowlens.jobs.routes import build_router as build_job_router
+from flowlens.replay.compatibility import LegacyHistory
+from flowlens.replay.controls import Controls
 from flowlens.replay.snapshots import Replay
 from flowlens.sources.store import Sources
 from flowlens.storage.sqlite.database import Database, RepositoryFactory
@@ -87,6 +89,7 @@ def create_host(
                 app.state.sessions = Sessions(database, app.state.accounts)
                 app.state.permissions = Permissions(database, app.state.sessions)
                 database.context_guard = app.state.permissions.enforce
+                app.state.legacy_history = LegacyHistory(app.state.permissions)
                 app.state.mutations = Mutations(database, operations=mutation_operations)
                 if config.import_staging_path is not None:
                     try:
@@ -108,6 +111,8 @@ def create_host(
                             app.state.sources,
                             snapshot_reader=snapshot_readers[0] if snapshot_readers else None,
                         )
+                        app.state.controls = Controls(app.state.replay)
+                        app.state.controls.recover()
                         if config.artifact_staging_path is not None:
                             app.state.artifact_files = PrivateFiles(config.artifact_staging_path)
                         app.state.assets = Assets(app.state.sources, app.state.artifact_files)
@@ -137,6 +142,8 @@ def create_host(
                 app.state.evidence = None
                 app.state.raw_files = None
                 app.state.import_commits = None
+                app.state.controls = None
+                app.state.legacy_history = None
                 app.state.replay = None
                 app.state.sources = None
                 if app.state.imports is not None:
@@ -169,6 +176,8 @@ def create_host(
     app.state.evidence = None
     app.state.raw_files = None
     app.state.import_commits = None
+    app.state.controls = None
+    app.state.legacy_history = None
     app.state.replay = None
     app.state.sources = None
     app.state.jobs = None

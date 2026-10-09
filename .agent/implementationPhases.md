@@ -6,12 +6,12 @@
 | Tanggal | 9 Oktober 2026 |
 | Urutan delivery | **Backend lengkap → frontend lengkap → containerization → deployment lokal dan satu VM** |
 | Kontrak produk | `.agent/PRD.md`; batas proyek dan aturan kerja tetap berlaku |
-| Current implementation phase | A01–A06 done; request scope complete, tidak ada fase implementasi aktif; contract1.0.0 |
-| Next recommended phase | A07 jika diinstruksikan; B tetap independen |
+| Current implementation phase | A07/Phase4 in_progress; A07.1–A07.2 done; contract1.0.0 |
+| Next recommended phase | A07.3 REST/WS; persistent goal sampai A09.3; B tetap independen |
 | Deadline dan staffing | Deadline belum ditetapkan; pengguna adalah pihak A (Platform & Replay); individu pihak B (Analysis & AI) belum ditetapkan |
 | Baseline data | Sintetik berlabel; replay simulator mitra berizin jika tersedia |
 
-Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase/subfase awalnya `planned`; Phase 0–1 kini `done` berdasarkan [baseline evidence](../docs/testing/phase01-evidence.md). Phase2 `done` berdasarkan A01–A03 evidence; Phase3/A04 `done` berdasarkan [A04 phase evidence](../docs/testing/a04-evidence.md); Phase3.1–3.3/A04.1–A04.2 `done` berdasarkan [A04.1 evidence](../docs/testing/a041-evidence.md) dan [A04.2 evidence](../docs/testing/a042-evidence.md); Phase6.1/A05 dan6.3/A06 `done` berdasarkan [A05](../docs/testing/a05-evidence.md)/[A06](../docs/testing/a06-evidence.md); shared Phase6 `in_progress` karena B6.2/6.4 `planned`; Phase4 `in_progress` (4.1 done); Phase5/7–17 `planned`. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap sendiri tidak membuktikan runtime atau gate.
+Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase/subfase awalnya `planned`; Phase 0–1 kini `done` berdasarkan [baseline evidence](../docs/testing/phase01-evidence.md). Phase2 `done` berdasarkan A01–A03 evidence; Phase3/A04 `done` berdasarkan [A04 phase evidence](../docs/testing/a04-evidence.md); Phase3.1–3.3/A04.1–A04.2 `done` berdasarkan [A04.1 evidence](../docs/testing/a041-evidence.md) dan [A04.2 evidence](../docs/testing/a042-evidence.md); Phase6.1/A05 dan6.3/A06 `done` berdasarkan [A05](../docs/testing/a05-evidence.md)/[A06](../docs/testing/a06-evidence.md); shared Phase6 `in_progress` karena B6.2/6.4 `planned`; Phase4 `in_progress` (4.1/4.2/4.4 done); Phase5/7–17 `planned`. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap sendiri tidak membuktikan runtime atau gate.
 
 ## 1. Sequencing Gates
 
@@ -260,14 +260,14 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 4 — Replay Engine, Archive, API, dan WebSocket
 
-**Status:** `in_progress` · **Owner:** pihak A · **Dependency:** Phase 3 (A); A07.1/4.1 done ([evidence](../docs/testing/a071-evidence.md)); A07.2 next. Analysis snapshot/events memakai fake module sampai Phase 10.
+**Status:** `in_progress` · **Owner:** pihak A · **Dependency:** Phase 3 (A); A07.1–A07.2/4.1/4.2/4.4 done ([snapshot evidence](../docs/testing/a071-evidence.md), [controls evidence](../docs/testing/a072-evidence.md)); A07.3 next. Analysis snapshot/events memakai fake module sampai Phase 10.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
 | 4.1 | Event source/reducer, checkpoints, as-of snapshots, AS_KNOWN/DEBRIEF filtering | Deterministic historical read service | `done` |
-| 4.2 | Play/pause/seek/step/speed dan leader/follow/local-view contract | Shared replay controls | `planned` |
+| 4.2 | Play/pause/seek/step/speed dan leader/follow/local-view contract | Shared replay controls | `done` |
 | 4.3 | Catalogue/source/history REST, typed stream sequence, snapshot/resync, pagination | Authorized replay transport | `planned` |
-| 4.4 | Archive/checkpoint/restart behavior dan training-route compatibility | Durable replay/compatibility tests | `planned` |
+| 4.4 | Archive/checkpoint/restart behavior dan training-route compatibility | Durable replay/compatibility tests | `done` |
 
 **Acceptance:** same events/config menghasilkan same snapshot; same-time ordering dan pagination tidak bocor future events; seek tidak memanggil provider; imported availability unknown tidak dipresentasikan sebagai historical real-time truth; reconnect/gaps/retries tidak duplicate state; grant expiry/revocation memutus akses stream. Training commands yang dipertahankan tetap pada boundary latihan dan tidak menjadi AI tools. Source replay tidak berubah oleh controls/review.
 

@@ -4,12 +4,20 @@
 | --- | --- |
 | Tanggal | 9 Oktober 2026 |
 | Objective | Persistent goal A07.1–A09.3, berurutan/local commit per unit; berhenti sebelum A10 |
-| Status | A01–A06 verified; A07.1 done; A07 in_progress; A07.2 next; B/Phase10 tidak dimulai |
-| Candidate | Implementation commit 7328ae8e420a7b86bfd19b7e788ba71741822e28 (feat/backend-aben), parent cdb2b9d; local only, tidak push |
-| Next focus | A07.2 controls/leader/follow/local view/compatibility, checkout sama feat/backend-aben |
+| Status | A01–A06 verified; A07.1–A07.2 done; A07 in_progress; A07.3 next; B/Phase10 tidak dimulai |
+| Candidate | A07.1 commit1d48791ab19c567aa88a6439b53e585bb0f30e1b; A07.2 local commit dilaporkan setelah checks |
+| Next focus | A07.3 catalogue/source/history REST dan typed WS/resync; checkout sama feat/backend-aben |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
 
-## Handoff terkini — A07.1
+## Handoff terkini — A07.2
+
+- A07.1 local commit `1d48791ab19c567aa88a6439b53e585bb0f30e1b`; clean before A07.2. PrasyaratA01–A06 dan A07.1 tetap source/check verified ([entry evidence](../docs/testing/a071-evidence.md)).
+- A07.2 controls leader/follow/local/archive/recovery dan metadata-only LegacyHistory tersedia ([evidence](../docs/testing/a072-evidence.md), [workflow](../docs/development/replay.md)). Frozen1.0.0/lock unchanged; migration0014. Real A sources/SQLite, optional fake B snapshot via frozen port; controls tidak memanggil B/provider.
+- Source immutable; local view independent; optimistic version/durable immutable receipts/events/audit satu UOW. Lost leader authority/restart freeze last committed cursor, bukan infer elapsed downtime. Legacy raw/private/hints/commands tetap quarantine; unknown availability/NOT_EVALUABLE, explicit string/UUID aliases, snake_case; full old monitoring tidak dipulihkan/training commands absent.
+- Final466 platform/66contracts each A/B, Ruff69/mypy47/drift/Bandit -ll/build PASS;13 prior migrations unchanged. Secret scan/local SHA dicatat dari actual hasil. Runtime hanya disposable tests/owners/threads, semua selesai; no push/merge/amend/destructive Git/B/Phase10/frontend/deploy. Shared phasesB/gates tidak dinaikkan selesai.
+- Next A07.3 setelah commit unit, otomatis tanpa konfirmasi. Goal berhenti setelah A09.3 committed; A10.1 hanya next handoff.
+
+## Rekam A07.1
 
 - Input21457f3, working tree clean; A01–A06 source/evidence diperiksa, baseline425 platform/66contracts each A/B/Ruff63/mypy44/drift/Bandit -ll PASS. A06.1–A06.2 acceptance diverifikasi pada coordinator + actual restart/crash/race/atomic checks.
 - A07.1 deterministic observed replay/derived checkpoints/host composition tersedia; [evidence](../docs/testing/a071-evidence.md), [workflow](../docs/development/replay.md). Source immutable, fake B frozen snapshot port, no provider. Shared1.0.0/lock unchanged; platform0013, observed-replay-1. Track snapshot header mengikuti frozen contract, source tracks tetap penuh.

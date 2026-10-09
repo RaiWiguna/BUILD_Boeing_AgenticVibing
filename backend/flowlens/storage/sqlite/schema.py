@@ -554,4 +554,34 @@ PLATFORM_MIGRATIONS = (
             FOREIGN KEY(session_id,revision) REFERENCES platform_revisions(session_id,revision));
         """,
     ),
+    MigrationSpec(
+        "platform.0014",
+        "A",
+        ("platform.0013",),
+        """
+        CREATE TABLE platform_playback(
+            session_id TEXT NOT NULL REFERENCES platform_sessions(id), viewer TEXT NOT NULL,
+            payload TEXT NOT NULL, version INTEGER NOT NULL CHECK(version>=0),
+            anchor_ms INTEGER NOT NULL CHECK(anchor_ms>=0), leader_digest TEXT,
+            archived INTEGER NOT NULL CHECK(archived IN (0,1)), PRIMARY KEY(session_id,viewer));
+        CREATE TABLE platform_control_receipts(
+            session_id TEXT NOT NULL REFERENCES platform_sessions(id),
+            actor_id TEXT NOT NULL REFERENCES platform_accounts(id), key TEXT NOT NULL,
+            fingerprint TEXT NOT NULL CHECK(length(fingerprint)=64), payload TEXT NOT NULL,
+            version INTEGER NOT NULL CHECK(version>0),
+            archived INTEGER NOT NULL CHECK(archived IN (0,1)),
+            viewer TEXT NOT NULL, PRIMARY KEY(session_id,actor_id,key));
+        CREATE TRIGGER platform_append_only_controls_update
+            BEFORE UPDATE ON platform_control_receipts
+            BEGIN SELECT RAISE(ABORT,'Immutable receipt.'); END;
+        CREATE TRIGGER platform_append_only_controls_delete
+            BEFORE DELETE ON platform_control_receipts
+            BEGIN SELECT RAISE(ABORT,'Immutable receipt.'); END;
+        CREATE TRIGGER platform_append_only_controls_replace
+            BEFORE INSERT ON platform_control_receipts
+            WHEN EXISTS(SELECT 1 FROM platform_control_receipts WHERE session_id=NEW.session_id
+            AND actor_id=NEW.actor_id AND key=NEW.key)
+            BEGIN SELECT RAISE(ABORT,'Immutable receipt.'); END;
+        """,
+    ),
 )

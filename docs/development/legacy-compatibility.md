@@ -28,7 +28,7 @@ Logical digest SHA-256 mencakup profile dan ordered rows beserta original JSON t
 | Command ID/request/response | `platform_legacy_commands` | Original ID/text tetap sebagai historical record, tidak dieksekusi |
 | Import receipt | `platform_legacy_imports` | Profile/digest/counts; idempotent retry |
 
-UUID namespace: `f9526f99-15d3-4f62-b8c5-22f48a7b3400`; name UUIDv5 adalah original session ID. String ID lama bukan UUID wire v1; alias mapping harus dipakai eksplisit pada compatibility readers A07, bukan silent coercion pada shared DTO.
+UUID namespace: `f9526f99-15d3-4f62-b8c5-22f48a7b3400`; name UUIDv5 adalah original session ID. String ID lama bukan UUID wire v1; alias mapping dipakai eksplisit pada metadata-only compatibility reader A07.2, bukan silent coercion pada shared DTO.
 
 Payload lama berada dalam quarantine tables. Import tidak menulis observed `platform_records`/stream events, tidak membuat account/grant, dan tidak mengirim provider payload. Metadata/public frame historis masih bisa mempunyai seed, nested metadata, assessments atau scenario hints; jangan memakai label "public" lama sebagai bukti aman untuk observer/AI. Eligibility/redaction/clock/unit adapters harus diterapkan sebelum compatibility reads pada A07. Availability historis tidak diciptakan; AS_KNOWN belum dapat diklaim dari archive ini. Private checkpoint/truth membutuhkan evaluator-only policy saat reader tersedia.
 
@@ -39,7 +39,7 @@ Validation memeriksa table/column inventory, integrity/FKs, unique row keys, val
 - `FLOWLENS_OPERATOR_KEY` serta file `runtime/operator-key.txt` tidak menjadi individual accounts/passwords; config baru menolak setting operator key lama.
 - Seat/operator bearer tokens lama adalah in-memory hashed-token entries dengan expiry 8 jam; archive SQLite tidak menyimpan token/account credentials. Tidak ada token conversion atau grandfathered grants.
 - `/api/v1/auth/operator`, seat minting dan mutating `/commands` lama tidak diaktifkan kembali. Routes tetap absent pada OpenAPI. Setelah A03.2, legacy bearer/invalid Origin ditolak 403 sebelum routing; 404 pada evidence A01.3 adalah hasil host saat itu. Individual auth dan grants/transport tersedia melalui A02/A03.1–A03.2.
-- Session/scenario/events/snapshot/report/stream serializers lama belum dipulihkan. Mapping read-only history/casing dan training-route compatibility merupakan A07; training commands bukan tool AI dan bukan scope live ATC.
+- A07.2 menyediakan `LegacyHistory` read-only metadata dengan alias/UUID eksplisit, cookie/live session grant dan output snake_case audited. Unknown provenance/rights/clock pada payload lama menghasilkan NOT_EVALUABLE dan available_time_ms=None; raw/private JSON tidak diproyeksikan. Session/scenario/events/snapshot/report/stream serializers penuh lama tidak dipulihkan; operator/seats/commands tetap deprecated/absent. [Evidence](../testing/a072-evidence.md). Training commands bukan tool AI dan bukan scope live ATC.
 - Simulator branch restoration menggunakan private checkpoint tidak dijalankan oleh migrator. Branch/what-if tetap optional dengan disposition sendiri.
 
 Tidak melakukan migrasi terhadap data nyata/developer selama task ini. Penggunaan CLI terhadap archive milik operator tetap mengikuti source rights/retention/privacy. [Evidence A01.3](../testing/a013-evidence.md) membuktikan sintetik dan batasnya.
