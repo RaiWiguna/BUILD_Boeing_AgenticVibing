@@ -11,6 +11,8 @@ dependencies = [
     "argon2-cffi>=25.1,<26",
     "fastapi>=0.115,<1",
     "google-cloud-speech==2.41.0",
+    "google-genai==2.29.0",
+    "httpx>=0.28,<1",
     "pydantic>=2.10,<3",
     "uvicorn>=0.34,<1",
 ]
@@ -30,6 +32,9 @@ dev = [
 [tool.hatch.build.targets.wheel]
 packages = ["backend/flowlens"]
 
+[tool.hatch.build.targets.sdist]
+exclude = ["/docs/pitch", "/tests/browser", "/tmp"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["backend"]
@@ -47,4 +52,3 @@ python_version = "3.12"
 strict = true
 mypy_path = "backend"
 files = ["backend/flowlens"]
-

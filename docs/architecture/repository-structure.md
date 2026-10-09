@@ -4,6 +4,16 @@ Tanggal: 9 Oktober 2026. Status: **Phase 0–1 foundation, host A01.1 dan persis
 
 ## Dasar penempatan
 
+Continuation B03 9 Oktober: `providers/stt/execution.py` adalah single-attempt
+worker-side acquisition/RPC/private submission, tanpa DB/evaluator/A imports.
+`providers/stt/provenance.py` adalah private codec dan SDK response reconstruction;
+`providers/stt/smoke.py` adalah opt-in synthetic smoke. `bindings/stt.py` adalah
+API-side standalone injected adapter yang menghubungkan codec dengan domain
+TranscriptLifecycle/caller UOW; pure analysis tetap tidak mengimpor SDK/provider.
+Tidak ada real host composition/HTTP route/job handler dari modul binding ini.
+`testing/stt_worker.py` hanya MOCK/disposable acceptance;
+`scripts/evaluation_stt.py` dan `evaluation/protocols/stt-*` evaluator-only.
+
 PRD membagi alur utama menjadi import sumber, clock/replay, observasi/geometri, audio/jobs, STT, intent/association, memory/findings, advisory, review, serta debrief/export. Struktur berikut memberi tempat untuk setiap responsibility tersebut, sekaligus menjaga evaluator truth dan private runtime data terpisah.
 
 Backend memakai satu package `flowlens` dengan modul responsibility, tanpa menambah service boundary yang tidak dibutuhkan v1. Frontend memakai feature folders sesuai journeys pengguna. Kontrak wire/generated artifacts, tests/fixtures, evaluator materials, dokumentasi, dan delivery tooling berada pada area tersendiri.
@@ -432,3 +442,16 @@ Compose volumes dan secret provisioning final ditentukan pada delivery stage; di
 Struktur folder, README/map, ADR layout, serta konteks setelah reset tersedia. Semua fase implementasi tetap planned dan G-BE/G-FE/G-DELIVERY belum dijalankan.
 
 Langkah berikutnya adalah Phase 0.1: petakan kontrak/scaffold ke requirement, tetapkan build-new/reuse disposition, fixture/independent-oracle plan dan external dependencies. Backend foundation selanjutnya menyediakan actual package/config/contracts/tests. Frontend dan packaging menunggu gate masing-masing.
+
+
+## Analysis advisory implementation — B05
+
+`backend/flowlens/advisory/` now owns private typed finding/eligibility/document/
+review records, evidence-bound Gemini selection, analysis.0004 connection-injected
+ledger, caller-UOW review/reanalysis/journal, read-only contextual query, private
+JSON/CSV/HTML rendering, metrics/diagnostics and injected analysis retention.
+`backend/flowlens/testing/advisory.py` is the executable disposable MOCK harness;
+`tests/analysis/test_advisory.py` contains independent local oracles. No route/job
+handler/real A/B composition is registered; readiness false, frozen1.0.0 unchanged.
+B03/B04 external acceptance flags and B05 in_progress remain. Details and actual
+checks: [B05 evidence](../testing/b05-evidence.md), [ADR0006](../adr/0006-evidence-bound-advisory-revisions.md).

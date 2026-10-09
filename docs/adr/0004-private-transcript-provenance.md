@@ -7,7 +7,8 @@ Frozen contracts 1.0.0 expose TranscriptSegment with integer, nonnegative sessio
 ranges and Evidence, but no raw alternatives, words, nullable session alignment,
 chunk clock/provenance, correction counter, or downstream dependency index.
 ProviderAdapter.transcribe(context, lease, audio) cannot bind B02 metadata/rights
-or return this provenance. JobResult has no slot for these private records.
+or return this provenance. JobResult has no dedicated typed raw-record slot;
+its existing artifacts list can reference a private JSON_REPORT (see continuation).
 
 Use private immutable records in analysis.transcript_records, an explicit
 AuthorizedChunk binding and STTExecutor in providers/stt. Preserve deterministic
@@ -72,3 +73,48 @@ ownership of evidence/ledger/audit retention and artifact TTL.
 Readiness stays false. Real GCP compatibility/smoke, audited pronunciation/alignment
 benchmark and transport/promotion reconciliation remain open. Frozen DTOs, ports
 and generated schemas are unchanged. No real A/B composition or gate advancement.
+
+## Standalone private artifact binding — 9 October 2026 continuation
+
+Accepted for independent B03.D3, without waiting for real Package A composition.
+Use frozen AssetAccess download/submit and ArtifactSubmission JSON_REPORT, with
+audio capability, source_asset_id bound to the authorized derivative chunk and
+`stt-private-provenance-1` transform. Deterministic attempt/chunk ID, canonical bytes,
+SHA256 and <=8MiB are required. Full raw records remain private artifact content;
+no words/config/provider payload in text, reason, evidence quote or Usage.
+
+`providers/stt/execution.py` owns single-attempt acquisition/RPC/submission through
+injected ports, bounded64KiB ranges, whole-attempt watchdog, checksums, checkpoints
+and per-RPC reservation. It creates no disk files; caller owns executor closure and
+heartbeat. Sync adapters must be bounded/cooperative. Generator closure and complete
+consumption are required. Platform owns partial uploads/staged TTL/promotion; frozen
+AssetAccess has no cleanup/abort method. A crash cannot guarantee exactly-once billing.
+
+`bindings/stt.py` is an API-side standalone adapter around TranscriptLifecycle;
+it does not change pure analysis import rules or worker import permissions.
+AcceptanceAccess loads immutable scoped staged content and resolves authoritative
+active attempt/lease/input/config/rights in the same caller UOW, including duplicates.
+The validator reconstructs the entire candidate from original protobuf and trusted
+B02 metadata/audio; transformed hypotheses/words/times/config cannot be accepted.
+This is response consistency validation, not a Google-origin cryptographic signature.
+An authenticated trusted worker and immutable platform staging are required in real
+composition. Empty/permissive authority callbacks are forbidden there.
+
+Exact replay preserves first API recorded_at, raw and original segment IDs; cancelled,
+expired, changed-input or fresh-attempt old submissions cannot add accepted state.
+Fresh attempts get distinct raw/artifact IDs; the existing chunk/revision uniqueness
+rejects a second accepted raw. Caller owns commit, job receipt and publication; no
+STT job handler or HTTP endpoint is registered in this standalone unit.
+
+No contract version change is required for opaque JSON_REPORT references in
+JobResult.artifacts. Phase10 reconciles authenticated port adapters, private artifact
+ACL/inventory/download/TTL/promotion, transform manifest negotiation, candidate outputs/
+usage/output hash, durable job state/receipt and atomic accepted handler wiring.
+ProviderAdapter's typed return and unknown-clock public transcript/correction revision
+gaps remain; a typed breaking extension needs explicit version reconciliation.
+Phase10 remains a separate integration acceptance, not a circular B03.D3 dependency.
+
+Standalone D3 deterministic acceptance is complete. Real cloud profile/smoke and
+audited waveform/critical-slot/alignment evaluation remain B03 obligations; neither
+MOCK private boundary nor actual FFmpeg plumbing satisfies them. Readiness false,
+frozen1.0.0 and parent phases/gates unchanged. Details: [B03 evidence](../testing/b03-evidence.md).

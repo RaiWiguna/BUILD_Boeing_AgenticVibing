@@ -1,0 +1,35 @@
+{
+  "version": "b03-evaluation-1",
+  "domain_status": "NOT_DOMAIN_VALIDATED",
+  "required_cohorts": ["callsign", "runway", "action", "condition", "negation", "clipped_boundary", "overlap", "repetition", "gaps", "channels", "correction", "ambiguity", "word_alignment", "segment_alignment"],
+  "cases": [
+    {
+      "id": "hold-short-tts",
+      "family": "samantha-hold-short",
+      "split": "TUNING",
+      "audio_sha256": "cf3baa73bc59e37ddbd16e99e8a5f7493c22057d01c02b4030585b88486ba044",
+      "label_status": "TTS_NOT_GOLD",
+      "label_sha256": null,
+      "reviewers": [],
+      "pronunciation_audited": false,
+      "critical_slots_audited": false,
+      "alignment_audited": false,
+      "verified_cohorts": [],
+      "real_response_sha256": null
+    },
+    {
+      "id": "held-out-to-acquire",
+      "family": "independent-held-out-to-acquire",
+      "split": "HELD_OUT",
+      "audio_sha256": null,
+      "label_status": "PLANNED",
+      "label_sha256": null,
+      "reviewers": [],
+      "pronunciation_audited": false,
+      "critical_slots_audited": false,
+      "alignment_audited": false,
+      "verified_cohorts": [],
+      "real_response_sha256": null
+    }
+  ]
+}

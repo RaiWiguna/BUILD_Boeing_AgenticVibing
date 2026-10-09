@@ -3,13 +3,158 @@
 | Atribut | Nilai |
 | --- | --- |
 | Tanggal | 9 Oktober 2026 |
-| Objective | Paket B B03 Google STT V2/transcript lifecycle; konteks B01/B02 dan A02.2 dipertahankan di bawah |
-| Status | Phase0–1 done; A01/A02 dan Phase2.1/2.2 done; Phase2 in_progress; B01/B02.1 done; B02.2/6.4 done untuk standalone MOCK acceptance; B03 in_progress (standalone adapter/lifecycle acceptance); B04–B06 planned; contract1.0.0 |
-| Candidate | Base cdb2b9dae3d16c22a524b8a05b2e5583cc48e0d0 + original uncommitted B01/B02 + B03 working tree; tidak commit/push/merge. Rekam commit A02 tetap di Git |
-| Next focus | B03 approved real GCP profile/synthetic smoke, audited labels/benchmark dan worker/artifact reconciliation; B04 prerequisites terbuka; A tetap A03.1 secara independen |
+| Objective | B05 local engineering/standalone MOCK accepted; B04 tetap in_progress; external acceptance open; B03 external acceptance tetap pending; konteks B01/B02/B03 dan A02.2 dipertahankan |
+| Status | Phase0–1 done; A01/A02 dan Phase2.1/2.2 done; Phase2 in_progress; B01/B02.1 done; B02.2/6.4 done untuk standalone MOCK acceptance; B03 in_progress (D1/D2/D3 standalone accepted); B04 in_progress (local MOCK accepted); B05 in_progress (local standalone MOCK); B06 in_progress (acceptance lokal); contract1.0.0 |
+| Candidate | HEAD/upstream feat/backend-rai = 5beeffd5726aae0321574ba8e302d47db6c46171 sebelum continuation; evaluator/package/capacity/compatibility continuation siap di-commit setelah final checks |
+| Next focus | External B03/B04 smoke dan audited/domain B05 acceptance terbuka; Linux runtime bila host tersedia; real A/B transport Phase10 belum dimulai; A tetap A03.1 independen |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
 
-## Handoff terkini — Paket B B03 (partial)
+## Handoff terkini — B05 local engineering, 9 Oktober 2026
+
+B05 in_progress; local standalone MOCK acceptance tersedia. `advisory/` memuat
+findings-1, evidence-bound provider selection advisory-select-1, append-only
+analysis.0004 ledger, review/version/idempotency/reanalysis/journal, read-only query,
+JSON/CSV/HTML private renderer, metrics/diagnostics dan injected analysis retention.
+No HTTP route/job handler/public projection/real composition; readiness false.
+User-authorized sequencing membolehkan B05 sebelum external B03/B04 closure.
+No paid calls/provider fallback/contracts change/A implementation/frontend/deployment.
+B06 acceptance lokal in_progress; parent phases/G-BE/G-FE/G-DELIVERY belum closed.
+
+Baseline baru: 589 PASS tanpa skip setelah FFmpeg ditambahkan hanya ke PATH proses;
+run awal tanpa binary: 582 PASS/2 FAIL/5 SKIP (AUDIO_BINARY_MISSING), bukan regression.
+B05 focused77 PASS; final isolated full B666 PASS/no skip (58.36s), contractsA66 PASS.
+Native B59/Linux-target84 mypy PASS; native Windows A POSIX7 unchanged. Ruff108 files,
+schema drift/Bandit/audit/build/diff PASS. One concurrent STT cancellation timing
+failure is retained in [B05 evidence](../docs/testing/b05-evidence.md), isolated rerun passes
+without changing assertions/timeouts. Evidence includes persistence/security/contract gaps.
+Harness B05 MOCK calls3/real0/disposable-cleaned; B04 MOCK calls2/real0 tetap PASS.
+Real smoke NOT_RUN; audited external benchmarks BLOCKED/metrics=null.
+Existing dirty work docs/pitch/tests/browser/tmp/D3/evaluator/B04 dipertahankan.
+No stage/commit/push/reset/clean/merge/branch change; no daemon/server ditinggalkan.
+
+Next: cloud operator menyiapkan approved STT/Gemini identity/access/rights/budget
+untuk smoke nyata; evaluation/domain lead menyediakan audited held-out labels dan
+thresholds/protocol. Phase10 owners mengikat authority/evidence/artifact/receipt/public
+projection dan atomic coordinator. MOCK bukan evidence kesiapan pipeline.
+
+## Previous handoff — B04 local engineering,9 Oktober2026
+
+- Implemented private `intent/`, `association/`, `memory/`, `loops/`;
+  `providers/gemini/` pinned SDK2.29.0/Developer Interactions v1beta;
+  `bindings/intent_memory.py` consumes existing transcript lifecycle/dependency index.
+- `analysis.0003` append-only memory ledger uses injected connection/caller UOW,
+  scoped FKs, provenance, deterministic reconstruction, explicit invalidations,
+  restart/rollback/purge. No worker SQLite, HTTP route or job handler installed.
+- Provider LOOKUP and EXTRACT are separate stateless schema requests. Server tools
+  stay read-only/scoped/bounded; no native execution/continuation history or thought
+  traces persisted. Transport enforces one actual send per reservation despite SDK
+  attempts0 mutation; no implicit credential lookup/fallback.
+- Gemini target/API support published; account access, actual compatibility smoke,
+  source rights/terms/quota/budget approval and audited semantic benchmark unverified.
+  Real Google/Gemini calls0. Default Gemini preflight BLOCKED, benchmark metrics=null.
+- B04 in_progress; B05 not started. B03/Phase7 in_progress with
+  B03_EXTERNAL_ACCEPTANCE_PENDING: STT_ACCOUNT_LOGIN_REQUIRED,
+  AUDITED_BENCHMARK_PENDING. STT smoke0, benchmark BLOCKED/metrics=null.
+- Final verification: B589 PASS/no skips (89 B04), contractsA66 PASS; native B49/
+  Linux-target74/scorer1 mypy PASS; Ruff/format/schema/Bandit/audit/build/diff PASS.
+  Harness MOCK calls2/real0/disposable-cleaned. Commands/gaps: docs/testing/b04-evidence.md.
+  Native full Windows mypy still has seven pre-existing A POSIX errors; A unchanged.
+  Frozen1.0.0, integrated readiness false; parent phases/G-BE/G-FE/G-DELIVERY unchanged.
+- Working tree preserved (D3/evaluator/docs/pitch/tests/browser/tmp); no reset,
+  clean, stage, commit, push, merge or branch change. No daemon/server left running.
+
+## Previous handoff — izin sequencing B04,9 Oktober2026
+
+- Pengguna menyatakan belum memiliki akun Google Cloud dan secara eksplisit
+  mengizinkan lanjut B04 sambil memberi flag bahwa B03 belum sepenuhnya selesai.
+- **B03_EXTERNAL_ACCEPTANCE_PENDING**: **STT_ACCOUNT_LOGIN_REQUIRED** serta
+  **AUDITED_BENCHMARK_PENDING**. B03/Phase7 tetap in_progress. D1/D2/D3/scorer lokal
+  accepted; real smoke0/benchmark metrics=null. Login saja belum menutup benchmark.
+- B04 next focus: engineering lokal Gemini structured intent, bounded read-only tools,
+  association dan memory/open loops, dengan transcript fixtures berlabel MOCK serta
+  injected frozen ports. B04 tetap planned/local start authorized sampai implementasi
+  dimulai. Jangan menunggu login STT untuk pekerjaan independen yang sudah diizinkan.
+- Izin ini mengubah sequencing, bukan acceptance: tidak menutup B03/B04/parent gates,
+  tidak mengizinkan paid RPC, fallback model/provider, perubahan frozen contracts,
+  implementasi A, Phase10 composition, frontend atau deployment. Gemini real smoke
+  juga membutuhkan identity/model/API/rights/budget approval tersendiri.
+- Audit Git: branch feat/backend-rai/HEAD da279281…; existing dirty/untracked work
+  dipertahankan. Sesi ini hanya memperbarui roadmap/handoff/packet/evidence untuk
+  keputusan sequencing dan menyiapkan prompt B04. Tidak ada source edit, test aplikasi
+  baru atau runtime yang dimulai; angka test500 B/71 evaluator/66 A adalah evidence
+  sesi sebelumnya, bukan test baru pada keputusan docs ini. No stage/commit/push.
+
+## Rekam sebelumnya — B03 offline evaluator continuation (partial overall)
+
+- Git audit aktual: branch feat/backend-rai, HEAD/upstream da279281f1698197df1efef569f578adb1610cef.
+  Perubahan D3/tooling/docs lama sudah dirty/untracked ketika sesi dimulai dan
+  dipertahankan bersama docs/pitch/tests/browser/tmp. Tidak ada stage/commit/push/
+  reset/clean/merge, perubahan Paket A, kontrak/generated schema atau handlers.
+- D1/D2/D3 tetap accepted mandiri. Gap nyata hanya readiness-only evaluator:
+  scripts/stt_scoring.py kini schema label/receipt/bundle, bounded artifact/hash/
+  scope/review/adjudication validation dan B02/protobuf reconstruction;14cohorts
+  termasuk condition; leakage session/family/speaker/source/chunk dicegah.
+  evaluation_stt.py --bundle offline; default plan tetap BLOCKED/metrics=null.
+- Arithmetic WER S/D/I/denominators, lexical critical slots/ambiguity, word/segment
+  start/end median/p95/max/missing timing/unknown clock diuji TEST_ONLY. Label
+  TEST_ONLY/receipt MOCK tidak lolos benchmark. Tidak ada gold/held-out/output nyata
+  yang dibuat atau benchmark metrics diklaim; hold-short tetap TTS NOT_GOLD.
+- Baseline tanpa PATH425pass/2fail/5skip karena AUDIO_BINARY_MISSING; process-local
+  FFmpeg9.0.2/hash B02.1 cocok, baseline432 PASS tanpa skip sebelum edit source.
+  Semua standalone harness termasuk real FFmpeg/worker dan D3 MOCK PASS. Native B32
+  dan Linux-target backend56 mypy PASS; full native Windows7 POSIX errors A tetap.
+  Final B500 PASS tanpa skip, focused evaluator71/Acontracts66 PASS; scorer1-file
+  mypy/Ruff/format/schema/Bandit0/dependency audit/build/diff PASS. Detail commands
+  dan limitations tercatat pada latest docs/testing/b03-evidence.md.
+- Cloud audit ulang: local gcloud inventory0 accounts/0 active, standard ADC false,
+  tujuh env config/credentials/budget absent. Tidak membaca credential/token atau
+  menjalankan paid RPC. Default smoke BLOCKED/provider_calls0. API/IAM/recognizer/
+  model/locale/region/features/quota/billing/logging/budget aktual UNKNOWN.
+- Blocker/owner: cloud operator approved local profile/identity/transfer/budget dan
+  real execution receipt; annotation/review lead menyediakan held-out rights-cleared
+  audio yang belum ada, two waveform reviewers/adjudication, frozen protocol/labels/thresholds.
+  Scorer lokal sudah implemented; jalankan setelah reviewed artifacts tersedia.
+- Real authenticated A/B coordinator/receipt/staging TTL/promotion/cleanup/handler
+  composition tetap Phase10, bukan prerequisite melingkar B03 mandiri. Frozen1.0.0/
+  readiness false; B03/Phase7/PaketB in_progress, B04 planned, parents/gates terbuka.
+  Tidak ada persistent process/server/container. Detail schema/limits/trust/commands
+  di evaluation/protocols/stt-evaluation.md; old evidence/handoff dipertahankan.
+
+## Rekam sebelumnya — B03 private boundary continuation (partial overall)
+
+- D1/D2 acceptance dipertahankan; authorization/audio validator diekstrak reusable.
+  D3 standalone done: providers/stt/{execution,provenance}.py + bindings/stt.py,
+  ChunkAccess/AcceptanceAccess injection, frozen AssetAccess/JSON_REPORT, bounded
+  download/upload/checksum/checkpoint/budget dan full protobuf/B02 reconstruction.
+  API binding memvalidasi authority di caller UOW; duplicate preserves recorded_at,
+  late/cancelled/stale/fresh-attempt old result ditolak. No handler/routes/real A code.
+- Partial/early/closed upload consumer ditolak dan iterator ditutup; worker tanpa
+  disk files; platform owns staged TTL/promotion/cleanup. Restart fresh attempts;
+  no exactly-once cloud billing claim. Pure-domain/provider/audio-worker import
+  assertions tidak diubah; API binding berada di module terpisah.
+- testing.stt_worker executable MOCK/disposable SQLite/restart PASS.
+  providers.stt.smoke reusable default preflight BLOCKED/provider_calls0; explicit
+  local approved profile/credentials + --execute untuk satu authorized synthetic
+  RPC. Actual FFmpeg->MOCK SDK plumbing test terpisah dari real Google success.
+- gcloud524.0.0 installed; local status-only auth inventory0/no active account,
+  standard ADC/tujuh env config/credentials/budget absent. No authenticated cloud
+  project/settings audit/token request/provisioning/paid RPC; real profile UNKNOWN.
+- evaluation/protocols/stt-plan.json/stt-evaluation.md + scripts/evaluation_stt.py
+  preflight BLOCKED/metrics=null. TTS NOT_GOLD, held-out acquisition planned only;
+  audited labels/reviewers/real outputs/scorer/thresholds masih terbuka.
+- Baseline359/final432 tests PASS tanpa skip, new73 PASS, contractsA66 PASS;
+  all standalone/real FFmpeg harnesses PASS. Native B32 files/Linux-target56 mypy
+  PASS; full native Windows same7 POSIX errors A. Ruff/format/schema/Bandit0/audit/
+  uv build PASS. Latest evidence + concrete owner/blocker table: b03-evidence.md.
+- Git HEAD/upstream da279281…; previous uncommitted descriptions below historical.
+  Existing docs/pitch/tests/browser/tmp retained; no stage/commit/push/merge/reset/
+  clean. No persistent process/container/server. Task DB/channels/audio scratch
+  cleaned; ignored toolchain/build/preflight reports retained, pytest normal retention.
+- Frozen1.0.0/readiness false. B03 overall/Phase7/PaketB/gates remain open;
+  next B03 cloud-profile/smoke + annotation/scoring. B04 planned, A03.1 independent.
+  Real Phase10 integration is not a circular dependency for standalone D3 acceptance.
+
+## Rekam sebelumnya — Paket B B03 adapter/lifecycle (partial)
 
 - providers/stt/{models,adapter}.py: explicit strict config/approval/authorized B02
   binding; SDK2.41.0 async V2 request/response, bounded channel/calls/output,
@@ -218,8 +363,83 @@ Tidak ada server/worker/container persisten dimulai. Disposable DB/clean install
 
 ## Next action
 
-A lanjut A03.1 setelah A02/account+HTTP auth selesai. B02.1 real FFmpeg dan B02.2 standalone acceptance done; B lanjut B03 approved real GCP profile/synthetic smoke, audited labels/benchmark dan worker/artifact reconciliation setelah standalone adapter/lifecycle acceptance. B04 prerequisites belum terpenuhi. Frozen baseline1.0.0/readiness false tetap. Reconcile/version perubahan breaking sebelum Phase10. Frontend tetap menunggu G-BE; container/deployment menunggu gate sesudahnya.
+A lanjut A03.1 setelah A02/account+HTTP auth selesai. B mulai B04 local engineering/MOCK standalone sesuai izin pengguna9 Oktober2026, sementara B03_EXTERNAL_ACCEPTANCE_PENDING (STT account/login/real smoke dan audited benchmark) tetap in_progress. Real transport/coordinator/artifact policy tetap Phase10 terpisah. Frozen baseline1.0.0/readiness false tetap. Reconcile/version perubahan breaking sebelum Phase10. Frontend tetap menunggu G-BE; container/deployment menunggu gate sesudahnya.
 
 ## Perencanaan Paket A — 8 Oktober 2026
 
 Pengguna adalah Pihak A. [Rencana eksekusi Paket A](../docs/development/package-a-execution.md) merinci scope A menjadi 10 tahap/26 unit sesi dengan acceptance dan handoff. Saat perencanaan seluruh unit planned; setelah eksekusi A01/A02 done dan next A03.1. Status foundation dan gate di atas tetap berlaku.
+
+## External acceptance tetap pending — 9 Oktober 2026
+
+**B04_EXTERNAL_ACCEPTANCE_PENDING**
+- GEMINI_ACCOUNT_ACCESS_UNVERIFIED
+- REAL_GEMINI_SMOKE_PENDING
+- AUDITED_SEMANTIC_BENCHMARK_PENDING
+
+B04 / Phase8: `in_progress`; local engineering + standalone MOCK acceptance:
+passed. Real Gemini provider_calls: **0**. Real smoke: **NOT_RUN**.
+Audited semantic benchmark: **BLOCKED**; benchmark metrics: **null**.
+Integrated pipeline readiness: **false**.
+Existing **GEMINI_EXTERNAL_ACCEPTANCE_PENDING** tetap terlihat dan belum ditutup.
+
+**B03_EXTERNAL_ACCEPTANCE_PENDING**
+- STT_ACCOUNT_LOGIN_REQUIRED
+- AUDITED_BENCHMARK_PENDING
+
+B03 / Phase7: `in_progress`; local standalone acceptance dipertahankan.
+Real STT calls: **0**; real smoke **NOT_RUN**; audited benchmark **BLOCKED**,
+metrics **null**. Izin engineering lokal B05 mengubah sequencing saja.
+
+## Handoff B06 lokal — 9 Oktober 2026
+
+B06 in_progress; local acceptance passed. Branch/HEAD/upstream tetap
+feat/backend-rai/da279281f1698197df1efef569f578adb1610cef. Seluruh existing dirty
+B03/D3/evaluator/B04/B05 dan docs/pitch/tests/browser/tmp dipertahankan, tanpa Git
+mutation. Source baru hanya testing/acceptance.py + tests/analysis/test_acceptance.py;
+docs B06/roadmap/handoff/packet status diperbarui. Tidak ada compatibility edit
+B03–B05 atau perubahan frozen1.0.0/Paket A/locks.
+
+Entrypoint `.venv/Scripts/python.exe -m flowlens.testing.acceptance --suite --output
+artifacts/reports/b06/acceptance.json`; process FFmpeg PATH mengikuti evidence.
+Manifest dari actual registrations; cross-service rollback/exception/restart,
+post-commit publication, duplicate cancellation dan ownership purge di DB disposable.
+Suite existing memberi security/semantic/failure/export/import-isolation coverage.
+Ini MOCK test composition, bukan audio-to-report pipeline production.
+
+Actual baseline666 PASS/65.73s; final676 B/contractsB PASS/49.18s tanpa skip,
+contractsA66 PASS/4.57s;9 standalones PASS. Ruff110/scoped B mypy61/Linux-target85/
+scorer1/schema/Bandit0/dependency audit/build/diff PASS. Full Windows mypy tetap7
+error POSIX A. Initial B06 SQL Bandit finding diperbaiki dengan literal SQL;
+source/test/threshold existing tidak dilonggarkan. Ignored reports/build tinggal
+untuk inspeksi; tidak ada persistent runtime yang ditinggalkan.
+
+Detail: [B06 evidence](../docs/testing/b06-evidence.md). Next: cloud operator/user
+menyediakan approved account/config/rights/budget dan authorization real smoke;
+evaluation/domain lead menyediakan audited held-out labels/real outputs/domain review.
+Platform+analysis owners menangani public/private projection, evidence availability,
+durable coordinator/artifact ACL/TTL/receipts pada Phase10 terpisah, belum dimulai.
+B03_EXTERNAL_ACCEPTANCE_PENDING (STT_ACCOUNT_LOGIN_REQUIRED,
+AUDITED_BENCHMARK_PENDING), B04_EXTERNAL_ACCEPTANCE_PENDING
+(GEMINI_ACCOUNT_ACCESS_UNVERIFIED, REAL_GEMINI_SMOKE_PENDING,
+AUDITED_SEMANTIC_BENCHMARK_PENDING), GEMINI_EXTERNAL_ACCEPTANCE_PENDING tetap.
+Real STT/Gemini0, smoke NOT_RUN, external benchmark BLOCKED/metrics=null,
+integrated readiness=false; B03/B04/B05/B06/parent phases/gates tidak ditutup.
+
+### Continuation tooling — 9 Oktober 2026
+
+Evaluator semantic offline, clean-install smoke, bounded synthetic capacity baseline
+dan compatibility matrix selesai di working tree. Final `pytest tests/analysis
+tests/contracts --track B -q`: **718 PASS**, tanpa skip; 42 test baru mencakup
+evaluator dan compatibility. Ruff116 files, scoped mypy tooling, schema drift,
+Bandit zero issues, pip-audit, build dan clean-install pass. Wheel/sdist smoke berjalan
+di luar checkout dengan locked requirements, enam installed MOCK entrypoints, tanpa
+source/PYTHONPATH leak, dan disposable environment bersih. sdist mengecualikan
+untracked pitch/browser/tmp.
+
+Capacity 16/128/512 ×3 pass invariant dan cleanup; hasil synthetic MOCK baseline
+dengan target UNSET, bukan kapasitas operasional. Linux runtime **NOT_RUN**: WSL2
+kernel ada, tetapi docker-desktop tidak memiliki Python/uv/FFmpeg dan Docker daemon
+unavailable. `mypy --platform linux` static-only. External B03/B04/B05 acceptance,
+audited corpus/reviewer/domain review, real STT/Gemini smoke, public projections,
+coordinator/Phase10 dan parent gates tetap terbuka. Real calls0, smoke NOT_RUN,
+benchmark BLOCKED/metrics null, integrated readiness false.

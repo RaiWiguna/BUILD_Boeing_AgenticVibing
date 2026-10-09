@@ -1,5 +1,300 @@
 # B03 — Google STT V2 and transcript lifecycle evidence
 
+## Current acceptance flag — user-authorized B04 sequencing (9 October 2026)
+
+**B03_EXTERNAL_ACCEPTANCE_PENDING** — reasons **STT_ACCOUNT_LOGIN_REQUIRED** and
+**AUDITED_BENCHMARK_PENDING**. User confirms no Google Cloud account yet and explicitly
+authorizes independent B04 engineering while B03 remains incomplete. B03/Phase7
+status stays `in_progress`; D1/D2/D3/offline scorer engineering acceptance retained.
+Real smoke remains unexecuted/provider_calls0; empirical benchmark BLOCKED/metrics=null.
+Account/login alone will not supply audited labels, held-out audio or real outputs.
+
+This is a sequencing exception, not an acceptance waiver or paid-request approval.
+B04 may use MOCK transcript fixtures/injected frozen ports before real STT exists.
+Cloud smoke and audited benchmark remain required B03 follow-up; real composition
+stays Phase10. Frozen1.0.0/readiness false/parent gates unchanged. Documentation-only
+decision; no new application tests or cloud calls executed in this update.
+
+## Latest engineering continuation — offline scoring completion (9 October 2026)
+
+Audit began with git status/branch/HEAD/upstream/diff-stat/full tracked diff.
+HEAD and upstream remain `da279281f1698197df1efef569f578adb1610cef` on
+`feat/backend-rai`. D3/tooling/docs already dirty/untracked at entry were read and
+preserved, along with docs/pitch, tests/browser and tmp. No Git mutation, Package A
+edit, frozen-contract/schema change, handler registration or B04 work.
+
+**D1/D2/D3 standalone acceptance retained. B03 and Phase7 remain in_progress.**
+The proven local gap was an absent scorer/artifact loader, not the accepted STT
+adapter/lifecycle/private boundary. `scripts/stt_scoring.py` now supplies strict
+waveform-label/receipt/bundle schemas, bounded hash-checked private artifact loading,
+review/adjudication/source/channel/range/scope validation, B02/protobuf reconstruction,
+session/family/speaker/source/chunk split-leak prevention and all14 cohort checks
+(condition added to the plan). Unit arithmetic covers WER S/D/I/denominators, lexical
+critical-slot errors/ambiguity and independent word/segment start/end error statistics,
+missing timing, clipped exclusion and unknown clocks. Details and commands:
+[waveform/scoring protocol](../../evaluation/protocols/stt-evaluation.md).
+
+`scripts/evaluation_stt.py --bundle` can score reviewed artifacts atomically, while
+the default plan remains BLOCKED/metrics=null. TEST_ONLY labels cannot enter this
+benchmark path. Receipt enums/attestations are operator evidence, not cryptographic
+Google authentication; reconstruction proves consistency only. All new arithmetic/
+SDK-projection inputs are explicitly TEST_ONLY. No waveform labels, held-out corpus,
+real outputs, quality metrics or domain review were invented. Scorer engineering is
+implemented; empirical benchmark acceptance is still open.
+
+### Verification of this continuation
+
+Initial baseline without FFmpeg PATH:425 pass/2 fail/5 skip, both failures
+AUDIO_BINARY_MISSING. After process-local tool PATH, before source edits:432 PASS
+without skip. Binary versions9.0.2 and hashes match B02.1; Python3.12.15, uv0.12.23,
+SDK2.41.0. No package/lock changes. Intermediate new evaluator tests caught a range
+conversion defect (backend Offset carries schema_version, evaluator Range does not);
+fixed using explicit start/end fields, retaining both schemas' strict validation.
+Final checks on this continuation:
+
+| Command/check | Actual result |
+| --- | --- |
+| pytest tests/analysis tests/contracts --track B -q --tb=short (FFmpeg PATH process-local) | 500 PASS, no skip; baseline432 +68 new scorer tests |
+| pytest tests/analysis/test_stt_scoring.py tests/analysis/test_stt_evaluation.py --track B -q | 71 PASS on final evaluator source, including final freeze guard |
+| pytest tests/contracts --track A -q | 66 PASS |
+| python -m flowlens.testing --track B; .analysis; .audio_worker; .audio_worker --real; .stt; .transcripts; .stt_worker | All7 PASS; disposable resources cleaned; real FFmpeg explicitly identified; cloud calls0 |
+| ruff check backend tests scripts; ruff format --check backend tests scripts | PASS;78 files formatted |
+| Native B mypy audio/workers/analysis/providers/stt/bindings +5 B harnesses | PASS32 files |
+| mypy --platform linux | PASS56 backend files; static Linux target, not Linux execution |
+| mypy scripts/stt_scoring.py | PASS1 evaluator file |
+| Full native Windows mypy | Same7 pre-existing POSIX attribute errors in A storage/sqlite/database.py and cli/bootstrap_admin.py; no A edits |
+| python -m flowlens.contracts.generate --check | PASS; frozen schemas unchanged |
+| bandit -r backend/flowlens -l; bandit scripts/stt_scoring.py scripts/evaluation_stt.py -l | PASS0 issues; existing6 backend suppressions retained; no evaluator suppressions |
+| pip_audit --local | No known vulnerabilities; unpublished atc-flowlens skipped |
+| uv build --python .venv/Scripts/python.exe --out-dir artifacts/reports/b03-scoring-dist | PASS sdist/wheel; runtime package contains no evaluator truth |
+| git diff --check | PASS |
+
+New tests exercise exact S/D/I/empty denominators/repetition/normalization, critical
+condition/negation ambiguity, insertions inside slot spans, independent timing
+statistics/missing/unmatched/unknown-clock outcomes, bounded file and JSON loading,
+path escape, duplicate JSON keys/nonfinite values, label/reviewer/range constraints,
+all five split-leak identities, source/scope/receipt mismatch and SDK reconstruction
+tampering. TEST_ONLY SDK projection is consistency testing only; no actual waveform
+quality or successful real-origin benchmark loading claimed. CLI invalid artifacts
+emit BLOCKED/metrics=null with safe diagnostics; subprocess imports prove runtime
+does not load evaluator modules. Final source adds label-adjudication-before-freeze
+and execution-after-freeze checks; descriptive scoring never closes a gate.
+
+No persistent process/server/container was started. Harnesses cleaned their own
+SQLite/audio/channels/subprocesses; normal pytest retention and ignored toolchain/
+build/preflight reports remain. Existing user folders and all previous changes were
+preserved. No approved provider profile or reviewed corpus became available.
+
+### Rechecked cloud prerequisites and external ownership
+
+Local gcloud status-only inventory:0 accounts/0 active, standard ADC absent; all7
+project/location/credential/model/language/recognizer/budget env names absent. No
+token request, credential read, authenticated cloud-setting audit, provisioning or
+paid RPC. Project/API/IAM/recognizer/model/locale/region/endpoint/features/quota/
+billing/budget/logging remain UNKNOWN. Default smoke:BLOCKED/provider_calls0;
+safe report `artifacts/reports/b03-smoke-preflight.json`. Default evaluation:
+BLOCKED/metrics=null; safe report `artifacts/reports/b03-evaluation-preflight.json`.
+Actual FFmpeg->MOCK SDK remains separate from real Google execution.
+
+Official Google pages rechecked9 October2026:
+[Recognize V2/IAM](https://docs.cloud.google.com/speech-to-text/docs/reference/rest/v2/projects.locations.recognizers/recognize)
+requires speech.recognizers.recognize and cloud-platform scope;
+[quotas](https://docs.cloud.google.com/speech-to-text/docs/quotas) retains10MB/60s
+inline synchronous limits and project-shared regional quotas;
+[Chirp3](https://docs.cloud.google.com/speech-to-text/docs/models/chirp-3) supports
+Recognize and en-US with published US/EU availability, but account-specific feature
+approval still requires the [locations check](https://docs.cloud.google.com/speech-to-text/docs/locations).
+[WordInfo](https://docs.cloud.google.com/python/docs/reference/speech/latest/google.cloud.speech_v2.types.WordInfo)
+warns timing accuracy varies; Chirp3 word confidence is not a correctness probability.
+[SDK async client](https://docs.cloud.google.com/python/docs/reference/speech/latest/google.cloud.speech_v2.services.speech.SpeechAsyncClient)
+exposes retry/timeout; existing explicit retry=None/bounded attempts retained.
+[Pricing](https://cloud.google.com/speech-to-text/pricing) describes per-request
+whole-second rounding and separate channel charging; no unapproved price assumed.
+[Setup](https://docs.cloud.google.com/speech-to-text/docs/setup),
+[IAM](https://docs.cloud.google.com/speech-to-text/docs/iam) and
+[data logging](https://docs.cloud.google.com/speech-to-text/docs/v1/data-logging)
+describe identity/API/billing and project opt-in logging. Published default logging
+behavior does not verify this account. No zero-retention or account-compatibility claim.
+
+| Owner/blocker | Required evidence / next action | Acceptance impact |
+| --- | --- | --- |
+| Cloud/platform operator: approved identity/profile/budget absent | Verify project/API/IAM/model/locale/region/endpoint/recognizer/features/quota/billing/logging; provide approved local credential/profile plus synthetic-transfer and maximum-cost authorization; then one opt-in real smoke | Real smoke open; calls0 |
+| Annotation/review lead: audited labels and held-out audio absent | Acquire licensed independent sessions/families/speakers; audit actual waveform with two reviewers/adjudication; freeze labels/protocol/thresholds before execution; supply private bundle with real outputs/receipt | Empirical WER/slots/timing benchmark BLOCKED; metrics=null |
+| Paket B | Maintain tested offline scorer; validate supplied artifacts and run descriptive benchmark after review | Local scorer no longer waiting for corpus to be implemented |
+| A+B Phase10 | Authenticated bounded ports, durable coordinator/reservation/receipt, private staging ACL/promotion/TTL/cleanup and atomic handler composition | Separate real integration; not circular dependency for B03 standalone |
+
+Frozen1.0.0/readiness false retained. JobResult.artifacts can carry private JSON_REPORT
+without schema extension; ProviderAdapter typed AuthorizedChunk/private return,
+unknown-clock wire representation and correction counters still need explicit
+Phase10 reconciliation/version decision if extended. No placeholder API/handler.
+
+## Previous continuation — standalone private boundary (9 October 2026)
+
+Git audit: `feat/backend-rai`; HEAD and `origin/feat/backend-rai` both
+`da279281f1698197df1efef569f578adb1610cef` (`feat: add audio worker and STT transcript
+lifecycle`). Earlier uncommitted-base descriptions below are historical evidence,
+not the current Git state. Start-of-session tracked tree clean; existing untracked
+docs/pitch, tests/browser and tmp preserved. No stage/commit/push/merge/reset/clean.
+
+**B03.D1/D2 retained; B03.D3 standalone acquisition/submission/revalidation completed.
+B03 overall remains partial/in_progress: real smoke and audited benchmark are open.
+Real A/B composition stays Phase 10, not a prerequisite for D3 acceptance.**
+
+### Implemented boundary and ownership
+
+- `providers/stt/adapter.py`: existing authorization/audio validation extracted into
+  reusable functions; executor behavior retained. No remapping/timing/dedup rewrite.
+- `providers/stt/execution.py:execute_attempt`: injected ChunkAccess + frozen
+  AssetAccess, executor, authoritative checkpoint and per-RPC budget callback.
+  Rights/scope/config/stage/index/size preflight before download; 64KiB range blocks,
+  strict type/length/checksum/WAV checks; monotonic whole-attempt timeout and lease
+  checkpoints across download/RPC/upload/return; exact live attempt guarded by executor.
+  No disk files, DB, evaluator or Package A imports. Caller owns heartbeat and executor
+  closure. Sync port adapters must have bounded transport timeouts/cooperate; this is
+  not a scheduler, hard-kill supervisor or OS resource sandbox.
+- `providers/stt/provenance.py`: canonical raw JSON private artifact, <=8MiB;
+  deterministic attempt/chunk UUID, SHA256/size/scope/source chunk binding,
+  JSON_REPORT + `stt-private-provenance-1` + audio capability. Hypotheses/words/config/
+  protobuf stay in private artifact bytes, never text/reason/Usage/wire extras.
+  Decode rejects altered manifest, noncanonical/duplicate-key JSON and reconstructs
+  every raw field via original protobuf + authoritative B02 audio/metadata/config.
+  This proves self-consistency, not a cryptographic Google response signature.
+- `bindings/stt.py:PrivateTranscriptIngest`: standalone API-side binding, outside
+  pure domain and worker modules. Injected AcceptanceAccess must authenticate staged
+  artifact ownership/scope and resolve active job/attempt/lease/input revision/config/
+  rights **inside caller UOW**, on every replay. Local checks also reject expired
+  leases and mismatched contexts; existing TranscriptLifecycle checks/evidence/audit/
+  event writes remain in that UOW. Exact duplicate preserves first recorded_at and
+  writes no duplicate state; unknown-clock raw yields no invented public segment.
+  Caller owns explicit commit and final job transition/receipt. No handler or HTTP
+  route registered; there is no real coordinator/promotion implementation here.
+- `testing/stt_worker.py`: executable MOCK in-memory transport/authority plus real
+  disposable SQLite acceptance/restart. Actual process import isolation tested.
+  Prototype file placement failed existing AST import rules; moved binding/execution
+  to their appropriate modules, leaving existing boundary assertions unchanged.
+
+Upload generator is explicitly closed on success/failure, and complete consumption
+is required (including consumer-close/early-return negatives). Worker creates no
+scratch files. Remote partial/staged bytes are platform-owned: TTL/promotion/cleanup
+must be reconciled at Phase 10; frozen AssetAccess has no delete/abort port. Restart
+uses fresh attempt/lease and distinct artifact/raw IDs; accepted chunk uniqueness
+prevents a second accepted record. Same-attempt billing across a crashed/restarted
+process is not exactly-once; durable retry/reservation/idempotency remains coordinator
+authority. Mock staging is cleared by the harness's mock platform after completion.
+
+### Actual continuation checks
+
+Python3.12.15 `.venv/Scripts`, uv0.12.23, SDK2.41.0 (`Requires-Python >=3.10`),
+frozen contracts1.0.0, pyproject/uv.lock/generated schemas unchanged. FFmpeg/ffprobe
+versions9.0.2 and binary hashes rechecked against B02.1 (match); PATH process-local.
+Waveform and synthetic manifest hashes rechecked (match historical hashes below).
+
+| Command/check | Actual result |
+| --- | --- |
+| Baseline pytest tests/analysis tests/contracts --track B -q | 359 PASS, no skip, before source edits |
+| Final same suite --tb=short | 432 PASS, no skip (original359 + new73) |
+| New boundary/smoke/evaluator suites | 73 PASS:58 boundary +12 smoke +3 evaluator |
+| pytest tests/contracts --track A -q | 66 PASS |
+| python -m flowlens.testing --track B; .analysis; .audio_worker; .stt; .transcripts | PASS standalone MOCK; provider_calls0 |
+| python -m flowlens.testing.audio_worker --real | PASS actual FFmpeg subprocess, cleaned; provider_calls0 |
+| python -m flowlens.testing.stt_worker | PASS MOCK SDK/private artifact/UOW/restart; disposable-cleaned; readiness false |
+| ruff check backend tests scripts; ruff format --check backend tests scripts | PASS;76 files formatted |
+| mypy B audio/workers/analysis/providers/stt/bindings + five B harnesses | PASS32 native Windows files |
+| mypy --platform linux | PASS56 files; static Linux target, not Linux runtime proof |
+| Full native Windows mypy | Same7 existing POSIX API errors A; no A source edits |
+| python -m flowlens.contracts.generate --check | PASS unchanged frozen schema |
+| bandit -r backend/flowlens -l | PASS0 issues; existing6 suppressions unchanged |
+| pip-audit --local | No known vulnerabilities; unpublished project skipped |
+| uv build --python .venv/Scripts/python.exe --out-dir artifacts/reports/b03-closure-dist | PASS sdist/wheel |
+| git diff --check | PASS |
+
+New tests prove candidate hypothesis/word/timing/config/preparation/SDK/status/hash/
+manifest tampering rejection; scope/owner/input/config/asset/stage/rights negatives;
+late/cancelled/stale/changed-attempt rejection even on duplicate replay; atomic
+evidence/audit/event/no-commit rollback; fresh attempt/restart uniqueness; partial/
+early/closed consumer cleanup; whole-attempt download timeout; unknown clock and
+safe subprocess diagnostics/import isolation. Original deterministic/real FFmpeg
+regressions retain their independent timing and failure assertions.
+Intermediate new-test failures used a wrong plural table name and stale MOCK evidence
+after fresh attempt; corrected harness expectations, not production constraints.
+Lint/Bandit issues in new harness corrected with explicit checks; no new suppressions.
+
+### Real provider smoke — BLOCKED, zero real calls
+
+Reusable entrypoint: `python -m flowlens.providers.stt.smoke`. Default performs no
+credential loading or RPC and emits safe JSON. Actual result: BLOCKED,
+APPROVED_PROFILE_UNAVAILABLE/CREDENTIALS_UNAVAILABLE, provider_calls0, readiness false.
+Safe report: ignored `artifacts/reports/b03-smoke-preflight.json`.
+
+Explicit `--profile <local-approved-json> --credentials <local-credential-file>`
+performs attestation preflight only; `--execute` additionally opts into the single
+paid request. Local profile schema is `SmokeProfile.model_json_schema()`; it requires
+STTConfig, ProviderApproval (matching config digest), quota/rights attestations,
+positive budget and operator conservative per-second price including rounding.
+Require max_calls1/max_attempts1/timeout<=30s and budget>=9 seconds at that price.
+Only pinned synthetic hold-short and its pinned rights manifest are eligible; real
+FFmpeg prepares one mono16kHz PCM16 chunk. Credentials are explicit/injected, never
+implicit ADC. Budget reservation is per invocation, not a project-wide cost ledger.
+Safe output includes SDK/API/Python/config hash, status, call count, latency/usage/
+reserved budget and response hash; actual billed cost remains unknown. No transcript,
+audio, credentials or private paths printed. RPC failure retains attempted call/
+audio/reservation counters; transport cancellation does not reverse billing.
+
+Presence audit: all seven previously listed config/credential/budget env names absent;
+standard ADC absent. **gcloud524.0.0 is installed**, `gcloud auth list` status-only
+inventory finds0 credentialed accounts/no active account; no token was requested.
+This is local credential inventory, not an authenticated audit of cloud settings.
+API enablement/IAM/project/recognizer/features/quota/billing/logging remain UNKNOWN.
+No provisioning/API enablement/logging/billing changes or cloud request performed.
+The real-preparation smoke test injects MOCK SDK explicitly; it is actual FFmpeg
+plumbing evidence only and never real Google success.
+
+Official Google sources rechecked on9 October: [Recognize/IAM/response](https://docs.cloud.google.com/speech-to-text/docs/reference/rest/v2/projects.locations.recognizers/recognize),
+[Chirp3 models/locales/features](https://docs.cloud.google.com/speech-to-text/docs/models/chirp-3),
+[locations](https://docs.cloud.google.com/speech-to-text/docs/locations),
+[quotas10MB/60s](https://docs.cloud.google.com/speech-to-text/docs/quotas),
+[channel/decoding](https://docs.cloud.google.com/speech-to-text/docs/multi-channel),
+[WordInfo offsets/unset confidence](https://docs.cloud.google.com/python/docs/reference/speech/latest/google.cloud.speech_v2.types.WordInfo),
+[async timeout/retry](https://docs.cloud.google.com/python/docs/reference/speech/latest/google.cloud.speech_v2.services.speech.SpeechAsyncClient),
+[account setup](https://docs.cloud.google.com/speech-to-text/docs/setup),
+[opt-in logging terms](https://docs.cloud.google.com/speech-to-text/docs/v1/data-logging-terms).
+Published compatibility is not account compatibility or region approval; MOCK
+mock-project/us/en-US/chirp_3 remains no release profile.
+
+### Evaluation and external blockers
+
+`evaluation/protocols/stt-evaluation.md`, `stt-plan.json` and
+`scripts/evaluation_stt.py` prepare corpus/split/provenance/annotation/cohort audit.
+Actual preflight BLOCKED/metrics=null; report in ignored
+`artifacts/reports/b03-evaluation-preflight.json`. Two manifest entries mean one
+NOT_GOLD tuning waveform and one **planned, absent** held-out acquisition. No cohort
+coverage claimed. Requires two waveform reviewers, adjudication, source/range/channel/
+ambiguity labels and separate domain review; hashes alone cannot unlock scoring.
+No WER, critical-slot accuracy or timestamp quality reported. Actual scorer and
+held-out benchmark remain open until audited artifacts/real outputs exist.
+
+| Blocker/owner | Impact | Required evidence and next action |
+| --- | --- | --- |
+| Cloud/platform operator: no approved profile/identity | Real7.1/7.4 cannot pass | Verify project/API/IAM/model/locale/region/recognizer/features/quota/billing/logging/price/budget; supply approved local config/credential, then opt-in synthetic smoke |
+| Evaluation/annotation lead: labels/held-out corpus absent | Quality7.4 cannot pass | Acquire rights-cleared independent held-out families; two waveform reviewers/adjudication; freeze label/source/split hashes and thresholds; B implements scoring on audited artifacts |
+| A+B at Phase10: real transport/coordinator/staging policy | Real integration not yet demonstrated | Implement authenticated bounded ChunkAccess/AcceptanceAccess, durable checkpoint/budget/receipt and artifact promotion/TTL within shared UOW; run real A/B acceptance |
+
+Frozen `JobResult.artifacts` **can** reference the private JSON_REPORT; no frozen
+schema change is needed for this standalone transport. It has no typed raw field;
+ProviderAdapter.transcribe lacks AuthorizedChunk/private return, and unknown session
+time/correction counters still lack wire representation. Exact codec/transform,
+private artifact access, usage/output-hash/receipt semantics, TTL and handler wiring
+require Phase10 reconciliation; a breaking typed extension needs a version decision.
+See ADR0004 continuation. No handler registered merely because an artifact uploaded.
+
+Next unit remains **B03 real-profile/smoke + annotation/scoring closure**, not B04.
+Readiness false; B03/Phase7/PaketB and G-BE/G-FE/G-DELIVERY not advanced. No persistent
+server/daemon/container started. Task channels, subprocesses, disposable DB/audio
+scratch closed/cleaned; ignored toolchain/build/preflight reports retained. Pytest
+temporary files follow pytest retention. No Package A or existing test edits.
+
+## Historical adapter/lifecycle implementation record
+
 Date: 9 October 2026; branch feat/backend-rai; base SHA
 cdb2b9dae3d16c22a524b8a05b2e5583cc48e0d0 plus existing B01/B02 working tree.
 Existing user changes and untracked docs/pitch, tests/browser, tmp retained.
