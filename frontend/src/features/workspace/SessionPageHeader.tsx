@@ -1,35 +1,47 @@
 import type { ReactNode } from 'react';
-import { MetaSep } from '@/components/layout/PageHeader';
+import { Breadcrumb, MetaSep } from '@/components/layout/PageHeader';
 import { useSessionScope } from '@/hooks/useSessionScope';
-import { SessionLabels } from './SessionHeader';
+import { LensSummary, ModeToggle, RunSelector, SessionLabels } from './SessionHeader';
+
+export interface Crumb {
+  label: string;
+  to?: string;
+}
 
 /**
- * Big-title header for session sub-pages (Review, Debrief, Metrics, Ask):
- * title + "Runway 27 · … · Run #03" meta + session labels, actions on the right.
+ * One header for every session screen except the Workspace (comp 03):
+ * `Sessions › {session} › {area}` breadcrumb, title, a context strip
+ * (run · lens · labels) and actions on the right. The lens toggle always sits
+ * first in the actions so it is in the same place on every screen.
  */
-export function SessionPageHeader({ title, meta, chips, actions }: { title: ReactNode; meta?: ReactNode[]; chips?: ReactNode; actions?: ReactNode }) {
-  const { detail, run } = useSessionScope();
+export function SessionPageHeader({ title, area, crumbs, chips, actions, lens = true }: { title: ReactNode; area: string; crumbs?: Crumb[]; chips?: ReactNode; actions?: ReactNode; lens?: boolean }) {
+  const { detail, run, href } = useSessionScope();
   if (!detail) return null;
-  const runway = detail.layout?.runways[0];
-  const parts = meta ?? [runway ? `Runway ${runway.ends[1]}` : detail.title, detail.context, run ? `Run ${run.label}` : 'No run'];
+  const trail: Crumb[] = [{ label: 'Sessions', to: `/sessions?selected=${detail.id}` }, { label: detail.title, to: href('workspace') }, ...(crumbs ?? [{ label: area }])];
   return (
-    <header className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-      <div className="min-w-0 flex-1">
-        <h1 className="text-[36px] font-medium leading-[1.05] tracking-[-0.04em] text-ink xl:text-[46px]">{title}</h1>
-        <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
-          <p className="flex flex-wrap items-center gap-x-2 text-[17px] text-ink-2 tabular">
-            {parts.map((p, i) => (
-              <span key={i} className="contents">
-                {i > 0 && <MetaSep />}
-                {p}
-              </span>
-            ))}
-          </p>
-          <SessionLabels />
-          {chips}
-        </div>
+    <header className="mb-5 short:mb-3">
+      <div className="fit:short:sr-only">
+        <Breadcrumb items={trail} />
       </div>
-      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2.5">{actions}</div>}
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <h1 className="text-[34px] font-medium leading-[1.05] tracking-[-0.04em] text-ink xl:text-[42px] short:xl:text-[34px]">{title}</h1>
+        {(lens || actions) && (
+          <div className="flex flex-wrap items-center gap-2.5">
+            {lens && <ModeToggle />}
+            {actions}
+          </div>
+        )}
+      </div>
+      {/* Context strip spans the full width so labels never wrap under the actions. */}
+      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 short:mt-1">
+        <p className="flex flex-wrap items-center gap-x-2 text-[16px] text-ink-2 tabular">
+          {run ? <RunSelector /> : 'No run'}
+          <MetaSep />
+          <LensSummary />
+        </p>
+        <SessionLabels />
+        {chips}
+      </div>
     </header>
   );
 }

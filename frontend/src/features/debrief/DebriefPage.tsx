@@ -4,6 +4,7 @@ import {
   CalendarClock,
   ChevronRight,
   CircleDot,
+  Download,
   FileDiff,
   FilePlus2,
   FileText,
@@ -20,11 +21,11 @@ import { Link, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import { isApiError } from '@/api/errors';
 import type { BriefSection, BriefView, JournalEntry } from '@/api/types';
-import { ScopeBanners, SessionLabels } from '@/features/workspace/SessionHeader';
+import { ScopeBanners } from '@/features/workspace/SessionHeader';
+import { SessionPageHeader } from '@/features/workspace/SessionPageHeader';
 import { IconTile, MoreButton } from '@/components/domain/primitives';
 import { EvidenceChip } from '@/components/domain/evidence';
 import { Callout, EmptyState, ErrorState, LoadingRows } from '@/components/domain/states';
-import { MetaSep } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Segmented, Select } from '@/components/ui/controls';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/menu';
@@ -35,6 +36,9 @@ import { useSessionScope } from '@/hooks/useSessionScope';
 import { formatClock, formatDateTimeUtc } from '@/lib/time';
 import { cn } from '@/lib/utils';
 import { ExportPanel } from './ExportPanel';
+import { useFindings } from '@/features/workspace/queries';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useBriefs, useCreateBrief, useJournal } from './queries';
 
 const JOURNAL_DOT: Record<JournalEntry['tone'], string> = { data: 'bg-data', discrepancy: 'bg-discrepancy', muted: 'bg-[#a7adb6]' };
@@ -100,7 +104,7 @@ function Journal({ brief }: { brief: BriefView }) {
   // "Key" = events the brief cites, plus findings, corrections and reviews.
   const entries = scope === 'ALL' ? all : all.filter((e) => cited.has(e.label) || e.kind === 'FINDING' || e.kind === 'CORRECTION' || e.kind === 'REVIEW');
   return (
-    <section aria-labelledby="journal-title" className="card p-5 xl:sticky xl:top-6">
+    <section aria-labelledby="journal-title" className="card p-5">
       <div className="mb-5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <h2 id="journal-title" className="text-[22px] font-semibold tracking-[-0.025em] text-ink">
@@ -126,11 +130,16 @@ function Journal({ brief }: { brief: BriefView }) {
       ) : entries.length === 0 ? (
         <EmptyState className="py-8" title="No journal events yet" />
       ) : (
-        <ol aria-label="Journal events" className="scrollbar-thin -mr-2 max-h-[calc(100dvh-260px)] overflow-y-auto pr-2">
+        <ScrollArea
+          as="ol"
+          aria-label="Journal events"
+          className="-mr-2 max-h-[calc(100dvh-250px)] min-h-[240px] pr-2"
+          moreLabel={() => <p className="pt-2 text-center text-[12.5px] text-ink-3">Scroll for more · {entries.length} events</p>}
+        >
           {entries.map((e, i) => (
             <JournalRow key={e.id} e={e} last={i === entries.length - 1} />
           ))}
-        </ol>
+        </ScrollArea>
       )}
     </section>
   );
@@ -297,10 +306,46 @@ function Summary({ brief, latest, onOpenLatest }: { brief: BriefView; latest: Br
   );
 }
 
+/* Review status ───────────────────────────────────────────────────── */
+
+/** Review progress for the full session, with a direct link to the next unreviewed finding. */
+function ReviewStatus() {
+  const findings = useFindings();
+  const { href } = useSessionScope();
+  const all = findings.data ?? [];
+  const open = all.filter((f) => f.finding.status === 'OPEN' || f.finding.status === 'UNDER_REVIEW');
+  const done = all.length - open.length;
+  return (
+    <section aria-labelledby="review-status-title" className="card p-5">
+      <div className="flex items-center justify-between gap-3">
+        <h2 id="review-status-title" className="text-[18px] font-semibold tracking-[-0.02em] text-ink">
+          Review status
+        </h2>
+        <span className="text-[13.5px] text-ink-2 tabular">
+          <span className="font-semibold text-ink">{done}</span> of {all.length} reviewed
+        </span>
+      </div>
+      <div role="progressbar" aria-label="Findings reviewed" aria-valuemin={0} aria-valuemax={all.length} aria-valuenow={done} className="mt-3 h-1.5 overflow-hidden rounded-full bg-track">
+        <div className="h-full rounded-full bg-data" style={{ width: `${all.length ? (done / all.length) * 100 : 0}%` }} />
+      </div>
+      {findings.data &&
+        (open[0] ? (
+          <Button asChild size="sm" variant="secondary" className="mt-4 w-full">
+            <Link to={href('review/findings', { finding: open[0].finding.id })}>
+              Continue reviewing · {open[0].label} <ArrowRight />
+            </Link>
+          </Button>
+        ) : (
+          <p className="mt-3 text-[13.5px] text-ink-2">Every finding has a reviewer decision. A new brief revision reflects them.</p>
+        ))}
+    </section>
+  );
+}
+
 /* Page ─────────────────────────────────────────────────────────────── */
 
 export function DebriefPage() {
-  const { detail, run, archived, sid } = useSessionScope();
+  const { detail, archived, sid } = useSessionScope();
   const { can } = useAuth();
   const connected = useConnected();
   const briefs = useBriefs();
@@ -319,7 +364,6 @@ export function DebriefPage() {
       { replace: true },
     );
   if (!detail) return null;
-  const runway = detail.layout?.runways[0];
   const canCreate = can('export.create') && !archived && connected && !create.isPending;
 
   const createRevision = () =>
@@ -333,48 +377,54 @@ export function DebriefPage() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 flex-1">
-          <h1 className="text-[36px] font-medium leading-[1.05] tracking-[-0.04em] text-ink xl:text-[46px]">Debrief</h1>
-          <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
-            <p className="flex flex-wrap items-center gap-x-2 text-[17px] text-ink-2 tabular">
-              {runway ? `Runway ${runway.ends[1]}` : detail.title}
-              <MetaSep />
-              {detail.context}
-              <MetaSep />
-              {run ? `Run ${run.label}` : 'No run'}
-            </p>
-            <SessionLabels />
-            {detail.manifest.domain_validation !== 'DOMAIN_REVIEWED' && (
-              <span className="inline-flex h-[30px] items-center gap-1.5 rounded-full bg-notice-tint px-3 text-[13.5px] font-medium text-notice">
-                <AlertTriangle aria-hidden className="size-[15px]" /> Not domain reviewed
+      <SessionPageHeader
+        title="Debrief"
+        area="Debrief"
+        lens={false}
+        chips={
+          detail.manifest.domain_validation !== 'DOMAIN_REVIEWED' && (
+            <span className="inline-flex h-[30px] items-center gap-1.5 rounded-full bg-notice-tint px-3 text-[13.5px] font-medium text-notice">
+              <AlertTriangle aria-hidden className="size-[15px]" /> Not domain reviewed
+            </span>
+          )
+        }
+        actions={
+          <>
+            {list.length > 0 && selected && (
+              <Select
+                label="Brief revision"
+                value={selected.brief.id}
+                onValueChange={setBrief}
+                icon={<FileText aria-hidden className="text-ink-2" />}
+                options={list.map((b) => ({ value: b.brief.id, label: `${b.label.replace('Brief revision', 'Brief rev.')}${b.stale ? ' · stale' : ''}` }))}
+              />
+            )}
+            {selected && (
+              <span className="inline-flex h-11 items-center gap-2 rounded-control border border-hairline bg-surface px-3.5 text-[14px] font-medium text-ink shadow-control tabular">
+                <CalendarClock aria-hidden className="size-4 text-ink-2" /> Brief as of {formatClock(selected.brief.as_of_ms)}
               </span>
             )}
-          </div>
-        </div>
-        <div className="flex shrink-0 flex-wrap items-center gap-2.5">
-          {list.length > 0 && selected && (
-            <Select
-              label="Brief revision"
-              value={selected.brief.id}
-              onValueChange={setBrief}
-              icon={<FileText aria-hidden className="text-ink-2" />}
-              options={list.map((b) => ({ value: b.brief.id, label: `${b.label.replace('Brief revision', 'Brief rev.')}${b.stale ? ' · stale' : ''}` }))}
-            />
-          )}
-          {selected && (
-            <span className="inline-flex h-11 items-center gap-2 rounded-control border border-hairline bg-surface px-3.5 text-[14px] font-medium text-ink shadow-control tabular">
-              <CalendarClock aria-hidden className="size-4 text-ink-2" /> As-of replay {formatClock(selected.brief.as_of_ms)}
-            </span>
-          )}
-          {can('export.create') && (
-            <Button variant="primary" className="hidden md:inline-flex" onClick={createRevision} disabled={!canCreate}>
-              {create.isPending ? <Loader2 className="animate-spin" /> : <FilePlus2 />}
-              {create.isPending ? 'Creating…' : 'Create brief revision'}
-            </Button>
-          )}
-        </div>
-      </header>
+            {can('export.create') && (
+              <Button variant="secondary" className="hidden md:inline-flex" onClick={createRevision} disabled={!canCreate}>
+                {create.isPending ? <Loader2 className="animate-spin" /> : <FilePlus2 />}
+                {create.isPending ? 'Creating…' : 'Create brief revision'}
+              </Button>
+            )}
+            {selected && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="primary">
+                    <Download /> Export report
+                  </Button>
+                </SheetTrigger>
+                <SheetContent title="Export report" description={`${selected.label} · as of ${formatClock(selected.brief.as_of_ms)} · generated locally by the MOCK adapter; original sources stay stored.`}>
+                  <ExportPanel brief={selected} sid={sid} />
+                </SheetContent>
+              </Sheet>
+            )}
+          </>
+        }
+      />
       <ScopeBanners />
 
       {briefs.isError && !briefs.data ? (
@@ -382,8 +432,8 @@ export function DebriefPage() {
           <ErrorState error={briefs.error} onRetry={() => briefs.refetch()} />
         </div>
       ) : !briefs.data ? (
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(280px,320px)_minmax(0,1fr)_minmax(310px,350px)]">
-          {[0, 1, 2].map((i) => (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(300px,360px)]">
+          {[0, 1].map((i) => (
             <div key={i} className="card p-5">
               <LoadingRows rows={5} />
             </div>
@@ -396,11 +446,12 @@ export function DebriefPage() {
           </EmptyState>
         </div>
       ) : (
-        <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(270px,320px)_minmax(0,1fr)] xl:grid-cols-[minmax(270px,310px)_minmax(0,1fr)_minmax(310px,350px)]">
-          <Journal brief={selected} />
+        // Two columns (UX-4.1): the summary is the main reading area; review status and journal sit beside it.
+        <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(300px,360px)] 2xl:grid-cols-[minmax(0,1fr)_400px]">
           <Summary brief={selected} latest={latest} onOpenLatest={() => latest && setBrief(latest.brief.id)} />
-          <div className="lg:col-span-2 xl:col-span-1 xl:sticky xl:top-6">
-            <ExportPanel brief={selected} sid={sid} />
+          <div className="space-y-5 lg:sticky lg:top-6">
+            <ReviewStatus />
+            <Journal brief={selected} />
           </div>
         </div>
       )}

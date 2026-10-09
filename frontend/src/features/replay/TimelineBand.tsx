@@ -1,4 +1,4 @@
-import { AudioLines, ChevronFirst, ChevronLast, Keyboard, ListVideo, LocateFixed, Pause, Play, Settings2, VolumeX, X } from 'lucide-react';
+import { AudioLines, ChevronFirst, ChevronLast, ChevronsDownUp, ChevronsUpDown, Keyboard, ListVideo, LocateFixed, Pause, Play, Settings2, VolumeX, X } from 'lucide-react';
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { Link } from 'react-router';
 import type { TimeRange, WaveformView, WorkspaceSnapshot } from '@/api/types';
@@ -9,6 +9,7 @@ import { Input, Kbd, Label } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/menu';
 import { Tooltip } from '@/components/ui/tooltip';
 import { useElementSize } from '@/hooks/useElementSize';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useStreamState } from '@/hooks/useSessionStream';
 import { clamp, formatClock, formatOffset, parseOffset } from '@/lib/time';
 import { cn } from '@/lib/utils';
@@ -226,6 +227,10 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
   const leaderName = useStreamState((s) => s.leaderName);
   const connected = useStreamState((s) => s.connection === 'CONNECTED');
   const [showMarkers, setShowMarkers] = useState(true);
+  // Compact by default below 1000 px tall so the workspace fits the viewport (D-2); the user can expand.
+  const isShort = useMediaQuery('(max-height: 999px)');
+  const [expanded, setExpanded] = useState<boolean | null>(null);
+  const compact = !(expanded ?? !isShort);
   const [lanesRef, lanes] = useElementSize<HTMLDivElement>();
   const drag = useRef<{ kind: 'seek' | 'range' | 'start' | 'end'; anchor: number } | null>(null);
   useReplayShortcuts(markers);
@@ -294,7 +299,8 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
   };
 
   const channelRows = waveforms ?? [];
-  const laneH = 40;
+  const laneH = compact ? 20 : 40;
+  const ctl = compact ? 'size-9 rounded-[11px]' : 'size-11 rounded-[13px]';
   const cursorX = xOf(cursor);
   const playing = status === 'PLAYING';
   const following = view === 'FOLLOW';
@@ -309,18 +315,18 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
   }, [duration, win, start, end, width]);
 
   return (
-    <Card as="section" aria-label="Replay timeline" className={cn('p-4 sm:px-5 sm:py-4', className)}>
+    <Card as="section" aria-label="Replay timeline" className={cn('p-4 sm:px-5', compact ? 'sm:py-3' : 'sm:py-4', className)}>
       {/* Transport */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
+      <div className={cn('flex flex-wrap items-center gap-y-3', compact ? 'gap-x-2' : 'gap-x-3')}>
         <button
           type="button"
           onClick={() => r().toggle()}
           aria-label={playing ? 'Pause replay' : 'Play replay'}
-          className="inline-flex size-[52px] shrink-0 items-center justify-center rounded-full bg-action text-on-action shadow-action transition-colors hover:bg-action-hover"
+          className={cn('inline-flex shrink-0 items-center justify-center rounded-full bg-action text-on-action shadow-action transition-colors hover:bg-action-hover', compact ? 'size-10' : 'size-[52px]')}
         >
           {playing ? <Pause aria-hidden className="size-5 fill-current" /> : <Play aria-hidden className="ml-0.5 size-5 fill-current" />}
         </button>
-        <p className="min-w-[118px] text-[17px] font-medium text-ink tabular" aria-live="off">
+        <p className={cn('min-w-[118px] font-medium text-ink tabular', compact ? 'text-[15.5px]' : 'text-[17px]')} aria-live="off">
           {formatClock(cursor)} <span className="text-ink-3">/</span> {formatClock(duration)}
         </p>
         <div className="flex items-center gap-1.5">
@@ -332,7 +338,7 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
                 const prev = [...markers].reverse().find((m) => m.t < cursor - 250);
                 r().seek(prev ? prev.t : 0);
               }}
-              className="inline-flex size-11 items-center justify-center rounded-[13px] border border-hairline bg-surface text-ink shadow-control hover:bg-sunken"
+              className={cn('inline-flex items-center justify-center border border-hairline bg-surface text-ink shadow-control hover:bg-sunken', ctl)}
             >
               <ChevronFirst aria-hidden className="size-[19px]" />
             </button>
@@ -345,7 +351,7 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
                 const next = markers.find((m) => m.t > cursor + 250);
                 if (next) r().seek(next.t);
               }}
-              className="inline-flex size-11 items-center justify-center rounded-[13px] border border-hairline bg-surface text-ink shadow-control hover:bg-sunken"
+              className={cn('inline-flex items-center justify-center border border-hairline bg-surface text-ink shadow-control hover:bg-sunken', ctl)}
             >
               <ChevronLast aria-hidden className="size-[19px]" />
             </button>
@@ -356,7 +362,7 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
           tone="data"
           value={String(speed)}
           onChange={(v) => r().setSpeed(Number(v) as Speed)}
-          className="h-11 gap-0.5 rounded-[14px] border border-hairline bg-surface p-[3px] shadow-control [&>button]:h-[36px] [&>button]:min-w-[54px] [&>button]:rounded-[11px] [&>button]:px-3 [&>button]:text-[15px] [&>button]:tabular"
+          className={cn('gap-0.5 rounded-[14px] border border-hairline bg-surface p-[3px] shadow-control [&>button]:min-w-[50px] [&>button]:rounded-[11px] [&>button]:px-3 [&>button]:text-[15px] [&>button]:tabular', compact ? 'h-9 [&>button]:h-[28px]' : 'h-11 [&>button]:h-[36px]')}
           options={SPEEDS.map((s) => ({ value: String(s), label: `${s}×` }))}
         />
         <Tooltip content={connected ? `Follow ${leaderName}'s replay position (F)` : 'Follow leader is unavailable while disconnected'}>
@@ -366,7 +372,8 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
             disabled={!connected}
             onClick={() => r().setView(following ? 'LOCAL' : 'FOLLOW')}
             className={cn(
-              'inline-flex h-11 items-center gap-2 rounded-[14px] border px-4 text-[15px] font-medium shadow-control transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+              'inline-flex items-center gap-2 rounded-[14px] border px-4 text-[15px] font-medium shadow-control transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+              compact ? 'h-9 px-3 text-[14px]' : 'h-11',
               following ? 'border-data/30 bg-data-tint text-data-strong' : 'border-hairline bg-surface text-ink hover:bg-sunken',
             )}
           >
@@ -375,29 +382,40 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
           </button>
         </Tooltip>
         <span className="inline-flex h-8 items-center gap-1.5 rounded-full bg-track px-3 text-[12.5px] font-medium text-ink-2">
-          <VolumeX aria-hidden className="size-3.5" /> Visual replay · audio not loaded (MOCK)
+          <VolumeX aria-hidden className="size-3.5" /> Visual replay · no audio (MOCK)
         </span>
         <div className="ml-auto flex items-center gap-2">
+          <Tooltip content={compact ? 'Expand timeline lanes' : 'Compact timeline lanes'}>
+            <button
+              type="button"
+              aria-pressed={!compact}
+              aria-label="Expanded timeline lanes"
+              onClick={() => setExpanded(compact)}
+              className={cn('inline-flex items-center justify-center border border-hairline bg-surface text-ink shadow-control transition-colors hover:bg-sunken', ctl)}
+            >
+              {compact ? <ChevronsUpDown aria-hidden className="size-[19px]" /> : <ChevronsDownUp aria-hidden className="size-[19px]" />}
+            </button>
+          </Tooltip>
           <Tooltip content={showMarkers ? 'Hide event markers' : 'Show event markers'}>
             <button
               type="button"
               aria-pressed={showMarkers}
               aria-label="Event markers"
               onClick={() => setShowMarkers((v) => !v)}
-              className={cn('inline-flex size-11 items-center justify-center rounded-[13px] border shadow-control transition-colors', showMarkers ? 'border-data/25 bg-data-tint text-data-strong' : 'border-hairline bg-surface text-ink hover:bg-sunken')}
+              className={cn('inline-flex items-center justify-center border shadow-control transition-colors', ctl, showMarkers ? 'border-data/25 bg-data-tint text-data-strong' : 'border-hairline bg-surface text-ink hover:bg-sunken')}
             >
               <AudioLines aria-hidden className="size-[19px]" />
             </button>
           </Tooltip>
           <Tooltip content="Open transcript at this position">
-            <Link to={transcriptHref} aria-label="Open transcript" className="inline-flex size-11 items-center justify-center rounded-[13px] border border-hairline bg-surface text-ink shadow-control hover:bg-sunken">
+            <Link to={transcriptHref} aria-label="Open transcript" className={cn('inline-flex items-center justify-center border border-hairline bg-surface text-ink shadow-control hover:bg-sunken', ctl)}>
               <ListVideo aria-hidden className="size-[19px]" />
             </Link>
           </Tooltip>
           <Popover>
             <Tooltip content="Keyboard shortcuts">
               <PopoverTrigger asChild>
-                <button type="button" aria-label="Keyboard shortcuts" className="inline-flex size-11 items-center justify-center rounded-[13px] border border-hairline bg-surface text-ink shadow-control hover:bg-sunken">
+                <button type="button" aria-label="Keyboard shortcuts" className={cn('inline-flex items-center justify-center border border-hairline bg-surface text-ink shadow-control hover:bg-sunken', ctl)}>
                   <Settings2 aria-hidden className="size-[19px]" />
                 </button>
               </PopoverTrigger>
@@ -422,8 +440,8 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
       </div>
 
       {/* Lanes */}
-      <div className="mt-3 grid grid-cols-[96px_minmax(0,1fr)] gap-x-3 sm:grid-cols-[112px_minmax(0,1fr)]">
-        <div className="flex h-7 items-end">
+      <div className={cn('grid grid-cols-[96px_minmax(0,1fr)] gap-x-3 sm:grid-cols-[112px_minmax(0,1fr)]', compact ? 'mt-1.5' : 'mt-3')}>
+        <div className={cn('flex items-end', compact ? 'h-6' : 'h-7')}>
           <Segmented
             label="Timeline zoom"
             size="sm"
@@ -437,7 +455,7 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
             ]}
           />
         </div>
-        <div className="relative h-7">
+        <div className={cn('relative', compact ? 'h-6' : 'h-7')}>
           {gaps
             .filter((g) => g.end_ms >= start && g.start_ms <= end)
             .map((g) => (
@@ -467,8 +485,8 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
 
         <div className="space-y-1">
           {channelRows.map((w, i) => (
-            <div key={w.channel} className="flex items-center gap-2.5 text-[15.5px] font-medium text-ink" style={{ height: laneH }}>
-              <AudioLines aria-hidden className={cn('size-[18px]', i === 0 ? 'text-data' : 'text-ink-3')} />
+            <div key={w.channel} className={cn('flex items-center gap-2.5 font-medium text-ink', compact ? 'text-[13.5px]' : 'text-[15.5px]')} style={{ height: laneH }}>
+              <AudioLines aria-hidden className={cn(compact ? 'size-4' : 'size-[18px]', i === 0 ? 'text-data' : 'text-ink-3')} />
               {w.label}
             </div>
           ))}

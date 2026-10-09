@@ -1,7 +1,6 @@
-import { AlertTriangle, CircleCheck, CircleHelp, CloudOff, ExternalLink, Info, Loader2, Lock, WifiOff } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, CircleCheck, CircleHelp, CloudOff, ExternalLink, Info, Loader2, Lock, WifiOff } from 'lucide-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { toast } from 'sonner';
 import { isApiError } from '@/api/errors';
 import type { OptionReviewStatus, OptionView } from '@/api/types';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -13,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioRow } from '@/components/ui/controls';
 import { Label, Textarea } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/menu';
+import { DraftGuard } from '@/hooks/useDraftGuard';
 import { useEvidence } from '@/hooks/useEvidence';
 import { useConnected } from '@/hooks/useSessionStream';
 import { useSessionScope } from '@/hooks/useSessionScope';
@@ -102,13 +102,14 @@ function OptionDetail({ o }: { o: OptionView }) {
   );
 }
 
-function OptionReviewForm({ o }: { o: OptionView }) {
+function OptionReviewForm({ o, onNext, nextLabel }: { o: OptionView; onNext?: () => void; nextLabel?: string | null }) {
   const { can } = useAuth();
   const { archived } = useSessionScope();
   const { open } = useEvidence();
   const connected = useConnected();
   const [decision, setDecision] = useState<Decision | ''>('');
   const [reason, setReason] = useState('');
+  const [saved, setSaved] = useState(false);
   const mutation = useReviewOption(o.option.id);
   const writable = can('review.write') && o.review_allowed && !archived;
   const ready = !!decision && !!reason.trim() && connected && !mutation.isPending;
@@ -143,15 +144,27 @@ function OptionReviewForm({ o }: { o: OptionView }) {
               { decision, reason: reason.trim() },
               {
                 onSuccess: () => {
-                  toast.success(`Rating saved for ${o.label}`, { description: 'Append-only — earlier ratings stay in history.' });
                   setDecision('');
                   setReason('');
+                  setSaved(true);
                 },
               },
             );
           }}
         >
-          <RadioGroup value={decision} onValueChange={(v) => setDecision(v as Decision)} aria-label="Rating" className="gap-0 divide-y divide-hairline-soft" disabled={!connected}>
+          <DraftGuard dirty={!!decision || !!reason.trim()} what="rating" />
+          {saved && (
+            <div role="status" className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[14px] bg-ready-tint px-3.5 py-2.5 text-[14px] text-ink">
+              <CheckCircle2 aria-hidden className="size-[18px] text-ready" />
+              <span className="flex-1">Rating saved for {o.label} · append-only.</span>
+              {onNext && nextLabel && (
+                <Button size="sm" variant="primary" onClick={onNext}>
+                  Next option · {nextLabel} <ArrowRight />
+                </Button>
+              )}
+            </div>
+          )}
+          <RadioGroup value={decision} onValueChange={(v) => { setDecision(v as Decision); setSaved(false); }} aria-label="Rating" className="gap-0 divide-y divide-hairline-soft" disabled={!connected}>
             {DECISIONS.map((d) => (
               <RadioRow key={d.value} value={d.value} label={d.label} className="rounded-none py-3 first:rounded-t-[12px] last:rounded-b-[12px]" />
             ))}
@@ -159,7 +172,7 @@ function OptionReviewForm({ o }: { o: OptionView }) {
           <Label htmlFor={`opt-reason-${o.option.id}`} className="mt-5 block text-[15px] font-semibold">
             Rating reason <span className="font-normal text-ink-2">(required)</span>
           </Label>
-          <Textarea id={`opt-reason-${o.option.id}`} value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} placeholder="Write an evidence-based reason" className="mt-2 min-h-[110px]" />
+          <Textarea id={`opt-reason-${o.option.id}`} value={reason} onChange={(e) => { setReason(e.target.value); setSaved(false); }} maxLength={500} placeholder="Write an evidence-based reason" className="mt-2 min-h-[110px]" />
           <p className="mt-1.5 flex justify-between gap-2 text-[12.5px] text-ink-3">
             <span>Choose a rating and add a reason before saving.</span>
             <span className="tabular">{reason.length}/500</span>
@@ -200,6 +213,17 @@ export function OptionsPage() {
   const list = data?.options ?? [];
   const selectedId = params.get('option') ?? list[0]?.option.id ?? null;
   const selected = list.find((o) => o.option.id === selectedId) ?? null;
+  const select = (id: string) =>
+    setParams(
+      (p) => {
+        const n = new URLSearchParams(p);
+        n.set('option', id);
+        return n;
+      },
+      { replace: true },
+    );
+  const at = list.findIndex((o) => o.option.id === selectedId);
+  const nextOption = at >= 0 ? (list[at + 1] ?? null) : null;
 
   if (options.isError && !data)
     return (
@@ -247,16 +271,7 @@ export function OptionsPage() {
                     <button
                       type="button"
                       aria-current={active ? 'true' : undefined}
-                      onClick={() =>
-                        setParams(
-                          (p) => {
-                            const n = new URLSearchParams(p);
-                            n.set('option', o.option.id);
-                            return n;
-                          },
-                          { replace: true },
-                        )
-                      }
+                      onClick={() => select(o.option.id)}
                       className={cn('group flex w-full items-center gap-3 rounded-[16px] px-4 py-3.5 text-left transition-colors', active ? 'bg-data-tint/80 shadow-[inset_3px_0_0_0_#2563eb]' : 'hover:bg-sunken')}
                     >
                       <span className="min-w-0 flex-1">
@@ -277,7 +292,7 @@ export function OptionsPage() {
               </section>
               <section aria-label="Evaluator rating" className="card p-6 lg:col-span-2 xl:col-span-1">
                 <DesktopOnly what="Rating options">
-                  <OptionReviewForm key={selected.option.id} o={selected} />
+                  <OptionReviewForm key={selected.option.id} o={selected} onNext={nextOption ? () => select(nextOption.option.id) : undefined} nextLabel={nextOption?.label ?? null} />
                 </DesktopOnly>
               </section>
             </>

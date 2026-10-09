@@ -4,14 +4,14 @@ import { Link, Navigate, NavLink, useParams } from 'react-router';
 import type { EntityInfo, EntityMemoryView, HistoryItem, OpenLoop } from '@/api/types';
 import { useReplay } from '@/features/replay/store';
 import { useEntityMemory, useRunwayMemory, useSnapshot } from '@/features/workspace/queries';
-import { ScopeBanners } from '@/features/workspace/SessionHeader';
+import { LensSummary, ModeToggle, RunSelector, ScopeBanners } from '@/features/workspace/SessionHeader';
 import { LayoutMini } from '@/components/domain/LayoutMini';
 import { Card, CardHeader, CodeChip, MoreButton } from '@/components/domain/primitives';
 import { EmptyState, ErrorState, LoadingRows } from '@/components/domain/states';
 import { Quote } from '@/components/domain/evidence';
 import { Breadcrumb, MetaSep } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/menu';
 import { Tooltip } from '@/components/ui/tooltip';
 import { useEvidence } from '@/hooks/useEvidence';
 import { useSessionScope } from '@/hooks/useSessionScope';
@@ -27,13 +27,12 @@ export function useMemoryLinks() {
 
 /* ── Header ─────────────────────────────────────────────────────────── */
 function MemoryHeader({ title, entity, onOpenEvidence }: { title: string; entity: EntityInfo | null; onOpenEvidence: (() => void) | null }) {
-  const { detail, run, mode, setMode, asOf } = useSessionScope();
+  const { detail, run } = useSessionScope();
   const link = useMemoryLinks();
   if (!detail) return null;
-  const runway = detail.layout?.runways[0];
   return (
     <header className="mb-5">
-      <Breadcrumb items={[{ label: 'Workspace', to: link('workspace') }, { label: 'Memory' }]} />
+      <Breadcrumb items={[{ label: 'Sessions', to: `/sessions?selected=${detail.id}` }, { label: detail.title, to: link('workspace') }, { label: 'Memory' }, ...(entity ? [{ label: entity.callsign }] : [])]} />
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -43,15 +42,12 @@ function MemoryHeader({ title, entity, onOpenEvidence }: { title: string; entity
               <CodeChip tone="neutral" className="bg-[#fff1e8] text-[#a2470f]">
                 Mock
               </CodeChip>
-              <span className={cn('inline-flex h-7 items-center rounded-full px-3 text-[14px] font-medium', mode === 'AS_KNOWN' ? 'bg-data-tint text-data-strong' : 'bg-track text-ink')}>{mode === 'AS_KNOWN' ? 'As-known' : 'Debrief'}</span>
             </div>
           </div>
           <p className="mt-2.5 flex flex-wrap items-center gap-x-2 text-[18px] text-ink-2 tabular">
-            {entity && runway ? `Runway ${runway.ends[1]}` : detail.title}
+            {run ? <RunSelector /> : 'No run'}
             <MetaSep />
-            {formatOffset(asOf)}
-            <MetaSep />
-            {run ? `Run ${run.label}` : 'No run'}
+            <LensSummary />
             {entity && (
               <>
                 <MetaSep />
@@ -60,7 +56,8 @@ function MemoryHeader({ title, entity, onOpenEvidence }: { title: string; entity
             )}
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <ModeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <MoreButton label="Memory options" className="size-11" />
@@ -74,10 +71,6 @@ function MemoryHeader({ title, entity, onOpenEvidence }: { title: string; entity
                   </Link>
                 </DropdownMenuItem>
               ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => setMode(mode === 'AS_KNOWN' ? 'DEBRIEF' : 'AS_KNOWN')}>
-                <Layers /> Switch to {mode === 'AS_KNOWN' ? 'Debrief' : 'As-known'}
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           {onOpenEvidence && (

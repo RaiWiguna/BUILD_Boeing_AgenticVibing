@@ -3,11 +3,10 @@ import { useId, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { isApiError } from '@/api/errors';
 import type { BriefView, ExportFormat, ExportJob } from '@/api/types';
-import { MoreButton, StatusPill } from '@/components/domain/primitives';
+import { StatusPill } from '@/components/domain/primitives';
 import { DesktopOnly, LoadingRows } from '@/components/domain/states';
 import { Button } from '@/components/ui/button';
 import { Segmented, Switch } from '@/components/ui/controls';
-import { Tooltip } from '@/components/ui/tooltip';
 import { useConnected } from '@/hooks/useSessionStream';
 import { useSessionScope } from '@/hooks/useSessionScope';
 import type { StatusMeta } from '@/lib/status';
@@ -108,15 +107,8 @@ export function ExportPanel({ brief }: { brief: BriefView; sid: string }) {
     );
 
   return (
-    <section aria-labelledby="export-title" className="card p-5">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 id="export-title" className="text-[22px] font-semibold tracking-[-0.025em] text-ink">
-          Export report
-        </h2>
-        <Tooltip content="Exports are generated locally by the MOCK adapter. Original sources stay stored.">
-          <MoreButton label="About exports" />
-        </Tooltip>
-      </div>
+    // Rendered inside the "Export report" sheet (decision D-4); the sheet provides the title.
+    <section aria-label="Export options">
 
       {!p ? (
         <LoadingRows rows={4} />

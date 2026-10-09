@@ -3,7 +3,7 @@ import { ArrowUp, CircleCheck, CircleHelp, CircleSlash, FlaskConical, Loader2, M
 import { useState } from 'react';
 import { isApiError } from '@/api/errors';
 import type { QueryResultView, QueryStatus } from '@/api/types';
-import { ModeToggle, ScopeBanners } from '@/features/workspace/SessionHeader';
+import { ScopeBanners } from '@/features/workspace/SessionHeader';
 import { SessionPageHeader } from '@/features/workspace/SessionPageHeader';
 import { CodeChip, StatusPill } from '@/components/domain/primitives';
 import { EvidenceChip } from '@/components/domain/evidence';
@@ -104,12 +104,12 @@ export function AskPage() {
     <div className="flex min-h-full flex-col">
       <SessionPageHeader
         title="Ask"
+        area="Ask"
         chips={
           <span className="inline-flex h-[30px] items-center gap-1.5 rounded-full bg-[#f3eefe] px-3 text-[13.5px] font-medium text-[#6941c6]">
             <FlaskConical aria-hidden className="size-[15px]" /> P1 · Experimental
           </span>
         }
-        actions={<ModeToggle />}
       />
       <ScopeBanners />
       <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -119,7 +119,7 @@ export function AskPage() {
               Ask about this session
             </h2>
             <p className="mt-1 text-[14px] text-ink-2">
-              Answers use only evidence available {mode === 'DEBRIEF' ? 'in Debrief' : 'As-known'} at <span className="font-medium text-ink tabular">{formatClock(asOf)}</span>. Read-only — nothing is changed or sent.
+              Answers use only evidence {mode === 'DEBRIEF' ? 'recorded up to' : 'available As-known at'} <span className="font-medium text-ink tabular">{formatClock(asOf)}</span>. Read-only — nothing is changed or sent.
             </p>
             <form
               className="relative mt-4"

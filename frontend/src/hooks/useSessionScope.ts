@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef } from 'react';
-import { useParams, useSearchParams } from 'react-router';
+import { useLocation, useParams, useSearchParams } from 'react-router';
 import { qk } from '@/api/queryKeys';
 import type { ReplayMode } from '@/api/types';
 import { useReplay, useQueryAsOf } from '@/features/replay/store';
+import { areaFromPath, lensAreaOf, parseLens, scopeFromParams, sessionHref, type LinkFocus, type SessionArea } from '@/lib/links';
 import { useApi } from './useApi';
 
 const LAST_SESSION_KEY = 'flowlens.lastSession';
@@ -13,6 +14,17 @@ export function rememberSession(id: string) {
     localStorage.setItem(LAST_SESSION_KEY, id);
   } catch {
     /* preference only */
+  }
+}
+
+const LAST_AREA_KEY = 'flowlens.lastArea';
+
+/** Area last opened in the remembered session, for the Sessions "Continue" card. */
+export function lastArea(): SessionArea {
+  try {
+    return (localStorage.getItem(LAST_AREA_KEY) as SessionArea | null) ?? 'workspace';
+  } catch {
+    return 'workspace';
   }
 }
 
@@ -26,7 +38,12 @@ export function lastSession() {
 
 /**
  * Session-scoped context shared by Workspace / Review / Debrief:
- * session + explicit run (never silently switched) + mode + as-of, all in the URL.
+ * session + explicit run (never silently switched) + lens + as-of, all in the URL.
+ *
+ * Lens (decision D-1): `mode=debrief|as-known` when the user chose one; otherwise the
+ * area default — Workspace/Memory replay As-known at the cursor, Review/Debrief/Ask/
+ * Metrics read the full session (Debrief at the session end). The replay cursor `t`
+ * is kept separately and only drives the as-of in As-known or on replay screens.
  */
 export function useSessionScope() {
   const api = useApi();
@@ -38,11 +55,27 @@ export function useSessionScope() {
   const runId = runParam ?? detail?.latest_run_id ?? null;
   const run = detail?.runs.find((r) => r.run.id === runId) ?? null;
   const latestRunId = detail?.latest_run_id ?? null;
-  const mode: ReplayMode = params.get('mode') === 'debrief' ? 'DEBRIEF' : 'AS_KNOWN';
+  const { pathname } = useLocation();
+  const lensArea = lensAreaOf(pathname);
+  const lensParam = parseLens(params.get('mode'));
+  const mode: ReplayMode = lensParam === 'debrief' ? 'DEBRIEF' : lensParam === 'as-known' ? 'AS_KNOWN' : lensArea === 'analysis' ? 'DEBRIEF' : 'AS_KNOWN';
+  /** Analysis screens in Debrief read everything up to the session end. */
+  const fullSession = lensArea === 'analysis' && mode === 'DEBRIEF';
   const init = useReplay((s) => s.init);
-  const asOf = useQueryAsOf();
+  const replayAsOf = useQueryAsOf();
+  const asOf = fullSession && detail ? detail.duration_ms : replayAsOf;
   const cursor = useReplay((s) => s.cursor);
   const status = useReplay((s) => s.status);
+
+  const area = areaFromPath(pathname);
+  useEffect(() => {
+    if (!sid) return;
+    try {
+      localStorage.setItem(LAST_AREA_KEY, area);
+    } catch {
+      /* preference only */
+    }
+  }, [sid, area]);
 
   const tParam = params.get('t');
   useEffect(() => {
@@ -90,14 +123,21 @@ export function useSessionScope() {
     isLatestRun: !!runId && runId === latestRunId,
     mode,
     asOf,
+    /** Replay cursor (bucketed) — differs from `asOf` when the full session is shown. */
+    replayAsOf,
+    fullSession,
+    lensArea,
     archived: detail?.lifecycle === 'ARCHIVED',
-    setMode: (m: ReplayMode) => setParam('mode', m === 'DEBRIEF' ? 'debrief' : null),
+    /** An explicit lens choice is written to the URL and carried to other screens. */
+    setMode: (m: ReplayMode) => setParam('mode', m === 'DEBRIEF' ? 'debrief' : 'as-known'),
     setRun: (id: string) => setParam('run', id),
     label: (id: string) => detail?.labels[id] ?? '—',
     scope: runId ? { sessionId: sid, runId } : null,
     search: params.toString(),
     /** Scope params carried across session screens (run · mode · t) — never evidence/selection. */
     carry: carryParams(params),
+    /** Link to another session screen keeping run · lens · t (plus an optional focus). */
+    href: (area: SessionArea, focus?: LinkFocus) => sessionHref(area, { sid, ...scopeFromParams(params), focus }),
   };
 }
 

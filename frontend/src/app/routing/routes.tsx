@@ -33,7 +33,7 @@ export const routes: RouteObject[] = [
     path: '/',
     element: (
       <RequireAuth>
-        <AppShell devtools={<MockControlPanel />} />
+        <AppShell devtools={(collapsed) => <MockControlPanel collapsed={collapsed} />} />
       </RequireAuth>
     ),
     errorElement: <RouteError />,

@@ -34,6 +34,9 @@ const SHORTCUTS: [string, string][] = [
   ['F', 'Follow leader'],
   ['Home / End', 'Start / end of session'],
   ['⌘K', 'Search'],
+  ['J / K', 'Review: next / previous finding'],
+  ['1 / 2 / 3', 'Review: choose confirm / dismiss / cannot be determined (never saves)'],
+  ['⌘↵ / Ctrl+↵', 'Review: save when decision and reason are filled'],
 ];
 
 export function HelpPage() {
@@ -148,7 +151,7 @@ export function HelpPage() {
             </dl>
           </SettingsCard>
           <div className="space-y-5">
-            <SettingsCard title="Keyboard" description="Replay shortcuts work when focus is not in a text field.">
+            <SettingsCard title="Keyboard" description="Single-key shortcuts work when focus is not in a text field.">
               <ul className="divide-y divide-hairline-soft">
                 {SHORTCUTS.map(([k, v]) => (
                   <li key={k} className="flex items-center justify-between gap-3 py-2.5 text-[14px] text-ink-2">

@@ -1,11 +1,14 @@
-import { Check, ChevronDown, Database, FlaskConical, History, Loader2, RefreshCw, ServerOff, Timer, WifiOff } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Check, ChevronDown, Database, EyeOff, FlaskConical, History, Loader2, RefreshCw, ServerOff, Timer, WifiOff } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { qk } from '@/api/queryKeys';
+import { useApi } from '@/hooks/useApi';
 import { useReplay } from '@/features/replay/store';
 import { CodeChip } from '@/components/domain/primitives';
 import { Breadcrumb, MetaSep } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Segmented } from '@/components/ui/controls';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, Popover, PopoverContent, PopoverTrigger } from '@/components/ui/menu';
 import { Tooltip } from '@/components/ui/tooltip';
 import { useSessionScope } from '@/hooks/useSessionScope';
 import { useStreamState } from '@/hooks/useSessionStream';
@@ -20,7 +23,10 @@ const CONNECTION = {
   OFFLINE: { label: 'Offline', dot: 'bg-[#a3aab5]' },
 } as const;
 
-/** "05:22.0 · ● Connected" — one pill, two facts, like the reference header. */
+/**
+ * "05:22.0 · ● Connected" — the as-of clock plus one status button whose popover
+ * explains the connection, where results come from, and that no provider is called.
+ */
 export function ClockConnectionPill() {
   const cursor = useReplay((s) => s.cursor);
   const playing = useReplay((s) => s.status === 'PLAYING');
@@ -37,25 +43,43 @@ export function ClockConnectionPill() {
         </span>
       </Tooltip>
       <span aria-hidden className="h-5 w-px bg-hairline" />
-      <Tooltip content={`FlowLens server stream · sequence ${seq}. This is not the analysis provider status.`}>
-        <span tabIndex={0} className="inline-flex h-full items-center gap-2 rounded-r-[14px] pl-3 pr-3.5">
-          <span aria-hidden className={cn('size-2.5 rounded-full', c.dot, connection !== 'CONNECTED' && 'animate-pulse')} />
-          <span role="status" aria-live="polite">
-            {c.label}
-          </span>
-        </span>
-      </Tooltip>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button type="button" aria-label={`Status: ${c.label}, cached results. Show details`} className="inline-flex h-full items-center gap-2 rounded-r-[14px] pl-3 pr-3 transition-colors hover:bg-sunken data-[state=open]:bg-sunken">
+            <span aria-hidden className={cn('size-2.5 rounded-full', c.dot, connection !== 'CONNECTED' && 'animate-pulse')} />
+            <span role="status" aria-live="polite">
+              {c.label}
+            </span>
+            <ChevronDown aria-hidden className="size-3.5 text-ink-2" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-[320px] p-4">
+          <dl className="space-y-3.5 text-[13.5px]">
+            <div className="flex gap-3">
+              <span aria-hidden className={cn('mt-1.5 size-2.5 shrink-0 rounded-full', c.dot)} />
+              <div>
+                <dt className="font-semibold text-ink">Server stream · {c.label}</dt>
+                <dd className="text-ink-2">FlowLens server, sequence {seq}. While disconnected, review changes pause and nothing is queued.</dd>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Database aria-hidden className="mt-0.5 size-4 shrink-0 text-ink-2" />
+              <div>
+                <dt className="font-semibold text-ink">Cached results</dt>
+                <dd className="text-ink-2">Results come from stored analysis. Seeking or switching the lens never calls a provider.</dd>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <ServerOff aria-hidden className="mt-0.5 size-4 shrink-0 text-ink-2" />
+              <div>
+                <dt className="font-semibold text-ink">Analysis provider · not called</dt>
+                <dd className="text-ink-2">Replay is offline. Provider status is shown in Settings › Providers.</dd>
+              </div>
+            </div>
+          </dl>
+        </PopoverContent>
+      </Popover>
     </div>
-  );
-}
-
-export function CachedPill() {
-  return (
-    <Tooltip content="Results come from stored analysis. Seeking or switching mode never calls a provider.">
-      <span tabIndex={0} className="inline-flex h-11 items-center gap-2 rounded-[14px] border border-hairline bg-surface px-3.5 text-[15px] font-medium text-ink shadow-control">
-        <Database aria-hidden className="size-[18px] text-ink-2" /> Cached results
-      </span>
-    </Tooltip>
   );
 }
 
@@ -139,12 +163,16 @@ export function SessionLabels({ className }: { className?: string }) {
 export function SessionHeader({ title, breadcrumb, actions, controls = 'full', titleExtra, meta }: { title: ReactNode; breadcrumb?: { label: string; to?: string }[]; actions?: ReactNode; controls?: 'full' | 'none'; titleExtra?: ReactNode; meta?: ReactNode }) {
   const { detail, mode } = useSessionScope();
   if (!detail) return null;
+  const trail = breadcrumb ?? [{ label: 'Sessions', to: `/sessions?selected=${detail.id}` }, { label: detail.title }, { label: typeof title === 'string' ? title : 'Workspace' }];
   return (
-    <header className="mb-6">
-      {breadcrumb && <Breadcrumb items={breadcrumb} />}
+    <header className="mb-6 fit:mb-4 fit:short:mb-3">
+      {/* On short fit viewports the sidebar session switcher carries this context. */}
+      <div className="fit:short:sr-only">
+        <Breadcrumb items={trail} />
+      </div>
       <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
         <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
-          <h1 className="text-[34px] font-medium leading-[1.06] tracking-[-0.04em] text-ink xl:text-[44px]">{title}</h1>
+          <h1 className="text-[34px] font-medium leading-[1.06] tracking-[-0.04em] text-ink xl:text-[44px] fit:text-[38px] short:text-[32px]">{title}</h1>
           {titleExtra}
         </div>
         {(controls === 'full' || actions) && (
@@ -153,19 +181,19 @@ export function SessionHeader({ title, breadcrumb, actions, controls = 'full', t
               <>
                 <ModeToggle />
                 <ClockConnectionPill />
-                <CachedPill />
               </>
             )}
             {actions}
           </div>
         )}
       </div>
-      <div className="mt-2.5 min-w-0">
+      {/* In the viewport-fit layout the session line and the meta line share one row. */}
+      <div className="mt-2.5 min-w-0 fit:mt-1.5 fit:flex fit:flex-wrap fit:items-center fit:gap-x-4 fit:gap-y-1">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span className="text-[25px] font-semibold leading-tight tracking-[-0.03em] text-ink">{detail.title}</span>
+          <span className="text-[25px] font-semibold leading-tight tracking-[-0.03em] text-ink fit:text-[21px]">{detail.title}</span>
           <SessionLabels />
         </div>
-        <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[16px] text-ink-2 tabular">
+        <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[16px] text-ink-2 tabular fit:mt-0 fit:text-[15px]">
           {meta ?? (
             <>
               {formatDate(detail.recorded_at)}
@@ -189,14 +217,58 @@ export function SessionHeader({ title, breadcrumb, actions, controls = 'full', t
   );
 }
 
-/** Banners that must stay visible: connection loss, not-latest run. */
+/** "Debrief · full session" / "As-known at 05:22" — the lens in words, same wording on every screen. */
+export function LensSummary() {
+  const { mode, fullSession, asOf } = useSessionScope();
+  if (fullSession) return <span>Debrief · full session</span>;
+  return (
+    <span>
+      {mode === 'DEBRIEF' ? 'Debrief' : 'As-known'} at {formatOffset(asOf)}
+    </span>
+  );
+}
+
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+/**
+ * As-known on an analysis screen hides what became available after the replay
+ * position; say how much and offer the full session (decision D-1).
+ */
+export function LensBanner() {
+  const api = useApi();
+  const { sid, runId, scope, mode, lensArea, asOf, detail, setMode } = useSessionScope();
+  const on = lensArea === 'analysis' && mode === 'AS_KNOWN' && !!scope && !!detail;
+  const end = detail?.duration_ms ?? 0;
+  const all = useQuery({ queryKey: qk.findings(sid, runId ?? '-', 'DEBRIEF', end), queryFn: () => api.listFindings(scope!, { asOfMs: end, mode: 'DEBRIEF' }), enabled: on });
+  const known = useQuery({ queryKey: qk.findings(sid, runId ?? '-', 'AS_KNOWN', asOf), queryFn: () => api.listFindings(scope!, { asOfMs: asOf, mode: 'AS_KNOWN' }), enabled: on });
+  const transcript = useQuery({ queryKey: qk.transcript(sid, runId ?? '-', 'AS_KNOWN', asOf), queryFn: () => api.getTranscript(scope!, { asOfMs: asOf, mode: 'AS_KNOWN' }), enabled: on });
+  if (!on) return null;
+  const laterFindings = all.data && known.data ? Math.max(0, all.data.length - known.data.length) : null;
+  const laterSegments = transcript.data?.hidden_after_as_of ?? null;
+  const counts = [laterFindings ? plural(laterFindings, 'finding') : null, laterSegments ? plural(laterSegments, 'segment') : null].filter(Boolean);
+  return (
+    <div role="status" className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[16px] border border-data-tint bg-data-tint/50 px-4 py-3 text-[14px] text-ink">
+      <EyeOff aria-hidden className="size-[18px] text-data" />
+      <span className="flex-1">
+        <strong className="font-semibold">Showing what was known at {formatOffset(asOf)}.</strong>{' '}
+        {counts.length ? `${counts.join(' and ')} became available later in the session.` : laterFindings == null ? 'Counting what became available later…' : 'Nothing else became available later.'}
+      </span>
+      <Button size="sm" variant="secondary" onClick={() => setMode('DEBRIEF')}>
+        Show full session
+      </Button>
+    </div>
+  );
+}
+
+/** Banners that must stay visible: connection loss, not-latest run, As-known lens. */
 export function ScopeBanners() {
-  const { run, latestRunId, setRun, detail, isLatestRun } = useSessionScope();
+  const { run, latestRunId, setRun, detail, isLatestRun, lensArea, mode } = useSessionScope();
   const connection = useStreamState((s) => s.connection);
   const latest = detail?.runs.find((r) => r.run.id === latestRunId);
   const showConnection = connection !== 'CONNECTED';
   const showRun = !!run && !isLatestRun && !!latest;
-  if (!showConnection && !showRun) return null;
+  const showLens = lensArea === 'analysis' && mode === 'AS_KNOWN';
+  if (!showConnection && !showRun && !showLens) return null;
   return (
     <div className="mb-5 space-y-2.5">
       {showConnection && (
@@ -218,6 +290,7 @@ export function ScopeBanners() {
           </Button>
         </div>
       )}
+      {showLens && <LensBanner />}
     </div>
   );
 }

@@ -1,26 +1,34 @@
-import { AlertTriangle, ChevronRight, Clock3, Flag, MoreHorizontal, RadioTower } from 'lucide-react';
-import { useState } from 'react';
+import { AlertTriangle, Brain, CheckCircle2, ChevronRight, Clock3, FileText, Flag, MoreHorizontal, RadioTower } from 'lucide-react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import type { FindingView } from '@/api/types';
 import { EvidencePanel } from '@/features/evidence/EvidencePanel';
+import { isTyping } from '@/features/evidence/FindingReviewForm';
+import { useTranscript } from './queries';
 import { useFindings } from '@/features/workspace/queries';
 import { CodeChip, MoreButton, StatusPill } from '@/components/domain/primitives';
 import { EmptyState, ErrorState, LoadingRows } from '@/components/domain/states';
 import { Select } from '@/components/ui/controls';
+import { Kbd } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/menu';
 import { useEvidence } from '@/hooks/useEvidence';
 import { useSessionScope } from '@/hooks/useSessionScope';
 import { CATEGORY_LABEL, STATUS } from '@/lib/status';
 import { formatDate, formatOffset } from '@/lib/time';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 const STATUS_FILTER = [
+  { value: 'NEEDS_REVIEW', label: 'Needs review' },
   { value: 'ALL', label: 'All statuses' },
-  { value: 'OPEN', label: 'Open' },
   { value: 'CONFIRMED', label: 'Confirmed' },
   { value: 'DISMISSED', label: 'Dismissed' },
   { value: 'UNRESOLVED', label: 'Cannot be determined' },
 ];
+
+/** Open or under review = still needs a reviewer decision. */
+export const needsReview = (f: FindingView) => f.finding.status === 'OPEN' || f.finding.status === 'UNDER_REVIEW';
+const matches = (status: string) => (f: FindingView) => status === 'ALL' || (status === 'NEEDS_REVIEW' ? needsReview(f) : f.finding.status === status);
 
 function priorityChip(f: FindingView) {
   const p = STATUS.priority[f.finding.priority];
@@ -60,6 +68,7 @@ function FindingList({ findings, selected, onSelect }: { findings: FindingView[]
                 <span className="mt-2 flex flex-wrap items-center gap-1.5">
                   {priorityChip(f)}
                   {f.finding.stale && <StatusPill size="sm" meta={{ label: 'Stale', tone: 'notice', icon: Clock3 }} />}
+                  {!needsReview(f) && <StatusPill size="sm" meta={{ label: 'Reviewed', tone: 'ready', icon: CheckCircle2 }} />}
                 </span>
               </span>
               <ChevronRight aria-hidden className="size-[18px] shrink-0 text-ink-2 transition-transform group-hover:translate-x-0.5" />
@@ -72,8 +81,13 @@ function FindingList({ findings, selected, onSelect }: { findings: FindingView[]
 }
 
 function FindingDetail({ f }: { f: FindingView }) {
-  const { detail, run } = useSessionScope();
+  const { detail, run, href } = useSessionScope();
   const { open } = useEvidence();
+  const transcript = useTranscript();
+  // Cross-links: the transcript segment behind the first quoted evidence, and the object's memory.
+  const evidenceLabels = new Set(f.finding.evidence.map((e) => detail?.labels[e.id]).filter(Boolean));
+  const segment = transcript.data?.rows.find((r) => evidenceLabels.has(r.evidence_label));
+  const entity = detail?.entities.find((e) => e.callsign === f.entity_label);
   const reviewer = f.reviews.length ? f.reviews[f.reviews.length - 1]!.decision : null;
   return (
     <div>
@@ -96,6 +110,18 @@ function FindingDetail({ f }: { f: FindingView }) {
         </DropdownMenu>
       </div>
       <p className="mt-2 text-[16px] leading-relaxed text-ink-2">{f.finding.statement}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {segment && (
+          <Link to={href('review/transcript', { segment: segment.original.id })} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-data-tint px-3 text-[13px] font-medium text-data-strong hover:bg-data-soft">
+            <FileText aria-hidden className="size-3.5" /> Open in transcript · {segment.label}
+          </Link>
+        )}
+        {entity && (
+          <Link to={href(`memory/${entity.id}`)} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-track px-3 text-[13px] font-medium text-ink hover:bg-hairline">
+            <Brain aria-hidden className="size-3.5" /> {entity.callsign} memory
+          </Link>
+        )}
+      </div>
       <dl className="mt-5 space-y-3.5 text-[15px]">
         {[
           ['Category', <span className="text-ink">{CATEGORY_LABEL[f.finding.category] ?? f.finding.category}</span>],
@@ -174,11 +200,18 @@ function FindingDetail({ f }: { f: FindingView }) {
 export function FindingsPage() {
   const findings = useFindings();
   const [params, setParams] = useSearchParams();
-  const [status, setStatus] = useState('ALL');
+  const [status, setStatus] = useState('NEEDS_REVIEW');
   const { mode, setMode, asOf } = useSessionScope();
-  const list = (findings.data ?? []).filter((f) => status === 'ALL' || f.finding.status === status);
-  const selectedId = params.get('finding') ?? list[0]?.finding.id ?? null;
-  const selected = findings.data?.find((f) => f.finding.id === selectedId) ?? null;
+  const all = findings.data ?? [];
+  const list = all.filter(matches(status));
+  const reviewed = all.filter((f) => !needsReview(f)).length;
+  const selectedId = params.get('finding') ?? list[0]?.finding.id ?? all[0]?.finding.id ?? null;
+  const selected = all.find((f) => f.finding.id === selectedId) ?? null;
+  // The selected item stays visible even after it leaves the "Needs review" filter (D-3).
+  const shown = selected && !list.includes(selected) ? all.filter((f) => list.includes(f) || f === selected) : list;
+  const at = all.findIndex((f) => f.finding.id === selectedId);
+  // Next = the next item after the current one (session order) that matches the filter, wrapping around.
+  const next = [...all.slice(at + 1), ...all.slice(0, Math.max(0, at))].find((f) => f !== selected && matches(status)(f) && (status !== 'NEEDS_REVIEW' || needsReview(f))) ?? null;
   const select = (id: string) =>
     setParams(
       (p) => {
@@ -189,6 +222,31 @@ export function FindingsPage() {
       { replace: true },
     );
 
+  // Pin the default selection in the URL so saving never moves the reviewer to another item.
+  const pinned = params.get('finding');
+  const first = list[0]?.finding.id ?? all[0]?.finding.id;
+  useEffect(() => {
+    if (!pinned && first) select(first);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pinned, first]);
+
+  // J / K move through the visible queue; ignored while typing.
+  const step = useEffectEvent((dir: 1 | -1) => {
+    if (!shown.length) return;
+    const i = shown.findIndex((f) => f.finding.id === selectedId);
+    const target = shown[Math.min(shown.length - 1, Math.max(0, i + dir))];
+    if (target) select(target.finding.id);
+  });
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return;
+      if (e.key === 'j' || e.key === 'J') step(1);
+      else if (e.key === 'k' || e.key === 'K') step(-1);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   if (findings.isError && !findings.data)
     return (
       <div className="card p-6">
@@ -197,17 +255,35 @@ export function FindingsPage() {
     );
 
   return (
-    <div className="grid grid-cols-1 flex-1 items-start gap-5 lg:grid-cols-[minmax(250px,300px)_minmax(0,1fr)] xl:grid-cols-[minmax(260px,290px)_minmax(270px,320px)_minmax(0,1fr)] 2xl:grid-cols-[300px_minmax(300px,370px)_minmax(0,1fr)]">
-      <section aria-labelledby="findings-list" className="card p-3 lg:sticky lg:top-6">
-        <div className="flex items-center justify-between gap-2 px-2 pb-3 pt-1.5">
-          <h2 id="findings-list" className="whitespace-nowrap text-[15.5px] font-semibold text-ink">
-            Findings in session
-          </h2>
-          <Select size="sm" label="Filter by status" value={status} onValueChange={setStatus} options={STATUS_FILTER} className="h-9 pl-3 pr-2.5 text-[13.5px]" />
+    <div className="grid flex-1 grid-cols-1 items-start gap-5 fit:min-h-0 fit:grid-rows-[minmax(0,1fr)] fit:items-stretch lg:grid-cols-[minmax(250px,300px)_minmax(0,1fr)] xl:grid-cols-[minmax(260px,290px)_minmax(270px,320px)_minmax(0,1fr)] 2xl:grid-cols-[300px_minmax(300px,370px)_minmax(0,1fr)]">
+      <section aria-labelledby="findings-list" className="card p-3 lg:sticky lg:top-6 fit:static fit:flex fit:min-h-0 fit:flex-col">
+        <div className="px-2 pb-3 pt-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 id="findings-list" className="whitespace-nowrap text-[15.5px] font-semibold text-ink">
+              Findings in session
+            </h2>
+            <Select size="sm" label="Filter by status" value={status} onValueChange={setStatus} options={STATUS_FILTER} className="h-9 pl-3 pr-2.5 text-[13.5px]" />
+          </div>
+          {findings.data && (
+            <div className="mt-3">
+              <p className="flex items-center justify-between text-[13px] text-ink-2 tabular">
+                <span>
+                  <span className="font-semibold text-ink">{reviewed}</span> of {all.length} reviewed
+                </span>
+                <span>{all.length - reviewed} {all.length - reviewed === 1 ? 'needs' : 'need'} review</span>
+              </p>
+              <div role="progressbar" aria-label="Review progress" aria-valuemin={0} aria-valuemax={all.length} aria-valuenow={reviewed} className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-track">
+                <div className="h-full rounded-full bg-data transition-[width] duration-300" style={{ width: `${all.length ? (reviewed / all.length) * 100 : 0}%` }} />
+              </div>
+              <p className="mt-2 hidden text-[12px] text-ink-3 xl:block">
+                <Kbd>J</Kbd> <Kbd>K</Kbd> next / previous
+              </p>
+            </div>
+          )}
         </div>
         {!findings.data ? (
           <LoadingRows rows={3} className="px-2" />
-        ) : list.length === 0 ? (
+        ) : shown.length === 0 ? (
           <EmptyState className="py-8" title="No findings in this view">
             {mode === 'AS_KNOWN' ? (
               <>
@@ -216,22 +292,33 @@ export function FindingsPage() {
                   Switch to Debrief
                 </button>
               </>
+            ) : status === 'NEEDS_REVIEW' ? (
+              <>
+                Every finding has a reviewer decision.{' '}
+                <button type="button" className="font-medium text-data hover:underline" onClick={() => setStatus('ALL')}>
+                  Show all
+                </button>
+              </>
             ) : (
               'Try another status filter.'
             )}
           </EmptyState>
         ) : (
-          <FindingList findings={list} selected={selectedId} onSelect={select} />
+          <ScrollArea className="fit:min-h-0 fit:flex-1">
+            <FindingList findings={shown} selected={selectedId} onSelect={select} />
+          </ScrollArea>
         )}
       </section>
 
       {selected ? (
         <>
-          <section aria-label="Finding detail" className="card p-6">
-            <FindingDetail f={selected} />
+          <section aria-label="Finding detail" className="card fit:flex fit:min-h-0 fit:flex-col fit:overflow-hidden">
+            <ScrollArea className="p-6 fit:min-h-0 fit:flex-1">
+              <FindingDetail f={selected} />
+            </ScrollArea>
           </section>
-          <section aria-label="Evidence" className="card p-5 lg:col-span-2 xl:col-span-1">
-            <EvidencePanel id={selected.finding.id} headingId="findings-evidence-title" embedded />
+          <section aria-label="Evidence" className="card p-5 fit:flex fit:min-h-0 fit:flex-col fit:short:block fit:short:overflow-y-auto fit:short:scrollbar-thin lg:col-span-2 xl:col-span-1">
+            <EvidencePanel id={selected.finding.id} headingId="findings-evidence-title" className="fit:flex-1" embedded onNext={next ? () => select(next.finding.id) : () => undefined} nextLabel={next?.label ?? null} />
           </section>
         </>
       ) : (

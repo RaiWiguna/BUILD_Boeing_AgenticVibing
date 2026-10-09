@@ -10,8 +10,8 @@ function Field({ label, children, sub, className }: { label: string; children: R
   return (
     <div className={cn('min-w-0', className)}>
       <p className="text-[12.5px] text-ink-3">{label}</p>
-      <div className="mt-1 line-clamp-2 break-words text-[13.5px] font-medium leading-snug text-ink">{children}</div>
-      {sub && <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-ink-3">{sub}</p>}
+      <div className="mt-1 break-words fit:mt-0.5 text-[13.5px] font-medium leading-snug text-ink">{children}</div>
+      {sub && <p className="mt-0.5 break-words text-[12px] leading-snug text-ink-3">{sub}</p>}
     </div>
   );
 }
@@ -38,7 +38,7 @@ export function MemoryStrip({ entity, state, selected, onSelect, memoryHref }: {
   return (
     <li
       className={cn(
-        'group relative grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 rounded-[18px] border px-3.5 py-3 transition-[background-color,border-color,box-shadow] duration-[140ms] @[700px]:grid-cols-[minmax(118px,0.9fr)_minmax(0,1.05fr)_minmax(0,1fr)_minmax(0,1.15fr)_minmax(64px,0.55fr)_auto]',
+        'group relative grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 rounded-[18px] border px-3.5 py-3 fit:py-2 transition-[background-color,border-color,box-shadow] duration-[140ms] @[700px]:grid-cols-[minmax(118px,0.9fr)_minmax(0,1.05fr)_minmax(0,1fr)_minmax(0,1.15fr)_minmax(64px,0.55fr)_auto]',
         selected ? 'border-data/25 bg-data-tint/70 shadow-[inset_3px_0_0_0_#2563eb]' : 'border-hairline-soft bg-surface hover:border-hairline hover:bg-sunken/50',
       )}
       onClick={onSelect}
@@ -61,11 +61,11 @@ export function MemoryStrip({ entity, state, selected, onSelect, memoryHref }: {
             to={memoryHref}
             onClick={(e) => e.stopPropagation()}
             title={`Open ${entity.callsign} memory`}
-            className={cn('block truncate rounded-[6px] text-[17.5px] font-semibold tracking-[-0.02em] underline-offset-4 hover:underline', selected ? 'text-data' : 'text-ink')}
+            className={cn('block rounded-[6px] text-[17.5px] font-semibold fit:text-[16px] tracking-[-0.02em] underline-offset-4 hover:underline', selected ? 'text-data' : 'text-ink')}
           >
             {entity.callsign}
           </Link>
-          <p className="truncate text-[12.5px] text-ink-2" title={`${entity.type} · ${entity.role}`}>
+          <p className="text-[12.5px] leading-snug text-ink-2">
             {entity.type} · {entity.role}
           </p>
         </div>
@@ -94,7 +94,7 @@ export function MemoryStrip({ entity, state, selected, onSelect, memoryHref }: {
           {trackMissing ? (
             <span className="text-ink-2">Track not available</span>
           ) : notEvaluable ? (
-            <span className="whitespace-nowrap text-[12px] font-semibold tracking-[0.01em] text-ink">NOT_EVALUABLE</span>
+            <span className="break-all text-[12px] font-semibold tracking-[0.01em] text-ink">NOT_EVALUABLE</span>
           ) : mvMeta && mv ? (
             <span className={mv.state === 'DIVERGENCE_CANDIDATE' ? TONE_TEXT.discrepancy : 'text-ink'}>{mv.state === 'CONSISTENT' ? (mv.summary ?? 'Consistent') : mvMeta.label}</span>
           ) : (

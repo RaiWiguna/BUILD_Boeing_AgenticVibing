@@ -206,7 +206,7 @@ export class MockApiClient implements ApiClient {
     }
 
     this.notifications = [
-      { id: mid('notif:1'), at: '2026-10-08T14:32:00Z', title: 'Analysis run #03 completed', detail: 'Runway 27 · Readback · 5 findings available', tone: 'ready', href: `/s/${s1.world.sessionId}/workspace`, read: false },
+      { id: mid('notif:1'), at: '2026-10-08T14:32:00Z', title: 'Analysis run #03 completed', detail: 'Runway 27 · Readback · 5 findings available', tone: 'ready', href: `/s/${s1.world.sessionId}/review/findings`, read: false },
       { id: mid('notif:2'), at: '2026-10-08T13:12:00Z', title: 'Export revoked', detail: 'CSV export for run #02 — permission changed', tone: 'notice', href: `/s/${s1.world.sessionId}/debrief`, read: false },
       { id: mid('notif:3'), at: '2026-10-04T09:41:00Z', title: 'Analysis partial', detail: 'Audio-only · Tower · provider unavailable after transcription', tone: 'discrepancy', href: `/sessions?selected=${mid('session:audioonly')}`, read: false },
     ];
@@ -702,7 +702,7 @@ export class MockApiClient implements ApiClient {
       job.status = 'SUCCEEDED';
       job.updated_at = nowIso();
       this.stream.emit(s.world.sessionId, 'JOB_PROGRESS', { session_id: s.world.sessionId, analysis_run_id: id, revision: inputRevision, job_id: job.id, stage: 'BRIEF', status: 'COMPLETED', completed_units: 6, total_units: 6 });
-      this.notify({ title: `Analysis run ${label} completed`, detail: `${s.world.spec.title} · results available`, tone: 'ready', href: `/s/${s.world.sessionId}/workspace?run=${id}` });
+      this.notify({ title: `Analysis run ${label} completed`, detail: `${s.world.spec.title} · results available`, tone: 'ready', href: `/s/${s.world.sessionId}/review/findings?run=${id}` });
     };
     setTimeout(tick, 600);
     return view;

@@ -6,6 +6,8 @@
 @custom-variant dark (&:is(.dark *));
 /* Short viewports (e.g. 1280×720): tighten vertical rhythm in fixed-height chrome. */
 @custom-variant short (@media (max-height: 820px));
+/* Viewport-fit workspace (decision D-2): wide and tall enough to show every panel at once. */
+@custom-variant fit (@media (min-width: 80rem) and (min-height: 720px));
 
 @theme inline {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;

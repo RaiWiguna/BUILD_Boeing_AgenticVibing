@@ -32,11 +32,14 @@ describe('MOCK UI journeys (component level)', () => {
   });
 
   it('debrief labels AI interpretation, locks provenance and keeps audio export off', async () => {
+    const user = userEvent.setup();
     const { container } = await renderApp(`/s/${S1}/debrief`);
     expect(await screen.findByText('Key item to review', undefined, { timeout: 4000 })).toBeInTheDocument();
     expect(screen.getByText(/AI interpretation · Mock/i)).toBeInTheDocument();
     expect(screen.getAllByText('SYNTHETIC').length).toBeGreaterThan(0);
 
+    // Export options live in a sheet opened from the header (decision D-4).
+    await user.click(screen.getByRole('button', { name: 'Export report' }));
     const provenance = await screen.findByRole('switch', { name: /Include provenance/ });
     expect(provenance).toBeChecked();
     expect(provenance).toBeDisabled();
@@ -45,6 +48,7 @@ describe('MOCK UI journeys (component level)', () => {
     expect(audio).toBeDisabled();
 
     expect(await axe(container, AXE)).toHaveNoViolations();
+    expect(await axe(screen.getByRole('dialog', { name: 'Export report' }), AXE)).toHaveNoViolations();
   });
 
   it('unknown answers say so and carry no evidence', async () => {

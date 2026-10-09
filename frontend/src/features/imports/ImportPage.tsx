@@ -165,11 +165,23 @@ function Dropzone({ onFiles, compact }: { onFiles: (files: ImportFileInput[]) =>
   );
 }
 
+const AUDIO_EXT = /\.(wav|flac)$/i;
+
+/** "tower.wav" + "ground.flac" → "Tower + Ground"; empty when no audio is chosen yet. */
+function suggestedTitle(files: ImportFileInput[]) {
+  const stems = files.filter((f) => AUDIO_EXT.test(f.name)).map((f) => f.name.replace(AUDIO_EXT, '').replace(/[_-]+/g, ' ').trim());
+  return stems.map((n) => n.charAt(0).toUpperCase() + n.slice(1)).join(' + ');
+}
+
 function SourceStep({ onCreated }: { onCreated: (d: ImportDraft) => void }) {
   const api = useApi();
-  const [title, setTitle] = useState('Audio-only · Tower');
+  // Empty until the user types; otherwise suggested from the audio file names.
+  const [typed, setTyped] = useState<string | null>(null);
   const [kind, setKind] = useState<SourceKind>('SYNTHETIC');
   const [files, setFiles] = useState<ImportFileInput[]>([]);
+  const sessions = useQuery({ queryKey: qk.sessions, queryFn: () => api.listSessions() });
+  const title = typed ?? suggestedTitle(files);
+  const duplicate = !!title.trim() && (sessions.data ?? []).some((x) => x.title.trim().toLowerCase() === title.trim().toLowerCase());
   const payload = { title, sourceKind: kind, files };
   const create = useMutation({
     mutationFn: () => api.createImport(payload, { idempotencyKey: idemKey('import.create', payload) }),
@@ -186,7 +198,10 @@ function SourceStep({ onCreated }: { onCreated: (d: ImportDraft) => void }) {
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="imp-title">Session name</Label>
-            <Input id="imp-title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Input id="imp-title" value={title} placeholder="e.g. Tower · evening shift" onChange={(e) => setTyped(e.target.value)} aria-invalid={duplicate || undefined} aria-describedby="imp-title-hint" />
+            <p id="imp-title-hint" className={cn('text-[13px]', duplicate ? 'text-discrepancy' : 'text-ink-2')}>
+              {duplicate ? 'A session with this name already exists. Choose a different name.' : typed == null && files.length ? 'Suggested from the file names. You can change it.' : 'Shown in the session list and on exports.'}
+            </p>
           </div>
           <div className="space-y-2">
             <Label>Source kind</Label>
@@ -203,7 +218,7 @@ function SourceStep({ onCreated }: { onCreated: (d: ImportDraft) => void }) {
           </div>
         </div>
         <div className="mt-6">
-          <Dropzone onFiles={(f) => setFiles((cur) => [...cur, ...f])} />
+          <Dropzone compact={files.length > 0} onFiles={(f) => setFiles((cur) => [...cur, ...f])} />
         </div>
         {files.length > 0 && (
           <ul className="mt-4 divide-y divide-hairline rounded-[16px] border border-hairline">
@@ -229,7 +244,7 @@ function SourceStep({ onCreated }: { onCreated: (d: ImportDraft) => void }) {
               <ArrowLeft /> Cancel
             </Link>
           </Button>
-          <Button variant="primary" disabled={!files.length || !title.trim() || create.isPending} onClick={() => create.mutate()}>
+          <Button variant="primary" disabled={!files.length || !title.trim() || duplicate || create.isPending} onClick={() => create.mutate()}>
             {create.isPending ? <Loader2 className="animate-spin" /> : null}
             Continue to preview <ArrowRight />
           </Button>

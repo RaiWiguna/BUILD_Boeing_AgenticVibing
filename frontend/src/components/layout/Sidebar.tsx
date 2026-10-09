@@ -1,5 +1,6 @@
+import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, BookOpenCheck, Brain, FolderOpen, HelpCircle, LayoutGrid, MessageSquareText, NotebookText, PanelLeft, Search, Settings } from 'lucide-react';
+import { BarChart3, BookOpenCheck, Brain, HelpCircle, LayoutGrid, MessageSquareText, Monitor, NotebookText, PanelLeft, Search, Settings } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { NavLink, useLocation, useMatch } from 'react-router';
 import { qk } from '@/api/queryKeys';
@@ -7,9 +8,11 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { Kbd } from '@/components/ui/input';
 import { Tooltip } from '@/components/ui/tooltip';
 import { useApi } from '@/hooks/useApi';
-import { lastSession } from '@/hooks/useSessionScope';
+import { carryParams, lastSession } from '@/hooks/useSessionScope';
 import { cn } from '@/lib/utils';
 import { NotificationsPopover } from './NotificationsPopover';
+import { areaFromPath } from '@/lib/links';
+import { SessionSwitcher } from './SessionSwitcher';
 import { UserMenu } from './UserMenu';
 import { Wordmark } from './Logo';
 
@@ -48,21 +51,23 @@ function NavItem({ item, collapsed }: { item: Item; collapsed: boolean }) {
   );
 }
 
-export function Sidebar({ collapsed, onToggle, onSearch }: { collapsed: boolean; onToggle: () => void; onSearch: () => void }) {
+export function Sidebar({ collapsed, onToggle, onSearch, footer }: { collapsed: boolean; onToggle: () => void; onSearch: () => void; footer?: ReactNode }) {
   const location = useLocation();
   const { can } = useAuth();
   const api = useApi();
-  const scoped = /^\/s\/([^/]+)/.exec(location.pathname)?.[1] ?? lastSession();
-  const keep = new URLSearchParams(location.search);
-  const carry = ['run', 'mode', 't'].map((k) => (keep.get(k) ? `${k}=${keep.get(k)}` : null)).filter(Boolean).join('&');
-  const q = carry && location.pathname.startsWith('/s/') ? `?${carry}` : '';
-  const s = (path: string) => (scoped ? `/s/${scoped}/${path}${q}` : `/choose/${path.split('/')[0]}`);
+  const routeSid = /^\/s\/([^/]+)/.exec(location.pathname)?.[1] ?? null;
+  const sessions = useQuery({ queryKey: qk.sessions, queryFn: () => api.listSessions() });
+  const remembered = lastSession();
+  // A remembered session counts only while it still exists (mock data resets on reload).
+  const scoped = routeSid ?? (remembered && sessions.data?.some((x) => x.id === remembered) ? remembered : null);
+  // Run · lens · t only carry within the session being viewed.
+  const q = routeSid ? `?${carryParams(new URLSearchParams(location.search))}`.replace(/\?$/, '') : '';
+  const s = (path: string) => `/s/${scoped}/${path}${q}`;
   const notif = useQuery({ queryKey: qk.notifications, queryFn: () => api.listNotifications(), refetchInterval: 8000 });
   const unread = notif.data?.filter((n) => !n.read).length ?? 0;
 
   const main: Item[] = [
-    { to: '/sessions', label: 'Sessions', icon: LayoutGrid, match: '/sessions' },
-    { to: s('workspace'), label: 'Workspace', icon: FolderOpen, match: '/s/:sid/workspace' },
+    { to: s('workspace'), label: 'Workspace', icon: Monitor, match: '/s/:sid/workspace' },
     { to: s('review/findings'), label: 'Review', icon: NotebookText, match: '/s/:sid/review' },
     { to: s('debrief'), label: 'Debrief', icon: BookOpenCheck, match: '/s/:sid/debrief' },
   ];
@@ -100,16 +105,27 @@ export function Sidebar({ collapsed, onToggle, onSearch }: { collapsed: boolean;
         )}
       </button>
 
-      <div className="mt-6 space-y-1.5 short:mt-4 short:space-y-1">
-        {main.map((i) => (
-          <NavItem key={i.label} item={i} collapsed={collapsed} />
-        ))}
+      <div className="mt-6 short:mt-4">
+        <NavItem item={{ to: '/sessions', label: 'Sessions', icon: LayoutGrid, match: '/sessions' }} collapsed={collapsed} />
       </div>
-      {!collapsed ? <p className="mb-2 mt-7 px-3.5 text-[13px] font-medium text-ink-3 short:mb-1 short:mt-4">Analyze</p> : <div className="mx-3 my-5 h-px shrink-0 bg-hairline short:my-3" />}
-      <div className="space-y-1.5 short:space-y-1">
-        {analyze.map((i) => (
-          <NavItem key={i.label} item={i} collapsed={collapsed} />
-        ))}
+      <div role="group" aria-label="Current session" className="mt-5 short:mt-3">
+        {!collapsed && <p className="mb-2 px-3.5 text-[13px] font-medium text-ink-3 short:mb-1">Current session</p>}
+        <SessionSwitcher collapsed={collapsed} currentId={scoped} area={areaFromPath(location.pathname)} />
+        {scoped && (
+          <>
+            <div className="mt-2 space-y-1.5 short:space-y-1">
+              {main.map((i) => (
+                <NavItem key={i.label} item={i} collapsed={collapsed} />
+              ))}
+            </div>
+            {!collapsed ? <p className="mb-2 mt-5 px-3.5 text-[13px] font-medium text-ink-3 short:mb-1 short:mt-3">Analyze</p> : <div className="mx-3 my-4 h-px shrink-0 bg-hairline short:my-3" />}
+            <div className="space-y-1.5 short:space-y-1">
+              {analyze.map((i) => (
+                <NavItem key={i.label} item={i} collapsed={collapsed} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="mt-auto space-y-1.5 pt-6 short:space-y-1 short:pt-4">
@@ -120,6 +136,7 @@ export function Sidebar({ collapsed, onToggle, onSearch }: { collapsed: boolean;
           <NavItem item={{ to: '/settings/account', label: 'Settings', icon: Settings, match: '/settings' }} collapsed={collapsed} />
         )}
         <NavItem item={{ to: '/help', label: 'Help', icon: HelpCircle, match: '/help' }} collapsed={collapsed} />
+        {footer}
       </div>
       <div className="mt-4 border-t border-hairline pt-4 short:mt-3 short:pt-3">
         <UserMenu collapsed={collapsed} />

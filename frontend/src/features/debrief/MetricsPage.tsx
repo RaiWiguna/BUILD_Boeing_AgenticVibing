@@ -6,7 +6,7 @@ import type { MetricsView } from '@/api/types';
 import { useReplay } from '@/features/replay/store';
 import { ScopeBanners } from '@/features/workspace/SessionHeader';
 import { SessionPageHeader } from '@/features/workspace/SessionPageHeader';
-import { CodeChip, DeltaPill, IconTile } from '@/components/domain/primitives';
+import { DeltaPill, IconTile } from '@/components/domain/primitives';
 import { ErrorState, LoadingRows } from '@/components/domain/states';
 import { Button } from '@/components/ui/button';
 import { Tooltip } from '@/components/ui/tooltip';
@@ -44,8 +44,15 @@ function Kpi({ icon, label, value, unit, delta, deltaUnit, hint }: { icon: typeo
 
 /** Occupied audio per minute — solid up to as-of, hatched after; gaps are hatched grey, never zero. */
 function MinuteChart({ m, asOf }: { m: MetricsView; asOf: number }) {
-  const seek = useReplay((s) => s.seek);
-  const max = Math.ceil(Math.max(60_000, ...m.per_minute.map((x) => x.occupied_ms)) / 30_000) * 30_000;
+  const replaySeek = useReplay((s) => s.seek);
+  const { fullSession, setMode } = useSessionScope();
+  // Picking a minute is an explicit move to a replay position, so it leaves the full-session lens.
+  const seek = (ms: number) => {
+    replaySeek(ms);
+    if (fullSession) setMode('AS_KNOWN');
+  };
+  // Scale to the data (and the reference line), not the 60 s ceiling, so short bars stay readable.
+  const max = Math.min(60_000, Math.ceil(Math.max(m.reference_ms * 1.25, ...m.per_minute.map((x) => x.occupied_ms)) / 10_000) * 10_000);
   const H = 200;
   const refY = H - (m.reference_ms / max) * H;
   return (
@@ -55,7 +62,7 @@ function MinuteChart({ m, asOf }: { m: MetricsView; asOf: number }) {
           <h2 id="minute-title" className="text-[20px] font-semibold tracking-[-0.02em] text-ink">
             Occupied audio time per minute
           </h2>
-          <p className="mt-1 text-[14px] text-ink-2">Voice activity on all channels · click a bar to move the replay as-of</p>
+          <p className="mt-1 text-[14px] text-ink-2">Voice activity on all channels · click a bar to see metrics up to that minute</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-[12.5px] text-ink-2">
           <span className="flex items-center gap-1.5">
@@ -111,9 +118,9 @@ function MinuteChart({ m, asOf }: { m: MetricsView; asOf: number }) {
               );
             })}
           </ol>
-          <div aria-hidden className="absolute inset-y-0 z-20 w-0 border-l-2 border-ink" style={{ left: `${(asOf / (m.per_minute.length * 60_000)) * 100}%` }}>
+          {!fullSession && <div aria-hidden className="absolute inset-y-0 z-20 w-0 border-l-2 border-ink" style={{ left: `${(asOf / (m.per_minute.length * 60_000)) * 100}%` }}>
             <span className="absolute -top-6 -translate-x-1/2 whitespace-nowrap rounded-full bg-ink px-2 py-0.5 text-[11px] font-medium text-white tabular">as-of {formatClock(asOf)}</span>
-          </div>
+          </div>}
         </div>
         <div className="relative mt-2 h-4 text-[11.5px] text-ink-3 tabular">
           {[...m.per_minute.filter((x) => x.minute % 3 === 0 && x.minute <= m.per_minute.length - 2).map((x) => x.minute), m.per_minute.length].map((min) => (
@@ -183,14 +190,10 @@ export function MetricsPage() {
     <div className="flex min-h-full flex-col">
       <SessionPageHeader
         title="Communication metrics"
+        area="Metrics"
         chips={
           <span className="inline-flex h-[30px] items-center gap-1.5 rounded-full bg-[#f3eefe] px-3 text-[13.5px] font-medium text-[#6941c6]">
             <FlaskConical aria-hidden className="size-[15px]" /> P1 · Experimental
-          </span>
-        }
-        actions={
-          <span className="inline-flex h-11 items-center gap-2 rounded-control border border-hairline bg-surface px-3.5 text-[14px] font-medium text-ink shadow-control tabular">
-            As of {formatClock(asOf)} <CodeChip>Replay</CodeChip>
           </span>
         }
       />

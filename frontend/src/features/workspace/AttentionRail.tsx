@@ -6,6 +6,7 @@ import { Card, HatchedBar, MoreButton, StatusPill } from '@/components/domain/pr
 import { EmptyState, ErrorState, LoadingRows } from '@/components/domain/states';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/menu';
 import { PillTabsList, PillTabsTrigger, Tabs, TabsContent } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEvidence } from '@/hooks/useEvidence';
 import { LOOP_KIND_LABEL, STATUS } from '@/lib/status';
 import { formatClock } from '@/lib/time';
@@ -17,6 +18,10 @@ const PRIORITY_STYLE: Record<FindingView['finding']['priority'], { bg: string; t
   INFO: { bg: 'bg-sunken hover:bg-track/70', tile: 'bg-track text-ink-2', icon: Info },
 };
 
+/**
+ * Clicking a card selects its object and highlights its evidence range on the timeline;
+ * it never moves the as-of. "Review" opens the finding in Review (full-session lens).
+ */
 function FindingCard({ f, reviewHref, onFocusRange }: { f: FindingView; reviewHref: string; onFocusRange: (f: FindingView) => void }) {
   const { open } = useEvidence();
   const style = PRIORITY_STYLE[f.finding.priority];
@@ -29,7 +34,7 @@ function FindingCard({ f, reviewHref, onFocusRange }: { f: FindingView; reviewHr
         <span aria-hidden className={cn('mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full', style.tile)}>
           <Icon className="size-[18px]" strokeWidth={2} />
         </span>
-        <div className="min-w-0 flex-1 pr-5">
+        <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <h3 className="text-[15px] font-semibold leading-snug tracking-[-0.01em] text-ink">
               {f.entity_label} · {f.title}
@@ -46,14 +51,14 @@ function FindingCard({ f, reviewHref, onFocusRange }: { f: FindingView; reviewHr
             >
               <Play aria-hidden className="size-3.5 fill-current" /> Listen to evidence
             </button>
+            <Link to={reviewHref} onClick={(e) => e.stopPropagation()} className="inline-flex h-9 items-center gap-1.5 rounded-[11px] px-3 text-[14px] font-medium text-ink transition-colors hover:bg-surface/70">
+              <ListChecks aria-hidden className="size-4 text-ink-2" /> Review
+            </Link>
             {reviewed && <StatusPill size="sm" meta={STATUS.findingStatus[f.finding.status]} />}
             {f.finding.stale && <StatusPill size="sm" meta={{ label: 'Stale', tone: 'notice', icon: Clock3 }} />}
           </div>
         </div>
       </div>
-      <Link to={reviewHref} aria-label={`Review ${f.label} ${f.title}`} className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-r-[20px] text-ink-2 transition-colors hover:text-ink">
-        <ChevronRight aria-hidden className="size-[18px]" />
-      </Link>
     </li>
   );
 }
@@ -130,26 +135,31 @@ export function AttentionRail({
   return (
     <Card as="aside" aria-labelledby="attention-title" className={cn('flex flex-col p-5', className)}>
       <div className="flex items-center justify-between gap-3">
-        <h2 id="attention-title" className="text-[23px] font-semibold tracking-[-0.025em] text-ink">
+        <h2 id="attention-title" className="whitespace-nowrap text-[23px] font-semibold tracking-[-0.025em] text-ink fit:text-[20px]">
           Needs attention
         </h2>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <MoreButton label="Filter findings" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-[220px]">
-            <DropdownMenuLabel>Priority</DropdownMenuLabel>
-            {(['ALL', 'ATTENTION', 'NOTICE', 'INFO'] as const).map((p) => (
-              <DropdownMenuItem key={p} onSelect={() => setPriority(p)}>
-                <span className="flex-1">{p === 'ALL' ? 'All priorities' : STATUS.priority[p].label}</span>
-                {priority === p && <CheckCircle2 className="!text-data" />}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-1">
+          <Link to={reviewBase('review/findings')} className="inline-flex h-9 items-center gap-0.5 whitespace-nowrap rounded-[11px] px-2 text-[14px] font-medium text-data hover:bg-data-tint">
+            Review all <ChevronRight aria-hidden className="size-4" />
+          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <MoreButton label="Filter findings" className="fit:size-9" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[220px]">
+              <DropdownMenuLabel>Priority</DropdownMenuLabel>
+              {(['ALL', 'ATTENTION', 'NOTICE', 'INFO'] as const).map((p) => (
+                <DropdownMenuItem key={p} onSelect={() => setPriority(p)}>
+                  <span className="flex-1">{p === 'ALL' ? 'All priorities' : STATUS.priority[p].label}</span>
+                  {priority === p && <CheckCircle2 className="!text-data" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-      <Tabs value={tab} onValueChange={setTab} className="mt-4 flex min-h-0 flex-1 flex-col">
-        <PillTabsList className="bg-transparent p-0 [&>button]:h-10 [&>button]:text-[15px] [&>button[data-state=active]]:bg-data-tint [&>button[data-state=active]]:text-data-strong [&>button[data-state=active]]:shadow-none">
+      <Tabs value={tab} onValueChange={setTab} className="mt-4 flex min-h-0 flex-1 flex-col fit:mt-3">
+        <PillTabsList className="bg-transparent p-0 [&>button]:h-10 fit:[&>button]:h-9 [&>button]:text-[15px] [&>button[data-state=active]]:bg-data-tint [&>button[data-state=active]]:text-data-strong [&>button[data-state=active]]:shadow-none">
           <PillTabsTrigger value="findings">
             Findings <span className="tabular opacity-80">{findings?.length ?? '–'}</span>
           </PillTabsTrigger>
@@ -157,7 +167,7 @@ export function AttentionRail({
             Open loops <span className="tabular opacity-80">{openLoops.length}</span>
           </PillTabsTrigger>
         </PillTabsList>
-        <TabsContent value="findings" className="mt-4 flex-1">
+        <TabsContent value="findings" className="mt-4 flex-1 fit:mt-3 fit:flex fit:min-h-0 fit:flex-col">
           {loading && !findings ? (
             <LoadingRows rows={3} />
           ) : error ? (
@@ -167,32 +177,27 @@ export function AttentionRail({
               No findings are available at {formatClock(asOf)} in this view. This does not mean the situation is safe or complete.
             </EmptyState>
           ) : (
-            <ul className="space-y-3">
+            <ScrollArea as="ul" aria-label="Findings at this as-of" className="-mx-1 space-y-3 px-1 fit:min-h-0 fit:flex-1">
               {list.map((f) => (
                 <FindingCard key={f.finding.id} f={f} reviewHref={reviewBase(`review/findings?finding=${f.finding.id}`)} onFocusRange={onFocusRange} />
               ))}
-            </ul>
+            </ScrollArea>
           )}
         </TabsContent>
-        <TabsContent value="loops" className="mt-4 flex-1">
+        <TabsContent value="loops" className="mt-4 flex-1 fit:mt-3 fit:flex fit:min-h-0 fit:flex-col">
           {openLoops.length === 0 ? (
             <EmptyState icon={ListChecks} title="No open loops at this as-of" className="py-8">
               Loops close only with evidence; unknown coverage keeps them open.
             </EmptyState>
           ) : (
-            <ul className="space-y-3">
+            <ScrollArea as="ul" aria-label="Open loops at this as-of" className="-mx-1 space-y-3 px-1 fit:min-h-0 fit:flex-1">
               {openLoops.map((l) => (
                 <LoopRow key={l.id} loop={l} entities={entities} asOf={asOf} label={label} />
               ))}
-            </ul>
+            </ScrollArea>
           )}
         </TabsContent>
       </Tabs>
-      <Link to={reviewBase('review/findings')} className="mt-4 flex h-12 items-center gap-3 rounded-[14px] border border-hairline px-4 text-[15px] font-medium text-ink transition-colors hover:bg-sunken">
-        <ListChecks aria-hidden className="size-[18px] text-ink-2" />
-        <span className="flex-1">Review all</span>
-        <ChevronRight aria-hidden className="size-[18px] text-ink-2" />
-      </Link>
     </Card>
   );
 }

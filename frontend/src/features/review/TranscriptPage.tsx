@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, CircleHelp, Filter, Loader2, MoreHorizontal, Pause, Play, RefreshCw, Search, Sparkles, VolumeX, WifiOff } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CircleHelp, Filter, Flag, Loader2, MoreHorizontal, Pause, Play, RefreshCw, Search, Sparkles, VolumeX, WifiOff } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -12,7 +12,9 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioRow, Select } from '@/components/ui/controls';
 import { Input, Label, Textarea } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip } from '@/components/ui/tooltip';
+import { DraftGuard } from '@/hooks/useDraftGuard';
 import { useEvidence } from '@/hooks/useEvidence';
 import { useConnected } from '@/hooks/useSessionStream';
 import { useSessionScope } from '@/hooks/useSessionScope';
@@ -142,7 +144,10 @@ function SegmentWave({ row, waves }: { row: TranscriptRow; waves: WaveformView[]
 function SegmentPanel({ row, rows, onNavigate, stale }: { row: TranscriptRow; rows: TranscriptRow[]; onNavigate: (id: string) => void; stale: boolean }) {
   const { can } = useAuth();
   const { open } = useEvidence();
-  const { archived, run, latestRunId, setRun, detail } = useSessionScope();
+  const { archived, run, latestRunId, setRun, detail, href } = useSessionScope();
+  const findings = useFindings();
+  // Findings whose evidence cites this segment (cross-link to Review › Findings).
+  const related = (findings.data ?? []).filter((f) => f.finding.evidence.some((e) => detail?.labels[e.id] === row.evidence_label));
   const connected = useConnected();
   const idx = rows.findIndex((r) => r.original.id === row.original.id);
   const writable = can('review.write') && !archived;
@@ -200,6 +205,7 @@ function SegmentPanel({ row, rows, onNavigate, stale }: { row: TranscriptRow; ro
           </button>
         </div>
       </div>
+      <DraftGuard dirty={textChanged || !!reason.trim() || !!target || !!pairReason.trim()} what="transcript edit" />
       <p className="mt-1 text-[13.5px] text-ink-2 tabular">
         {formatOffset(row.segment.start_ms ?? 0)} · {detail?.channels[row.segment.channel]?.label ?? `Channel ${row.segment.channel}`} · {row.evidence_label} · revision {row.segment.revision}
       </p>
@@ -233,6 +239,17 @@ function SegmentPanel({ row, rows, onNavigate, stale }: { row: TranscriptRow; ro
         </Callout>
       )}
 
+      {related.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-[13px] text-ink-2">Cited by</span>
+          {related.map((f) => (
+            <Link key={f.finding.id} to={href('review/findings', { finding: f.finding.id })} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-data-tint px-3 text-[13px] font-medium text-data-strong hover:bg-data-soft">
+              <Flag aria-hidden className="size-3.5" /> {f.label} · {f.title}
+            </Link>
+          ))}
+        </div>
+      )}
+
       <div className="mt-5">
         <p className="flex items-center gap-1.5 text-[15px] font-semibold text-ink">
           Original STT hypothesis
@@ -246,94 +263,101 @@ function SegmentPanel({ row, rows, onNavigate, stale }: { row: TranscriptRow; ro
         </p>
       </div>
 
-      <div className="mt-6">
-        <p className="text-[15px] font-semibold text-ink">Association candidate</p>
-        {row.association_targets.length === 0 ? (
-          <p className="mt-2 text-[14px] text-ink-2">{row.intent?.speech_act === 'INSTRUCTION' ? 'Instructions are pairing targets, not candidates.' : 'No pairing candidates for this segment.'}</p>
-        ) : (
-          <>
-            <div className="mt-1.5 flex items-center gap-2 text-[13px] text-ink-2">
-              Current: {row.association ? <StatusPill size="sm" meta={STATUS.association[row.association.status]} /> : 'none'}
-            </div>
-            <RadioGroup value={target} onValueChange={setTarget} aria-label="Pairing decision" className="mt-2" disabled={!writable || !connected}>
-              {row.association_targets.map((t) => (
-                <RadioRow key={t.id} value={t.id} label={t.label} className="py-2" />
-              ))}
-              <RadioRow value="UNDETERMINED" label="Cannot be determined yet" className="py-2" />
-            </RadioGroup>
-            {(ambiguous || row.association?.unknowns.length) ? (
-              <p className="mt-2 flex items-center gap-2 rounded-[12px] bg-notice-tint px-3.5 py-2.5 text-[13.5px] text-notice">
-                <CircleHelp aria-hidden className="size-4 shrink-0" /> {row.association?.unknowns.length ? `Unknown: ${row.association.unknowns.join(', ')}.` : 'Pairing is ambiguous.'}
-              </p>
-            ) : null}
-            {writable && target && (
-              <DesktopOnly what="Saving a pairing">
-              <div className="mt-3 space-y-2">
-                <Label htmlFor="pair-reason">Pairing reason (required)</Label>
-                <Input id="pair-reason" value={pairReason} onChange={(e) => setPairReason(e.target.value)} placeholder="What in the audio supports this pairing?" />
-                <div className="flex justify-end gap-2">
-                  <Button size="sm" variant="ghost" onClick={() => setTarget('')}>
-                    Cancel
-                  </Button>
-                  <Button size="sm" variant="primary" disabled={!pairReason.trim() || pairing.isPending || !connected} onClick={savePairing}>
-                    {pairing.isPending && <Loader2 className="animate-spin" />} Save pairing
-                  </Button>
-                </div>
-                {pairing.error && <p role="alert" className="text-[13px] text-discrepancy">{isApiError(pairing.error) ? pairing.error.message : 'Saving failed.'}</p>}
-              </div>
-              </DesktopOnly>
+      <Tabs defaultValue={ambiguous ? 'pairing' : 'correction'} className="mt-6">
+        <TabsList>
+          <TabsTrigger value="correction">Correction{row.revisions.length > 0 && <span className="ml-1.5 tabular text-ink-3">{row.revisions.length}</span>}</TabsTrigger>
+          <TabsTrigger value="pairing">Pairing{ambiguous && <span aria-label="ambiguous" className="ml-1.5 inline-block size-1.5 rounded-full bg-notice" />}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="correction" className="mt-4">
+
+          <DesktopOnly what="Correcting the transcript">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              saveRevision();
+            }}
+          >
+            <Label htmlFor="correction" className="text-[15px] font-semibold">
+              Transcript correction
+            </Label>
+            <Textarea id="correction" value={text} onChange={(e) => setText(e.target.value)} disabled={!writable || !connected} className="mt-2 min-h-[84px] text-[15px]" />
+            <Label htmlFor="correction-reason" className="mt-4 block text-[15px] font-semibold">
+              Correction reason
+            </Label>
+            <Input id="correction-reason" value={reason} onChange={(e) => setReason(e.target.value)} onBlur={() => setTouched(true)} disabled={!writable || !connected} placeholder="Fill in after listening to the original audio" aria-invalid={touched && textChanged && !reason.trim()} className="mt-2" />
+            {touched && textChanged && !reason.trim() && <p className="mt-1.5 text-[12.5px] text-discrepancy">A reason is required to save a revision.</p>}
+            {conflict && (
+              <Callout className="mt-3" tone="notice" icon={RefreshCw} title="A newer revision exists" action={<Button size="sm" variant="secondary" onClick={() => correction.reset()}>Keep my draft and retry</Button>}>
+                Someone saved a revision while you were editing. Your text is kept here; compare with the latest row, then save again.
+              </Callout>
             )}
-          </>
-        )}
-      </div>
-
-      <div className="my-6 h-px bg-hairline" />
-
-      <DesktopOnly what="Correcting the transcript">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          saveRevision();
-        }}
-      >
-        <Label htmlFor="correction" className="text-[15px] font-semibold">
-          Transcript correction
-        </Label>
-        <Textarea id="correction" value={text} onChange={(e) => setText(e.target.value)} disabled={!writable || !connected} className="mt-2 min-h-[84px] text-[15px]" />
-        <Label htmlFor="correction-reason" className="mt-4 block text-[15px] font-semibold">
-          Correction reason
-        </Label>
-        <Input id="correction-reason" value={reason} onChange={(e) => setReason(e.target.value)} onBlur={() => setTouched(true)} disabled={!writable || !connected} placeholder="Fill in after listening to the original audio" aria-invalid={touched && textChanged && !reason.trim()} className="mt-2" />
-        {touched && textChanged && !reason.trim() && <p className="mt-1.5 text-[12.5px] text-discrepancy">A reason is required to save a revision.</p>}
-        {conflict && (
-          <Callout className="mt-3" tone="notice" icon={RefreshCw} title="A newer revision exists" action={<Button size="sm" variant="secondary" onClick={() => correction.reset()}>Keep my draft and retry</Button>}>
-            Someone saved a revision while you were editing. Your text is kept here; compare with the latest row, then save again.
-          </Callout>
-        )}
-        {correction.error && !conflict && <p role="alert" className="mt-3 rounded-[12px] bg-discrepancy-tint px-3.5 py-2.5 text-[13.5px] text-discrepancy">{isApiError(correction.error) ? correction.error.message : 'Saving failed. Your draft is kept.'}</p>}
-        {!connected && (
-          <p role="status" className="mt-3 flex items-center gap-2 rounded-[12px] bg-notice-tint px-3.5 py-2.5 text-[13.5px] text-notice">
-            <WifiOff aria-hidden className="size-4" /> Saving is paused while disconnected.
-          </p>
-        )}
-        <div className="mt-4 grid grid-cols-2 gap-3">
+            {correction.error && !conflict && <p role="alert" className="mt-3 rounded-[12px] bg-discrepancy-tint px-3.5 py-2.5 text-[13.5px] text-discrepancy">{isApiError(correction.error) ? correction.error.message : 'Saving failed. Your draft is kept.'}</p>}
+            {!connected && (
+              <p role="status" className="mt-3 flex items-center gap-2 rounded-[12px] bg-notice-tint px-3.5 py-2.5 text-[13.5px] text-notice">
+                <WifiOff aria-hidden className="size-4" /> Saving is paused while disconnected.
+              </p>
+            )}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div>
+                <Button variant="secondary" size="lg" className="w-full" onClick={() => open(row.segment.evidence[0]?.id ?? row.segment.id)}>
+                  <Play /> Listen to evidence
+                </Button>
+                <p className="mt-1.5 text-[12px] text-ink-3">The original source stays stored.</p>
+              </div>
+              <div>
+                <Button type="submit" variant="primary" size="lg" className="w-full" disabled={!writable || !connected || correction.isPending || !textChanged}>
+                  {correction.isPending && <Loader2 className="animate-spin" />} Save revision
+                </Button>
+                <p className="mt-1.5 text-[12px] text-ink-3">A new revision can make derived results stale.</p>
+              </div>
+            </div>
+            {!writable && <p className="mt-3 text-[13px] text-ink-2">{archived ? 'Archived session — read-only.' : 'Your role can read the transcript but not correct it.'}</p>}
+          </form>
+          </DesktopOnly>
+        </TabsContent>
+        <TabsContent value="pairing" className="mt-4">
           <div>
-            <Button variant="secondary" size="lg" className="w-full" onClick={() => open(row.segment.evidence[0]?.id ?? row.segment.id)}>
-              <Play /> Listen to evidence
-            </Button>
-            <p className="mt-1.5 text-[12px] text-ink-3">The original source stays stored.</p>
+            <p className="text-[15px] font-semibold text-ink">Association candidate</p>
+            {row.association_targets.length === 0 ? (
+              <p className="mt-2 text-[14px] text-ink-2">{row.intent?.speech_act === 'INSTRUCTION' ? 'Instructions are pairing targets, not candidates.' : 'No pairing candidates for this segment.'}</p>
+            ) : (
+              <>
+                <div className="mt-1.5 flex items-center gap-2 text-[13px] text-ink-2">
+                  Current: {row.association ? <StatusPill size="sm" meta={STATUS.association[row.association.status]} /> : 'none'}
+                </div>
+                <RadioGroup value={target} onValueChange={setTarget} aria-label="Pairing decision" className="mt-2" disabled={!writable || !connected}>
+                  {row.association_targets.map((t) => (
+                    <RadioRow key={t.id} value={t.id} label={t.label} className="py-2" />
+                  ))}
+                  <RadioRow value="UNDETERMINED" label="Cannot be determined yet" className="py-2" />
+                </RadioGroup>
+                {(ambiguous || row.association?.unknowns.length) ? (
+                  <p className="mt-2 flex items-center gap-2 rounded-[12px] bg-notice-tint px-3.5 py-2.5 text-[13.5px] text-notice">
+                    <CircleHelp aria-hidden className="size-4 shrink-0" /> {row.association?.unknowns.length ? `Unknown: ${row.association.unknowns.join(', ')}.` : 'Pairing is ambiguous.'}
+                  </p>
+                ) : null}
+                {writable && target && (
+                  <DesktopOnly what="Saving a pairing">
+                  <div className="mt-3 space-y-2">
+                    <Label htmlFor="pair-reason">Pairing reason (required)</Label>
+                    <Input id="pair-reason" value={pairReason} onChange={(e) => setPairReason(e.target.value)} placeholder="What in the audio supports this pairing?" />
+                    <div className="flex justify-end gap-2">
+                      <Button size="sm" variant="ghost" onClick={() => setTarget('')}>
+                        Cancel
+                      </Button>
+                      <Button size="sm" variant="primary" disabled={!pairReason.trim() || pairing.isPending || !connected} onClick={savePairing}>
+                        {pairing.isPending && <Loader2 className="animate-spin" />} Save pairing
+                      </Button>
+                    </div>
+                    {pairing.error && <p role="alert" className="text-[13px] text-discrepancy">{isApiError(pairing.error) ? pairing.error.message : 'Saving failed.'}</p>}
+                  </div>
+                  </DesktopOnly>
+                )}
+              </>
+            )}
           </div>
-          <div>
-            <Button type="submit" variant="primary" size="lg" className="w-full" disabled={!writable || !connected || correction.isPending || !textChanged}>
-              {correction.isPending && <Loader2 className="animate-spin" />} Save revision
-            </Button>
-            <p className="mt-1.5 text-[12px] text-ink-3">A new revision can make derived results stale.</p>
-          </div>
-        </div>
-        {!writable && <p className="mt-3 text-[13px] text-ink-2">{archived ? 'Archived session — read-only.' : 'Your role can read the transcript but not correct it.'}</p>}
-      </form>
-      </DesktopOnly>
-
+        </TabsContent>
+      </Tabs>
       {row.revisions.length > 0 && (
         <div className="mt-6">
           <p className="text-[14px] font-semibold text-ink">Revision history</p>

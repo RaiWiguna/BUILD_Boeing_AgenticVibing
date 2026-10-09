@@ -8,7 +8,7 @@ import { Wordmark } from './Logo';
 import { Sidebar } from './Sidebar';
 
 /** Below md: compact top bar + slide-in navigation sheet (the sidebar is hidden). */
-function MobileBar({ onSearch }: { onSearch: () => void }) {
+function MobileBar({ onSearch, devtools }: { onSearch: () => void; devtools?: DevtoolsSlot }) {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   const [lastPath, setLastPath] = useState(pathname);
@@ -33,7 +33,7 @@ function MobileBar({ onSearch }: { onSearch: () => void }) {
             <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[rgba(25,27,32,0.28)] data-[state=open]:animate-in data-[state=open]:fade-in-0" />
             <DialogPrimitive.Content aria-describedby={undefined} tabIndex={-1} onOpenAutoFocus={(e) => { e.preventDefault(); (e.currentTarget as HTMLElement).focus(); }} className="outline-none fixed inset-y-0 left-0 z-50 overflow-y-auto bg-canvas shadow-pop data-[state=open]:animate-in data-[state=open]:slide-in-from-left">
               <DialogPrimitive.Title className="sr-only">Navigation</DialogPrimitive.Title>
-              <Sidebar collapsed={false} onToggle={() => setOpen(false)} onSearch={() => { setOpen(false); onSearch(); }} />
+              <Sidebar collapsed={false} onToggle={() => setOpen(false)} onSearch={() => { setOpen(false); onSearch(); }} footer={devtools?.(false)} />
             </DialogPrimitive.Content>
           </DialogPrimitive.Portal>
         </DialogPrimitive.Root>
@@ -54,7 +54,10 @@ function readCollapsed() {
   return typeof window !== 'undefined' && window.innerWidth < 1360;
 }
 
-export function AppShell({ devtools }: { devtools?: ReactNode }) {
+/** Dev-only sidebar footer content (the MOCK control), rendered for the current collapse state. */
+export type DevtoolsSlot = (collapsed: boolean) => ReactNode;
+
+export function AppShell({ devtools }: { devtools?: DevtoolsSlot }) {
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [search, setSearch] = useState(false);
 
@@ -84,17 +87,16 @@ export function AppShell({ devtools }: { devtools?: ReactNode }) {
       <a href="#main" className="sr-only z-50 rounded-[10px] bg-action px-4 py-2 text-on-action focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
         Skip to content
       </a>
-      <MobileBar onSearch={() => setSearch(true)} />
+      <MobileBar onSearch={() => setSearch(true)} devtools={devtools} />
       <div className="flex">
         <div className="hidden md:block">
-          <Sidebar collapsed={collapsed} onToggle={toggle} onSearch={() => setSearch(true)} />
+          <Sidebar collapsed={collapsed} onToggle={toggle} onSearch={() => setSearch(true)} footer={devtools?.(collapsed)} />
         </div>
         <main id="main" tabIndex={-1} className={cn('min-w-0 flex-1 px-4 pb-8 pt-5 outline-none md:px-[var(--main-padding)] md:pt-7')}>
           <Outlet />
         </main>
       </div>
       <CommandPalette open={search} onOpenChange={setSearch} />
-      {devtools}
     </div>
   );
 }
