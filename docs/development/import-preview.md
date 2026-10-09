@@ -1,6 +1,6 @@
 # Private import staging dan preview — A04.1
 
-Tanggal: 9 Oktober 2026. Profile host `imports-1`, shared contracts/ports tetap 1.0.0. Preview memeriksa bytes dan menghasilkan metadata/remediation; tidak membuat replay session, source, asset, job atau analysis run. Manifest/rights/clock normalization kini tersedia melalui [A04.2 metadata workflow](import-metadata.md); commit/promotion/source reader menunggu A04.3.
+Tanggal: 9 Oktober 2026. Profile host `imports-1`, shared contracts/ports tetap 1.0.0. Preview memeriksa bytes dan menghasilkan metadata/remediation; tidak membuat replay session, source, asset, job atau analysis run. Manifest/rights/clock normalization kini tersedia melalui [A04.2 metadata workflow](import-metadata.md); commit/promotion/source reader tersedia melalui [A04.3 workflow](import-commit.md).
 
 ## Mengaktifkan service lokal
 
@@ -9,7 +9,7 @@ Set `FLOWLENS_DB_PATH` dan `FLOWLENS_IMPORT_STAGING_PATH` pada launcher [backend
 ```sh
 FLOWLENS_DB_PATH=data/db/flowlens.sqlite3 \
 FLOWLENS_IMPORT_STAGING_PATH=data/scratch/imports \
-.venv/bin/python -m flowlens.cli.serve
+.venv/bin/python -m flowlens.api.serve
 ```
 
 Staging harus directory lokal terpisah dari directory DB, owner-only (0700), tanpa symlink pada path/ancestors. Service membuat root bila belum ada, tanpa melonggarkan permissions root yang sudah ada. Files opaque UUID memakai 0600; nama input hanya metadata ASCII, maksimum128 karakter. Exclusive POSIX lock berlaku sepanjang lifespan. Tanpa konfigurasi staging, import endpoints503; `/ready` tetap503/HOST_ONLY meskipun preview aktif. Account/bootstrap/login mengikuti [authentication](authentication.md).
@@ -37,7 +37,7 @@ Declared MIME harus sesuai extension/profile atau `application/octet-stream`; co
 
 ## Batas resource dan recovery
 
-Default service limits: file2GiB, aggregate4GiB, sidecar64MiB, whole JSON8MiB, audio2jam/file, rate8–192kHz, maksimal2 channels total (hingga2 audio parts),1 events,1 tracks,4 files,200k rows/sidecar. File size dapat menjadi batas yang lebih kecil daripada duration pada encoding/rate tertentu. Ada4 concurrent upload slots,100 drafts global/16 per-owner; retry existing key mendapat kandidat sementara terbatas slots. Limits adalah engineering baseline yang dapat diinjeksi dengan ImportLimits; environment limit tuning belum tersedia. Bukan hasil performance/capacity benchmark.
+Default service limits: file512MiB, aggregate2GiB, sidecar64MiB, whole JSON8MiB, audio2jam/file dan maksimal2jam total durasi lintas kanal (duration × channel), rate8–192kHz, maksimal2 channels total (hingga2 audio parts),1 events,1 tracks,4 files,200k rows/sidecar. File size dapat menjadi batas yang lebih kecil daripada duration pada encoding/rate tertentu. Ada4 concurrent upload slots,100 drafts global/16 per-owner; retry existing key mendapat kandidat sementara terbatas slots. Limits adalah engineering baseline yang dapat diinjeksi dengan ImportLimits; environment limit tuning belum tersedia. Bukan hasil performance/capacity benchmark.
 
 Custom multipart parser mengirim bytes langsung ke private fd, tanpa framework global temp spooling. Body dibatasi total+1MiB framing, headers8/part dan2KiB/header, whole-request timeout600s. SHA-256 streaming, optional part header `X-Content-SHA256` lowercase hex64, file fsync dan hash ulang sesudah inspection. Traversal termasuk raw Windows paths ditolak sebelum multipart compatibility parser menghapus path.
 

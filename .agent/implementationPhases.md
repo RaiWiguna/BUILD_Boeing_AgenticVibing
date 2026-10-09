@@ -6,8 +6,8 @@
 | Tanggal | 9 Oktober 2026 |
 | Urutan delivery | **Backend lengkap → frontend lengkap → containerization → deployment lokal dan satu VM** |
 | Kontrak produk | `.agent/PRD.md`; batas proyek dan aturan kerja tetap berlaku |
-| Current implementation phase | A07/Phase4 done; A08.1–A08.3/Phase5 done; A09.1 done; A09.2 done; A09.3 done; next A10.1; goal sampai A09.3; contract1.0.0 |
-| Next recommended phase | A10.1 standalone acceptance; A09.3 recovery done; B tetap independen |
+| Current implementation phase | A07/Phase4 done; A08.1–A08.3/Phase5 done; A09.1 done; A09.2 done; A09.3 done; A10.1 done; A10.2 next; persistent goal sampai A10.2 + audit; contract1.0.0 |
+| Next recommended phase | A10.2 manifest/handoff Paket A; B tetap independen |
 | Deadline dan staffing | Deadline belum ditetapkan; pengguna adalah pihak A (Platform & Replay); individu pihak B (Analysis & AI) belum ditetapkan |
 | Baseline data | Sintetik berlabel; replay simulator mitra berizin jika tersedia |
 
@@ -141,7 +141,7 @@ flowchart LR
 
 Seluruh Phase 1–10 dilaksanakan sebelum implementasi frontend. Backend selesai berarti API/workers/domain nyata tersedia dan terverifikasi; bukan sekadar endpoint yang mengembalikan fixture.
 
-Paket A memiliki [rincian eksekusi A01–A10](../docs/development/package-a-execution.md) dalam 26 unit sesi untuk mengendalikan scope dan handoff. A01–A06 `done`; A07–A09 `done`; A10 `planned`; nomor ini merinci fase yang sudah ada dan tidak mengubah gate/ownership.
+Paket A memiliki [rincian eksekusi A01–A10](../docs/development/package-a-execution.md) dalam 26 unit sesi untuk mengendalikan scope dan handoff. A01–A06 `done`; A07–A09 `done`; A10 `in_progress` (A10.1 done, A10.2 planned); nomor ini merinci fase yang sudah ada dan tidak mengubah gate/ownership.
 
 ### 6.1 Model Eksekusi — Dua Paket Independen, Integrasi di Akhir
 
@@ -656,3 +656,7 @@ Perbarui `.agent/sessionHandoff.md` untuk pekerjaan lintas sesi yang substantif,
 - Gate impact: baseline memungkinkan A/B mulai independen; tidak memberi G-BE passed.
 
 A09.3 local backup/restore/maintenance done: [workflow](../docs/development/recovery.md), [evidence](../docs/testing/a093-evidence.md). Next A10.1 only; B/Phase10 and release gates remain not_started/planned as applicable.
+
+## Acceptance mandiri Paket A — A10.1
+
+A10.1 done: [evidence](../docs/testing/a101-evidence.md), [measured baseline](../docs/testing/a101-benchmark.json). Real A API/SQLite + frozen fake B; 715 platform + separate full-size capacity PASS; contracts A/B66each. Input1f88f389; commit membawa evidence. Next A10.2 manifest/handoff, otomatis sesuai scope aktif. Goal tetap active sampai kedua commit + final audit. Phase10 planned; G-BE not_started; B/provider/domain/operational validation belum terbukti.

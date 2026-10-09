@@ -78,10 +78,9 @@ def reduce(
         except (ValidationError, ValueError):
             raise ContractError("ACCESS_DENIED") from None
     source = ordered(context, [*events, *(analysis.events if analysis else [])])
+    source_fields = SourceEvent.model_fields
     source = [
-        SourceEvent.model_validate(
-            {k: v for k, v in r.model_dump().items() if k in SourceEvent.model_fields}
-        )
+        SourceEvent.model_validate({k: v for k, v in r.model_dump().items() if k in source_fields})
         for r in source
     ]
     memory = ordered(context, analysis.memory if analysis else [])
@@ -162,7 +161,7 @@ class Replay:
         # B may read repositories through ports. Never hold a replay/DB lock here.
         analysis = self.snapshot_reader(context) if self.snapshot_reader else None
         result = reduce(context, events, analysis, sequence=sequence)
-        if analysis is not None:
+        if analysis is not None and analysis.events:
             observed = {r.id: r for r in reduce(context, events, None, sequence=sequence).events}
             if any(observed.get(r.id) != r for r in analysis.events):
                 raise ContractError("ACCESS_DENIED")
@@ -219,9 +218,13 @@ class Replay:
                             sequence,
                         ):
                             raise ValueError("Invalid checkpoint")
-                        result = reduce(
-                            context, events, analysis, sequence=sequence, checkpoint=base
-                        )
+                        # Exact checkpoints already reconstructed and compared against the
+                        # current inputs need no second full dedup/validation pass. Older
+                        # checkpoints still follow the original merge path.
+                        if base != result:
+                            result = reduce(
+                                context, events, analysis, sequence=sequence, checkpoint=base
+                            )
                     except (ValidationError, ValueError):
                         # Derived cache can be rebuilt; it is never an authoritative source.
                         pass

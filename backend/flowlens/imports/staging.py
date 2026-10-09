@@ -26,8 +26,8 @@ Role = Literal["audio", "events", "tracks"]
 
 class ImportLimits(BaseModel):
     model_config = ConfigDict(strict=True, extra="forbid", frozen=True)
-    max_file_bytes: int = Field(default=2 * 1024**3, ge=1, le=8 * 1024**3)
-    max_total_bytes: int = Field(default=4 * 1024**3, ge=1, le=16 * 1024**3)
+    max_file_bytes: int = Field(default=512 * 1024**2, ge=1, le=512 * 1024**2)
+    max_total_bytes: int = Field(default=2 * 1024**3, ge=1, le=2 * 1024**3)
     max_sidecar_bytes: int = Field(default=64 * 1024**2, ge=1, le=128 * 1024**2)
     max_duration_ms: int = Field(default=7200000, ge=1, le=7200000)
     max_rows: int = Field(default=200000, ge=1, le=1000000)
@@ -471,6 +471,8 @@ class UploadSession:
         files = [file.inspect() for file in self.files]
         if sum(file.channels or 0 for file in files) > 2:
             raise ImportFailure("CHANNEL_LIMIT")
+        if sum((file.duration_ms or 0) * (file.channels or 0) for file in files) > 7200000:
+            raise ImportFailure("TOTAL_DURATION_LIMIT")
         preview = ImportPreview(
             id=self.id,
             status="NEEDS_REMEDIATION",

@@ -1,5 +1,17 @@
 # Session Handoff — ATC FlowLens
 
+## Current — A10.1 complete, A10.2 next
+
+9 Oktober 2026, feat/backend-aben. Input clean1f88f38971f1e171fd2421aa8647424e429e26f1 verified; existing changes none. A01–A09 actual source/tests/evidence/ancestry rechecked. Persistent goal active sampai seluruh A10.1–A10.2, dua local conventional commits dan final audit; jangan berhenti pada milestone ini.
+
+A10.1: PRD upload limits fixed with failing-first regression; replay redundant reducers optimized after measured p95 failure940ms. Final 715platformPASS +1opt-in skip; separate full-size capacity1PASS; contracts66each A/B, lint/format/mypy78/drift/Bandit/lock/build/dependency audit PASS. [Evidence](../docs/testing/a101-evidence.md), [measurements](../docs/testing/a101-benchmark.json): 100committed sessions/20objects/60min replay, two60min audio channels; p95list385.162ms/snapshot488.148ms/seek141.646ms/resync181.843ms. Cadence60s, ASGI/one authorized account; no high-rate/VM/browser/provider claim.
+
+Versions: frozen1.0.0/schema/ports/18migrations/uv.lock unchanged; source hashes in report. No runtime remains; all assets/accounts/SQLite synthetic disposable. Local commit A10.1 adalah commit yang membawa record ini. Next A10.2: generate/verify source manifest, reproducible entrypoints/config/routes/migrations/registrations/inventory and B composition obligations, update handoff, checks/scan/review and second local commit, then final objective audit.
+
+G-BE/G-FE/G-DELIVERY not_started; Phase10 planned. Source/tests/build/platform benchmark tersedia; provider verified NO; domain NOT_DOMAIN_VALIDATED; operational NO. No B/frontend/container/deployment/push/merge/amend. Historical records below capture prior scopes and are superseded by this current record.
+
+## Historical A09.3
+
 9 Oktober 2026. Branch feat/backend-aben. A01–A06 source/check prerequisites verified; A07.1–A09.3 implemented with sequential local conventional commits. A09.3 input9f9ee3e442819d45c742a247db94810d1a0f1c1b; final candidate is this recovery commit (resolve git log -1).
 
 A09.3: recovery/{maintenance,catalog,snapshots,candidates}, cli/maintenance, append-only audit migration0018. WAL-aware private asset snapshot/hash, exclusive offline owners, isolated restore with current external tombstones/expiry, old credentials/active jobs invalidated, retained grants/revisions/evidence/export/checkpoints, durable retirement/crash cleanup. [Evidence](../docs/testing/a093-evidence.md), [workflow/limits](../docs/development/recovery.md), [objective audit](../docs/testing/a07-a09-completion-audit.md).

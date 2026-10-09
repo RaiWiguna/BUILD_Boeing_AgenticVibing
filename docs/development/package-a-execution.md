@@ -1,6 +1,6 @@
 # Rencana Eksekusi Paket A — Platform & Replay
 
-Tanggal: 9 Oktober 2026. Owner: pengguna sebagai Pihak A. A01 `done`: A01.1–A01.3 `done`; A02 `done` (A02.1–A02.2 done); A03 `done` (A03.1–A03.3 done); A04 `done` (A04.1–A04.3 done); A05 `done`; A06 `done`; A07 `done` (A07.1–A07.3 done); A08 `done` (A08.1–A08.3 done); A09 `done` (A09.1–A09.3 done); A10 `planned`. Baseline bersama: contract 1.0.0, Phase 0–1 selesai. Evidence: [A01.1](../testing/a011-evidence.md), [A01.2](../testing/a012-evidence.md), [A01.3](../testing/a013-evidence.md).
+Tanggal: 9 Oktober 2026. Owner: pengguna sebagai Pihak A. A01 `done`: A01.1–A01.3 `done`; A02 `done` (A02.1–A02.2 done); A03 `done` (A03.1–A03.3 done); A04 `done` (A04.1–A04.3 done); A05 `done`; A06 `done`; A07 `done` (A07.1–A07.3 done); A08 `done` (A08.1–A08.3 done); A09 `done` (A09.1–A09.3 done); A10 `in_progress` (A10.1 `done`; A10.2 `planned`). Baseline bersama: contract 1.0.0, Phase 0–1 selesai. Evidence: [A01.1](../testing/a011-evidence.md), [A01.2](../testing/a012-evidence.md), [A01.3](../testing/a013-evidence.md).
 
 ## Pendekatan dan scope
 
@@ -147,6 +147,8 @@ Progress: A09.1 `done` ([evidence](../testing/a091-evidence.md), [workflow](arti
 Report JSON/CSV/HTML rendering/redaction/escaping milik B. A menyediakan lifecycle artifact, bukan merender report pengganti. Local recovery dilakukan non-container; off-host VM backup/operator dan deployment tetap tahap delivery.
 
 ## A10 — Acceptance mandiri dan handoff
+
+Progress: A10.1 `done` ([acceptance evidence](../testing/a101-evidence.md)); A10.2 `planned`. Goal tetap active sampai manifest/handoff, kedua commit dan final audit tersedia.
 
 **Prasyarat:** seluruh unit A01–A09 selesai dengan evidence, termasuk compatibility/historical migration yang diwajibkan.
 
