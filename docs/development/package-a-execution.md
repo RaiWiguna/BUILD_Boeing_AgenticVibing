@@ -1,6 +1,6 @@
 # Rencana Eksekusi Paket A — Platform & Replay
 
-Tanggal: 9 Oktober 2026. Owner: pengguna sebagai Pihak A. A01 `done`: A01.1–A01.3 `done`; A02 `done` (A02.1–A02.2 done); A03–A10 `planned`. Baseline bersama: contract 1.0.0, Phase 0–1 selesai. Evidence: [A01.1](../testing/a011-evidence.md), [A01.2](../testing/a012-evidence.md), [A01.3](../testing/a013-evidence.md).
+Tanggal: 9 Oktober 2026. Owner: pengguna sebagai Pihak A. A01 `done`: A01.1–A01.3 `done`; A02 `done` (A02.1–A02.2 done); A03 `done` (A03.1–A03.3 done); A04 `done` (A04.1–A04.3 done); A05 `done`; A06 `done`; A07–A10 `planned`. Baseline bersama: contract 1.0.0, Phase 0–1 selesai. Evidence: [A01.1](../testing/a011-evidence.md), [A01.2](../testing/a012-evidence.md), [A01.3](../testing/a013-evidence.md).
 
 ## Pendekatan dan scope
 
@@ -14,10 +14,10 @@ Urutan rekomendasi: A01 → A02 → A03 → A04 → A05 → A06 → A07 → A08 
 
 - [x] A01: Bangun host, persistence dan migrations platform — Phase 2.1.
 - [x] A02: Bangun lifecycle akun dan autentikasi — Phase 2.2.
-- [ ] A03: Terapkan grants, transport policy, audit dan mutation consistency — Phase 2.3–2.4.
-- [ ] A04: Bangun import/provenance/clock dan commit atomik — Phase 3.1–3.4.
-- [ ] A05: Bangun akses aset privat dan registry evidence — Phase 6.1 serta boundary evidence Paket A.
-- [ ] A06: Bangun durable jobs dan accepted-result coordinator — Phase 6.3.
+- [x] A03: Terapkan grants, transport policy, audit dan mutation consistency — Phase 2.3–2.4.
+- [x] A04: Bangun import/provenance/clock dan commit atomik — Phase 3.1–3.4.
+- [x] A05: Bangun akses aset privat dan registry evidence — Phase 6.1 serta boundary evidence Paket A.
+- [x] A06: Bangun durable jobs dan accepted-result coordinator — Phase 6.3.
 - [ ] A07: Bangun replay deterministik, controls, REST dan WebSocket — Phase 4.1–4.4.
 - [ ] A08: Bangun geometry, occupancy, rules dan alert lifecycle — Phase 5.1–5.4.
 - [ ] A09: Bangun artifacts, retention/purge dan platform ops/recovery — bagian A Phase 9.4/9.6.
@@ -27,7 +27,7 @@ Urutan rekomendasi: A01 → A02 → A03 → A04 → A05 → A06 → A07 → A08 
 
 **Prasyarat:** baseline 1.0.0 dan [ownership platform/analysis](../architecture/backend-baseline.md).
 
-Progress: A01.1–A01.3/A01 `done`; next A03.1 setelah A02 done. Audited legacy archive conversion tersedia; legacy credentials/routes tetap deprecated, public compatibility readers tetap A07.
+Progress: A01.1–A01.3/A01 `done`; A03–A06 juga done. Audited legacy archive conversion tersedia; legacy credentials/routes tetap deprecated, public compatibility readers tetap A07.
 
 | Unit sesi | Pekerjaan terbatas | Bukti selesai |
 | --- | --- | --- |
@@ -41,7 +41,7 @@ Jangan memakai `flowlens.testing.SQLiteHarness` sebagai storage aplikasi. Jangan
 
 **Prasyarat:** A01.1–A01.2.
 
-Progress: A02.1–A02.2/A02 done ([accounts](../testing/a021-evidence.md), [HTTP sessions](../testing/a022-evidence.md)); next A03.1. [Account/CLI workflow](account-lifecycle.md) menjelaskan trusted internal boundary dan session revocation yang masih perlu dihubungkan ke transport.
+Progress: A02.1–A02.2/A02 done ([accounts](../testing/a021-evidence.md), [HTTP sessions](../testing/a022-evidence.md)); A03–A06 juga done. [Account/CLI workflow](account-lifecycle.md) menjelaskan trusted internal boundary dan session revocation yang terhubung ke transport policy; stream scheduling nyata tetap A07.
 
 | Unit sesi | Pekerjaan terbatas | Bukti selesai |
 | --- | --- | --- |
@@ -53,6 +53,8 @@ Account tidak disamakan dengan seat/position. Argon2 dependency ditambahkan mela
 ## A03 — Authorization dan konsistensi mutations
 
 **Prasyarat:** A02; operasi domain yang belum tersedia memakai test services melalui ports.
+
+Progress: A03.1 `done` ([evidence](../testing/a031-evidence.md), [authorization workflow](authorization.md)); A03.2 `done` ([evidence](../testing/a032-evidence.md), [transport workflow](transport-policy.md)); A03.3 `done` ([evidence](../testing/a033-evidence.md), [mutation workflow](mutation-consistency.md)); A03/Phase2 `done`; A04–A06 juga done.
 
 | Unit sesi | Pekerjaan terbatas | Bukti selesai |
 | --- | --- | --- |
@@ -66,6 +68,8 @@ Uji policy WS sekarang, lalu uji koneksi WS nyata dan revocation saat stream dib
 
 **Prasyarat:** A01–A03; gunakan fixture sintetik baseline.
 
+Progress: A04.1–A04.3/A04 `done` ([phase evidence](../testing/a04-evidence.md), [commit/source workflow](import-commit.md)); A05/A06 juga done. Draft preview belum committed; explicit commit kini tersedia. No integrasi B.
+
 | Unit sesi | Pekerjaan terbatas | Bukti selesai |
 | --- | --- | --- |
 | A04.1 | Bangun private upload staging, size/content/duration/path/hash validation dan preview/remediation | Malformed/oversized/traversal/nonfinite ditolak; belum ada sesi committed pada preview |
@@ -75,6 +79,8 @@ Uji policy WS sekarang, lalu uji koneksi WS nyata dan revocation saat stream dib
 DB dan filesystem tidak memiliki transaksi atomik bersama: dokumentasikan staging/promotion, recovery dan orphan cleanup, lalu uji crash pada batas tersebut. Audit pronunciation/time mapping fixture audio sesuai acceptance Phase 3; script TTS tidak otomatis gold transcript. Cloud permission enforcement diuji tanpa provider call, lalu diperiksa ulang pada lease/result A06.
 
 ## A05 — Aset privat dan evidence
+
+Progress: `done`; [workflow](private-assets-evidence.md), [phase evidence](../testing/a05-evidence.md).
 
 **Prasyarat:** A03–A04.
 
@@ -86,6 +92,8 @@ DB dan filesystem tidak memiliki transaksi atomik bersama: dokumentasikan stagin
 Semantik interpretasi evidence milik B; A memverifikasi sumber, referensi, range, scope dan akses. Decode/resample/chunk FFmpeg tetap milik B.
 
 ## A06 — Jobs dan accepted results
+
+Progress: `done`; [workflow](durable-jobs.md), [phase evidence](../testing/a06-evidence.md). A07 belum dimulai.
 
 **Prasyarat:** A01–A05. Gunakan `AnalysisModule` fake dan handlers terdaftar; tidak mengimpor internals B.
 

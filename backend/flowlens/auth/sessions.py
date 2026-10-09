@@ -12,7 +12,7 @@ from uuid import UUID
 
 from flowlens.auth.accounts import Account, AccountRepository, Accounts, account, login_name
 from flowlens.core.errors import ContractError
-from flowlens.storage.sqlite.database import Database
+from flowlens.storage.sqlite.database import Database, UnitOfWork
 from pydantic import SecretStr
 
 IDLE_MS = 60 * 60 * 1000
@@ -132,28 +132,40 @@ class Sessions:
             uow.commit()
         return AuthSession(current, SecretStr(token), now + ABSOLUTE_MS)
 
+    def authenticate(
+        self, uow: UnitOfWork, digest: str, *, allow_password_change: bool = False
+    ) -> Account:
+        """Validate within the caller's transaction; no independent authorization snapshot."""
+        uow.check_open()
+        now = self.clock()
+        row = uow.connection.execute(
+            "SELECT * FROM platform_auth_sessions WHERE token_hash=?", (digest,)
+        ).fetchone()
+        if (
+            row is None
+            or row["revoked"]
+            or now < row["last_seen_ms"]
+            or now >= row["expires_ms"]
+            or now >= row["last_seen_ms"] + IDLE_MS
+        ):
+            raise ContractError("AUTH_REQUIRED")
+        current = account(AccountRepository(uow).row(UUID(row["account_id"])))
+        if not current.active or current.credential_version != row["credential_version"]:
+            raise ContractError("AUTH_REQUIRED")
+        if current.must_change_password and not allow_password_change:
+            raise ContractError("ACCESS_DENIED")
+        return current
+
     def resolve(self, token: str, *, allow_password_change: bool = False) -> AuthSession:
         digest = token_hash(token)
-        now = self.clock()
         with self.database.begin() as uow:
+            current = self.authenticate(uow, digest, allow_password_change=allow_password_change)
             row = uow.connection.execute(
-                "SELECT * FROM platform_auth_sessions WHERE token_hash=?", (digest,)
+                "SELECT expires_ms FROM platform_auth_sessions WHERE token_hash=?", (digest,)
             ).fetchone()
-            if (
-                row is None
-                or row["revoked"]
-                or now < row["last_seen_ms"]
-                or now >= row["expires_ms"]
-                or now >= row["last_seen_ms"] + IDLE_MS
-            ):
-                raise ContractError("AUTH_REQUIRED")
-            current = account(AccountRepository(uow).row(UUID(row["account_id"])))
-            if not current.active or current.credential_version != row["credential_version"]:
-                raise ContractError("AUTH_REQUIRED")
-            if current.must_change_password and not allow_password_change:
-                raise ContractError("ACCESS_DENIED")
             uow.connection.execute(
-                "UPDATE platform_auth_sessions SET last_seen_ms=? WHERE token_hash=?", (now, digest)
+                "UPDATE platform_auth_sessions SET last_seen_ms=? WHERE token_hash=?",
+                (self.clock(), digest),
             )
             uow.commit()
         return AuthSession(current, SecretStr(token), row["expires_ms"])

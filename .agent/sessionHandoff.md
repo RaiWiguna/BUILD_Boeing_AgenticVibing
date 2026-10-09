@@ -3,13 +3,100 @@
 | Atribut | Nilai |
 | --- | --- |
 | Tanggal | 9 Oktober 2026 |
-| Objective | Paket A A02.2: HTTP login/logout, cookie sessions, expiry/rate limits |
-| Status | Phase 0–1 done; A01/A02 dan Phase 2.1/2.2 done; Phase 2 in_progress; B belum dimulai; contract 1.0.0 |
-| Candidate | Input c36cf04; perubahan A02.1–A02.2 dicommit lokal atas instruksi pengguna 9 Oktober 2026; SHA akhir tersedia di Git log; tanpa push |
-| Next focus | A03.1 grants/RequestContext/worker principal; B tetap independen |
+| Objective | Authorized A04.3→A06 selesai; A01–A06 done |
+| Status | A01–A06 done; A07–A10 planned; B belum dimulai; contract1.0.0 |
+| Candidate | Local closeout A03.1–A06, parent cdb2b9d; SHA aktual dari git log; tidak push |
+| Next focus | Chat baru fresh context pada project/checkout yang sama: goal A07.1–A09.3; chat lama berhenti di A06 |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
 
-## Handoff terkini — A02.2
+## Handoff terkini — A06 selesai, local commit dan fresh-chat handover
+
+- Instruksi terbaru pengguna: verifikasi/tutup A06.1–A06.2, commit lokal seluruh perubahan terkait yang pending, tidak push/A07 di chat lama; buat chat baru fresh (bukan fork/worktree), project/checkout yang sama. Chat baru wajib memverifikasi A01–A06 dari source/checks, membuat goal persisten A07.1–A09.3, satu unit berurutan dengan acceptance/checks/review/secret scan/docs/local conventional commit per unit, lalu berhenti setelah A09.3 dengan A10.1 sebagai next. Tidak mengerjakan B/Phase10/frontend/deploy, tidak push/merge/amend/destructive Git.
+- Closeout ulang9 Oktober2026: source/result UOW/lease scope/recovery dan acceptance matrix direview; full425 platform PASS,66 contracts each A/B, Ruff63/mypy44/drift/Bandit -ll PASS (2 LOW native subprocess tetap). Source tidak berubah selama final suite. Markdown links/fences dan diff whitespace PASS.
+- Secret check: gitleaks/trufflehog/git-secrets tidak tersedia; scoped known-secret signature scan pada67 candidate files menemukan0 matches. Output hanya metadata di ignored artifacts/reports/a06-closeout-secret-scan.json; tidak mengklaim dedicated/history/entropy scan. Tidak stage runtime/private data/secrets. Runtime hanya test clients/DB owners/thread/native/crash subprocesses, seluruhnya selesai; tidak ada persistent runtime sesi untuk diserahkan.
+
+
+- Otorisasi A04.3→A05→A06 dipenuhi; phase docs diperbarui setelah tiap paket, docs dibaca ulang pada awal fase baru. A07/integrasi B/push/deploy tidak dilakukan; commit lokal kini diizinkan pada closeout.
+- A06.1–A06.2 done: [workflow](../docs/development/durable-jobs.md), [evidence](../docs/testing/a06-evidence.md). jobs/{coordinator,routes}.py, platform0012, host trusted AnalysisModule/policies/repository injection dan active-lease guard. Default domain/jobs tidak aktif, test composition MOCK. Source/assets/evidence real A; AnalysisModule/repository fake via frozen ports, tanpa internals B.
+- Durable run config/model/API/SDK/prompt/rule/reducer/input hashes; captured as-of, live creator grants/version/rights/retention/revision/config; one-UOW claims, scoped assets, deadlines/heartbeat, concurrency/reservations, bounded retries/cancel expected_version/idempotency, startup/poll/inspect recovery. Lost/unknown usage conservatively charged; aggregate unknown preserved, no exactly-once provider billing claim.
+- Result validate outside lock, recheck inside final UOW; read-back every output. Domain/evidence/artifact/audit/usage/job/receipt/sequence atomic; callback commit/rollback/raw COMMIT denied. Stable duplicate/postcommit-publication/crash receipts and late/revoked/stale denial. Concurrent result race reproduced and fixed with deterministic test. Submitted derivatives already durable; acceptance SQL flag/registry only, no FS/DB atomic transaction claim. Actual resync WS remains A07.
+- Final checks:60 jobs cases; full425 platform;66 contracts each A/B; Ruff63/mypy44; structural frozen port assignment; drift; Bandit0 medium/high (2 existing LOW); build PASS. 5 committed migration checksums unchanged, current12; upgrade0011→0012 and actual os._exit before/aftercommit recovery/FKs PASS. Contract1.0.0/lock unchanged A05/A06.
+- Runtime all disposable DB/files/TestClient/threads/native/crash subprocesses closed; a06-dist ignored. No persistent server/worker/container or provider/network/data migration. No real B/remote worker, domain/provider fidelity, full-size capacity/hardware power-loss/WS/maintenance validation. Readiness HOST_ONLY503; all gates not_started.
+- Next A07.1–A09.3 di chat baru sesuai instruksi terbaru, diawali verifikasi prasyarat. A08/A09/A10 and B remain planned; do not infer backend complete/G-BE from fake standalone packet evidence.
+
+## Rekam A05 phase completion
+
+- A05 done: [workflow](../docs/development/private-assets-evidence.md)/[evidence](../docs/testing/a05-evidence.md), platform0011, full365 platform/66 each contracts/Ruff60/mypy42/drift/Bandit threshold PASS. Authorized media ranges, immutable registry scope/hash/time/quote/file verification, private staged derivatives and internal bounded uploads. No B/provider; readiness503/gates not_started. Runtime disposable closed.
+- Pada akhir A05, active next A06.1–A06.2: read rules/PRD/phase/handoff; durable leases/budget/recovery and accepted-result UOW with fake registered handlers/repositories. Update docs after full A06. A07 not authorized in this request.
+
+## Rekam A04 phase completion
+
+- Otorisasi aktif pengguna: selesaikan A04.3 lalu seluruh A05 dan A06, docs setelah tiap paket fase selesai, baca ulang docs sebelum fase berikut. Tidak ada izin commit/push/deploy atau integrasi B.
+- A04.1–A04.3/Phase3 done; platform0010; shared1.0.0/lock unchanged. [Evidence](../docs/testing/a04-evidence.md)/[workflow](../docs/development/import-commit.md). New15 cases, full356 +both-track66, Ruff/mypy39/drift/Bandit threshold/build PASS. Root/raw durable copy/fsync then atomic DB publication; actual process-exit recovery verified. Source ports enforce grants/current rights/retention/as-of; raw SQL managed-source immutability; no automatic grants.
+- Runtime only disposable owners/TestClient/native/crash subprocesses; all closed, a04-dist ignored. No real data/provider/B. Gold pronunciation/domain/physical/hardware power-loss/performance validation not established; G-BE/readiness unchanged503.
+- Next A05.1–A05.2: private authorized media/range/worker minimal, EvidenceService register/resolve source/hash/scope/quote/time/as-of/UOW. Read phase docs before code. Then update phase docs and continue A06.1–A06.2 jobs/lease/budget/atomic accepted results with fake AnalysisModule. Do not stop at A05.
+
+## Rekam A04.2
+
+- Deliverables: sources/metadata.py, clocks/normalization.py, imports/{metadata,normalization}.py, records parser/private fd reader/current preview dan POST/GET metadata, platform.0009;29 new cases. [Workflow](../docs/development/import-metadata.md), [evidence](../docs/testing/a042-evidence.md), [ADR elaboration](../docs/adr/0003-private-import-staging.md).
+- Prasyarat A04.1 source/rules/PRD/handoff/execution dan35 tests verified sebelum implementasi. Existing uncommitted work preserved; no source/session commit atau real B/provider integration.
+- Full draft envelope stores source owner/identifier/dataset, granular tri-state local/cloud_audio/cloud_context/reviewer/export/audio_export/basis, explicit fixed/unknown retention, nullable coverage, per-file checksums/channel/clock, evidenced effective entity aliases/callsigns dan declared metric layout. Unknown tidak menjadi zero/false/permission. Speaker=true memerlukan future evidence adapter; unsupported sekarang ditolak.
+- Local preparation memerlukan local ALLOWED + fixed retention, tidak memerlukan cloud/alignment. Owner active-admin, Origin/CSRF/no-store, <=1MiB metadata request; latest/historical revision GET. Immutable <=64 revisions, expected_version/key/hash receipt transaction, current authority/expiry/file check before retry. Latest GET preview reflects metadata; original upload receipt stable. Reserved source/session IDs belum domain records.
+- Frozen1.0.0 projection conservative: cloud true only both audio/context allowed; shared local projection requires reviewer allowed; linear drift clock projected unknown. Full envelope harus dipertahankan A04.3. Histori receipt bukan current rights; service preflight loads latest. No provider dispatch/job/result coordinator yet.
+- Explicit relative offset/linear drift Decimal + uncertainty/reviewer/basis; tested IANA wall-time/DST adapter. Canonical sidecars retain raw timestamps/recorded/available/source IDs/hashes; imported parent scopes/IDs/layout/evidence checked, known effective identity mapped to import-scoped UUID. Unknown available not fabricated. Metadata summaries no source text, no worker/domain accepted records. Layout LOCAL_CARTESIAN m/ft factor0.3048; unsupported geographic units/CRS denied. Paired METADATA_COMPLETE bukan geometric/domain eligibility.
+- platform.0009 immutable rows/auditable actor/time/request hashes, FK cascade on draft cleanup. Fresh/upgrade0008→0009/raw preservation/TTL/retry/concurrency/commit-fault/owner/revocation/tamper tested. Journal ephemeral scratch, no committed audit/atomic FS promotion claim.
+- Checks: platform341 (312 prior +29 new) PASS; contracts66 each A/B PASS; Ruff lint/format51, mypy35, schema drift/Bandit threshold/build/pip-audit PASS. Bandit0 medium/high,2 existing low subprocess findings, no suppressions. Committed0001–0005 checksums unchanged; current0001–0009, previous0006–0008 retained. Shared1.0.0/dependency lock unchanged.
+- Limits: canonical m/relative-ms/UTC input profiles only, wall adapter standalone tested; no geographic/corpus/speaker adapter, real license/domain/physical alignment verification, full-size throughput/metadata capacity benchmark. Darwin native memory-limit limitation A04.1 remains. Retention declarations not purge execution; propagation to derivatives/export/backups later owners.
+- Runtime: disposable DB owners/TestClient/thread pools/native subprocess closed; ignored a042-dist exists. No persistent server/worker/container, real data/account migration, provider calls, commit/push/merge/deploy. All gates not_started, readiness503/HOST_ONLY.
+- A04.2/Phase3.2–3.3 done; A04/Phase3 in_progress. Next only A04.3: commit using full envelope, promotion/dedup/conflict, atomic metadata/assets/events plus crash recovery, source reader through ports. No integrasi B.
+
+## Rekam A04.1
+
+- Deliverables: imports/{staging,inspection,routes}.py, optional private host root/lifespan/error handler, platform.0008, decoder/multipart dependencies,35 import cases dan progress/ADR. [Workflow](../docs/development/import-preview.md), [evidence](../docs/testing/a041-evidence.md), [ADR](../docs/adr/0003-private-import-staging.md).
+- Prasyarat A03 verified: rules/handoff/PRD/execution dan129 scoped mutation/transport cases. Existing A03.1–A03.3 working tree dipertahankan; no new B/domain endpoints selain private preview.
+- POST /api/v1/imports custom streaming multipart langsung private UUID files, no global temp spool; GET owner-scoped metadata. Active admin only, Origin/CSRF/no-store, final authority/expiry check, hash verification, identical retry stable/changed409. Expired original receipt tidak dapat dibaca ulang via POST. Current evaluator global import grant tidak tersedia; admin lain bukan owner draft.
+- Strict versioned WAV/FLAC/canonical events JSON/JSONL dan tracks JSON/explicit-unit CSV; bounds bytes/duration/channels/rows/headers/slots/drafts. Malformed/nonfinite/traversal termasuk Windows paths ditolak; raw original bytes/hash dipertahankan. Preview shows unknown clock/layout, undeclared rights blocking, track presence/audio facts/counts; no storage path/key/content/truth.
+- No replay sessions/source/assets/jobs/runs at preview. Draft-only startup recovery interrupted/expired/orphans dan restart persistence checked; domain manifest/rights/coverage/normalization/atomic promotion/source reader remain A04.2–A04.3. Continuous TTL maintenance belum tersedia; reclaim startup-only.
+- Native subprocess fixed argv/fd/no shell, minimal env tanpa host secrets, CPU/wall timeout + bounded byte/metadata/frames/buffer. macOS menolak memory rlimit; no hard memory cap/security sandbox claim. Linux cap/full-size throughput belum tested. Native library coverage tidak dibuktikan pip-audit.
+- Versions: shared contracts1.0.0 unchanged; migrations0001–0008, committed0001–0005 checksums unchanged, prior0006/0007 retained. Lock adds soundfile0.14.0/python-multipart0.0.32/numpy2.5.3; observed libsndfile1.2.2.
+- Checks: platform312 (277 prior +35 import cases) PASS; contracts66 each A/B PASS; Ruff lint/format46, mypy31, schema drift/build/pip-audit PASS. Bandit0 medium/high,2 low subprocess B404/B603 reviewed without skips. Synthetic/disposable SQLite/Argon2/TestClient/native decoder; no live network upload/provider/domain validation.
+- Runtime: disposable owners/TestClient/native subprocess closed; ignored a041-dist available. No persistent server/worker/container, real account/data migration, commit/push/merge/deploy. Readiness503/HOST_ONLY, all gates not_started.
+- A04.1/Phase3.1 done; A04/Phase3 in_progress. Next only A04.2; A04.3/integrasi B belum dikerjakan.
+
+## Rekam A03.3
+
+- Deliverables: storage/sqlite/mutations.py, platform.0007, UOW authorizer/domain commit ownership/review events, host trusted operation registration/lifecycle; 58 new tests. [Workflow](../docs/development/mutation-consistency.md), [evidence](../docs/testing/a033-evidence.md).
+- Human-only general mutation coordinator memakai frozen repositories/UOW ports. Trusted registry chooses capability/type/handler/namespace; current authority checked sebelum receipt lookup. Worker ditolak agar tidak bypass actual lease/result coordinator A06. Domain callback validates target/transition/source rights; no domain endpoint atau real B baru.
+- Same scoped actor/session/run/operation/target/key + canonical payload/input/version → stable original receipt, no repeat effect/publication. Changed payload/version conflicts409; new key with stale version conflicts409. Version0 adalah missing bookkeeping, bukan target existence; actual aggregate creation must initialize bookkeeping before first shared Review expected_version1.
+- Callback persisted-result read-back + version/event/audit/receipt satu real UOW. Callback commit/rollback/raw transaction attempts denied; caught attempts poison UOW. Domain/evidence/storage/commit fault rollback semua writes/publication. After-commit failure durable, retry serves original receipt; real resync A07.
+- Three audit tables dan mutation receipts append-only, termasuk replacement lewat composite key/new UUID pada ordinary SQLite connection. Historical audit preserved .0006→.0007; existing committed .0001–.0005 checksums unchanged. .0006 retained, contracts1.0.0/lock unchanged. Enforcement bukan cryptographic tamper evidence atau proteksi privileged DB-file replacement; audit privacy/maintenance A09.
+- Checks: platform277 (219 prior +58 new), contracts66 masing-masing A/B PASS; Ruff lint/format42, mypy28, schema drift, Bandit0, sdist/wheel PASS. Real disposable SQLite/Argon2/TestClient/thread concurrency, fake review repository melalui frozen ports; no live network/provider/domain validation.
+- Runtime: owners/TestClient/connections/thread pools closed; ignored a033-dist tersedia. No persistent server/worker/container, real accounts/data migration, commit/push/merge/deploy. Readiness503/G-BE/G-FE/G-DELIVERY tetap not_started.
+- A03.1–A03.3/A03/Phase2 done; next A04.1 (private staging/size-content-duration-path-hash validation/preview). A04/A06/A07/A09 atau integrasi B tidak dimulai pada sesi ini.
+
+## Rekam A03.2
+
+- Deliverables: auth/transport.py + authenticate_worker, api/serializers.py, host HTTP/WS/no-store integration dan HTTPConnection auth helpers; 71 new tests dan prior test setup diperbarui. [Workflow](../docs/development/transport-policy.md), [evidence](../docs/testing/a032-evidence.md).
+- Automatic host /api/v1 human principal/Origin/CSRF policy; auth restricted flows tetap endpoint-specific. Internal /internal dan /api/v1/internal require live worker bearer, tanpa browser cookies/Origin/Fetch Metadata. Query/context claims, bearer public dan ambiguous headers/cookies denied. Scoped helpers memakai server state, bukan client mode/as-of/context.
+- WS policy sebelum accept dan scoped recheck helper tersedia. Validation/HTTP/contract failures1008 dan unexpected1011 dengan reason kosong; default validation input leak reproduced/fixed. TestClient probe rechecks logout/reset/expiry/grant revoke; actual stream scheduling/disconnect/resync tetap A07.3.
+- Public projection live-UOW: exact observed typed DTOs only, nested scope/revision/time/mode, copied-model revalidation; worker/internal/raw/truth/private/subclass denied. Manifest source rights current; no audio grant → assets empty; explicit audio → authorized metadata tanpa fixture/private paths. Truth tidak punya frozen public DTO; trusted readers tetap memisahkan truth/secret dalam teks.
+- Checks: platform219 (148 prior +71 new), contracts66 masing-masing A/B PASS; Ruff lint/format40, mypy27, schema drift, Bandit0, sdist/wheel PASS. Disposable SQLite/Argon2/TestClient only; no new live network WS/provider/domain validation. Contract1.0.0/lock/migrations.0001–.0006 unchanged.
+- Compatibility: transport denial precedes route/body validation. Legacy bearer sekarang403; legacy routes tetap absent. Existing safe-error tests diberi authenticated fixtures dengan assertions tetap. Tidak ada real domain/admin/job/media/export endpoints baru; future handlers wajib memakai object capability/rights guards dan serializer secara eksplisit.
+- Runtime: disposable DB/TestClient owners closed; ignored a032-dist tersedia. No persistent server/worker/container, real accounts/data changes, commit/push/merge/deploy. All gates tetap not_started/readiness503.
+- Next A03.3/Phase2.4; A03.1–A03.2/Phase2.3 done, A03/Phase2 in_progress. A03.3, A04 dan integrasi B tidak dikerjakan pada sesi ini.
+
+## Rekam A03.1
+
+- Deliverables: auth/permissions.py, platform.0006, Sessions.authenticate same-UOW, host permissions service/guard, guarded platform/injected repositories/event/audit dan 38 authorization tests. [Workflow](../docs/development/authorization.md), [evidence](../docs/testing/a031-evidence.md).
+- Explicit expiring/revocable per-account/session capabilities; role bounded, admin tidak otomatis punya domain/truth access, truth evaluator+DEBRIEF only. Legacy nullable grants fail closed. Management trusted service memakai live admin cookie credential dan atomic audit; belum HTTP endpoints.
+- RequestContext dibangun dari credential/grants/run/revision/hash/server replay state; full DTO digest receipts TTL5m. Every host repository/event/audit checks live proof/session/version/grant/scope/revision in same UOW; forged/cache after revoke/logout/reset denied. Worker credentials hashed/SecretStr, separate principal with one-run scope and bounded explicit source/asset allowlists; no truth/export/admin/inventory.
+- Source local/cloud/export/audio_export policy dan safe asset metadata helpers membaca ulang manifest/hash/rights. Real media/export routes belum ada. Current input/run must be latest; missing replay state NOT_EVALUABLE. Historical readers/as-of filtering A07, source writers A04, leases A06.
+- Checks: 148 platform + contracts66 masing-masing A/B PASS; Ruff format/lint, mypy25, schema drift, Bandit0 dan sdist/wheel build PASS. Fresh/upgrade/restart/rollback negative cases covered. TestClient host guard; no new live HTTP smoke because no new route. No provider/real B/domain/operational validation.
+- Contract1.0.0/lock unchanged; migrations .0001–.0006. Direct DB/raw SQL trusted infrastructure; domain host guard wajib, no client context ingestion. Public role DTOs/transport guards A03.2; append-only audit/version/idempotency A03.3.
+- Runtime: all disposable fixtures/DB owners/TestClient closed, ignored a031-dist build available. No persistent runtime, real accounts/data changes, commit/push/merge/deploy. Gates all not_started.
+- Next A03.2; A03.1 done, A03/Phase2.3 in_progress. Do not start A03.3/A04 or integrate B in same unit.
+
+## Rekam A02.2
 
 - Deliverables: auth/sessions.py + routes.py, platform.0005, host session/router lifecycle, exact origin config, launcher forwarding disabled, Account successful rehash/password-version guard, session HTTP/service tests dan auth/evidence docs.
 - Cookie-only opaque sessions: random raw token hanya Set-Cookie HttpOnly/SameSiteLax/Secure pada configured HTTPS; SQLite menyimpan digest/stamp/timing/revocation. CSRF token derived HMAC, Origin/CSRF pada auth mutations, responses/errors no-store. No bearer/query fallback.
@@ -89,8 +176,8 @@ Tidak ada server/worker/container persisten dimulai. Disposable DB/clean install
 
 ## Next action
 
-A lanjut A03.1 setelah A02/account+HTTP auth selesai dan frozen baseline 1.0.0; B dapat mulai mandiri. Reconcile/version perubahan breaking sebelum Phase 10; credential/model readiness sebelum real smoke. Frontend tetap menunggu G-BE; container/deployment menunggu gate sesudahnya.
+A lanjut A04.1 setelah A01–A03/Phase2 grants/transport/mutation foundation selesai dan frozen baseline 1.0.0; B dapat mulai mandiri. Reconcile/version perubahan breaking sebelum Phase 10; credential/model readiness sebelum real smoke. Frontend tetap menunggu G-BE; container/deployment menunggu gate sesudahnya.
 
 ## Perencanaan Paket A — 8 Oktober 2026
 
-Pengguna adalah Pihak A. [Rencana eksekusi Paket A](../docs/development/package-a-execution.md) merinci scope A menjadi 10 tahap/26 unit sesi dengan acceptance dan handoff. Saat perencanaan seluruh unit planned; setelah eksekusi A01/A02 done dan next A03.1. Status foundation dan gate di atas tetap berlaku.
+Pengguna adalah Pihak A. [Rencana eksekusi Paket A](../docs/development/package-a-execution.md) merinci scope A menjadi 10 tahap/26 unit sesi dengan acceptance dan handoff. Saat perencanaan seluruh unit planned; setelah eksekusi A01/A02/A03/Phase2 done, next A04.1. Status foundation dan gate di atas tetap berlaku.

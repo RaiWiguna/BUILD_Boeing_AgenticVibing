@@ -38,7 +38,7 @@ Validation memeriksa table/column inventory, integrity/FKs, unique row keys, val
 
 - `FLOWLENS_OPERATOR_KEY` serta file `runtime/operator-key.txt` tidak menjadi individual accounts/passwords; config baru menolak setting operator key lama.
 - Seat/operator bearer tokens lama adalah in-memory hashed-token entries dengan expiry 8 jam; archive SQLite tidak menyimpan token/account credentials. Tidak ada token conversion atau grandfathered grants.
-- `/api/v1/auth/operator`, seat minting dan mutating `/commands` lama tidak diaktifkan kembali. Host sekarang membalas 404. Individual bootstrap/login/logout/reset/deactivation berikutnya A02, grants/CSRF A03.
+- `/api/v1/auth/operator`, seat minting dan mutating `/commands` lama tidak diaktifkan kembali. Routes tetap absent pada OpenAPI. Setelah A03.2, legacy bearer/invalid Origin ditolak 403 sebelum routing; 404 pada evidence A01.3 adalah hasil host saat itu. Individual auth dan grants/transport tersedia melalui A02/A03.1–A03.2.
 - Session/scenario/events/snapshot/report/stream serializers lama belum dipulihkan. Mapping read-only history/casing dan training-route compatibility merupakan A07; training commands bukan tool AI dan bukan scope live ATC.
 - Simulator branch restoration menggunakan private checkpoint tidak dijalankan oleh migrator. Branch/what-if tetap optional dengan disposition sendiri.
 

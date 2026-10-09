@@ -11,6 +11,8 @@ dependencies = [
     "argon2-cffi>=25.1,<26",
     "fastapi>=0.115,<1",
     "pydantic>=2.10,<3",
+    "python-multipart>=0.0.20,<0.1",
+    "soundfile>=0.14,<0.15",
     "uvicorn>=0.34,<1",
 ]
 

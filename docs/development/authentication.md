@@ -1,6 +1,6 @@
 # HTTP authentication — A02.2
 
-Tanggal: 9 Oktober 2026. Individual login/session/password-change/logout tersedia pada host A dengan configured DB dan bootstrap akun. Replay/session grants, worker principals dan transport lintas domain/media/WS tetap A03/A07. `/ready` tetap 503 karena pipeline backend belum lengkap.
+Tanggal: 9 Oktober 2026. Individual login/session/password-change/logout tersedia pada host A dengan configured DB dan bootstrap akun. Grants/worker principals dan generic HTTP/WS policy tersedia melalui [A03.1–A03.2](transport-policy.md); actual domain/media/stream tetap unit owner. `/ready` tetap 503 karena pipeline backend belum lengkap.
 
 ## Local workflow dan origin
 
@@ -41,6 +41,6 @@ Hashing untuk HTTP login/password-change dibatasi dua calls bersamaan per servic
 
 ## Limits dan next action
 
-Transport ini belum menambah domain grants/RequestContext/session-object authorization, worker auth, generic mutation CSRF middleware, WS handshake/revocation atau media/export policy. Cookie expiry/revocation dites lewat HTTP dan service; tidak ada UI/browser journey/TLS VM/WS termination claim. Admin user management endpoints belum tersedia; account service tetap internal.
+A02.2 sendiri hanya menyediakan auth routes; [A03.1](authorization.md) menambahkan grants/contexts/worker dan [A03.2](transport-policy.md) generic HTTP/WS policy serta public projection. Bearer/query/context claims kini ditolak 403 sebelum routing/body validation; transport Origin denial juga mendahului 422 malformed body. Actual domain/media/export routes dan real WS replay tetap unit owner. Admin user management endpoints belum tersedia; account service tetap internal.
 
-Production profile tetap diblok sebelum G-BE. Tidak membuat akun/password nyata, provider calls atau deployment dalam unit ini. [Evidence A02.2](../testing/a022-evidence.md). Next A03.1.
+Production profile tetap diblok sebelum G-BE. Tidak membuat akun/password nyata, provider calls atau deployment dalam unit ini. [Evidence A02.2](../testing/a022-evidence.md). General mutation infrastructure tersedia pada [A03.3](mutation-consistency.md); next A04.1.

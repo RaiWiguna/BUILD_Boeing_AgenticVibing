@@ -7,7 +7,7 @@ from typing import Literal, Self
 from urllib.parse import urlsplit
 
 from flowlens.core.config import Profile
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class HostSettings(BaseModel):
@@ -19,6 +19,9 @@ class HostSettings(BaseModel):
     contract_version: Literal["1.0.0"] = "1.0.0"
     database_path: Path | None = None
     public_origin: str | None = None
+    import_staging_path: Path | None = None
+    raw_assets_path: Path | None = None
+    artifact_staging_path: Path | None = None
 
     @field_validator("public_origin")
     @classmethod
@@ -42,6 +45,44 @@ class HostSettings(BaseModel):
             if not ip_address(parsed.hostname).is_loopback:
                 raise ValueError("HTTP auth is restricted to loopback origins.")
         return value.rstrip("/")
+
+    @model_validator(mode="after")
+    def staging_requires_database(self) -> Self:
+        if self.import_staging_path is not None:
+            if self.database_path is None:
+                raise ValueError("Import staging requires a configured database.")
+            if self.import_staging_path.absolute() == self.database_path.absolute().parent:
+                raise ValueError("Staging requires a separate directory.")
+        if self.raw_assets_path is not None:
+            if self.database_path is None or self.import_staging_path is None:
+                raise ValueError("Raw storage requires database and import staging")
+            roots = (
+                self.raw_assets_path.absolute(),
+                self.import_staging_path.absolute(),
+                self.database_path.absolute().parent,
+            )
+            if any(
+                a == b or a in b.parents or b in a.parents
+                for index, a in enumerate(roots)
+                for b in roots[index + 1 :]
+            ):
+                raise ValueError("Private storage directories must be separate")
+        if self.artifact_staging_path is not None:
+            if (
+                self.raw_assets_path is None
+                or self.import_staging_path is None
+                or self.database_path is None
+            ):
+                raise ValueError("Artifacts require configured source storage")
+            path = self.artifact_staging_path.absolute()
+            roots = (
+                self.raw_assets_path.absolute(),
+                self.import_staging_path.absolute(),
+                self.database_path.absolute().parent,
+            )
+            if any(path == root or path in root.parents or root in path.parents for root in roots):
+                raise ValueError("Artifact storage requires a separate root")
+        return self
 
     @property
     def origin(self) -> str:
@@ -78,6 +119,9 @@ class HostSettings(BaseModel):
             "FLOWLENS_PORT": "port",
             "FLOWLENS_DB_PATH": "database_path",
             "FLOWLENS_ORIGIN": "public_origin",
+            "FLOWLENS_IMPORT_STAGING_PATH": "import_staging_path",
+            "FLOWLENS_RAW_ASSETS_PATH": "raw_assets_path",
+            "FLOWLENS_ARTIFACT_STAGING_PATH": "artifact_staging_path",
         }
         if any(key.startswith("FLOWLENS_") and key not in fields for key in environment):
             raise ValueError("Unsupported host configuration key.")
@@ -88,7 +132,12 @@ class HostSettings(BaseModel):
         for key, field in fields.items():
             if key in environment:
                 raw = environment[key]
-                if field == "database_path":
+                if field in (
+                    "database_path",
+                    "import_staging_path",
+                    "raw_assets_path",
+                    "artifact_staging_path",
+                ):
                     if not raw.strip() or "://" in raw:
                         raise ValueError("A local database file path is required.")
                     values[field] = Path(raw)

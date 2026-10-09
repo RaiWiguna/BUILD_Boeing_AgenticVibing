@@ -160,9 +160,12 @@ def error_module():
         ("http", 403, "ACCESS_DENIED"),
     ],
 )
-def test_errors_never_echo_private_exception_or_request_details(path, status, code):
-    app = host(settings(profile="test"), modules=(error_module(),))
+def test_errors_never_echo_private_exception_or_request_details(tmp_path, path, status, code):
+    app = host(
+        settings(profile="test", database_path=tmp_path / "errors.db"), modules=(error_module(),)
+    )
     with TestClient(app, raise_server_exceptions=False) as client:
+        authenticate_error_client(app, client)
         response = client.get(f"/api/v1/test/{path}", headers={"X-Request-ID": "private-password"})
         assert response.status_code == status
         assert response.json()["code"] == code
@@ -172,9 +175,25 @@ def test_errors_never_echo_private_exception_or_request_details(path, status, co
         assert "x-secret" not in response.headers
 
 
-def test_validation_error_omits_input_and_uses_server_request_id():
-    with TestClient(host(settings(), modules=(error_module(),))) as client:
-        response = client.post("/api/v1/test/input", json={"count": "private-password"})
+def authenticate_error_client(app, client):
+    from pydantic import SecretStr
+
+    initial = SecretStr("synthetic-error-initial")
+    changed = SecretStr("synthetic-error-changed")
+    account = app.state.accounts.bootstrap("admin", initial)
+    app.state.accounts.change_password(account.id, initial, changed)
+    auth = app.state.sessions.login("admin", changed, "local")
+    client.cookies.set("flowlens_session", auth.token.get_secret_value())
+    return {"Origin": app.state.settings.origin, "X-CSRF-Token": auth.csrf_token}
+
+
+def test_validation_error_omits_input_and_uses_server_request_id(tmp_path):
+    app = host(settings(database_path=tmp_path / "validation.db"), modules=(error_module(),))
+    with TestClient(app) as client:
+        headers = authenticate_error_client(app, client)
+        response = client.post(
+            "/api/v1/test/input", json={"count": "private-password"}, headers=headers
+        )
         assert response.status_code == 422
         assert response.json()["code"] == "INVALID_INPUT"
         assert response.json()["field_issues"] == ["body.count"]

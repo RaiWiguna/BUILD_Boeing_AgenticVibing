@@ -326,7 +326,8 @@ def test_cookie_only_auth_and_session_denial_do_not_extend_idle_deadline(tmp_pat
             "/api/v1/auth/session?token=synthetic-old-token",
             headers={"Authorization": "Bearer synthetic-old-token"},
         )
-        assert response.status_code == 401
+        assert response.status_code == 403
+        assert response.json()["code"] == "ACCESS_DENIED"
 
 
 def test_password_endpoint_requires_csrf_and_rejects_actor_injection(tmp_path):
