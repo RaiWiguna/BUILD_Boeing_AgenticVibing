@@ -45,4 +45,6 @@ Checks: typecheck, ESLint, contract type drift, copy guard (85 files), Vitest 41
 
 M3 QA (9 Oktober): 15 MOCK journeys (termasuk import, E2E-01–05, connection lost, keyboard) lulus terhadap `vite preview`; axe per route (20 route) tanpa pelanggaran serious/critical; sweep console 77 route bersih; tanpa overflow horizontal di 390/720/1024 px. Delapan bug UI/mock ditemukan dan diperbaiki (seleksi transcript setelah revisi, label run duplikat, sidebar 1280×720, path NaN, fokus evidence drawer, tiga temuan axe, overflow ponsel). Panduan: [frontend MOCK developer guide](../docs/development/frontend-mock.md).
 
+UX pass (9 Oktober, sore): fase UX-1 s.d. UX-5 dari [rencana UX](../docs/development/ux-improvement-plan.md) diimplementasikan beserta pass desain/kepadatan (keputusan D-1 s.d. D-4). Vitest 48 PASS, 15 journeys PASS, typecheck/lint/copy/type-drift/build bersih, sweep overflow/console bersih. Deviasi: Workspace 1280×720 menampilkan 2 strip + isyarat scroll.
+
 Next: tambahkan `pytest-playwright` via `uv add --dev pytest-playwright` (uv tidak tersedia di sesi ini); walkthrough keyboard-only penuh dan uji screen reader nyata; ganti adapter MOCK ke HTTP setelah G-BE `passed`. Belum commit/push.

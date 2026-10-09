@@ -93,6 +93,10 @@ Flag Mock control disimpan di memori, jadi journeys menyalakannya setelah page l
 | Smooth scroll JS mengabaikan reduced motion | `behavior` mengikuti `prefers-reduced-motion` |
 | Fixture login journeys tidak meng-encode `next`, sehingga `t`/`segment` hilang | `next` di-encode; tunggu redirect keluar dari `/login` |
 
+### Perbaikan UX UX-1 s.d. UX-5 dan pass desain (9 Oktober, sore)
+
+Rencana dan status: [ux-improvement-plan](../development/ux-improvement-plan.md) §8. Checks setelah perubahan: `npm run typecheck`, `npm run lint`, `npm run check:copy` (91 files), `npm run check:types`, `npm run build` bersih; Vitest **48 tests PASS** (tambah `tests/unit/links.test.ts`; test Debrief kini membuka sheet Export dan menjalankan axe pada sheet); **15 Python Playwright MOCK journeys PASS** terhadap `vite preview` (`pytest tests/e2e/frontend_mock --browser-channel chrome`); sweep 10 route × 390/720/1024/1440 px tanpa overflow horizontal dan tanpa console error. Bug yang ditemukan saat pass desain: form keputusan sticky di Findings menutupi quote Heard pada 1440×900 — diganti layout setinggi viewport dengan form di bawah area evidence yang di-scroll; nama import default `Audio-only · Tower` ternyata duplikat sesi yang ada — kini kosong dengan saran dari nama file dan validasi duplikat.
+
 ### Visual (browser pane, 1440×900 kecuali disebut)
 
 Dibandingkan side-by-side dengan comps: 03 workspace, 04 memory, 05 transcript (baris AMBIGUOUS terpilih otomatis di-scroll ke tengah tabel), 06 findings + evidence, 07 options, 08 debrief (rev 2 dan rev 1 stale). Metrics, Ask, Settings (evaluator + admin), Help diperiksa. Responsive: mobile 375×812 (top bar + navigation sheet, timeline tidak sticky, axis label tidak bertumpuk, write controls diganti catatan read-only), tablet 768×1024 (sidebar rail, kolom bertumpuk). 9 Oktober: dicek ulang 1280×720 (sidebar rapat, tombol akun terlihat, range editor timeline) dan 390×844 (Sessions, Import, Findings) setelah perbaikan overflow.

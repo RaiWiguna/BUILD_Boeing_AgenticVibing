@@ -52,8 +52,10 @@ Ganti role di tengah demo lewat **menu akun** (nama di kiri bawah sidebar), lalu
 
 Setelah login, aplikasi membuka **Sessions**.
 
-- Tunjukkan strip KPI, tabel sesi, dan label `SYNTHETIC` / `MOCK` / `Replay offline`.
-- Klik baris **Runway 27 · Readback**. Panel kanan menampilkan tiga readiness: source ready, analysis, dan review.
+- Bila sebelumnya sudah membuka sesi, kartu **Continue where you left off** di atas menampilkan sesi dan layar terakhir beserta jumlah finding terbuka.
+- Tunjukkan strip KPI, tabel sesi, dan label `SYNTHETIC` / `MOCK` / `Replay offline`. Status Archived tampil sebagai badge di judul, terpisah dari kolom Analysis.
+- Klik area baris **Runway 27 · Readback** (bukan judulnya). Panel kanan menampilkan tiga readiness: source ready, analysis, dan review. Klik judul sesi (atau Enter saat fokus) langsung membuka Workspace.
+- Item di **Needs checking** membuka tempat penyelesaiannya: finding ke Review, open loop/divergence ke Workspace.
 
 > "Source siap, analisis selesai, dan sudah di-review adalah tiga status berbeda. Kami tidak menggabungkannya menjadi satu centang hijau."
 
@@ -99,17 +101,19 @@ Di kartu F-03, klik **Listen to evidence**. Drawer evidence terbuka di kanan.
 
 ### Langkah 4 — Review: Transcript, Findings, Options (comp 05–07) · ±3 menit
 
-Klik **Review** di sidebar.
+Klik **Review** di sidebar. Review, Debrief, Metrics dan Ask membaca **seluruh sesi** (Debrief) secara default; As-known opsional dan menampilkan banner jumlah item yang baru tersedia kemudian, dengan tombol **Show full session**. Sesi bisa diganti dari switcher **Current session** di sidebar tanpa kehilangan area.
 
 1. **Findings** (pilih tab Findings, F-03).
    - Tunjukkan detail: category, priority, "Still unknown: speaker identity", dan **Source alert** yang dicatat terpisah dari AI finding.
    - Di **Reviewer decision**, ketiga opsi awalnya kosong dan **Save review** belum aktif.
+   - Filter default **Needs review** dengan progres "0 of 5 reviewed". **J / K** pindah antar finding; **1 / 2 / 3** memilih keputusan; **⌘/Ctrl+Enter** menyimpan.
    - Pilih **Cannot be determined yet** dan tulis alasan, misalnya: *Speaker identity not confirmed in audio.* Klik **Save review**.
-   - Toast "Review saved · Revision 1 · append-only" muncul, status berubah menjadi UNRESOLVED, dan riwayat review tampil.
+   - Halaman tetap di F-03: status "Review saved for F-03 · revision 1" dengan tombol **Next finding**, riwayat review tampil, dan form kembali kosong. "Advance after saving" default mati.
+   - Pindah item dengan draft belum tersimpan memunculkan dialog **Discard draft?**.
    > "Review tidak menimpa apa pun. Setiap keputusan menjadi revisi baru dengan alasan wajib, dan acknowledge tidak sama dengan confirm."
 2. **Transcript.**
    - Baris **07:02 "Roger, holding."** berlabel AMBIGUOUS dan terpilih otomatis.
-   - Tunjukkan **Original STT hypothesis** yang read-only, kandidat pairing FLN214/VEH03, dan form **Transcript correction** yang terpisah.
+   - Tunjukkan **Original STT hypothesis** yang read-only, link **Cited by F-07**, lalu tab **Pairing** (kandidat FLN214/VEH03, terbuka otomatis karena ambigu) dan tab **Correction** yang terpisah.
    > "Teks STT asli tidak pernah diubah. Koreksi menjadi revisi baru, dan hasil turunan ditandai stale sampai dianalisis ulang."
    - Opsional: simpan koreksi dengan alasan untuk menunjukkan banner stale dan tombol **Re-analyse as new run**. Run baru tidak dipilih otomatis.
 3. **Options.**
@@ -126,10 +130,10 @@ Klik **Review** di sidebar.
 
 Klik **Debrief**.
 
-1. **Journal**: filter **Key / All**. Event E-13 "zero nine" dan koreksi E-14 terlihat berurutan.
+1. **Review status** di kolom kanan menampilkan progres dan **Continue reviewing · F-03**. **Journal**: filter **Key / All**, scroll di dalam panel dengan isyarat "Scroll for more". Event E-13 "zero nine" dan koreksi E-14 terlihat berurutan.
 2. **Session summary**: kartu biru **Key item to review — F-03**, berlabel "AI interpretation · MOCK". Bagian Known situation, Context changes, Still open dan Unknown & coverage masing-masing punya chip evidence.
 3. Di dropdown **Brief rev. 2**, pilih **Brief rev. 1 · stale**. Muncul callout stale, as-of 05:22, dan journal yang berhenti sebelum E-14. Klik **Open brief revision 2**.
-4. **Export report**:
+4. **Export report** (tombol di header, membuka sheet di kanan):
    - Pilih format HTML/CSV/JSON. **Include provenance** terkunci menyala, dan **Include audio** dinonaktifkan dengan alasan.
    - Klik **Create export**: status berjalan Preparing → Ready, lalu **Download** muncul. File dibuat lokal oleh mock dan membawa label SYNTHETIC/MOCK serta header provenance.
 
@@ -141,7 +145,7 @@ Klik **Debrief**.
 
 1. **Metrics** (badge P1 · Experimental):
    - KPI active audio, open loops dan object switches, dengan perbandingan ke run sebelumnya.
-   - Grafik per menit: gap audio tampil sebagai unknown (arsir abu-abu), bukan nol. Klik satu bar untuk memindahkan as-of.
+   - Grafik per menit (skala mengikuti data, maksimum 60 s): gap audio tampil sebagai unknown (arsir abu-abu), bukan nol. Klik satu bar untuk beralih ke As-known pada menit itu.
    > "Ini indikator eksperimental, bukan penilaian beban kerja atau kinerja."
 2. **Ask**:
    - Klik saran *What was the last instruction to FLN214?* Jawaban muncul dengan chip evidence.
@@ -166,7 +170,7 @@ Klik **Debrief**.
 
 ## 4. Skenario opsional (tombol Mock, ±5 menit)
 
-Nyalakan satu switch, tunjukkan efeknya, lalu matikan lagi. Switch disimpan di memori, jadi refresh halaman juga mematikannya. Nyalakan switch setelah halaman tujuan terbuka.
+Panel dibuka dari **Mock control** di footer sidebar (di layar sempit: di dalam menu navigasi). Nyalakan satu switch, tunjukkan efeknya, lalu matikan lagi. Switch disimpan di memori, jadi refresh halaman juga mematikannya. Nyalakan switch setelah halaman tujuan terbuka.
 
 | Switch | Apa yang ditunjukkan | Di mana |
 | --- | --- | --- |
