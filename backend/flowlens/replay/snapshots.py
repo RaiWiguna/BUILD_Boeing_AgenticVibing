@@ -127,7 +127,8 @@ class Replay:
             reducer_version,
         )
 
-    def _inputs(self, uow: UnitOfWork, context: RequestContext) -> tuple[list[SourceEvent], int]:
+    def authorize_inputs(self, uow: UnitOfWork, context: RequestContext) -> None:
+        """Recheck source authority without reconstructing unrelated source records."""
         self.sources.permissions.enforce(uow, context)
         context.require("read", context.session_id)
         if "worker" in context.capabilities:
@@ -137,6 +138,9 @@ class Replay:
             (str(context.session_id), context.input_revision),
         ):
             self.sources.require_right(uow, context, UUID(row[0]), "reviewer")
+
+    def _inputs(self, uow: UnitOfWork, context: RequestContext) -> tuple[list[SourceEvent], int]:
+        self.authorize_inputs(uow, context)
         rows = uow.connection.execute(
             "SELECT kind,payload FROM platform_records WHERE session_id=? AND revision=? "
             "AND run_id IS NULL AND namespace IN ('source_events','tracks')",

@@ -58,7 +58,7 @@ class Views:
 
     def project(self, context: RequestContext, value: object) -> dict[str, Any]:
         with self.database.begin() as uow:
-            self.replay._inputs(uow, context)
+            self.replay.authorize_inputs(uow, context)
             return public_dto(self.permissions, uow, context, value)
 
     def snapshot(

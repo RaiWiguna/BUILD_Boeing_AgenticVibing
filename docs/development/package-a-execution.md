@@ -1,6 +1,6 @@
 # Rencana Eksekusi Paket A — Platform & Replay
 
-Tanggal: 9 Oktober 2026. Owner: pengguna sebagai Pihak A. A01 `done`: A01.1–A01.3 `done`; A02 `done` (A02.1–A02.2 done); A03 `done` (A03.1–A03.3 done); A04 `done` (A04.1–A04.3 done); A05 `done`; A06 `done`; A07 `done` (A07.1–A07.3 done); A08 `done` (A08.1–A08.3 done); A09 `done` (A09.1–A09.3 done); A10 `in_progress` (A10.1 `done`; A10.2 `planned`). Baseline bersama: contract 1.0.0, Phase 0–1 selesai. Evidence: [A01.1](../testing/a011-evidence.md), [A01.2](../testing/a012-evidence.md), [A01.3](../testing/a013-evidence.md).
+Tanggal: 10 Oktober 2026. Owner: pengguna sebagai Pihak A. A01 `done`: A01.1–A01.3 `done`; A02 `done` (A02.1–A02.2 done); A03 `done` (A03.1–A03.3 done); A04 `done` (A04.1–A04.3 done); A05 `done`; A06 `done`; A07 `done` (A07.1–A07.3 done); A08 `done` (A08.1–A08.3 done); A09 `done` (A09.1–A09.3 done); A10 `done` (A10.1–A10.2 `done`). Baseline bersama: contract 1.0.0, Phase 0–1 selesai. Evidence: [A01.1](../testing/a011-evidence.md), [A01.2](../testing/a012-evidence.md), [A01.3](../testing/a013-evidence.md).
 
 ## Pendekatan dan scope
 
@@ -21,7 +21,7 @@ Urutan rekomendasi: A01 → A02 → A03 → A04 → A05 → A06 → A07 → A08 
 - [x] A07: Bangun replay deterministik, controls, REST dan WebSocket — Phase 4.1–4.4.
 - [x] A08: Bangun geometry, occupancy, rules dan alert lifecycle — Phase 5.1–5.4.
 - [x] A09: Bangun artifacts, retention/purge dan platform ops/recovery — bagian A Phase 9.4/9.6.
-- [ ] A10: Verifikasi acceptance mandiri dan serahkan manifest Paket A — persiapan entry Phase 10.
+- [x] A10: Verifikasi acceptance mandiri dan serahkan manifest Paket A — persiapan entry Phase 10.
 
 ## A01 — Host, SQLite dan migrations
 
@@ -93,7 +93,7 @@ Semantik interpretasi evidence milik B; A memverifikasi sumber, referensi, range
 
 ## A06 — Jobs dan accepted results
 
-Progress: `done`; [workflow](durable-jobs.md), [phase evidence](../testing/a06-evidence.md). A07 done; A08.1–A08.3 done/A09.1 done; A09.2 done; A09.3 done; next A10.1.
+Progress: `done`; [workflow](durable-jobs.md), [phase evidence](../testing/a06-evidence.md). A07 done; A08.1–A08.3 done/A09.1 done; A09.2 done; A09.3 done; A10 kini done; next integrasi Phase10 setelah entry B terpenuhi.
 
 **Prasyarat:** A01–A05. Gunakan `AnalysisModule` fake dan handlers terdaftar; tidak mengimpor internals B.
 
@@ -106,7 +106,7 @@ Provider call tidak berlangsung dalam replay/DB lock. Exactly-once local commit 
 
 ## A07 — Replay, REST dan WebSocket
 
-Progress: A07.1–A07.3/A07 `done` ([snapshots](../testing/a071-evidence.md), [controls](../testing/a072-evidence.md), [transport](../testing/a073-evidence.md), [workflow](replay.md)); A08.1–A08.3 done; A09.1 done; A09.2 done; A09.3 done; next A10.1.
+Progress: A07.1–A07.3/A07 `done` ([snapshots](../testing/a071-evidence.md), [controls](../testing/a072-evidence.md), [transport](../testing/a073-evidence.md), [workflow](replay.md)); A08.1–A08.3 done; A09.1 done; A09.2 done; A09.3 done; A10 kini done; next integrasi Phase10 setelah entry B terpenuhi.
 
 **Prasyarat:** A01–A05. Snapshot/events analisis masih melalui fake B.
 
@@ -120,7 +120,7 @@ Replay test memakai input observed, tanpa evaluator schedule/labels. Training co
 
 ## A08 — Geometri, occupancy dan rules
 
-Progress: A08.1 `done` ([kernel evidence](../testing/a081-evidence.md), [workflow](geometry.md)); A08.2 `done` ([occupancy evidence](../testing/a082-evidence.md)); A08.3 `done` ([rules/alerts evidence](../testing/a083-evidence.md)); A09.1 done; A09.2 done; A09.3 done; next A10.1.
+Progress: A08.1 `done` ([kernel evidence](../testing/a081-evidence.md), [workflow](geometry.md)); A08.2 `done` ([occupancy evidence](../testing/a082-evidence.md)); A08.3 `done` ([rules/alerts evidence](../testing/a083-evidence.md)); A09.1 done; A09.2 done; A09.3 done; A10 kini done; next integrasi Phase10 setelah entry B terpenuhi.
 
 **Prasyarat:** A07; baca oracle/protocol evaluasi sebelum menulis perhitungan.
 
@@ -134,7 +134,7 @@ S01–S10 dijalankan pada A08; duplicate commands dan seek/reconnect S11–S12 j
 
 ## A09 — Artifacts, retention dan ops/recovery
 
-Progress: A09.1 `done` ([evidence](../testing/a091-evidence.md), [workflow](artifacts-retention.md)); A09.2–A09.3 done; next A10.1; [recovery evidence](../testing/a093-evidence.md), [recovery workflow](recovery.md); [A09.2 evidence](../testing/a092-evidence.md), [ops workflow](operability.md).
+Progress: A09.1 `done` ([evidence](../testing/a091-evidence.md), [workflow](artifacts-retention.md)); A09.2–A09.3 done; A10 kini done; next integrasi Phase10 setelah entry B terpenuhi; [recovery evidence](../testing/a093-evidence.md), [recovery workflow](recovery.md); [A09.2 evidence](../testing/a092-evidence.md), [ops workflow](operability.md).
 
 **Prasyarat:** A01–A08; sensitive inventory/purge dan provider diagnostics B memakai callbacks fake terdaftar.
 
@@ -148,7 +148,7 @@ Report JSON/CSV/HTML rendering/redaction/escaping milik B. A menyediakan lifecyc
 
 ## A10 — Acceptance mandiri dan handoff
 
-Progress: A10.1 `done` ([acceptance evidence](../testing/a101-evidence.md)); A10.2 `planned`. Goal tetap active sampai manifest/handoff, kedua commit dan final audit tersedia.
+Progress: A10.1–A10.2 `done`: [acceptance](../testing/a101-evidence.md), [manifest/handoff](package-a-handoff.md), [final audit](../testing/a10-completion-audit.md). Paket A selesai mandiri; Phase10/G-BE tetap menunggu B dan integrated acceptance. Kedua commit lokal diverifikasi sebelum persistent goal complete.
 
 **Prasyarat:** seluruh unit A01–A09 selesai dengan evidence, termasuk compatibility/historical migration yang diwajibkan.
 

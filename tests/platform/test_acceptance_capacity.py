@@ -14,9 +14,11 @@ import subprocess
 import sys
 import wave
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 from pathlib import Path
 from time import perf_counter
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
 import pytest
 from fastapi.testclient import TestClient
@@ -80,6 +82,19 @@ def test_measured_platform_capacity(tmp_path):
     )
     report = {
         "fixture": "a10-capacity-1",
+        "date_local": datetime.now(ZoneInfo("Asia/Jakarta")).isoformat(),
+        "measured_source_sha256": {
+            p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
+            for p in [
+                "backend/flowlens/api/host.py",
+                "backend/flowlens/replay/snapshots.py",
+                "backend/flowlens/replay/views.py",
+                "backend/flowlens/replay/controls.py",
+                "backend/flowlens/imports/staging.py",
+                "uv.lock",
+                "tests/platform/test_acceptance_capacity.py",
+            ]
+        },
         "input_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         "environment": {
             "os": platform.platform(),
@@ -274,8 +289,9 @@ def test_measured_platform_capacity(tmp_path):
             import cProfile
 
             profile = cProfile.Profile()
-            c = app.state.controls.context(token, sid, view="LOCAL", mode="AS_KNOWN")
-            profile.runcall(app.state.replay.snapshot, c)
+            from flowlens.replay.views import Views
+
+            profile.runcall(Views(app.state.controls).snapshot, token, sid, "LOCAL", "AS_KNOWN")
             profile.dump_stats("artifacts/reports/a101-replay.prof")
 
         def requests(kind):

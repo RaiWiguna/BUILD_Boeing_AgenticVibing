@@ -2,12 +2,12 @@
 
 | Atribut | Nilai |
 | --- | --- |
-| Status dokumen | Phase0–5/A01–A08 dan A05/A06 (A6.1/A6.3) done; B planned |
-| Tanggal | 9 Oktober 2026 |
+| Status dokumen | Paket A A01–A10 done; B/Phase10 planned; parent Phase6/9 B masih pending |
+| Tanggal | 10 Oktober 2026 |
 | Urutan delivery | **Backend lengkap → frontend lengkap → containerization → deployment lokal dan satu VM** |
 | Kontrak produk | `.agent/PRD.md`; batas proyek dan aturan kerja tetap berlaku |
-| Current implementation phase | A07/Phase4 done; A08.1–A08.3/Phase5 done; A09.1 done; A09.2 done; A09.3 done; A10.1 done; A10.2 next; persistent goal sampai A10.2 + audit; contract1.0.0 |
-| Next recommended phase | A10.2 manifest/handoff Paket A; B tetap independen |
+| Current implementation phase | A01–A10 Paket A done; standalone acceptance/manifest complete; Phase10 planned; contract1.0.0 |
+| Next recommended phase | Terima B candidate/manifest/real provider smoke untuk entry Phase10; G-BE not_started |
 | Deadline dan staffing | Deadline belum ditetapkan; pengguna adalah pihak A (Platform & Replay); individu pihak B (Analysis & AI) belum ditetapkan |
 | Baseline data | Sintetik berlabel; replay simulator mitra berizin jika tersedia |
 
@@ -141,7 +141,7 @@ flowchart LR
 
 Seluruh Phase 1–10 dilaksanakan sebelum implementasi frontend. Backend selesai berarti API/workers/domain nyata tersedia dan terverifikasi; bukan sekadar endpoint yang mengembalikan fixture.
 
-Paket A memiliki [rincian eksekusi A01–A10](../docs/development/package-a-execution.md) dalam 26 unit sesi untuk mengendalikan scope dan handoff. A01–A06 `done`; A07–A09 `done`; A10 `in_progress` (A10.1 done, A10.2 planned); nomor ini merinci fase yang sudah ada dan tidak mengubah gate/ownership.
+Paket A memiliki [rincian eksekusi A01–A10](../docs/development/package-a-execution.md) dalam 26 unit sesi untuk mengendalikan scope dan handoff. A01–A06 `done`; A07–A09 `done`; A10 `done` (A10.1–A10.2 done); nomor ini merinci fase yang sudah ada dan tidak mengubah gate/ownership.
 
 ### 6.1 Model Eksekusi — Dua Paket Independen, Integrasi di Akhir
 
@@ -659,4 +659,6 @@ A09.3 local backup/restore/maintenance done: [workflow](../docs/development/reco
 
 ## Acceptance mandiri Paket A — A10.1
 
-A10.1 done: [evidence](../docs/testing/a101-evidence.md), [measured baseline](../docs/testing/a101-benchmark.json). Real A API/SQLite + frozen fake B; 715 platform + separate full-size capacity PASS; contracts A/B66each. Input1f88f389; commit membawa evidence. Next A10.2 manifest/handoff, otomatis sesuai scope aktif. Goal tetap active sampai kedua commit + final audit. Phase10 planned; G-BE not_started; B/provider/domain/operational validation belum terbukti.
+A10.1 done: [evidence](../docs/testing/a101-evidence.md), [measured baseline](../docs/testing/a101-benchmark.json). Real A API/SQLite + frozen fake B; 715 platform + separate full-size capacity PASS; contracts A/B66each. Input1f88f389; commit membawa evidence. A10.2 done: [verified manifest/handoff](../docs/development/package-a-handoff.md), [final audit](../docs/testing/a10-completion-audit.md); local commits dan final-source checks/measurements tersedia. Persistent goal complete hanya setelah actual post-commit Git audit. Next entry Phase10 setelah B candidate/smoke tersedia. Phase10 planned; G-BE not_started; B/provider/domain/operational validation belum terbukti.
+
+A10.2 final candidate membawa manifest dan5route collision regression tests plus replay authority/materialization optimization.720platform + separate full-size benchmark1PASS; final p95list175.880/snapshot407.321/seek119.108ms, resync172.089ms pada declared profile. Parent shared phases/gates tidak dinaikkan selesai.

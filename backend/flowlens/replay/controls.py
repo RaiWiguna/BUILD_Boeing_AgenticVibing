@@ -54,7 +54,7 @@ class Controls:
             request_id=uuid4(),
         )
         self.permissions._receipt(uow, ctx, "HUMAN", token_hash(token))
-        self.replay._inputs(uow, ctx)
+        self.replay.authorize_inputs(uow, ctx)
         return ctx
 
     def _duration(self, uow: UnitOfWork, c: RequestContext) -> tuple[int, list[int]]:

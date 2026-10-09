@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 from fastapi import FastAPI, Request, Response, WebSocket
 from fastapi.exceptions import RequestValidationError, WebSocketRequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.routing import _IncludedRouter
 from flowlens import CONTRACT_VERSION
 from flowlens.artifacts.lifecycle import Artifacts
 from flowlens.artifacts.routes import build_router as build_artifact_router
@@ -397,6 +398,18 @@ def create_host(
 
 
 def route_keys(route: object) -> set[tuple[str, str]]:
+    # The locked FastAPI runtime retains includes as lazy branches. Use the same
+    # effective paths as its matcher, including nested prefixes and WebSockets.
+    if isinstance(route, _IncludedRouter):
+        keys: set[tuple[str, str]] = set()
+        for candidate in route.effective_candidates():
+            if isinstance(candidate, _IncludedRouter):
+                keys.update(route_keys(candidate))
+            elif candidate.starlette_route is not None:
+                keys.update(route_keys(candidate.starlette_route))
+            else:
+                keys.update((candidate.path, method) for method in candidate.methods)
+        return keys
     if isinstance(route, WebSocketRoute):
         return {(route.path, "WEBSOCKET")}
     if isinstance(route, Route):
