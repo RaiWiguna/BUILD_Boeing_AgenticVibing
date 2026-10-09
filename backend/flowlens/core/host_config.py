@@ -22,6 +22,7 @@ class HostSettings(BaseModel):
     import_staging_path: Path | None = None
     raw_assets_path: Path | None = None
     artifact_staging_path: Path | None = None
+    retention_journal_path: Path | None = None
 
     @field_validator("public_origin")
     @classmethod
@@ -82,6 +83,25 @@ class HostSettings(BaseModel):
             )
             if any(path == root or path in root.parents or root in path.parents for root in roots):
                 raise ValueError("Artifact storage requires a separate root")
+        if self.retention_journal_path is not None:
+            if self.raw_assets_path is None or self.database_path is None:
+                raise ValueError("Retention requires configured source storage")
+            path = self.retention_journal_path.resolve()
+            journal_roots = [
+                p.resolve()
+                for p in (
+                    self.database_path.parent,
+                    self.import_staging_path,
+                    self.raw_assets_path,
+                    self.artifact_staging_path,
+                )
+                if p is not None
+            ]
+            if any(
+                path == root or path in root.parents or root in path.parents
+                for root in journal_roots
+            ):
+                raise ValueError("Current deletion journal must be outside restored roots")
         return self
 
     @property
@@ -122,6 +142,7 @@ class HostSettings(BaseModel):
             "FLOWLENS_IMPORT_STAGING_PATH": "import_staging_path",
             "FLOWLENS_RAW_ASSETS_PATH": "raw_assets_path",
             "FLOWLENS_ARTIFACT_STAGING_PATH": "artifact_staging_path",
+            "FLOWLENS_RETENTION_JOURNAL_PATH": "retention_journal_path",
         }
         if any(key.startswith("FLOWLENS_") and key not in fields for key in environment):
             raise ValueError("Unsupported host configuration key.")
@@ -137,6 +158,7 @@ class HostSettings(BaseModel):
                     "import_staging_path",
                     "raw_assets_path",
                     "artifact_staging_path",
+                    "retention_journal_path",
                 ):
                     if not raw.strip() or "://" in raw:
                         raise ValueError("A local database file path is required.")

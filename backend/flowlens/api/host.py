@@ -9,6 +9,8 @@ from fastapi import FastAPI, Request, Response, WebSocket
 from fastapi.exceptions import RequestValidationError, WebSocketRequestValidationError
 from fastapi.responses import JSONResponse
 from flowlens import CONTRACT_VERSION
+from flowlens.artifacts.lifecycle import Artifacts
+from flowlens.artifacts.routes import build_router as build_artifact_router
 from flowlens.assets.access import Assets
 from flowlens.assets.routes import build_router as build_asset_router
 from flowlens.assets.storage import PrivateFiles
@@ -35,6 +37,9 @@ from flowlens.replay.compatibility import LegacyHistory
 from flowlens.replay.controls import Controls
 from flowlens.replay.routes import build_router as build_replay_router
 from flowlens.replay.snapshots import Replay
+from flowlens.retention.coordinator import Retention
+from flowlens.retention.journal import Tombstones
+from flowlens.retention.routes import build_router as build_retention_router
 from flowlens.sources.store import Sources
 from flowlens.storage.sqlite.database import Database, RepositoryFactory
 from flowlens.storage.sqlite.mutations import MutationOperation, Mutations
@@ -107,9 +112,6 @@ def create_host(
                 if config.raw_assets_path is not None:
                     try:
                         app.state.raw_files = PrivateFiles(config.raw_assets_path)
-                        app.state.import_commits = ImportCommit(
-                            app.state.imports, app.state.raw_files
-                        )
                         app.state.sources = Sources(
                             database, app.state.permissions, app.state.raw_files
                         )
@@ -122,6 +124,31 @@ def create_host(
                         if config.artifact_staging_path is not None:
                             app.state.artifact_files = PrivateFiles(config.artifact_staging_path)
                         app.state.assets = Assets(app.state.sources, app.state.artifact_files)
+                        app.state.artifacts = Artifacts(app.state.assets)
+                        if config.retention_journal_path is not None:
+                            app.state.tombstones = Tombstones(config.retention_journal_path)
+                            callbacks = {}
+                            namespaces: list[str] = []
+                            for module in registry.modules:
+                                namespaces.extend(module.inventory_namespaces)
+                                if module.purge_handler is not None:
+                                    if not module.inventory_namespaces:
+                                        raise ValueError(
+                                            "Purge handler requires registered inventory"
+                                        )
+                                    callbacks[module.inventory_namespaces[0]] = module.purge_handler
+                            app.state.retention = Retention(
+                                app.state.permissions,
+                                app.state.assets,
+                                app.state.tombstones,
+                                imports=app.state.imports,
+                                callbacks=callbacks,
+                                inventory_namespaces=tuple(namespaces),
+                            )
+                            app.state.retention.recover()
+                        app.state.import_commits = ImportCommit(
+                            app.state.imports, app.state.raw_files
+                        )
                         app.state.assets.recover_artifacts()
                         app.state.evidence = EvidenceRegistry(app.state.sources, app.state.assets)
                         app.state.geometry = Occupancy(app.state.sources, app.state.evidence)
@@ -143,6 +170,11 @@ def create_host(
                 yield
             finally:
                 app.state.jobs = None
+                if app.state.tombstones is not None:
+                    app.state.tombstones.close()
+                app.state.tombstones = None
+                app.state.retention = None
+                app.state.artifacts = None
                 if app.state.artifact_files is not None:
                     app.state.artifact_files.close()
                 app.state.artifact_files = None
@@ -195,6 +227,9 @@ def create_host(
     app.state.replay = None
     app.state.sources = None
     app.state.jobs = None
+    app.state.tombstones = None
+    app.state.retention = None
+    app.state.artifacts = None
     profile = (
         "MOCK"
         if any(module.mock for module in registry.modules)
@@ -301,6 +336,8 @@ def create_host(
     app.include_router(build_replay_router())
     app.include_router(build_geometry_router())
     app.include_router(build_rule_router())
+    app.include_router(build_artifact_router())
+    app.include_router(build_retention_router())
     occupied: set[tuple[str, str]] = set()
     for route in app.routes:
         occupied.update(route_keys(route))

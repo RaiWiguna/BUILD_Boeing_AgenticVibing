@@ -645,4 +645,17 @@ PLATFORM_MIGRATIONS = (
             BEGIN SELECT RAISE(ABORT,'Immutable seen receipt.'); END;
         """,
     ),
+    MigrationSpec(
+        "platform.0016",
+        "A",
+        ("platform.0015",),
+        """
+        CREATE TABLE platform_purges(
+            session_id TEXT PRIMARY KEY NOT NULL REFERENCES platform_sessions(id),
+            actor_id TEXT NOT NULL, reason TEXT NOT NULL,
+            state TEXT NOT NULL CHECK(state IN ('PREPARED','DONE')),
+            inventory_hash TEXT NOT NULL, payload TEXT NOT NULL,
+            key_hash TEXT NOT NULL, created_ms INTEGER NOT NULL);
+        """,
+    ),
 )

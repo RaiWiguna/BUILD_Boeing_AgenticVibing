@@ -46,6 +46,7 @@ class Permissions:
         self.database = database
         self.sessions = sessions
         self.worker_guard: Callable[[UnitOfWork, RequestContext], None] | None = None
+        self.deny_session: Callable[[UUID], bool] | None = None
 
     def _admin(self, uow: UnitOfWork, token: str) -> Account:
         actor = self.sessions.authenticate(uow, token_hash(token))
@@ -134,6 +135,8 @@ class Permissions:
         return cast(list[Capability], sorted(allowed))
 
     def _input(self, uow: UnitOfWork, session: UUID, run: UUID | None) -> sqlite3.Row:
+        if self.deny_session is not None and self.deny_session(session):
+            raise ContractError("ACCESS_DENIED")
         latest = uow.connection.execute(
             "SELECT * FROM platform_revisions WHERE session_id=? ORDER BY revision DESC LIMIT 1",
             (str(session),),
@@ -374,6 +377,9 @@ class Permissions:
 
     def enforce(self, uow: UnitOfWork, context: RequestContext) -> None:
         uow.check_open()
+        if uow.retention_context is context:
+            context.require("admin", context.session_id)
+            return
         proof = uow.connection.execute(
             "SELECT * FROM platform_context_receipts WHERE digest=? AND expires_ms>?",
             (context_digest(context), self.sessions.clock()),

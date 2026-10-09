@@ -4,12 +4,21 @@
 | --- | --- |
 | Tanggal | 9 Oktober 2026 |
 | Objective | Persistent goal A07.1–A09.3, berurutan/local commit per unit; berhenti sebelum A10 |
-| Status | A01–A06 verified; A07.1–A07.3/A07 done; A08.1–A08.2 done; A08.3/A08 done; A09.1 next; B/Phase10 tidak dimulai |
-| Candidate | A08.2 commitec63841f1d97b6c8c794d754ea63a95b36382388; A08.3 SHA reported after actual checks/commit |
-| Next focus | A09.1 artifacts/retention/purge/tombstones/audit; checkout sama feat/backend-aben |
+| Status | A01–A06 verified; A07/A08 done; A09.1 done; A09.2 next; B/Phase10 tidak dimulai |
+| Candidate | A09.1 local commit; SHA dari actual Git dilaporkan di final/next unit, tanpa amend |
+| Next focus | A09.2 health/ready/release, sanitized logs, usage/budget, provider admin profiles/disk checks; checkout sama feat/backend-aben |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
 
-## Handoff terkini — A08.3
+## Handoff terkini — A09.1 selesai
+
+- Input `d263e085bd16ad34a984b65c1daafd948a574d75`, clean sebelum unit. [Evidence](../docs/testing/a091-evidence.md), [workflow/limits](../docs/development/artifacts-retention.md).
+- Artifact transport/lifecycle JSON/CSV/HTML privat, active EXPORT authority, source/creator export rights, hash/container/size/TTL, accepted-result atomic promotion, attachment/CSP/no-store downloads dan live per-chunk revoke/expiry. Rendering/redaction/escaping B tidak diimplementasikan.
+- Retention admin preview bind contents, PREPARED/DONE plan0016, worker revocation/job cancellation, current external fsynced Tombstones sebelum raw/derived/import-staging/DB erasure, audit minimal dan retry/fault/restore/expiry reconciliation sebelum source verification. Journal wajib terpisah dari restored roots; ops diaktifkan hanya jika retention_journal_path configured. Callback frozen signatures/registered analysis repositories diuji; unknown custom SQL inventory fail closed. Tidak ada klaim instant provider/backup/forensic deletion.
+- Final657 platform (141.92s),37 scoped (15.26s),66 contracts each A/B, Ruff100/mypy66/drift/Bandit -ll/lock/build PASS. Semua15 migration definitions identik input HEAD;0016 appended, frozen1.0.0/dependency lock unchanged. Diff reviewed;26 staged files/0 matches scoped known-secret-signature scan report ignored di artifacts/reports/a091-secret-scan.json. Dedicated scanners tidak tersedia, bukan entropy/history scan.
+- Tidak ada runtime/private data retained selain disposable test outputs ignored; tidak push/merge/amend/destructive Git/B/Phase10/frontend/deploy. Readiness HOST_ONLY503; parent Phase9 masih in_progress dengan B planned, bukan acceptance gabungan.
+- Next A09.2, lalu A09.3 consistent backup/isolated restore/maintenance CLI. Goal tetap ACTIVE, jangan berhenti setelah milestone A09.1 dan jangan menandai complete sebelum A09.3 committed + A10.1 handoff only. B diagnostics tetap fake via frozen registered ports; tidak label provider verified atau operational validation.
+
+## Rekam A08.3
 
 - Input ec63841f1d97b6c8c794d754ea63a95b36382388, clean before unit; previous goal turns produced WIP/test evidence, then durable lifecycle/indicators/transport. A08.3/Phase5 deliverables are ready after actual checks/commit ([evidence](../docs/testing/a083-evidence.md), [workflow](../docs/development/geometry.md)).
 - Explicit lab-source-1 codec/lab-rules-1 default fictional-1/H1/allowed side/protection5m and5000ms lab response window. Actual SourceReader/GeometryReader/EvidenceRegistry scope/time/clock/identity/coverage integration; physical occupancy independent of cancellation/report. Source severity vs deterministic priority separate; simultaneous contradictory source alerts UNKNOWN with all original variants; seen means SEEN_ONLY.

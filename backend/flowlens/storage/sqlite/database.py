@@ -53,6 +53,7 @@ class UnitOfWork:
         self.domain_active = False
         self.poisoned = False
         self.owner_transaction = False
+        self.retention_context: RequestContext | None = None
         connection.set_authorizer(self.runtime_authorize)
 
     def runtime_authorize(
@@ -63,6 +64,16 @@ class UnitOfWork:
         database: str | None,
         trigger: str | None,
     ) -> int:
+        if self.retention_context is not None and not self.domain_active:
+            if (
+                action == sqlite3.SQLITE_DROP_TRIGGER
+                or (action == sqlite3.SQLITE_PRAGMA and arg1 == "defer_foreign_keys")
+                or (
+                    action == sqlite3.SQLITE_DELETE
+                    and arg1 in ("platform_audit", "platform_mutation_receipts")
+                )
+            ):
+                return sqlite3.SQLITE_OK
         immutable = {
             "platform_audit",
             "platform_account_audit",
@@ -110,6 +121,20 @@ class UnitOfWork:
                 self.poisoned = True
             return sqlite3.SQLITE_DENY
         return sqlite3.SQLITE_OK
+
+    @contextmanager
+    def retention_writes(self, context: RequestContext) -> Iterator[None]:
+        """Coordinator-only erasure context; callbacks cannot enter or acquire commit authority."""
+        self.check_open()
+        if self.domain_active or self.retention_context is not None:
+            self.poisoned = True
+            raise RuntimeError("Nested retention authority denied")
+        context.require("admin", context.session_id)
+        self.retention_context = context
+        try:
+            yield
+        finally:
+            self.retention_context = None
 
     @contextmanager
     def domain_writes(self) -> Iterator[None]:
@@ -184,6 +209,9 @@ class UnitOfWork:
 
     def after_commit(self, callback: Callable[[], None]) -> None:
         self.check_open()
+        if self.retention_context is not None and self.domain_active:
+            self.poisoned = True
+            raise RuntimeError("Purge callbacks cannot defer unscoped writes")
         self.callbacks.append(callback)
 
     def commit(self) -> None:
@@ -267,6 +295,7 @@ class Database:
             connection.row_factory = sqlite3.Row
             connection.execute("PRAGMA foreign_keys=ON")
             connection.execute("PRAGMA synchronous=FULL")
+            connection.execute("PRAGMA secure_delete=ON")
             connection.execute("PRAGMA recursive_triggers=ON")
             yield connection
         finally:
