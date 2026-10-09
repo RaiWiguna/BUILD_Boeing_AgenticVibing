@@ -6,8 +6,8 @@
 | Tanggal | 9 Oktober 2026 |
 | Urutan delivery | **Backend lengkap → frontend lengkap → containerization → deployment lokal dan satu VM** |
 | Kontrak produk | `.agent/PRD.md`; batas proyek dan aturan kerja tetap berlaku |
-| Current implementation phase | A07/Phase4 done; A08.1–A08.3/Phase5 done; A09.1 done; A09.2 next; goal sampai A09.3; contract1.0.0 |
-| Next recommended phase | A09.2 operability; persistent goal sampai A09.3; B tetap independen |
+| Current implementation phase | A07/Phase4 done; A08.1–A08.3/Phase5 done; A09.1 done; A09.2 done; A09.3 next; goal sampai A09.3; contract1.0.0 |
+| Next recommended phase | A09.3 backup/recovery; persistent goal sampai A09.3; B tetap independen |
 | Deadline dan staffing | Deadline belum ditetapkan; pengguna adalah pihak A (Platform & Replay); individu pihak B (Analysis & AI) belum ditetapkan |
 | Baseline data | Sintetik berlabel; replay simulator mitra berizin jika tersedia |
 
@@ -88,7 +88,7 @@ Audit awal memeriksa kontrak dan scaffold yang benar-benar tersedia, lalu meneta
 | 6 | Backend A / B | A: assets/jobs/internal API; B: audio processing/worker | A: Phase 2; B: Phase 1; keduanya memakai frozen contracts | `in_progress` (A6.1/6.3 done; B planned) |
 | 7 | Backend B | Google STT, transcript/corrections, analysis persistence dan benchmark | Phase 6.2/6.4 (B); GCP readiness untuk smoke | `planned` |
 | 8 | Backend B | Gemini intent, scoped tools, association, memory/open loops | Phase 7 (B); Gemini readiness untuk smoke | `planned` |
-| 9 | Backend A / B | A: artifact lifecycle/ops; B: findings/review/brief/report/query/provider diagnostics | A: Phase 2–6 bagian A; B: Phase 8; tanpa dependency lintas implementasi | `in_progress` (A09.1 done; A09.2–A09.3/B planned) |
+| 9 | Backend A / B | A: artifact lifecycle/ops; B: findings/review/brief/report/query/provider diagnostics | A: Phase 2–6 bagian A; B: Phase 8; tanpa dependency lintas implementasi | `in_progress` (A09.1 done; A09.2 done; A09.3/B planned) |
 | 10 | Integrasi backend akhir | Composition/migrations nyata, integrated verification, contract freeze, G-BE | Seluruh task dan acceptance paket A serta B selesai | `planned` |
 | 11 | Frontend | React/Vite/shadcn foundation, auth/router, API data layer | G-BE `passed` | `planned` |
 | 12 | Frontend | Sessions/import, workspace, replay/audio, memory/situation | Phase 11 | `planned` |
@@ -260,7 +260,7 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 4 — Replay Engine, Archive, API, dan WebSocket
 
-**Status:** `done` · **Owner:** pihak A · **Dependency:** Phase 3 (A); A07.1–A07.3/4.1–4.4 done ([snapshot evidence](../docs/testing/a071-evidence.md), [controls evidence](../docs/testing/a072-evidence.md), [transport evidence](../docs/testing/a073-evidence.md)); A08.1–A08.2 done; A08.3/5.3–5.4 done ([evidence](../docs/testing/a083-evidence.md)); A09.1 done; A09.2 next. Analysis snapshot/events memakai fake module sampai Phase 10.
+**Status:** `done` · **Owner:** pihak A · **Dependency:** Phase 3 (A); A07.1–A07.3/4.1–4.4 done ([snapshot evidence](../docs/testing/a071-evidence.md), [controls evidence](../docs/testing/a072-evidence.md), [transport evidence](../docs/testing/a073-evidence.md)); A08.1–A08.2 done; A08.3/5.3–5.4 done ([evidence](../docs/testing/a083-evidence.md)); A09.1 done; A09.2 done; A09.3 next. Analysis snapshot/events memakai fake module sampai Phase 10.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
@@ -273,7 +273,7 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 5 — Geometry, Occupancy, Prediction, Rules, dan Alert Lifecycle
 
-**Status:** `done` · **Owner:** pihak A · **Dependency:** Phase 4 (A); A08.1/5.1 done ([evidence](../docs/testing/a081-evidence.md)); A08.2/5.2 done ([evidence](../docs/testing/a082-evidence.md)); A08.3/5.3–5.4 done ([evidence](../docs/testing/a083-evidence.md)); A09.1 done; A09.2 next. Tidak membutuhkan STT/Gemini atau memory B.
+**Status:** `done` · **Owner:** pihak A · **Dependency:** Phase 4 (A); A08.1/5.1 done ([evidence](../docs/testing/a081-evidence.md)); A08.2/5.2 done ([evidence](../docs/testing/a082-evidence.md)); A08.3/5.3–5.4 done ([evidence](../docs/testing/a083-evidence.md)); A09.1 done; A09.2 done; A09.3 next. Tidak membutuhkan STT/Gemini atau memory B.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
@@ -336,7 +336,7 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 9 — Findings, Options, Review, Debrief, dan Operability
 
-**Status:** `in_progress` (A09.1 platform9.4 done; A09.2–A09.3/B planned) · **Owner:** B untuk 9.1–9.3/9.5 dan analysis parts 9.4/9.6; A untuk platform parts 9.4/9.6 · **Dependency:** B memakai Phase 8; A memakai Phase 2–6 bagian A. Tidak ada dependency implementasi lintas pihak.
+**Status:** `in_progress` (A09.1 platform9.4 done; A09.2 done; A09.3/B planned) · **Owner:** B untuk 9.1–9.3/9.5 dan analysis parts 9.4/9.6; A untuk platform parts 9.4/9.6 · **Dependency:** B memakai Phase 8; A memakai Phase 2–6 bagian A. Tidak ada dependency implementasi lintas pihak.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
@@ -345,7 +345,7 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 | 9.3 | Human confirm/dismiss/unresolved/relevance, append-only review, invalidation dan reanalysis | Durable review/journal APIs | `planned` |
 | 9.4 | B: JSON/CSV/HTML rendering, evidence/versions, capability redaction dan injection escaping; A: artifact submission/storage/download/expiry, retention/purge/tombstones/audit queries; B mendaftarkan sensitive-data inventory/purge handler | Report renderer B dan artifact lifecycle A yang independently tested | A `done` ([A09.1 evidence](../docs/testing/a091-evidence.md)); B `planned` |
 | 9.5 | P1 contextual query dan communication metrics sesuai disposition | Scoped read-only query/metric APIs | `planned` |
-| 9.6 | A: health/ready/release, log/audit/usage/budget infrastructure, disk/backup/restore dan provider admin profiles; B: provider check handlers, sanitized diagnostics/usage/latency dan analysis readiness | Platform ops A dan provider diagnostics B | `planned` |
+| 9.6 | A: health/ready/release, log/audit/usage/budget infrastructure, disk/backup/restore dan provider admin profiles; B: provider check handlers, sanitized diagnostics/usage/latency dan analysis readiness | Platform ops A dan provider diagnostics B | `in_progress` (A09.2 done; A09.3/B planned; [evidence](../docs/testing/a092-evidence.md)) |
 
 **Scope:** backend menyediakan semua fungsi Sessions/Workspace/Review/Debrief/Settings yang dijanjikan. Opsi tidak dapat dieksekusi; nol opsi dengan `INSUFFICIENT_CONTEXT` valid. Factual brief/query items mempunyai evidence IDs; query tidak mengubah operational memory. Metrik komunikasi tidak menjadi diagnosis. Branch/what-if tetap workflow evaluator opsional, tidak ditambahkan sebagai tool AI atau fitur wajib tanpa disposition.
 

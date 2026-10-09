@@ -3,7 +3,7 @@
 from collections.abc import Mapping
 from ipaddress import ip_address
 from pathlib import Path
-from typing import Literal, Self
+from typing import Annotated, Literal, Self
 from urllib.parse import urlsplit
 
 from flowlens.core.config import Profile
@@ -23,6 +23,9 @@ class HostSettings(BaseModel):
     raw_assets_path: Path | None = None
     artifact_staging_path: Path | None = None
     retention_journal_path: Path | None = None
+    minimum_free_bytes: int = Field(default=64 * 1024**2, ge=0, lt=2**63)
+    release_sha: Annotated[str, Field(pattern=r"^(?:[a-f0-9]{40}|[a-f0-9]{64})$")] | None = None
+    lock_sha256: Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")] | None = None
 
     @field_validator("public_origin")
     @classmethod
@@ -143,6 +146,9 @@ class HostSettings(BaseModel):
             "FLOWLENS_RAW_ASSETS_PATH": "raw_assets_path",
             "FLOWLENS_ARTIFACT_STAGING_PATH": "artifact_staging_path",
             "FLOWLENS_RETENTION_JOURNAL_PATH": "retention_journal_path",
+            "FLOWLENS_MINIMUM_FREE_BYTES": "minimum_free_bytes",
+            "FLOWLENS_RELEASE_SHA": "release_sha",
+            "FLOWLENS_LOCK_SHA256": "lock_sha256",
         }
         if any(key.startswith("FLOWLENS_") and key not in fields for key in environment):
             raise ValueError("Unsupported host configuration key.")
@@ -163,7 +169,7 @@ class HostSettings(BaseModel):
                     if not raw.strip() or "://" in raw:
                         raise ValueError("A local database file path is required.")
                     values[field] = Path(raw)
-                elif field in ("api_workers", "port"):
+                elif field in ("api_workers", "port", "minimum_free_bytes"):
                     if not raw.isascii() or not raw.isdecimal():
                         raise ValueError("Invalid integer host setting.")
                     values[field] = int(raw)

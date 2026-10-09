@@ -1,6 +1,6 @@
 # Struktur Repository ATC FlowLens
 
-Tanggal: 9 Oktober 2026. Status: **A01–A07 tersedia dan standalone platform acceptance selesai; A07 replay/REST/WS tersedia; B/provider/domain pipeline belum tersedia; A08.1–A08.3 geometry/occupancy/rules/alerts tersedia; A09.1 artifact/retention tersedia; A09.2–A09.3/A10, frontend/deployment belum diimplementasikan**. Source A09.1: [workflow](../development/artifacts-retention.md)/[evidence](../testing/a091-evidence.md). Tree di bawah adalah snapshot scaffold7 Oktober; source terkini dirujuk melalui [A04](../testing/a04-evidence.md), [A05](../testing/a05-evidence.md) dan [A06](../testing/a06-evidence.md).
+Tanggal: 9 Oktober 2026. Status: **A01–A07 tersedia dan standalone platform acceptance selesai; A07 replay/REST/WS tersedia; B/provider/domain pipeline belum tersedia; A08.1–A08.3 geometry/occupancy/rules/alerts tersedia; A09.1 artifact/retention tersedia; A09.2 local operability tersedia; A09.3/A10, frontend/deployment belum diimplementasikan**. Source A09.2: [workflow](../development/operability.md)/[evidence](../testing/a092-evidence.md). Source A09.1: [workflow](../development/artifacts-retention.md)/[evidence](../testing/a091-evidence.md). Tree di bawah adalah snapshot scaffold7 Oktober; source terkini dirujuk melalui [A04](../testing/a04-evidence.md), [A05](../testing/a05-evidence.md) dan [A06](../testing/a06-evidence.md).
 
 ## Dasar penempatan
 

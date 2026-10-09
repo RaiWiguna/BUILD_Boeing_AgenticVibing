@@ -3,7 +3,8 @@
 from collections.abc import AsyncIterator, Awaitable, Callable, Mapping, Sequence
 from contextlib import asynccontextmanager
 from os import environ
-from uuid import uuid4
+from time import perf_counter_ns
+from uuid import UUID, uuid4
 
 from fastapi import FastAPI, Request, Response, WebSocket
 from fastapi.exceptions import RequestValidationError, WebSocketRequestValidationError
@@ -33,6 +34,11 @@ from flowlens.imports.routes import build_router as build_import_router
 from flowlens.imports.staging import ImportFailure, Imports
 from flowlens.jobs.coordinator import Jobs, StagePolicy
 from flowlens.jobs.routes import build_router as build_job_router
+from flowlens.ops.health import Operations
+from flowlens.ops.logs import emit
+from flowlens.ops.providers import AdapterBinding, Providers
+from flowlens.ops.routes import build_router as build_ops_router
+from flowlens.ops.usage import UsageReader
 from flowlens.replay.compatibility import LegacyHistory
 from flowlens.replay.controls import Controls
 from flowlens.replay.routes import build_router as build_replay_router
@@ -57,6 +63,7 @@ def create_host(
     analysis_module: AnalysisModule | None = None,
     context_reader: ContextReader | None = None,
     job_policies: Sequence[StagePolicy] = (),
+    provider_adapters: Mapping[str, AdapterBinding] | None = None,
     repository_factories: Mapping[str, RepositoryFactory] | None = None,
 ) -> FastAPI:
     config = settings if settings is not None else HostSettings.from_environment(environ)
@@ -64,6 +71,14 @@ def create_host(
         raise ValueError("Analysis module and registered stage policies required together")
     if job_policies and (config.database_path is None or config.raw_assets_path is None):
         raise ValueError("Jobs require durable database and committed source storage")
+    if provider_adapters and any(
+        k not in ("GOOGLE_STT", "GEMINI")
+        or not isinstance(v, AdapterBinding)
+        or type(v.mock) is not bool
+        or (v.mock and config.profile != "test")
+        for k, v in provider_adapters.items()
+    ):
+        raise ValueError("Provider MOCK registration requires test profile")
     registry = ModuleRegistry(profile=config.profile)
     for module in modules:
         if module.mock and config.profile != "test":
@@ -99,6 +114,13 @@ def create_host(
                 app.state.accounts = Accounts(database)
                 app.state.sessions = Sessions(database, app.state.accounts)
                 app.state.permissions = Permissions(database, app.state.sessions)
+                app.state.providers = Providers(
+                    database,
+                    app.state.sessions,
+                    adapters=provider_adapters,
+                    allow_mock=config.profile == "test",
+                )
+                app.state.usage = UsageReader(app.state.permissions)
                 database.context_guard = app.state.permissions.enforce
                 app.state.legacy_history = LegacyHistory(app.state.permissions)
                 app.state.mutations = Mutations(database, operations=mutation_operations)
@@ -197,6 +219,8 @@ def create_host(
                 app.state.permissions = None
                 app.state.sessions = None
                 app.state.accounts = None
+                app.state.providers = None
+                app.state.usage = None
                 app.state.transactions = None
 
     app = FastAPI(
@@ -227,12 +251,15 @@ def create_host(
     app.state.replay = None
     app.state.sources = None
     app.state.jobs = None
+    app.state.providers = None
+    app.state.usage = None
     app.state.tombstones = None
     app.state.retention = None
     app.state.artifacts = None
     profile = (
         "MOCK"
         if any(module.mock for module in registry.modules)
+        or any(v.mock for v in (provider_adapters or {}).values())
         or (analysis_module is not None and config.profile == "test")
         else config.profile
     )
@@ -242,6 +269,7 @@ def create_host(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         # Never trust a caller-supplied ID or log untrusted exception text.
+        started = perf_counter_ns()
         request.state.request_id = str(uuid4())
         try:
             await run_in_threadpool(check_http_transport, request)
@@ -255,6 +283,13 @@ def create_host(
         response.headers["X-Request-ID"] = request.state.request_id
         if request.url.path.startswith(("/api/v1", "/internal")):
             response.headers["Cache-Control"] = "no-store"
+        emit(
+            event="HTTP_REQUEST",
+            request_id=UUID(request.state.request_id),
+            status=response.status_code,
+            latency_ms=max(0, (perf_counter_ns() - started) // 1000000),
+            measurement="UNTIL_HEADERS",
+        )
         return response
 
     @app.exception_handler(RequestValidationError)
@@ -313,21 +348,29 @@ def create_host(
             response.headers["Retry-After"] = retry
         return response
 
+    app.state.ops = Operations(
+        app.state,
+        config,
+        (
+            *PLATFORM_MIGRATIONS,
+            *(spec for module in registry.modules if not module.mock for spec in module.migrations),
+        ),
+        profile=profile,
+    )
+
     @app.get("/health")
     def health() -> dict[str, str]:
         return {"status": "alive", "profile": profile}
 
     @app.get("/ready")
     def ready() -> JSONResponse:
-        # Module readiness alone cannot prove DB/assets/coordinator or G-BE readiness.
-        return JSONResponse(
-            status_code=503,
-            content={"ready": False, "implementation": "HOST_ONLY", "profile": profile},
-        )
+        report = app.state.ops.ready()
+        return JSONResponse(status_code=200 if report["ready"] else 503, content=report)
 
     @app.get("/release.json")
-    def release() -> dict[str, str]:
-        return {"contract_version": CONTRACT_VERSION, "implementation": "HOST_ONLY"}
+    def release() -> dict[str, object]:
+        service: Operations = app.state.ops
+        return service.release()
 
     app.include_router(build_router())
     app.include_router(build_import_router())
@@ -338,6 +381,7 @@ def create_host(
     app.include_router(build_rule_router())
     app.include_router(build_artifact_router())
     app.include_router(build_retention_router())
+    app.include_router(build_ops_router())
     occupied: set[tuple[str, str]] = set()
     for route in app.routes:
         occupied.update(route_keys(route))

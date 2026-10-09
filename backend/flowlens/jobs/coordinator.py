@@ -28,6 +28,7 @@ from flowlens.contracts.ports import AnalysisModule
 from flowlens.contracts.ports import UnitOfWork as TransactionPort
 from flowlens.core.errors import ContractError
 from flowlens.imports.metadata import PreparedImport
+from flowlens.ops.logs import emit
 from flowlens.sources.metadata import Action
 from flowlens.sources.policy import policy
 from flowlens.storage.sqlite.database import Database, UnitOfWork
@@ -423,6 +424,21 @@ class Jobs:
         uow.connection.execute(
             "UPDATE platform_worker_scopes SET revoked=1 WHERE id=?", (attempt["scope_id"],)
         )
+        logged_lease = JobLease.model_validate_json(attempt["lease"])
+        uow.after_commit(
+            lambda: emit(
+                event="JOB_ATTEMPT_FINISHED",
+                session_id=UUID(attempt["session_id"]),
+                run_id=logged_lease.analysis_run_id,
+                stage=logged_lease.stage,
+                config_hash=logged_lease.config_hash,
+                input_hash=logged_lease.input_hash,
+                job_id=UUID(attempt["job_id"]),
+                attempt_id=UUID(attempt["id"]),
+                charged_microunits=cost,
+                measurement="COMMITTED_ATTEMPT",
+            )
+        )
 
     def _sync_run(self, uow: UnitOfWork, run_id: str, forced: str | None = None) -> None:
         run = self._run(uow, run_id)
@@ -628,6 +644,10 @@ class Jobs:
                 uow.connection.execute(
                     "INSERT INTO platform_attempts VALUES (?,?,?,?)",
                     (run["session_id"], str(lease.attempt_id), job["id"], str(lease.lease_id)),
+                )
+                uow.connection.execute(
+                    "INSERT INTO platform_attempt_timing VALUES (?,?,?)",
+                    (run["session_id"], str(lease.attempt_id), self.now()),
                 )
                 uow.connection.execute(
                     "INSERT INTO "

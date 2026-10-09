@@ -658,4 +658,63 @@ PLATFORM_MIGRATIONS = (
             key_hash TEXT NOT NULL, created_ms INTEGER NOT NULL);
         """,
     ),
+    MigrationSpec(
+        "platform.0017",
+        "A",
+        ("platform.0016",),
+        """
+        CREATE TABLE platform_provider_profiles(
+            id TEXT NOT NULL, revision INTEGER NOT NULL CHECK(revision>0),
+            config_hash TEXT NOT NULL, payload TEXT NOT NULL,
+            actor_id TEXT NOT NULL REFERENCES platform_accounts(id), created_ms INTEGER NOT NULL,
+            PRIMARY KEY(id,revision));
+        CREATE TABLE platform_provider_checks(
+            id TEXT PRIMARY KEY NOT NULL, profile_id TEXT NOT NULL, revision INTEGER NOT NULL,
+            payload TEXT NOT NULL, actor_id TEXT NOT NULL REFERENCES platform_accounts(id),
+            created_ms INTEGER NOT NULL,
+            FOREIGN KEY(profile_id,revision) REFERENCES platform_provider_profiles(id,revision));
+        CREATE TABLE platform_ops_requests(
+            actor_id TEXT NOT NULL REFERENCES platform_accounts(id), operation TEXT NOT NULL,
+            key_hash TEXT NOT NULL, request_hash TEXT NOT NULL, result TEXT NOT NULL,
+            PRIMARY KEY(actor_id,operation,key_hash));
+        CREATE TABLE platform_ops_audit(
+            id INTEGER PRIMARY KEY, actor_id TEXT NOT NULL REFERENCES platform_accounts(id),
+            action TEXT NOT NULL, object_id TEXT NOT NULL, version INTEGER NOT NULL,
+            created_ms INTEGER NOT NULL);
+        CREATE TABLE platform_attempt_timing(
+            session_id TEXT NOT NULL, attempt_id TEXT NOT NULL, leased_ms INTEGER NOT NULL,
+            PRIMARY KEY(session_id,attempt_id), FOREIGN KEY(session_id,attempt_id)
+            REFERENCES platform_attempts(session_id,id));
+        CREATE TABLE platform_ops_probe(id INTEGER PRIMARY KEY CHECK(id=1), value INTEGER NOT NULL);
+        INSERT INTO platform_ops_probe VALUES (1,0);
+        CREATE TRIGGER platform_append_only_provider_profile_update BEFORE UPDATE
+            ON platform_provider_profiles
+            BEGIN SELECT RAISE(ABORT,'Immutable provider configuration.'); END;
+        CREATE TRIGGER platform_append_only_provider_profile_delete BEFORE DELETE
+            ON platform_provider_profiles
+            BEGIN SELECT RAISE(ABORT,'Immutable provider configuration.'); END;
+        CREATE TRIGGER platform_append_only_provider_profile_replace BEFORE INSERT
+            ON platform_provider_profiles
+            WHEN EXISTS(SELECT 1 FROM platform_provider_profiles WHERE id=NEW.id
+                AND revision=NEW.revision)
+            BEGIN SELECT RAISE(ABORT,'Immutable provider configuration.'); END;
+        CREATE TRIGGER platform_append_only_provider_check_update BEFORE UPDATE
+            ON platform_provider_checks
+            BEGIN SELECT RAISE(ABORT,'Immutable provider diagnostic.'); END;
+        CREATE TRIGGER platform_append_only_provider_check_delete BEFORE DELETE
+            ON platform_provider_checks
+            BEGIN SELECT RAISE(ABORT,'Immutable provider diagnostic.'); END;
+        CREATE TRIGGER platform_append_only_provider_check_replace BEFORE INSERT
+            ON platform_provider_checks
+            WHEN EXISTS(SELECT 1 FROM platform_provider_checks WHERE id=NEW.id)
+            BEGIN SELECT RAISE(ABORT,'Immutable provider diagnostic.'); END;
+        CREATE TRIGGER platform_append_only_ops_audit_update BEFORE UPDATE ON platform_ops_audit
+            BEGIN SELECT RAISE(ABORT,'Append-only ops audit.'); END;
+        CREATE TRIGGER platform_append_only_ops_audit_delete BEFORE DELETE ON platform_ops_audit
+            BEGIN SELECT RAISE(ABORT,'Append-only ops audit.'); END;
+        CREATE TRIGGER platform_append_only_ops_audit_replace BEFORE INSERT ON platform_ops_audit
+            WHEN EXISTS(SELECT 1 FROM platform_ops_audit WHERE id=NEW.id)
+            BEGIN SELECT RAISE(ABORT,'Append-only ops audit.'); END;
+        """,
+    ),
 )

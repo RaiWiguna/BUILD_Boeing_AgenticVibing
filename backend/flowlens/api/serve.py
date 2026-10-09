@@ -5,6 +5,7 @@ from os import environ
 import uvicorn
 from flowlens.api.host import create_host
 from flowlens.core.host_config import HostSettings
+from flowlens.ops.logs import configure
 
 
 def main() -> None:
@@ -13,6 +14,7 @@ def main() -> None:
         app = create_host(settings)
     except ValueError:
         raise SystemExit("Invalid host configuration; check the documented settings.") from None
+    configure()
     uvicorn.run(
         app,
         host=settings.host,

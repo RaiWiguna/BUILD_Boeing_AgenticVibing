@@ -4,12 +4,21 @@
 | --- | --- |
 | Tanggal | 9 Oktober 2026 |
 | Objective | Persistent goal A07.1–A09.3, berurutan/local commit per unit; berhenti sebelum A10 |
-| Status | A01–A06 verified; A07/A08 done; A09.1 done; A09.2 next; B/Phase10 tidak dimulai |
-| Candidate | A09.1 local commit; SHA dari actual Git dilaporkan di final/next unit, tanpa amend |
-| Next focus | A09.2 health/ready/release, sanitized logs, usage/budget, provider admin profiles/disk checks; checkout sama feat/backend-aben |
+| Status | A01–A06 verified; A07/A08 done; A09.1–A09.2 done; A09.3 next; B/Phase10 tidak dimulai |
+| Candidate | A09.2 local commit; SHA dari actual Git dilaporkan di final/next unit, tanpa amend |
+| Next focus | A09.3 consistent backup/isolated restore/maintenance CLI; setelah commit final audit dan A10.1 handoff only; checkout sama feat/backend-aben |
 | Gate | G-BE, G-FE, G-DELIVERY: not_started |
 
-## Handoff terkini — A09.1 selesai
+## Handoff terkini — A09.2 selesai
+
+- Input `22e72b331249858576c0fcebca27eb12ee2184b1`, clean sebelum unit. [Evidence](../docs/testing/a092-evidence.md), [workflow/limits](../docs/development/operability.md).
+- Real schema/DB rollback-write/private roots/fsync/disk/coordinator ledger/journal probes; local readiness200 jika dependencies configured/healthy,503 jika missing/fault. Provider outage tidak memblokir actual cached snapshot. Root scope LOCAL_PLATFORM, implementation HOST_ONLY; G-BE NOT_STARTED/provider_verifiedfalse/domain/operational validation belum ada.
+- Safe release actual code/migration/installed dependency versions, declared/unrecorded SHA/lock hashes; no path/env/credential dump. Dedicated JSON INFO launcher sink, bounded HTTP/generated correlation/header latency dan durable job IDs/stage/hashes/charge; rollback/duplicate not extra logged commit, body/query/exception/transcript/secrets omitted.
+- Immutable admin provider metadata/options/config hashes/history/idempotency/audit; frozen ProviderAdapter explicit MOCK test-only, options binding, metadata-only check outside lock, live admin/revision recheck. No B provider/SDK/network/transcribe/extract; desired metadata tidak rewrite historical StagePolicy/runs atau source rights. Scoped/admin usage preserves unknown vs conservative charge; per-channel provider usage unknown in frozen port, not invented.
+- Final685 platform (143.21s),28 scoped (9.23s),66 contracts each A/B, Ruff110/mypy72/drift/Bandit -ll/lock/build PASS. Historical16 migration definitions unchanged;0017 appended (profiles/checks/ops/timing), frozen1.0.0/lock unchanged. Review/available staged signature scan24 files/0 matches before local commit; ignored report artifacts/reports/a092-secret-scan.json, dedicated scanners unavailable. No persistent services/private data tracked.
+- Next A09.3 consistent SQLite/assets backup, isolated restore, maintenance CLI; WAL/hashes/grants/revisions/jobs/checkpoints/current tombstones and expiry before access. Goal ACTIVE until A09.3 committed and final objective audit/A10.1 handoff only. Do not implement A10/B/Phase10/frontend/deploy or push/merge/amend/destructive Git.
+
+## Rekam A09.1
 
 - Input `d263e085bd16ad34a984b65c1daafd948a574d75`, clean sebelum unit. [Evidence](../docs/testing/a091-evidence.md), [workflow/limits](../docs/development/artifacts-retention.md).
 - Artifact transport/lifecycle JSON/CSV/HTML privat, active EXPORT authority, source/creator export rights, hash/container/size/TTL, accepted-result atomic promotion, attachment/CSP/no-store downloads dan live per-chunk revoke/expiry. Rendering/redaction/escaping B tidak diimplementasikan.
