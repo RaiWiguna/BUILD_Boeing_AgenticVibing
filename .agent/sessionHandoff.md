@@ -1,15 +1,14 @@
 # Session Handoff — ATC FlowLens
 
-| Atribut | Nilai |
-| --- | --- |
-| Tanggal | 9 Oktober 2026 |
-| Objective | Persistent goal A07.1–A09.3, berurutan/local commit per unit; berhenti sebelum A10 |
-| Status | A01–A06 verified; A07/A08 done; A09.1–A09.2 done; A09.3 next; B/Phase10 tidak dimulai |
-| Candidate | A09.2 local commit; SHA dari actual Git dilaporkan di final/next unit, tanpa amend |
-| Next focus | A09.3 consistent backup/isolated restore/maintenance CLI; setelah commit final audit dan A10.1 handoff only; checkout sama feat/backend-aben |
-| Gate | G-BE, G-FE, G-DELIVERY: not_started |
+9 Oktober 2026. Branch feat/backend-aben. A01–A06 source/check prerequisites verified; A07.1–A09.3 implemented with sequential local conventional commits. A09.3 input9f9ee3e442819d45c742a247db94810d1a0f1c1b; final candidate is this recovery commit (resolve git log -1).
 
-## Handoff terkini — A09.2 selesai
+A09.3: recovery/{maintenance,catalog,snapshots,candidates}, cli/maintenance, append-only audit migration0018. WAL-aware private asset snapshot/hash, exclusive offline owners, isolated restore with current external tombstones/expiry, old credentials/active jobs invalidated, retained grants/revisions/evidence/export/checkpoints, durable retirement/crash cleanup. [Evidence](../docs/testing/a093-evidence.md), [workflow/limits](../docs/development/recovery.md), [objective audit](../docs/testing/a07-a09-completion-audit.md).
+
+Tests are disposable/synthetic real A + fake B through frozen1.0.0. No persistent server/worker/container remains. No push/merge/amend/destructive Git, B implementation, frontend, deployment or Phase10. Gates G-BE/G-FE/G-DELIVERY not_started; local readiness200/503 depends on configured dependencies, HOST_ONLY is not production readiness. Backup LOCAL_PRIVATE_UNENCRYPTED; no off-host schedule/certification. Restore account/grant state point-in-time; review before promotion. Current external deletion authority must remain independently current.
+
+**Next A10.1 only:** enter with A01–A09 source/tests/evidence and this commit. Execute standalone acceptance/capacity/timing as defined in package-a-execution, using fake B. A10.1 was not performed here; do not claim measured 60-minute replay/100 sessions/20 objects/two-channel two-hour assets. A10.2 and Phase10 follow their own authorization/gates. This goal stops after A09.3 commit and objective audit.
+
+## Rekam A09.2
 
 - Input `22e72b331249858576c0fcebca27eb12ee2184b1`, clean sebelum unit. [Evidence](../docs/testing/a092-evidence.md), [workflow/limits](../docs/development/operability.md).
 - Real schema/DB rollback-write/private roots/fsync/disk/coordinator ledger/journal probes; local readiness200 jika dependencies configured/healthy,503 jika missing/fault. Provider outage tidak memblokir actual cached snapshot. Root scope LOCAL_PLATFORM, implementation HOST_ONLY; G-BE NOT_STARTED/provider_verifiedfalse/domain/operational validation belum ada.

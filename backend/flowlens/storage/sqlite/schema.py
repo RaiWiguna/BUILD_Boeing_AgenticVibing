@@ -717,4 +717,25 @@ PLATFORM_MIGRATIONS = (
             BEGIN SELECT RAISE(ABORT,'Append-only ops audit.'); END;
         """,
     ),
+    MigrationSpec(
+        "platform.0018",
+        "A",
+        ("platform.0017",),
+        """
+        CREATE TABLE platform_recovery_audit(
+            id TEXT PRIMARY KEY NOT NULL, operation TEXT NOT NULL,
+            backup_id TEXT NOT NULL, manifest_hash TEXT NOT NULL,
+            operator_uid INTEGER NOT NULL, created_ms INTEGER NOT NULL);
+        CREATE TRIGGER platform_append_only_recovery_audit_update
+            BEFORE UPDATE ON platform_recovery_audit
+            BEGIN SELECT RAISE(ABORT,'Append-only recovery audit.'); END;
+        CREATE TRIGGER platform_append_only_recovery_audit_delete
+            BEFORE DELETE ON platform_recovery_audit
+            BEGIN SELECT RAISE(ABORT,'Append-only recovery audit.'); END;
+        CREATE TRIGGER platform_append_only_recovery_audit_replace
+            BEFORE INSERT ON platform_recovery_audit
+            WHEN EXISTS(SELECT 1 FROM platform_recovery_audit WHERE id=NEW.id)
+            BEGIN SELECT RAISE(ABORT,'Append-only recovery audit.'); END;
+        """,
+    ),
 )

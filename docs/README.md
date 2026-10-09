@@ -1,6 +1,6 @@
 # Peta Dokumentasi ATC FlowLens
 
-Tanggal: 9 Oktober 2026. Baseline Phase0–1 dan Paket A A01–A07 done; import/source/assets/evidence/jobs tersedia dengan fake AnalysisModule untuk standalone acceptance A. A07 replay/checkpoints/controls/REST/WS tersedia; Paket B dan actual provider/domain pipeline belum tersedia; A08.1–A08.3 geometry/occupancy/rules/alerts tersedia; A09.1 artifacts/retention tersedia; A09.2 local operability tersedia; A09.3/A10/frontend/deployment belum diimplementasikan; readiness lokal200/503 sesuai dependencies dan gates not_started. Dokumen lama bukan spesifikasi aktif; AGENTS.md lama tidak berlaku.
+Tanggal: 9 Oktober 2026. Baseline Phase0–1 dan Paket A A01–A09 done; import/source/assets/evidence/jobs tersedia dengan fake AnalysisModule untuk standalone acceptance A. A07 replay/checkpoints/controls/REST/WS tersedia; Paket B dan actual provider/domain pipeline belum tersedia; A08.1–A08.3 geometry/occupancy/rules/alerts tersedia; A09.1 artifacts/retention tersedia; A09.2 local operability tersedia; A10/frontend/deployment belum diimplementasikan; readiness lokal200/503 sesuai dependencies dan gates not_started. Dokumen lama bukan spesifikasi aktif; AGENTS.md lama tidak berlaku.
 
 ## Kontrak dan konteks kerja
 
@@ -18,7 +18,7 @@ Tanggal: 9 Oktober 2026. Baseline Phase0–1 dan Paket A A01–A07 done; import/
 - [Audit requirements/source](product/requirement-audit.md) dan [scope/dependencies](product/baseline-scope.md).
 - [Backend baseline](architecture/backend-baseline.md) dan [ADR 0002](adr/0002-frozen-backend-contracts.md).
 - [Shared contracts](api/shared-contracts.md), [developer workflow](development/backend-foundation.md), dan [A/B packets](development/backend-packets.md).
-- [Rencana eksekusi Paket A per sesi](development/package-a-execution.md): A01–A07 done ([snapshots](testing/a071-evidence.md), [controls](testing/a072-evidence.md), [transport](testing/a073-evidence.md)); A08.1–A08.3 done ([kernel](testing/a081-evidence.md), [occupancy](testing/a082-evidence.md), [rules/alerts](testing/a083-evidence.md)); A09.1 done ([evidence](testing/a091-evidence.md)); A09.2 done ([evidence](testing/a092-evidence.md)); A09.3 next; [evidence host](testing/a011-evidence.md) dan [persistence](testing/a012-evidence.md).
+- [Rencana eksekusi Paket A per sesi](development/package-a-execution.md): A01–A09 done ([snapshots](testing/a071-evidence.md), [controls](testing/a072-evidence.md), [transport](testing/a073-evidence.md)); A08.1–A08.3 done ([kernel](testing/a081-evidence.md), [occupancy](testing/a082-evidence.md), [rules/alerts](testing/a083-evidence.md)); A09.1 done ([evidence](testing/a091-evidence.md)); A09.2 done ([evidence](testing/a092-evidence.md)); A09.3 done; next A10.1; [evidence host](testing/a011-evidence.md) dan [persistence](testing/a012-evidence.md).
 - [Evaluation protocol](../evaluation/protocols/baseline.md) dan [checks/evidence](testing/phase01-evidence.md).
 
 Artifact lifecycle/retention/purge: [workflow](development/artifacts-retention.md) dan [evidence A09.1](testing/a091-evidence.md).
@@ -66,3 +66,5 @@ Bedakan planned, source tersedia, build berhasil, berjalan, tests lulus, provide
 A04 completed: [import commit workflow](development/import-commit.md), [phase evidence](testing/a04-evidence.md).
 
 A05/A06 `done`: [assets/evidence workflow](development/private-assets-evidence.md), [jobs workflow](development/durable-jobs.md), [A05 evidence](testing/a05-evidence.md), [A06 evidence](testing/a06-evidence.md).
+
+A09.3 local backup/restore/maintenance done: [workflow](development/recovery.md), [evidence](testing/a093-evidence.md). Next A10.1 only; B/Phase10 and release gates remain not_started/planned as applicable.

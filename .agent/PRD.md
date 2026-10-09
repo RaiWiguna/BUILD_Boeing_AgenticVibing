@@ -3,7 +3,7 @@
 | Atribut | Nilai |
 | --- | --- |
 | Status dokumen | **Draft product contract v1.0 untuk review**; keputusan stack pengguna dikunci, asumsi produk dan keputusan terbuka ditandai |
-| Status implementasi | Requirement target. A01–A07 Paket A tersedia dan standalone checks lulus (9 Oktober 2026): host/persistence/auth/grants/import/private assets/evidence/jobs/replay/REST/WS; analisis memakai fake B melalui frozen ports. A08.1–A08.3 metric geometry/occupancy/ETA/exit/eligibility/rules/alerts tersedia; A09.1 artifact/retention dan A09.2 local operability tersedia; A09.3/A10, B/provider pipeline nyata, UI dan deployment belum diimplementasikan; release gates belum passed |
+| Status implementasi | Requirement target. A01–A09 Paket A tersedia dan standalone checks lulus (9 Oktober 2026): host/persistence/auth/grants/import/private assets/evidence/jobs/replay/REST/WS; analisis memakai fake B melalui frozen ports. A08.1–A08.3 metric geometry/occupancy/ETA/exit/eligibility/rules/alerts tersedia; A09.1 artifact/retention dan A09.2 local operability tersedia; A10, B/provider pipeline nyata, UI dan deployment belum diimplementasikan; release gates belum passed |
 | Versi dokumen | 1.0 |
 | Tanggal | 7 Oktober 2026 |
 | Product owner | Tim ATC FlowLens; individu pemilik keputusan produk/domain belum ditetapkan |
@@ -1204,3 +1204,5 @@ Versi PRD, requirement, dan acceptance criteria harus diperbarui ketika keputusa
 PRD menetapkan requirement target. Kesiapan pipeline audio–intent–memory–advisory, UI lengkap, integrasi provider, dan deployment belum dibuktikan oleh dokumen ini. Keberadaan modul pada source harus dibedakan dari build yang berhasil, aplikasi yang berjalan, test yang lulus, review pakar domain, dan validasi operasional.
 
 Setiap release mencatat pemeriksaan yang benar-benar dijalankan beserta hasilnya. Cloud inference, benchmark audio, deployment VM, review ATCO, dan studi pengguna hanya diberi status selesai setelah tersedia hasil pemeriksaan yang sesuai. Sampai pembuktian tersebut tersedia, kemampuan dan angka performa dalam PRD merupakan target atau baseline usulan.
+
+A09.3 local backup/restore/maintenance done: [workflow](../docs/development/recovery.md), [evidence](../docs/testing/a093-evidence.md). Next A10.1 only; B/Phase10 and release gates remain not_started/planned as applicable.

@@ -1,6 +1,6 @@
 # Struktur Repository ATC FlowLens
 
-Tanggal: 9 Oktober 2026. Status: **A01–A07 tersedia dan standalone platform acceptance selesai; A07 replay/REST/WS tersedia; B/provider/domain pipeline belum tersedia; A08.1–A08.3 geometry/occupancy/rules/alerts tersedia; A09.1 artifact/retention tersedia; A09.2 local operability tersedia; A09.3/A10, frontend/deployment belum diimplementasikan**. Source A09.2: [workflow](../development/operability.md)/[evidence](../testing/a092-evidence.md). Source A09.1: [workflow](../development/artifacts-retention.md)/[evidence](../testing/a091-evidence.md). Tree di bawah adalah snapshot scaffold7 Oktober; source terkini dirujuk melalui [A04](../testing/a04-evidence.md), [A05](../testing/a05-evidence.md) dan [A06](../testing/a06-evidence.md).
+Tanggal: 9 Oktober 2026. Status: **A01–A09 tersedia dan standalone platform acceptance selesai; A07 replay/REST/WS tersedia; B/provider/domain pipeline belum tersedia; A08.1–A08.3 geometry/occupancy/rules/alerts tersedia; A09.1 artifact/retention tersedia; A09.2 local operability tersedia; A10, frontend/deployment belum diimplementasikan**. Source A09.2: [workflow](../development/operability.md)/[evidence](../testing/a092-evidence.md). Source A09.1: [workflow](../development/artifacts-retention.md)/[evidence](../testing/a091-evidence.md). Tree di bawah adalah snapshot scaffold7 Oktober; source terkini dirujuk melalui [A04](../testing/a04-evidence.md), [A05](../testing/a05-evidence.md) dan [A06](../testing/a06-evidence.md).
 
 ## Dasar penempatan
 
@@ -438,3 +438,5 @@ Implementasi imports saat ini (A04.1): `staging.py` mengelola private owner-scop
 [Import metadata workflow](../development/import-metadata.md) menjelaskan granular envelope dan conservative frozen-contract projection sebelum domain commit.
 
 A06 menempatkan platform-owned scheduler/internal routes di jobs/, tanpa mengimpor internals B. Typed domain repositories memakai injected analysis.* factories; storage private assets/evidence tersedia sejak A04/A05. [Workflow](../development/durable-jobs.md).
+
+A09.3 local backup/restore/maintenance done: [workflow](../development/recovery.md), [evidence](../testing/a093-evidence.md). Next A10.1 only; B/Phase10 and release gates remain not_started/planned as applicable.
