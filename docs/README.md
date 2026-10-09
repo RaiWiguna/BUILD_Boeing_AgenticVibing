@@ -1,6 +1,6 @@
 # Peta Dokumentasi ATC FlowLens
 
-Tanggal: 9 Oktober 2026. Foundation Phase 0–1, host/persistence/legacy conversion A01 selesai; A02/accounts+HTTP auth tersedia; next A03.1 grants/context. Business pipeline dan Paket B belum diimplementasikan. Dokumen lama tidak dipulihkan sebagai spesifikasi aktif, dan instruksi AGENTS.md sebelumnya tidak berlaku.
+Tanggal: 9 Oktober 2026. Foundation Phase 0–1, host/persistence/legacy conversion A01 selesai; A02/accounts+HTTP auth tersedia; next A03.1 grants/context. Paket B B01/B02 standalone acceptance selesai; B03 adapter/transcript lifecycle tersedia dengan deterministic acceptance, tetapi real smoke/benchmark dan reconciliation masih terbuka. Readiness false; full business pipeline belum tersedia. Dokumen lama tidak dipulihkan sebagai spesifikasi aktif, dan instruksi AGENTS.md sebelumnya tidak berlaku.
 
 ## Kontrak dan konteks kerja
 
@@ -19,6 +19,7 @@ Tanggal: 9 Oktober 2026. Foundation Phase 0–1, host/persistence/legacy convers
 - [Backend baseline](architecture/backend-baseline.md) dan [ADR 0002](adr/0002-frozen-backend-contracts.md).
 - [Shared contracts](api/shared-contracts.md), [developer workflow](development/backend-foundation.md), dan [A/B packets](development/backend-packets.md).
 - [Rencana eksekusi Paket A per sesi](development/package-a-execution.md): A01/A02 done, next A03.1; [evidence host](testing/a011-evidence.md) dan [persistence](testing/a012-evidence.md).
+- [Rencana eksekusi Paket B](development/package-b-execution.md): B01/B02 done dalam scope standalone, B03 partial/in_progress, B04–B06 planned; [evidence B01](testing/b01-evidence.md), [B02.1](testing/b021-evidence.md), [B02.2](testing/b022-evidence.md), dan [B03](testing/b03-evidence.md).
 - [Evaluation protocol](../evaluation/protocols/baseline.md) dan [checks/evidence](testing/phase01-evidence.md).
 
 ## Area dokumentasi

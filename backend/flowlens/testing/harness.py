@@ -6,7 +6,7 @@ This is executable specification, not the platform persistence/job implementatio
 import hashlib
 import sqlite3
 from collections.abc import Callable, Iterator
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -30,7 +30,7 @@ from flowlens.contracts.models import (
     Track,
     TranscriptSegment,
 )
-from flowlens.contracts.ports import EvidenceService, UnitOfWork
+from flowlens.contracts.ports import EvidenceService, Repository, UnitOfWork
 from flowlens.core.errors import ContractError
 from flowlens.core.modules import MigrationSpec, ModuleRegistration, ModuleRegistry
 
@@ -614,7 +614,7 @@ class SQLiteUnitOfWork:
         if self.closed:
             raise RuntimeError("unit-of-work already closed")
 
-    def repository(self, namespace: str) -> SQLiteRepository:
+    def repository(self, namespace: str) -> Repository:
         self.check_open()
         if namespace not in ("analysis", "evidence"):
             raise ValueError("unknown repository namespace")
@@ -664,7 +664,7 @@ class SQLiteTransactionFactory:
 
     def __init__(self, path: Path) -> None:
         self.path = path
-        with sqlite3.connect(path) as conn:
+        with closing(sqlite3.connect(path)) as conn:
             conn.executescript("""
                 PRAGMA foreign_keys=ON;
                 CREATE TABLE IF NOT EXISTS reference_sessions(id TEXT PRIMARY KEY);
