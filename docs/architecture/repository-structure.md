@@ -1,8 +1,18 @@
 # Struktur Repository ATC FlowLens
 
-Tanggal: 9 Oktober 2026. Status: **A01–A09 tersedia dan standalone platform acceptance selesai; A07 replay/REST/WS tersedia; B/provider/domain pipeline belum tersedia; A08.1–A08.3 geometry/occupancy/rules/alerts tersedia; A09.1 artifact/retention tersedia; A09.2 local operability tersedia; A10, frontend/deployment belum diimplementasikan**. Source A09.2: [workflow](../development/operability.md)/[evidence](../testing/a092-evidence.md). Source A09.1: [workflow](../development/artifacts-retention.md)/[evidence](../testing/a091-evidence.md). Tree di bawah adalah snapshot scaffold7 Oktober; source terkini dirujuk melalui [A04](../testing/a04-evidence.md), [A05](../testing/a05-evidence.md) dan [A06](../testing/a06-evidence.md).
+Tanggal: 10 Oktober 2026. Status: **A01–A10 standalone done; source B01–B06 tersedia, B03–B06 external acceptance pending; real A/B runtime composition Phase10 planned; provider/domain/operational validation belum terbukti; frontend/deployment belum diimplementasikan**. [Reconciliation dan entry integrasi](../development/backend-reconciliation.md). Tree di bawah adalah snapshot scaffold7 Oktober; inventory aktual tersedia pada manifest A dan reconciliation A/B.
 
 ## Dasar penempatan
+
+Continuation B03 9 Oktober: `providers/stt/execution.py` adalah single-attempt
+worker-side acquisition/RPC/private submission, tanpa DB/evaluator/A imports.
+`providers/stt/provenance.py` adalah private codec dan SDK response reconstruction;
+`providers/stt/smoke.py` adalah opt-in synthetic smoke. `bindings/stt.py` adalah
+API-side standalone injected adapter yang menghubungkan codec dengan domain
+TranscriptLifecycle/caller UOW; pure analysis tetap tidak mengimpor SDK/provider.
+Tidak ada real host composition/HTTP route/job handler dari modul binding ini.
+`testing/stt_worker.py` hanya MOCK/disposable acceptance;
+`scripts/evaluation_stt.py` dan `evaluation/protocols/stt-*` evaluator-only.
 
 PRD membagi alur utama menjadi import sumber, clock/replay, observasi/geometri, audio/jobs, STT, intent/association, memory/findings, advisory, review, serta debrief/export. Struktur berikut memberi tempat untuk setiap responsibility tersebut, sekaligus menjaga evaluator truth dan private runtime data terpisah.
 
@@ -433,10 +443,23 @@ Struktur folder, README/map, ADR layout, serta konteks setelah reset tersedia. S
 
 Langkah berikutnya adalah Phase 0.1: petakan kontrak/scaffold ke requirement, tetapkan build-new/reuse disposition, fixture/independent-oracle plan dan external dependencies. Backend foundation selanjutnya menyediakan actual package/config/contracts/tests. Frontend dan packaging menunggu gate masing-masing.
 
-Implementasi imports saat ini (A04.1): `staging.py` mengelola private owner-scoped draft, `inspection.py` memeriksa native audio/canonical sidecars, dan `routes.py` streaming multipart/preview. Rights/clock/identity/layout preparation A04.2 tersedia pada sources/metadata.py, clocks/normalization.py dan imports/{metadata,normalization}.py; source reader/atomic commit masih A04.3. [Workflow](../development/import-preview.md).
+Implementasi imports A04.1–A04.3 selesai: `staging.py` mengelola private owner-scoped draft, `inspection.py` memeriksa native audio/canonical sidecars, dan `routes.py` streaming multipart/preview. Rights/clock/identity/layout preparation A04.2 tersedia pada sources/metadata.py, clocks/normalization.py dan imports/{metadata,normalization}.py; source reader/atomic commit A04.3 juga tersedia. [Workflow](../development/import-preview.md).
 
 [Import metadata workflow](../development/import-metadata.md) menjelaskan granular envelope dan conservative frozen-contract projection sebelum domain commit.
 
 A06 menempatkan platform-owned scheduler/internal routes di jobs/, tanpa mengimpor internals B. Typed domain repositories memakai injected analysis.* factories; storage private assets/evidence tersedia sejak A04/A05. [Workflow](../development/durable-jobs.md).
 
-A09.3 local backup/restore/maintenance done: [workflow](../development/recovery.md), [evidence](../testing/a093-evidence.md). Next A10.1 only; B/Phase10 and release gates remain not_started/planned as applicable.
+A09.3 local backup/restore/maintenance done: [workflow](../development/recovery.md), [evidence](../testing/a093-evidence.md). A10 standalone selesai; real composition Phase10 dan release gates tetap planned/not_started.
+
+
+## Analysis advisory implementation — B05
+
+`backend/flowlens/advisory/` now owns private typed finding/eligibility/document/
+review records, evidence-bound Gemini selection, analysis.0004 connection-injected
+ledger, caller-UOW review/reanalysis/journal, read-only contextual query, private
+JSON/CSV/HTML rendering, metrics/diagnostics and injected analysis retention.
+`backend/flowlens/testing/advisory.py` is the executable disposable MOCK harness;
+`tests/analysis/test_advisory.py` contains independent local oracles. No route/job
+handler/real A/B composition is registered; readiness false, frozen1.0.0 unchanged.
+B03/B04 external acceptance flags and B05 in_progress remain. Details and actual
+checks: [B05 evidence](../testing/b05-evidence.md), [ADR0006](../adr/0006-evidence-bound-advisory-revisions.md).

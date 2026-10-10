@@ -4,7 +4,7 @@ Start after Phase 0/1 evidence; independent implementation until final Phase 10 
 
 ## Package A — Platform & Replay
 
-Rincian eksekusi per sesi: [Paket A: A01–A10](package-a-execution.md). A01–A07 `done` ([snapshots](../testing/a071-evidence.md), [controls](../testing/a072-evidence.md), [transport](../testing/a073-evidence.md)); A08.1–A08.3 `done` ([kernel](../testing/a081-evidence.md), [occupancy](../testing/a082-evidence.md), [rules/alerts](../testing/a083-evidence.md)); A08 `done`, A09–A10 `planned`. Import/source/private assets/evidence/jobs dan atomic result boundary diverifikasi mandiri dengan fake AnalysisModule; B belum dimulai. G-BE tetap not_started; seluruh paket A belum selesai.
+Rincian eksekusi: [Paket A](package-a-execution.md) A01–A10 done secara mandiri; [Paket B](package-b-execution.md) B01/B02 done, B03–B06 in_progress dengan local MOCK acceptance dan external/provider/domain closure masih terbuka. Source kedua paket tersedia bersama; real composition dan integrated acceptance Phase10 belum dilakukan.
 
 1. Phase 2: host/config; platform schemas/migration runner/UOW; accounts/grants/cookie/CSRF/worker principal; audit/idempotency/versioning. Tests fresh/upgrade/auth/cross-scope/rollback.
 2. Phase 3 + 6.1: import preview/atomic commit, immutable source manifest/rights/clock/coverage, private assets/ranges. Tests malformed/path/hash/duplicate/conflict/forbidden transfer.
@@ -15,6 +15,20 @@ Rincian eksekusi per sesi: [Paket A: A01–A10](package-a-execution.md). A01–A
 7. Run shared contract suite with fake analysis and package-owned security/recovery/performance tests. Submit manifest + evidence.
 
 ## Package B — Analysis & AI
+
+[Rencana B01–B06](package-b-execution.md), [evidence B01](../testing/b01-evidence.md),
+[B02.1](../testing/b021-evidence.md), [B02.2](../testing/b022-evidence.md),
+[B03](../testing/b03-evidence.md). B01 foundation, B02.1 real FFmpeg dan B02.2 isolated
+worker standalone acceptance done. B03 STT V2 adapter/transcript lifecycle deterministic
+acceptance tersedia; approved real GCP profile/smoke, audited benchmark dan worker/
+artifact reconciliation masih terbuka. Readiness false; no real A/B composition.
+
+Keputusan sequencing pengguna9 Oktober2026: B04 local engineering boleh dimulai
+dengan MOCK transcript fixtures/injected frozen ports walaupun B03 belum closed.
+Flag B03_EXTERNAL_ACCEPTANCE_PENDING (STT_ACCOUNT_LOGIN_REQUIRED dan
+AUDITED_BENCHMARK_PENDING); B03/Phase7 tetap in_progress. Exception ini tidak
+menghapus real-provider/benchmark acceptance dan tidak mengizinkan paid RPC atau
+penutupan gates. B04 masih planned/local start authorized pada pencatatan keputusan.
 
 1. After Phase 1: analysis module/config/migrations/repositories/registration via transaction ports; reference FK schemas supplied harness. Do not import A internals.
 2. Phase 6.2/6.4: controlled FFmpeg processing/chunks/time mapping and isolated worker using fake platform ports; no SQLite import/mount in worker.
@@ -32,3 +46,20 @@ Phase 10 installs real A/B implementation and verifies cross-package atomic tran
 A04 completed: [import commit workflow](import-commit.md), [phase evidence](../testing/a04-evidence.md).
 
 A05/A06 `done`: [assets/evidence](private-assets-evidence.md), [durable jobs](durable-jobs.md), [final phase evidence](../testing/a06-evidence.md).
+
+
+B04 continuation9 Oktober2026: private intent/association/memory/open-loop services,
+bounded Gemini2.29.0 Interactions adapter and analysis.0003 ledger implemented with
+injected ports/caller UOW. Standalone MOCK evidence: [B04](../testing/b04-evidence.md).
+No production pipeline readiness or handler wiring. B04 external smoke/benchmark
+and B03_EXTERNAL_ACCEPTANCE_PENDING remain; B05 and integration gates not advanced.
+
+
+B05 continuation9 Oktober2026: independent local engineering authorized before
+external B03/B04 acceptance. `advisory/` + analysis.0004/register_advisory/testing.advisory
+provide standalone MOCK behavior; [B05 evidence](../testing/b05-evidence.md).
+B03_EXTERNAL_ACCEPTANCE_PENDING (STT_ACCOUNT_LOGIN_REQUIRED, AUDITED_BENCHMARK_PENDING)
+and B04_EXTERNAL_ACCEPTANCE_PENDING (GEMINI_ACCOUNT_ACCESS_UNVERIFIED,
+REAL_GEMINI_SMOKE_PENDING, AUDITED_SEMANTIC_BENCHMARK_PENDING) remain.
+GEMINI_EXTERNAL_ACCEPTANCE_PENDING remains. Real calls0/smoke NOT_RUN/benchmark
+BLOCKED/metrics=null/readiness=false. B05 in_progress, B06 and gates not closed.

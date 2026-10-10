@@ -1,0 +1,734 @@
+{
+  "manifest_version": "backend-source-reconciliation-1",
+  "date": "2026-10-10",
+  "A_candidate": "0be155589f2362b354fe8463a041f43b67cc6267",
+  "B_target": "736659190706847129d123bd442a3ea720e6ddbd",
+  "merge_base": "cdb2b9dae3d16c22a524b8a05b2e5583cc48e0d0",
+  "resolution_commit_command": "git log -1 --format=%H -- docs/development/backend-reconciliation.json",
+  "source": {
+    "backend/flowlens/__init__.py": {
+      "owner": "shared",
+      "sha256": "8efbeb5a798423b3fcfef9ac53bf1e2595dcecedf5dca695512e1fda8f7da576"
+    },
+    "backend/flowlens/advisory/__init__.py": {
+      "owner": "B",
+      "sha256": "f6479ae9d951cfba8cab24387828301249b1fdc0dda7cac0767450da48f969b3"
+    },
+    "backend/flowlens/advisory/diagnostics.py": {
+      "owner": "B",
+      "sha256": "067f81bc78adec7b62ad1c0fcdb0c4b1d9a1c02f1d1bd745a9622f863e390fcc"
+    },
+    "backend/flowlens/advisory/exports.py": {
+      "owner": "B",
+      "sha256": "aac411de20b9d241233a5eca92850ee04d202d61be1a09231428455609f52613"
+    },
+    "backend/flowlens/advisory/findings.py": {
+      "owner": "B",
+      "sha256": "9fdc0724ac28db5309f13df8bbc5d59017db4a6839397d1bafeebd80d7cd2253"
+    },
+    "backend/flowlens/advisory/models.py": {
+      "owner": "B",
+      "sha256": "ab744f2d16717ada238e131dd15a6d9fca1626c4b16eeeb6daa7012be0d12045"
+    },
+    "backend/flowlens/advisory/provider.py": {
+      "owner": "B",
+      "sha256": "a1ae3bdbecbc88eac3cdb94da4e114223ff0b7861e7f933029ea0c61bc882b4c"
+    },
+    "backend/flowlens/advisory/retention.py": {
+      "owner": "B",
+      "sha256": "3859705a18f932aa59500748504366a8bfd398ba648dbede8f19a63302ec7ea3"
+    },
+    "backend/flowlens/advisory/service.py": {
+      "owner": "B",
+      "sha256": "9d35adadd2b4716155bc526340b117acb78717eb5dee41c56b3e082b4872cd98"
+    },
+    "backend/flowlens/advisory/store.py": {
+      "owner": "B",
+      "sha256": "3e1fa484a67451edceb82b8e8bb9062d743c277504e2656a66d23c49e42a5cbd"
+    },
+    "backend/flowlens/analysis/__init__.py": {
+      "owner": "B",
+      "sha256": "b6824dd01343a88078ed963ecd7aa13346fad85dc3d865b7da4da5f49bebe811"
+    },
+    "backend/flowlens/analysis/config.py": {
+      "owner": "B",
+      "sha256": "eb6995ff04085a8f2d3b6d57c006ec2949da44133d1ea88b40e51ec6b80f4828"
+    },
+    "backend/flowlens/analysis/module.py": {
+      "owner": "B",
+      "sha256": "d72748be4e956957630c6c0f93df2a5ae30acf1d4f007252631e308d276d9df0"
+    },
+    "backend/flowlens/analysis/repository.py": {
+      "owner": "B",
+      "sha256": "fd11f1563d959eca5396b37e4adaa6af6c2da9eb6d2466e04c82e30d290636ba"
+    },
+    "backend/flowlens/analysis/schema.py": {
+      "owner": "B",
+      "sha256": "0970a63f2211ebb77d7b3511ef5dcad190836b7efd41f1afad6560351f04f42c"
+    },
+    "backend/flowlens/analysis/transcript_projection.py": {
+      "owner": "B",
+      "sha256": "dd2354a6d00226eecdabfbea5a81a3c19c61fca07a4d5fde80263c4c5b8fd7df"
+    },
+    "backend/flowlens/analysis/transcript_records.py": {
+      "owner": "B",
+      "sha256": "7c308464aedfab99707add9bf212d8aef3471672367a2b28784987963d0bae1f"
+    },
+    "backend/flowlens/analysis/transcript_store.py": {
+      "owner": "B",
+      "sha256": "f547fad6caae280be1ad104c6a6e4e41f480c0995b14cedc10aa5ff17ccdc301"
+    },
+    "backend/flowlens/analysis/transcripts.py": {
+      "owner": "B",
+      "sha256": "1c602f51a22b9349d0634afd2757c2f706d120230f4a6ffe4e2e4b1e29629407"
+    },
+    "backend/flowlens/api/app.py": {
+      "owner": "shared",
+      "sha256": "16c1867ff5feb17fc4c69bf720a607fba2a28a1cd52fb3d74587607194619a27"
+    },
+    "backend/flowlens/api/host.py": {
+      "owner": "A",
+      "sha256": "86c30ac118a7b3b94ef2472584bbddb5c56ffbe5b78dc5544725cf95f53344c2"
+    },
+    "backend/flowlens/api/serializers.py": {
+      "owner": "A",
+      "sha256": "f03411754f23df92d81c989dfec34237c7ea39b58545b52fd29e69e3c090cb5d"
+    },
+    "backend/flowlens/api/serve.py": {
+      "owner": "A",
+      "sha256": "bdbdd46970558f8af87975062c6ad7b24541bc2c2f0b103d34281380ef876d44"
+    },
+    "backend/flowlens/artifacts/__init__.py": {
+      "owner": "A",
+      "sha256": "ccbe9c03fd7d84ca1f5da2d75a079dbde3722414b30e47e48552c42649cc900d"
+    },
+    "backend/flowlens/artifacts/lifecycle.py": {
+      "owner": "A",
+      "sha256": "53c4c784b624202a799121fd2a66a6622ab99b74ba1e6ac499f62cc12b9f4d0a"
+    },
+    "backend/flowlens/artifacts/profiles.py": {
+      "owner": "A",
+      "sha256": "777a938604c029fd9c624732d4138f8d3ee8b5e046a6f0c6b9ee3592e2021606"
+    },
+    "backend/flowlens/artifacts/routes.py": {
+      "owner": "A",
+      "sha256": "95b3679e365248d6d4d468fa342da969c4a916b8085044152ec5a1fc02803b67"
+    },
+    "backend/flowlens/assets/access.py": {
+      "owner": "A",
+      "sha256": "001e7c7b6ad10a5a02576a70b766be8b8aba2a4ae7a1beeaa8e40308922fe758"
+    },
+    "backend/flowlens/assets/routes.py": {
+      "owner": "A",
+      "sha256": "91047635a486b60dcfc1e30a24da7eb24860c1d17f831d4d55afd24cec3061c4"
+    },
+    "backend/flowlens/assets/storage.py": {
+      "owner": "A",
+      "sha256": "6ce4b8f05b1b1ac5c2c5dc0f14629d01ab407678a0f57e0bdf4319da9df6894f"
+    },
+    "backend/flowlens/association/__init__.py": {
+      "owner": "B",
+      "sha256": "8576857d1e2645842ad67d29d205b9622f27a9b583ea3c66f461d95071bc6402"
+    },
+    "backend/flowlens/audio/__init__.py": {
+      "owner": "B",
+      "sha256": "503ae75d38be47dd3f4b0cfe4461c61ac6837481c1aaf3a80e0e007047c7c64f"
+    },
+    "backend/flowlens/audio/models.py": {
+      "owner": "B",
+      "sha256": "2ee838b94c5de28dce2f232eda3a280684230dc795b65bf0b55078a1deafc12c"
+    },
+    "backend/flowlens/audio/planning.py": {
+      "owner": "B",
+      "sha256": "349d4d69b845154456bce35c057e5d91a627eadc35f852fe3ca8fe7d4bea8c6b"
+    },
+    "backend/flowlens/audio/preparation.py": {
+      "owner": "B",
+      "sha256": "dce988961657c8f6502bc48301d57a9d382f23792a71205b8793c41491ebc0de"
+    },
+    "backend/flowlens/audio/process.py": {
+      "owner": "B",
+      "sha256": "09724058c1ff635766b75e49c9e1a656c1677dfa73b8446ec2bf7b9ec51a3c9b"
+    },
+    "backend/flowlens/audio/tools.py": {
+      "owner": "B",
+      "sha256": "f6ec0396bdb5ae239b40081521c61eed785577c4fb807d3768183ecb4b531611"
+    },
+    "backend/flowlens/auth/accounts.py": {
+      "owner": "shared",
+      "sha256": "9627802af35217db58c92ba3c3818aedab5ba08939ba0dbaaec9abe429aa6b29"
+    },
+    "backend/flowlens/auth/permissions.py": {
+      "owner": "A",
+      "sha256": "6e124a5cb11e796dd96270affb3523f69f493f1e690846e8b74f6c4fd19130e3"
+    },
+    "backend/flowlens/auth/routes.py": {
+      "owner": "A",
+      "sha256": "b871d45c552ffcdb95ef7b6ab531cb71dd60bdf208436797cb18e556bd38dbdb"
+    },
+    "backend/flowlens/auth/sessions.py": {
+      "owner": "A",
+      "sha256": "f57a96b03d691566ca2eab6186c4adea03fa6003c9edf2205d9a34ba28c149ee"
+    },
+    "backend/flowlens/auth/transport.py": {
+      "owner": "A",
+      "sha256": "5f55aeda77ccdfe0a34a2bb33d6961d84b57d2919b93c31bb501ef74372924ec"
+    },
+    "backend/flowlens/bindings/__init__.py": {
+      "owner": "B",
+      "sha256": "e2d9ee327877e20a67a87b7b9ee32b61d6406ab6ca932857f0c68f1b8c3ed5b6"
+    },
+    "backend/flowlens/bindings/intent_memory.py": {
+      "owner": "B",
+      "sha256": "dc7afd99ec4ce21964251e3a44c9c96076fb1c275aae2087eddba732bc608970"
+    },
+    "backend/flowlens/bindings/stt.py": {
+      "owner": "B",
+      "sha256": "a51b01b0dc1e75f5dc15b60cfe61ba374d04cb74acfc71da76187c087bf567f0"
+    },
+    "backend/flowlens/cli/bootstrap_admin.py": {
+      "owner": "shared",
+      "sha256": "1f52727f4c13aa2708cf62fc3ef2a7514fb72e9215a7f884ee9ec05f5382436d"
+    },
+    "backend/flowlens/cli/maintenance.py": {
+      "owner": "A",
+      "sha256": "1a11d65dd0ec35eede8b21affbe7841ebc880f89df457057234462e22770864b"
+    },
+    "backend/flowlens/cli/migrate_archive.py": {
+      "owner": "shared",
+      "sha256": "55784b0e5f46d00ce3164b252f8320986433ead31f58bce51c28d4163ed3b20b"
+    },
+    "backend/flowlens/clocks/normalization.py": {
+      "owner": "A",
+      "sha256": "2caf176ba69e8f170ba16bbad0d9d6256400cef1fdafd96a46b86950b40ee094"
+    },
+    "backend/flowlens/contracts/generate.py": {
+      "owner": "shared",
+      "sha256": "99b61913dc1cb23d1b773428294c5816297412ba53cac65d3768f79e0acf5df2"
+    },
+    "backend/flowlens/contracts/models.py": {
+      "owner": "shared",
+      "sha256": "aa034b0d72afc148f0a1456fa87a7c9a394c06d3c00c70f8c06f3fe68ab7ed5c"
+    },
+    "backend/flowlens/contracts/ports.py": {
+      "owner": "shared",
+      "sha256": "932c973b336a8ac8fcb0b696465733ad2846ec23299710eaaf6f53cb5896a229"
+    },
+    "backend/flowlens/core/config.py": {
+      "owner": "shared",
+      "sha256": "29c1a0d0a79ec43bbf4cf147a105207263e28a99dad4015ba0eb4e1e91cae58c"
+    },
+    "backend/flowlens/core/errors.py": {
+      "owner": "shared",
+      "sha256": "46ec8075e87286e50d10da1b246ceac23b0d7be05e0480e734076c9496fa4238"
+    },
+    "backend/flowlens/core/host_config.py": {
+      "owner": "A",
+      "sha256": "4981afb7364277e8c527e131c0c8e2e3d9e24b134f80eb6d2da59bee493fcab8"
+    },
+    "backend/flowlens/core/modules.py": {
+      "owner": "shared",
+      "sha256": "0e81ce9c601d5072b911cb6933ca0783136dc051ae452d82e1421e8543b87dd5"
+    },
+    "backend/flowlens/evidence/registry.py": {
+      "owner": "A",
+      "sha256": "b59a70d7753737e0149a3fe4ee47234a1ddc439221135fd954f694598bcbfdc3"
+    },
+    "backend/flowlens/geometry/alerts.py": {
+      "owner": "A",
+      "sha256": "ca6fc21e2153069c6246b9dae3afa313281284c0739748d15f8b3badafa5a265"
+    },
+    "backend/flowlens/geometry/indicators.py": {
+      "owner": "A",
+      "sha256": "fd6dfd0e5feccce5e48e7035c70a6da535c5b2ab92ffc66eb920e28fe5e40538"
+    },
+    "backend/flowlens/geometry/kernel.py": {
+      "owner": "A",
+      "sha256": "a0e043c518e47cc0159f4393baf578831ebc06987f994918fd8750d2d213309a"
+    },
+    "backend/flowlens/geometry/occupancy.py": {
+      "owner": "A",
+      "sha256": "c1c17461466dd542bec06cb893fad281bba573d3cd53eb552848855e3846d9f8"
+    },
+    "backend/flowlens/geometry/route_rules.py": {
+      "owner": "A",
+      "sha256": "3184f6d5048d96be2611b876ad56e6fa971e73104d89c0ebdc007d623c6e6908"
+    },
+    "backend/flowlens/geometry/routes.py": {
+      "owner": "A",
+      "sha256": "217567c265ae72e1b9081041abc1a8aa182b05a26b83ca5d1607afca8ea8530a"
+    },
+    "backend/flowlens/geometry/rules.py": {
+      "owner": "A",
+      "sha256": "e4f184db76ef10e11bd072ef5d8247c200cf694861e8b30daa6198969c072de7"
+    },
+    "backend/flowlens/geometry/service.py": {
+      "owner": "A",
+      "sha256": "307b348f5ae755479b9ce32fa20c55f38be1a7efe4c1ba01a314b935db0d1545"
+    },
+    "backend/flowlens/imports/commit.py": {
+      "owner": "A",
+      "sha256": "7a00b9c875499c9535fb6c1f5a7c8a6328612753dcd0974766754804e82858df"
+    },
+    "backend/flowlens/imports/inspection.py": {
+      "owner": "A",
+      "sha256": "dbcacc9c4eb53800b5000fe197c4ef20b3e0d3ee894d8a163764534bd9fec996"
+    },
+    "backend/flowlens/imports/metadata.py": {
+      "owner": "A",
+      "sha256": "caa484e57313b57579e1b1b90bea87e770e914db8fc0ee1cce4174543fe6b662"
+    },
+    "backend/flowlens/imports/normalization.py": {
+      "owner": "A",
+      "sha256": "ae41fb9c564800a52f1703a296444d9c4c7bdf9b33bdbabac4f09b02d1fc691e"
+    },
+    "backend/flowlens/imports/routes.py": {
+      "owner": "A",
+      "sha256": "6290dd1e8769d7647f2211a7e714303999cfc4242d563aa9edfd8a72d9d205fd"
+    },
+    "backend/flowlens/imports/staging.py": {
+      "owner": "A",
+      "sha256": "ef6e2bc9dbda2ed48e88a4c3bec8b3c1207a88223ea6d3bcc9d292994beefc7b"
+    },
+    "backend/flowlens/intent/__init__.py": {
+      "owner": "B",
+      "sha256": "e52272271a82630f0a28bff1c0ed666b77eebf02c04b3cb8dfa304f9a76f0528"
+    },
+    "backend/flowlens/intent/models.py": {
+      "owner": "B",
+      "sha256": "0893187c1dbc95a69da17dc62b7088c4d057ad757ea331de8fcaf057201558f1"
+    },
+    "backend/flowlens/intent/validation.py": {
+      "owner": "B",
+      "sha256": "dbda1ec1781ab14d63216543ba97cfbba917bf47f326a1c239cb162dc797f23d"
+    },
+    "backend/flowlens/jobs/coordinator.py": {
+      "owner": "A",
+      "sha256": "8da0d522edb81a884b004bb0728c72e257e6f14471b2ff2c6b647d1ced4afa33"
+    },
+    "backend/flowlens/jobs/routes.py": {
+      "owner": "A",
+      "sha256": "94468847e6422f0a91c0ac4bc809279f84d73b44e0723c653df1ec9c92186085"
+    },
+    "backend/flowlens/loops/__init__.py": {
+      "owner": "B",
+      "sha256": "aa1f1e9a5c13e792ee84b0c7578b6d9975d5757d9e0e098cbe7bd1a8a5d853a0"
+    },
+    "backend/flowlens/memory/__init__.py": {
+      "owner": "B",
+      "sha256": "38630267fb26fd6feaf6022cd78d678e7adba7349b9e2fb3868c1f58398a9e6d"
+    },
+    "backend/flowlens/memory/models.py": {
+      "owner": "B",
+      "sha256": "f0217f488a33392d57952f78db0cec3b0a6aefcc71290baf3a637268fcf6d76b"
+    },
+    "backend/flowlens/memory/reducer.py": {
+      "owner": "B",
+      "sha256": "1beb0a3b1774deb363734c4927772315c01aa63df8afee4e1b0e31d52c032268"
+    },
+    "backend/flowlens/memory/service.py": {
+      "owner": "B",
+      "sha256": "90c26aa8edf7ca8a214af420b4366c38a7100c578c555825a589fc35993e8b86"
+    },
+    "backend/flowlens/memory/store.py": {
+      "owner": "B",
+      "sha256": "eca1fd534352e8f13d81f3e7a260bbe83e37528c10bce4369f33b0516f29a649"
+    },
+    "backend/flowlens/ops/__init__.py": {
+      "owner": "A",
+      "sha256": "fac33c1e37c043f83aa03bf0a246c353ce1d4255ceec3c665f435b623715e139"
+    },
+    "backend/flowlens/ops/health.py": {
+      "owner": "A",
+      "sha256": "cf70355e51660fa555750c482fcf2aa914c4040d4724c036fcd0eacb9dfb04ff"
+    },
+    "backend/flowlens/ops/logs.py": {
+      "owner": "A",
+      "sha256": "3db493d757b86eea35b18f95864f1307479f51174db392e0a45616a676b06ecb"
+    },
+    "backend/flowlens/ops/providers.py": {
+      "owner": "A",
+      "sha256": "2b3afd1f2552944f230699e1928e1d7a5dff9eba8d9d10c07ad251b69141e70c"
+    },
+    "backend/flowlens/ops/routes.py": {
+      "owner": "A",
+      "sha256": "7ffd580f0a51babb4e9eeb075bd4cab0ca5fab2242a9f49baa8f472dbb23fd51"
+    },
+    "backend/flowlens/ops/usage.py": {
+      "owner": "A",
+      "sha256": "060be9d0f93099d4f0a55ede401a92f38ab547daddbe0b7414ce6714c2ae7b9e"
+    },
+    "backend/flowlens/providers/gemini/__init__.py": {
+      "owner": "B",
+      "sha256": "dc4b9a3d6245a54547214ea68b4a81551a3133100518899b4c10c69753258a3d"
+    },
+    "backend/flowlens/providers/gemini/adapter.py": {
+      "owner": "B",
+      "sha256": "b51dd2bd6118a5e0ec5cced5787a2e7de2cbc1178469e8ed8f0ef6bf7a7cbde5"
+    },
+    "backend/flowlens/providers/gemini/models.py": {
+      "owner": "B",
+      "sha256": "d0eb6a9a1759d5804d385c0cb6ca94a55d689a162f4198a25f4680a59cde8644"
+    },
+    "backend/flowlens/providers/gemini/smoke.py": {
+      "owner": "B",
+      "sha256": "f40d7ed53ca0b6c2a8196410e60c64cc4c0f97950f27e69bb6239a7f79af3fd1"
+    },
+    "backend/flowlens/providers/gemini/tools.py": {
+      "owner": "B",
+      "sha256": "5724e20ef618bc606a1c1a78c416ecc7b3a118208bbef2eead6ca833a2c8f5cb"
+    },
+    "backend/flowlens/providers/gemini/transport.py": {
+      "owner": "B",
+      "sha256": "31b4ac57d7cc1c3c699be48f3edcc75eaf05e966df236340826091359aeebe4b"
+    },
+    "backend/flowlens/providers/stt/__init__.py": {
+      "owner": "B",
+      "sha256": "5b6060c1223dd75c217bdd82d4fa0aaeb82e085043f4b8cee48f9df4eab3aa4e"
+    },
+    "backend/flowlens/providers/stt/adapter.py": {
+      "owner": "B",
+      "sha256": "c30d4a4363b27ef1ea1ec08213b28fb08d86f251d4230b2de2c8b679bc2610ca"
+    },
+    "backend/flowlens/providers/stt/execution.py": {
+      "owner": "B",
+      "sha256": "b1ff8fa8949692531eb6f3d63262bdb592f0b6734385d41abaaac1f13c67c938"
+    },
+    "backend/flowlens/providers/stt/models.py": {
+      "owner": "B",
+      "sha256": "77a52314f7fc417329aa429c57524c48690f05e785ae55c2fe9532b45b246eb0"
+    },
+    "backend/flowlens/providers/stt/provenance.py": {
+      "owner": "B",
+      "sha256": "0e1cbd250d2a54e2d903c5f07a824493c722648d69e0cd20850bb199674c5c2e"
+    },
+    "backend/flowlens/providers/stt/smoke.py": {
+      "owner": "B",
+      "sha256": "a0909fcb67ca53b1b427f3d14457adbe9125c781baa6972c79c55a7d73101284"
+    },
+    "backend/flowlens/recovery/__init__.py": {
+      "owner": "A",
+      "sha256": "a97ad5d90a186c6055914e9f3f4b040cc5da97da89b64f9670dadcb3853d73df"
+    },
+    "backend/flowlens/recovery/candidates.py": {
+      "owner": "A",
+      "sha256": "80f1805439695c4178f1b2a8b3621221b7b949b8330029ba4d2e8a89a1c6e89f"
+    },
+    "backend/flowlens/recovery/catalog.py": {
+      "owner": "A",
+      "sha256": "1c0789018d4599df4bb9d86349201b39a34e65cc5b7076d4d40b21d73ae6bd03"
+    },
+    "backend/flowlens/recovery/maintenance.py": {
+      "owner": "A",
+      "sha256": "84ca8dafbedfb7359813822739c8b40606da9e51fce8ab6db6c81a94e16de4c6"
+    },
+    "backend/flowlens/recovery/snapshots.py": {
+      "owner": "A",
+      "sha256": "8ca26b98a516fffb1d77a5596646dfd3beb9c28dd19c75b1a06a67db72525fcf"
+    },
+    "backend/flowlens/replay/compatibility.py": {
+      "owner": "A",
+      "sha256": "3509971fb740b0bd5721e1e0b367270533fe1234c7ccaac5561832ea84a0b8c4"
+    },
+    "backend/flowlens/replay/controls.py": {
+      "owner": "A",
+      "sha256": "7f66294b35a489a93ce7f789bd1cea33b18516b0b68ad90b1a80a438dbb1bf7a"
+    },
+    "backend/flowlens/replay/routes.py": {
+      "owner": "A",
+      "sha256": "19295c01facabe99d2c1f44ae2de8c16e5a1b1a4d43ab991b138579a84e32252"
+    },
+    "backend/flowlens/replay/snapshots.py": {
+      "owner": "A",
+      "sha256": "39a0d447af8e26553641493a804fc878853ffe3ae1cb9e4aff63a8d024462772"
+    },
+    "backend/flowlens/replay/streams.py": {
+      "owner": "A",
+      "sha256": "dead272dc9dbf652e00fbd8f5e1a1fc3eecc940bdd58faf5f1fdec249d33220b"
+    },
+    "backend/flowlens/replay/views.py": {
+      "owner": "A",
+      "sha256": "f463f47a9e532a5a9f483c8e5009e89055f2a77cc5e3d7ef284592134739255a"
+    },
+    "backend/flowlens/retention/__init__.py": {
+      "owner": "A",
+      "sha256": "07596ed014fe4e8001fecb5a143ab24bd98ae2091315333bb5c9e6bdcf3170a2"
+    },
+    "backend/flowlens/retention/coordinator.py": {
+      "owner": "A",
+      "sha256": "cdb020279f4a771178d06ddc6cfc5d1a83de48db1d3a8d105128062a38396c03"
+    },
+    "backend/flowlens/retention/journal.py": {
+      "owner": "A",
+      "sha256": "4846785dd6d6b20f4fcae90d4a39cdd2eaae8c9dbe3ebb38b1b006779af32681"
+    },
+    "backend/flowlens/retention/routes.py": {
+      "owner": "A",
+      "sha256": "4815e81b6a207c764facb25d2951feeb599b7efe71ffd881c3a7eb697454e895"
+    },
+    "backend/flowlens/sources/metadata.py": {
+      "owner": "A",
+      "sha256": "4c64523aaf578802efa67acf598942fa3e2172526460a7b324cd020bd6f85a6d"
+    },
+    "backend/flowlens/sources/policy.py": {
+      "owner": "A",
+      "sha256": "d2090dfb82a5b0f73bd03f31687e1850b2307919ad3f1012ddae3a9c7eb25cc1"
+    },
+    "backend/flowlens/sources/store.py": {
+      "owner": "A",
+      "sha256": "7b0029a687e4169a42add99cabea5e94d8c763c8533e41b66437ed610e8dad28"
+    },
+    "backend/flowlens/storage/sqlite/database.py": {
+      "owner": "A",
+      "sha256": "081d02760073c71dcc4297c72b6b1cf1d16f028f465c0f58d42ffba9b02bff40"
+    },
+    "backend/flowlens/storage/sqlite/legacy.py": {
+      "owner": "shared",
+      "sha256": "69b5b17cdddad0c22484cd7477b642beaa0be18a367e34a772530ae4b52a4827"
+    },
+    "backend/flowlens/storage/sqlite/migrate.py": {
+      "owner": "shared",
+      "sha256": "44acc1b64ed0bcd7b72cd2c8ccd8bf955037d3bdde72b4ce669b28dd3f099ccb"
+    },
+    "backend/flowlens/storage/sqlite/mutations.py": {
+      "owner": "A",
+      "sha256": "f9c0ee935d25fa8c88d185630538e49e546e5636149c8fb23558250946cb6f65"
+    },
+    "backend/flowlens/storage/sqlite/repository.py": {
+      "owner": "shared",
+      "sha256": "2ef14a874e086bfd29ff85dea0fc3b99b47abe484280c5ccb21cb96e277959f1"
+    },
+    "backend/flowlens/storage/sqlite/schema.py": {
+      "owner": "A",
+      "sha256": "1cae899018c826ee7140a2f92e985b8c08e9097cb5b3834ec652e6a96647b822"
+    },
+    "backend/flowlens/testing/__init__.py": {
+      "owner": "shared",
+      "sha256": "022cdb325121457a6f1db12ce1805ec4c6fd806e3398cead9dd523856bcbbfef"
+    },
+    "backend/flowlens/testing/__main__.py": {
+      "owner": "shared",
+      "sha256": "9030484c498602237cee0c6305e82906fea809d1f158ba04e05d968d0cff4de3"
+    },
+    "backend/flowlens/testing/acceptance.py": {
+      "owner": "B",
+      "sha256": "b05997898c094b1cc6e2d60fb61ad592464fe5c0192871ac3f722c8a50fd3c0f"
+    },
+    "backend/flowlens/testing/advisory.py": {
+      "owner": "B",
+      "sha256": "dce5b3600876f26565ba1341a99dec9d4eb24fc879d1e1d7ed9c09921855be39"
+    },
+    "backend/flowlens/testing/analysis.py": {
+      "owner": "B",
+      "sha256": "c8dac5ce87e7dbb07ed75414836e69fb6405091b951b0f29e0b173cffb2f8cb1"
+    },
+    "backend/flowlens/testing/audio_worker.py": {
+      "owner": "B",
+      "sha256": "29a00fdb383ac8e273a536655ede3cdfebb06916d97976a112bfcc94a20f9ee2"
+    },
+    "backend/flowlens/testing/harness.py": {
+      "owner": "B",
+      "sha256": "04e79ba072d81a871a132ac9eb308214eecd58a00ffa2f9ac6b86ebd4951dfd1"
+    },
+    "backend/flowlens/testing/intent_memory.py": {
+      "owner": "B",
+      "sha256": "4d1f1951444b6199f998ef0789fb20c0469f1b3c582faa923692c1b9906f9994"
+    },
+    "backend/flowlens/testing/stt.py": {
+      "owner": "B",
+      "sha256": "4cb96b6750734cea9809f5d17fe66caa64440511ce7a3314b26ff147c8c6798b"
+    },
+    "backend/flowlens/testing/stt_worker.py": {
+      "owner": "B",
+      "sha256": "e5a2702f33d06b14fd9a5e14e7f5ddb2ad97c7ffb88b07b6a3da57d7a1cd8b9c"
+    },
+    "backend/flowlens/testing/transcripts.py": {
+      "owner": "B",
+      "sha256": "857a1a5b95714b308439a336e71639bffd0d0b20fc4f3d2385d2d382d600bc2a"
+    },
+    "backend/flowlens/workers/__init__.py": {
+      "owner": "B",
+      "sha256": "9df8f7e57110c90cef66bf5c070aafcc0fd492d2f3b10a179fe14ee066e3f6e8"
+    },
+    "backend/flowlens/workers/audio/__init__.py": {
+      "owner": "B",
+      "sha256": "990c95091af01cd621f03d7051252dc3e4242821693f0f257ce2b1ec14e57cdd"
+    },
+    "backend/flowlens/workers/audio/models.py": {
+      "owner": "B",
+      "sha256": "fcdd24fa0583373ee63902021c60d4506b77139079fd4b856a756a9130ebf27f"
+    },
+    "backend/flowlens/workers/audio/worker.py": {
+      "owner": "B",
+      "sha256": "0a31cfb2a8f026382671929b1b6a09bdb2adc1f86e119d1dc189e056043fce2f"
+    }
+  },
+  "config_sha256": {
+    "pyproject.toml": "84186b4c37c0924cd75c9141fe7905bde2d4ef81273dd40b5cc1b82dd791444f",
+    "uv.lock": "28ddfb3dc800064541bb394383d27a7c592350abc6ecbaf121be0f084847b5da"
+  },
+  "locked_packages": {
+    "annotated-doc": "0.0.5",
+    "annotated-types": "0.8.0",
+    "anyio": "4.15.1",
+    "argon2-cffi": "25.1.0",
+    "argon2-cffi-bindings": "26.1.0",
+    "atc-flowlens": "0.1.0",
+    "bandit": "1.9.4",
+    "boolean-py": "5.0",
+    "cachecontrol": "0.14.4",
+    "certifi": "2026.7.22",
+    "cffi": "2.1.1",
+    "charset-normalizer": "3.5.2",
+    "click": "8.5.0",
+    "colorama": "0.4.6",
+    "cryptography": "50.0.2",
+    "cyclonedx-python-lib": "11.12.0",
+    "defusedxml": "0.7.1",
+    "distro": "1.9.0",
+    "fastapi": "0.142.4",
+    "filelock": "4.0.12",
+    "google-api-core": "2.42.0",
+    "google-auth": "2.61.0",
+    "google-cloud-speech": "2.41.0",
+    "google-genai": "2.29.0",
+    "googleapis-common-protos": "1.75.5",
+    "grpcio": "1.84.0",
+    "grpcio-status": "1.84.0",
+    "h11": "0.16.0",
+    "httpcore": "1.0.9",
+    "httpcore2": "2.13.1",
+    "httpx": "0.28.1",
+    "httpx2": "2.13.1",
+    "httpx2-jsfetch": "1.0",
+    "idna": "3.20",
+    "iniconfig": "2.3.1",
+    "librt": "0.16.0",
+    "license-expression": "30.4.4",
+    "markdown-it-py": "4.2.0",
+    "mdurl": "0.1.2",
+    "msgpack": "1.2.3",
+    "mypy": "1.20.2",
+    "mypy-extensions": "1.1.0",
+    "numpy": "2.5.3",
+    "opentelemetry-api": "1.45.1",
+    "packageurl-python": "0.17.6",
+    "packaging": "26.3",
+    "pathspec": "1.1.1",
+    "pip": "26.2.1",
+    "pip-api": "0.0.35",
+    "pip-audit": "2.10.1",
+    "pip-requirements-parser": "32.0.1",
+    "platformdirs": "4.12.4",
+    "pluggy": "1.6.0",
+    "proto-plus": "1.29.0",
+    "protobuf": "7.36.2",
+    "py-serializable": "2.1.0",
+    "pyasn1": "0.6.4",
+    "pyasn1-modules": "0.4.2",
+    "pycparser": "3.1",
+    "pydantic": "2.13.5",
+    "pydantic-core": "2.46.5",
+    "pygments": "2.21.0",
+    "pyparsing": "3.3.3",
+    "pytest": "9.1.1",
+    "python-multipart": "0.0.32",
+    "pyyaml": "6.0.3",
+    "requests": "2.34.2",
+    "rich": "15.0.0",
+    "ruff": "0.16.10",
+    "shapely": "2.2.0",
+    "sniffio": "1.3.1",
+    "sortedcontainers": "2.4.0",
+    "soundfile": "0.14.0",
+    "starlette": "1.7.0",
+    "stevedore": "5.9.1",
+    "tenacity": "9.1.4",
+    "tomli": "2.5.0",
+    "tomli-w": "1.2.0",
+    "truststore": "0.10.4",
+    "types-protobuf": "7.35.1.20260906",
+    "types-shapely": "2.1.0.20260728",
+    "typing-extensions": "4.16.0",
+    "typing-inspection": "0.4.4",
+    "urllib3": "2.8.0",
+    "uvicorn": "0.54.0",
+    "websockets": "16.1.1",
+    "wsproto": "1.3.2"
+  },
+  "existing_A_B_package_versions_changed": [],
+  "frozen_contracts": "1.0.0 schemas and Python ports byte-identical to both inputs",
+  "historical_A10_manifest": "docs/development/package-a-manifest.json at A_candidate; current joint checkout intentionally differs",
+  "status": {
+    "source_coexistence": "verified",
+    "runtime_composition": "not_started",
+    "B_external_acceptance": "pending",
+    "G_BE": "not_started",
+    "provider_verified": false,
+    "domain": "NOT_DOMAIN_VALIDATED",
+    "operational_validation": false
+  },
+  "remaining_integration": [
+    "Explicit StagePolicy, repositories, routes, scoped context, snapshot and purge bindings",
+    "Project private B records to frozen DTO/evidence/JobResult with semantic validation",
+    "Order A/B migrations under API-owned unit of work; B-aware maintenance/catalog/restore",
+    "Wire actual worker authenticated input/media/artifact/results",
+    "Approved real STT/Gemini smoke, budget, rights, held-out and domain evidence",
+    "Integrated scenarios, isolation, recovery, capacity/timing and OpenAPI/client freeze"
+  ],
+  "source_overlays": {
+    "backend/flowlens/testing/audio_worker.py": {
+      "reason": "Canonical macOS temporary scratch root in MOCK harness; strict path guard unchanged",
+      "B_input_sha256": "15a368a02a98fed2b93ff1eb4c83837d1d49b3c751db273cd0c0010ba223cc17",
+      "final_sha256": "29a00fdb383ac8e273a536655ede3cdfebb06916d97976a112bfcc94a20f9ee2"
+    },
+    "backend/flowlens/providers/stt/smoke.py": {
+      "reason": "Exact LF and CRLF synthetic fixture hashes; arbitrary tamper still fails closed",
+      "B_input_sha256": "5a5937fd94304ee4ee39e6d6333807d9354000d4569898c73d06047f5532016c",
+      "final_sha256": "a0909fcb67ca53b1b427f3d14457adbe9125c781baa6972c79c55a7d73101284"
+    }
+  },
+  "regression": "tests/analysis/test_stt_smoke.py: LF/CRLF exact fixture + arbitrary byte tamper rejection; existing worker subprocess success and five failure cleanup tests",
+  "checks": {
+    "platform": "720 passed, 1 opt-in capacity skipped, 184.53s",
+    "analysis": "654 passed, 17.85s",
+    "contracts_A": "66 passed",
+    "contracts_B": "66 passed",
+    "B_local_acceptance": "9 standalone commands PASS, local MOCK/real FFmpeg; no provider calls",
+    "ruff": "check PASS; format 207 files PASS",
+    "mypy": "139 source files PASS",
+    "schema_drift": "PASS",
+    "bandit_medium_high": "0 findings; 2 low issues excluded by -ll",
+    "dependency_advisories": "No known vulnerabilities; unpublished project not audited",
+    "uv_lock": "87 packages; both inputs existing versions preserved",
+    "build": "sdist + wheel PASS",
+    "installed_wheel": "clean locked environment outside checkout PASS; six B entrypoints; disposable cleaned",
+    "native_A_startup": {
+      "health": 200,
+      "release": 200,
+      "openapi": 200,
+      "ready": 503,
+      "unauthenticated_catalogue": 401,
+      "provider_verified": false
+    },
+    "secret_scan": {
+      "tracked_files": 467,
+      "staged_files": 109,
+      "findings": 0,
+      "limits": "Known PEM/Google/AWS/GitHub/Slack signatures; no entropy/history certification"
+    },
+    "git_diff_check": "PASS; no unresolved entries or conflict markers"
+  },
+  "benchmark_status": "Original A10 measured results preserved at A_candidate. No new joint runtime/provider benchmark claimed; opt-in capacity not rerun for source reconciliation.",
+  "initial_failures": [
+    "Console pytest B collection: repository scripts not importable; use python -m pytest",
+    "B 8 failures: macOS temporary-path symlink and exact LF/CRLF manifest hash; fixed and final entire B suite PASS"
+  ],
+  "environment": {
+    "python": "3.12.14",
+    "platform": "darwin macOS",
+    "sqlite": "3.53.1",
+    "ffmpeg": "9.0.2 Homebrew",
+    "provider_calls": 0
+  }
+}

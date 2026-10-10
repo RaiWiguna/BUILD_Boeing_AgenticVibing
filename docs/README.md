@@ -1,6 +1,6 @@
 # Peta Dokumentasi ATC FlowLens
 
-Tanggal: 10 Oktober 2026. Baseline Phase0–1 dan Paket A A01–A09 done; import/source/assets/evidence/jobs tersedia dengan fake AnalysisModule untuk standalone acceptance A. A07 replay/checkpoints/controls/REST/WS tersedia; Paket B dan actual provider/domain pipeline belum tersedia; A08.1–A08.3 geometry/occupancy/rules/alerts tersedia; A09.1 artifacts/retention tersedia; A09.2 local operability tersedia; A10.1–A10.2/Paket A standalone acceptance dan manifest selesai; frontend/deployment belum diimplementasikan; readiness lokal200/503 sesuai dependencies dan gates not_started. Dokumen lama bukan spesifikasi aktif; AGENTS.md lama tidak berlaku.
+Tanggal: 10 Oktober 2026. Paket A A01–A10 standalone done. Paket B B01/B02 standalone done; B03–B06 local/MOCK acceptance tersedia, real provider/held-out/domain closure masih terbuka. Source A/B direconcile pada feat/backend-aben; composition nyata Phase10 dan G-BE/G-FE/G-DELIVERY belum selesai. Evidence tiap owner tetap terpisah.
 
 ## Kontrak dan konteks kerja
 
@@ -19,6 +19,7 @@ Tanggal: 10 Oktober 2026. Baseline Phase0–1 dan Paket A A01–A09 done; import
 - [Backend baseline](architecture/backend-baseline.md) dan [ADR 0002](adr/0002-frozen-backend-contracts.md).
 - [Shared contracts](api/shared-contracts.md), [developer workflow](development/backend-foundation.md), dan [A/B packets](development/backend-packets.md).
 - [Rencana eksekusi Paket A per sesi](development/package-a-execution.md): A01–A09 done ([snapshots](testing/a071-evidence.md), [controls](testing/a072-evidence.md), [transport](testing/a073-evidence.md)); A08.1–A08.3 done ([kernel](testing/a081-evidence.md), [occupancy](testing/a082-evidence.md), [rules/alerts](testing/a083-evidence.md)); A09.1 done ([evidence](testing/a091-evidence.md)); A09.2 done ([evidence](testing/a092-evidence.md)); A09.3 done; A10 done; [verified handoff](development/package-a-handoff.md); [evidence host](testing/a011-evidence.md) dan [persistence](testing/a012-evidence.md).
+- [Rencana eksekusi Paket B](development/package-b-execution.md): B01/B02 done dalam scope standalone, B03 partial/in_progress, B04–B06 planned; [evidence B01](testing/b01-evidence.md), [B02.1](testing/b021-evidence.md), [B02.2](testing/b022-evidence.md), dan [B03](testing/b03-evidence.md).
 - [Evaluation protocol](../evaluation/protocols/baseline.md) dan [checks/evidence](testing/phase01-evidence.md).
 
 Artifact lifecycle/retention/purge: [workflow](development/artifacts-retention.md) dan [evidence A09.1](testing/a091-evidence.md).
@@ -67,6 +68,8 @@ A04 completed: [import commit workflow](development/import-commit.md), [phase ev
 
 A05/A06 `done`: [assets/evidence workflow](development/private-assets-evidence.md), [jobs workflow](development/durable-jobs.md), [A05 evidence](testing/a05-evidence.md), [A06 evidence](testing/a06-evidence.md).
 
-A09.3 local backup/restore/maintenance done: [workflow](development/recovery.md), [evidence](testing/a093-evidence.md). Next A10.1 only; B/Phase10 and release gates remain not_started/planned as applicable.
+A09.3 local backup/restore/maintenance done: [workflow](development/recovery.md), [evidence](testing/a093-evidence.md). A10 standalone selesai; real composition Phase10 dan release gates tetap planned/not_started.
 
 Paket A A10 complete: [acceptance](testing/a101-evidence.md), [final benchmark](testing/a102-benchmark.json), [source-generated manifest](development/package-a-manifest.json), [integration handoff](development/package-a-handoff.md), [objective audit](testing/a10-completion-audit.md). B/provider/domain/integrated Phase10 dan G-BE tetap belum selesai.
+
+Source reconciliation A/B: [resolution, checks dan entry integrasi](development/backend-reconciliation.md), [joint manifest](development/backend-reconciliation.json).

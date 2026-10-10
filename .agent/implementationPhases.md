@@ -2,16 +2,16 @@
 
 | Atribut | Nilai |
 | --- | --- |
-| Status dokumen | Paket A A01–A10 done; B/Phase10 planned; parent Phase6/9 B masih pending |
+| Status dokumen | A01–A10 standalone done; B01/B02 standalone done; B03–B06 external acceptance pending; Phase10 planned |
 | Tanggal | 10 Oktober 2026 |
 | Urutan delivery | **Backend lengkap → frontend lengkap → containerization → deployment lokal dan satu VM** |
 | Kontrak produk | `.agent/PRD.md`; batas proyek dan aturan kerja tetap berlaku |
-| Current implementation phase | A01–A10 Paket A done; standalone acceptance/manifest complete; Phase10 planned; contract1.0.0 |
-| Next recommended phase | Terima B candidate/manifest/real provider smoke untuk entry Phase10; G-BE not_started |
+| Current implementation phase | Source A/B direconcile; A standalone done; B03–B06 in_progress; real composition Phase10 planned; contract1.0.0 |
+| Next recommended phase | Lengkapi B external acceptance dan explicit composition/recovery reconciliation; G-BE not_started |
 | Deadline dan staffing | Deadline belum ditetapkan; pengguna adalah pihak A (Platform & Replay); individu pihak B (Analysis & AI) belum ditetapkan |
 | Baseline data | Sintetik berlabel; replay simulator mitra berizin jika tersedia |
 
-Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase/subfase awalnya `planned`; Phase 0–1 kini `done` berdasarkan [baseline evidence](../docs/testing/phase01-evidence.md). Phase2 `done` berdasarkan A01–A03 evidence; Phase3/A04 `done` berdasarkan [A04 phase evidence](../docs/testing/a04-evidence.md); Phase3.1–3.3/A04.1–A04.2 `done` berdasarkan [A04.1 evidence](../docs/testing/a041-evidence.md) dan [A04.2 evidence](../docs/testing/a042-evidence.md); Phase6.1/A05 dan6.3/A06 `done` berdasarkan [A05](../docs/testing/a05-evidence.md)/[A06](../docs/testing/a06-evidence.md); shared Phase6 `in_progress` karena B6.2/6.4 `planned`; Phase4/A07 `done` ([transport evidence](../docs/testing/a073-evidence.md)); Phase5 `done`; Phase9 `in_progress` (A09.1 done); Phase7–8/10–17 `planned`. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap sendiri tidak membuktikan runtime atau gate.
+Dokumen ini menetapkan pekerjaan, dependency, deliverable, acceptance, dan gate. Semua fase/subfase awalnya `planned`; Phase 0–1 kini `done` berdasarkan [baseline evidence](../docs/testing/phase01-evidence.md). Phase2 `done` berdasarkan A01–A03 evidence; Phase3/A04 `done` berdasarkan [A04 phase evidence](../docs/testing/a04-evidence.md); Phase3.1–3.3/A04.1–A04.2 `done` berdasarkan [A04.1 evidence](../docs/testing/a041-evidence.md) dan [A04.2 evidence](../docs/testing/a042-evidence.md); Phase6.1/A05 dan6.3/A06 `done` berdasarkan [A05](../docs/testing/a05-evidence.md)/[A06](../docs/testing/a06-evidence.md); shared Phase6 standalone A/B available; real composition belum dibuktikan; Phase4/A07 `done` ([transport evidence](../docs/testing/a073-evidence.md)); Phase5 `done`; Phase9 `in_progress` (A09.1–A09.3 done, B external acceptance pending); Phase7–8 in_progress (B external acceptance pending), Phase10–17 planned. Dokumen atau source yang sudah ada adalah input audit, bukan alasan untuk menandai fase selesai. Pembuatan roadmap sendiri tidak membuktikan runtime atau gate.
 
 ## 1. Sequencing Gates
 
@@ -85,10 +85,10 @@ Audit awal memeriksa kontrak dan scaffold yang benar-benar tersedia, lalu meneta
 | 3 | Backend A | Import atomik, provenance, clocks, quality dan source reader | Phase 2 (A) | `done` |
 | 4 | Backend A | Replay/checkpoints, REST/WS, archive dan compatibility | Phase 3 (A) | `done` |
 | 5 | Backend A | Footprint, occupancy, prediction, observed rules/alerts | Phase 4 (A) | `done` |
-| 6 | Backend A / B | A: assets/jobs/internal API; B: audio processing/worker | A: Phase 2; B: Phase 1; keduanya memakai frozen contracts | `in_progress` (A6.1/6.3 done; B planned) |
-| 7 | Backend B | Google STT, transcript/corrections, analysis persistence dan benchmark | Phase 6.2/6.4 (B); GCP readiness untuk smoke | `planned` |
-| 8 | Backend B | Gemini intent, scoped tools, association, memory/open loops | Phase 7 (B); Gemini readiness untuk smoke | `planned` |
-| 9 | Backend A / B | A: artifact lifecycle/ops; B: findings/review/brief/report/query/provider diagnostics | A: Phase 2–6 bagian A; B: Phase 8; tanpa dependency lintas implementasi | `in_progress` (A09.1 done; A09.2 done; A09.3 done; B planned) |
+| 6 | Backend A / B | A: assets/jobs/internal API; B: audio processing/worker | A: Phase 2; B: Phase 1; keduanya memakai frozen contracts | `in_progress` (A6.1/6.3 standalone done; B6.2/6.4 standalone done; composition pending) |
+| 7 | Backend B | Google STT, transcript/corrections, analysis persistence dan benchmark | Phase 6.2/6.4 (B); GCP readiness untuk smoke | `in_progress` (fondasi B01 saja) |
+| 8 | Backend B | Gemini intent, scoped tools, association, memory/open loops | B03 local accepted; user-authorized exception untuk engineering B04 sebelum external B03 closure; Gemini readiness untuk smoke | `in_progress` (local MOCK accepted; real provider/benchmark open) |
+| 9 | Backend A / B | A: artifact lifecycle/ops; B: findings/review/brief/report/query/provider diagnostics | A: Phase 2–6 bagian A; B: Phase 8; tanpa dependency lintas implementasi | `in_progress` (A09 done; B05 local/MOCK accepted; external/domain acceptance pending) |
 | 10 | Integrasi backend akhir | Composition/migrations nyata, integrated verification, contract freeze, G-BE | Seluruh task dan acceptance paket A serta B selesai | `planned` |
 | 11 | Frontend | React/Vite/shadcn foundation, auth/router, API data layer | G-BE `passed` | `planned` |
 | 12 | Frontend | Sessions/import, workspace, replay/audio, memory/situation | Phase 11 | `planned` |
@@ -260,7 +260,7 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 4 — Replay Engine, Archive, API, dan WebSocket
 
-**Status:** `done` · **Owner:** pihak A · **Dependency:** Phase 3 (A); A07.1–A07.3/4.1–4.4 done ([snapshot evidence](../docs/testing/a071-evidence.md), [controls evidence](../docs/testing/a072-evidence.md), [transport evidence](../docs/testing/a073-evidence.md)); A08.1–A08.2 done; A08.3/5.3–5.4 done ([evidence](../docs/testing/a083-evidence.md)); A09.1 done; A09.2 done; A09.3 done; next A10.1. Analysis snapshot/events memakai fake module sampai Phase 10.
+**Status:** `done` · **Owner:** pihak A · **Dependency:** Phase 3 (A); A07.1–A07.3/4.1–4.4 done ([snapshot evidence](../docs/testing/a071-evidence.md), [controls evidence](../docs/testing/a072-evidence.md), [transport evidence](../docs/testing/a073-evidence.md)); A08.1–A08.2 done; A08.3/5.3–5.4 done ([evidence](../docs/testing/a083-evidence.md)); A09.1 done; A09.2 done; A09.3 done; A10 standalone done; next explicit A/B composition setelah entry acceptance. Analysis snapshot/events memakai fake module sampai Phase 10.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
@@ -273,7 +273,7 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 5 — Geometry, Occupancy, Prediction, Rules, dan Alert Lifecycle
 
-**Status:** `done` · **Owner:** pihak A · **Dependency:** Phase 4 (A); A08.1/5.1 done ([evidence](../docs/testing/a081-evidence.md)); A08.2/5.2 done ([evidence](../docs/testing/a082-evidence.md)); A08.3/5.3–5.4 done ([evidence](../docs/testing/a083-evidence.md)); A09.1 done; A09.2 done; A09.3 done; next A10.1. Tidak membutuhkan STT/Gemini atau memory B.
+**Status:** `done` · **Owner:** pihak A · **Dependency:** Phase 4 (A); A08.1/5.1 done ([evidence](../docs/testing/a081-evidence.md)); A08.2/5.2 done ([evidence](../docs/testing/a082-evidence.md)); A08.3/5.3–5.4 done ([evidence](../docs/testing/a083-evidence.md)); A09.1 done; A09.2 done; A09.3 done; A10 standalone done; next explicit A/B composition setelah entry acceptance. Tidak membutuhkan STT/Gemini atau memory B.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
@@ -293,22 +293,47 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
 | 6.1 | Private assets, authorized range serving, hashes dan storage keys | Scoped audio service | `done` ([A05 evidence](../docs/testing/a05-evidence.md)) |
-| 6.2 | Controlled FFmpeg/ffprobe decode/resample/chunk, channel/time mapping, overlap/gaps | Versioned derivatives/chunks | `planned` |
+| 6.2 | Controlled FFmpeg/ffprobe decode/resample/chunk, channel/time mapping, overlap/gaps | Versioned derivatives/chunks | `done`: 57 PASS termasuk real FFmpeg9.0.2, mapping/accounting/hash/cleanup |
 | 6.3 | Durable jobs/attempts/leases/heartbeats, deadlines, concurrency/budget reservations | Job coordinator dan internal API | `done` ([A06 evidence](../docs/testing/a06-evidence.md)) |
-| 6.4 | Separate worker process, authenticated minimal input/result, cancel/retry/restart | Isolated worker executable | `planned` |
+| 6.4 | Separate worker process, authenticated minimal input/result, cancel/retry/restart | Isolated worker executable | `done` untuk standalone MOCK acceptance74 PASS; actual authenticated transport/integration belum tersedia |
 
 **Acceptance:** worker tidak membuka SQLite atau seluruh raw asset inventory; unauthorized range/internal routes ditolak; decode limits dan sanitization diuji; raw hashes tetap sama; chunks mempertahankan audio clock; worker/provider tidak menahan replay lock. Timeout, expired lease, duplicate/late/cancelled result, crash, permission change dan stale input version tidak membentuk duplicate accepted commit. Local exactly-once commit tidak diklaim sebagai exactly-once provider billing.
 
+B02.1 menyediakan `audio/{models,planning,process,tools,preparation}.py` dengan
+context-managed scratch, immutable raw hash checks, structured commands, time/output
+limits, mono channel chunks, source/session mapping, overlap/gap provenance.
+[Evidence](../docs/testing/b021-evidence.md), [ADR](../docs/adr/0003-controlled-local-audio.md).
+Real FFmpeg9.0.2 acceptance57 PASS/no skip. Worker isolated executable melalui
+frozen JobClient/AssetAccess/internal authorized binding tersedia, heartbeat saat
+processing, cancellation/deadline/lost lease/tool kill/reap, scoped artifact provenance,
+typed results/receipts dan local cleanup. [B02.2 evidence](../docs/testing/b022-evidence.md):
+worker74 PASS, combined B218 PASS. MOCK bukan real API/auth/durable platform integration;
+bounded adapters/staged TTL/coordinator promotion tetap platform. No DB/A/evaluator imports.
+Readiness false, handlers kosong. Next B03; parent6/9 dan gates tidak ditutup.
+
 ### Phase 7 — Google STT dan Transcript Lifecycle
 
-**Status:** `planned` · **Owner:** pihak B · **Dependency:** 6.2/6.4 (B), frozen platform ports dan standalone analysis persistence; GCP access untuk real smoke. Tidak menunggu 6.1/6.3 (A).
+**Status:** `in_progress` (B01 + B03.D1/D2/D3 standalone accepted) · **Owner:** pihak B · **Dependency:** 6.2/6.4 (B), frozen platform ports dan standalone analysis persistence; GCP access untuk real smoke. Tidak menunggu 6.1/6.3 (A).
+
+Fondasi sesudah Phase 1: B01 `done` untuk registration/config/analysis.0001/
+scoped configuration repository/transaction ports dan disposable MOCK harness.
+[Rencana Paket B](../docs/development/package-b-execution.md),
+[evidence B01](../docs/testing/b01-evidence.md): 21 unit tests, 66 contracts masing-masing
+A/B; native Windows B mypy dan full POSIX-target mypy PASS. Native whole-backend
+Windows mypy memiliki 7 error API POSIX A. B03 adapter, raw hypotheses/timing,
+conservative canonical-word dedup, analysis.0002 dan correction/evidence/stale lifecycle
+tersedia dengan standalone MOCK acceptance; private acquisition/submission/authority
+D3 accepted. Real smoke/benchmark belum selesai; real transport/promotion Phase10
+terpisah; readiness false. B02.1/6.2 real acceptance dan B02.2/6.4
+standalone MOCK acceptance done; B03 closure berikutnya. Tidak ada
+integrasi nyata A/B atau penutupan parent Phase 6/9 maupun gate.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
-| 7.1 | Implement SDK adapter, provider profile, locale/region/model/recognizer checks | Google STT V2 adapter | `planned` |
-| 7.2 | Transcribe chunks, preserve offsets/confidence/quality, overlap dedup dan partial results | Transcript hypotheses | `planned` |
-| 7.3 | Analysis module registration, repositories/migrations dan append-only transcript corrections/attribution dengan reason/evidence/stale dependencies melalui transaction ports | Analysis persistence dan transcript revision API | `planned` |
-| 7.4 | Mock failures, real synthetic smoke, critical-slot/alignment baseline | STT verification/benchmark record | `planned` |
+| 7.1 | Implement SDK adapter, provider profile, locale/region/model/recognizer checks | Google STT V2 adapter | `in_progress`: SDK2.41.0/strict routing/approval/MOCK acceptance; real profile unverified |
+| 7.2 | Transcribe chunks, preserve offsets/confidence/quality, overlap dedup dan partial results | Transcript hypotheses | `in_progress`: D1/D3 standalone provenance/timing/worker/private artifact validation accepted; real-provider evidence open; real transport Phase10 |
+| 7.3 | Analysis module registration, repositories/migrations dan append-only transcript corrections/attribution dengan reason/evidence/stale dependencies melalui transaction ports | Analysis persistence dan transcript revision API | `in_progress`: B01 + standalone lifecycle/analysis.0002 accepted; platform run/revision API/integration open |
+| 7.4 | Mock failures, real synthetic smoke, critical-slot/alignment baseline | STT verification/benchmark record | `in_progress`: D1/D2/D3 regressions dan offline schema/loader/scorer TEST_ONLY verified; smoke/evaluation preflight BLOCKED; real smoke/audited labels/held-out benchmark open |
 
 **Scope:** initial chunk baseline ≤50 detik dan di bawah 10 MB untuk inline recognize; batas efektif diverifikasi pada API release. GCS/BatchRecognize bukan dependency default. Word timing dapat unavailable; chunk ranges tetap tersedia. Diarization tidak menjadi identity ground truth dan null confidence tidak dibuat menjadi angka.
 
@@ -316,17 +341,66 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 **Blocker policy:** tanpa credential/region/quota, adapter/mock work dapat berlangsung, tetapi 7.4 belum selesai dan G-BE belum dapat passed.
 
+B03 [evidence](../docs/testing/b03-evidence.md) dan
+[ADR0004](../docs/adr/0004-private-transcript-provenance.md): frozen1.0.0 tetap;
+internal records tidak dimasukkan ke field wire yang salah. Permission/profile
+preflight, bounded async RPC, caller budget/lease callbacks, immutable raw alternatives,
+unknown clock/null confidence, exact overlap trace, append-only revisions dan caller
+UOW evidence/audit/events tersedia. Separate register_transcripts tidak memasang
+STT accepted-result handler/API atau real A/B composition. B04 local engineering
+boleh dimulai sesuai user-authorized sequencing exception di bawah; B03 external
+acceptance tetap wajib. Paket B, parent phases dan seluruh gates tetap terbuka.
+
+Continuation9 Oktober: providers/stt/{execution,provenance,smoke}.py dan bindings/stt.py
+menutup D3 mandiri dengan injected ChunkAccess/AcceptanceAccess, frozen JSON_REPORT,
+full raw reconstruction dan caller UOW. testing.stt_worker PASS; no handler/HTTP route.
+Frozen JobResult.artifacts dapat mereferensikan private provenance tanpa schema change;
+durable authority/receipt/private ACL/TTL/promotion/usage/hash/handler wiring tetap
+Phase10, bukan dependency melingkar untuk D3. Baseline359/final432 tanpa skip,
+contractsA66; native B32/full Linux-target56 mypy PASS, Windows A POSIX7 unchanged.
+gcloud524.0.0 local accounts0/no active; standard ADC/env profile absent. Smoke default
+BLOCKED/calls0. Evaluation preflight metrics=null, TTS NOT_GOLD/held-out planned;
+scoring menunggu audited artifacts/real outputs. B03 overall tidak done; gates tetap.
+
+Continuation offline evaluator9 Oktober: gap scorer/loader lokal ditutup tanpa
+menunggu Paket A atau corpus. scripts/stt_scoring.py + evaluation_stt.py --bundle
+memvalidasi bounded hashes/schema/reviewers/adjudication/scope/Google receipt dan
+B02/protobuf; split session/family/speaker/source/chunk,14cohorts termasuk condition.
+WER denominators/critical-slot lexical errors/word-segment start/end/missing timing
+diuji TEST_ONLY; final B500 PASS/no skip, focused71/A66 PASS; bukan benchmark.
+Native B32/Linux-target56/scorer1 mypy PASS, Windows A7 POSIX unchanged;
+Ruff/format/schema/Bandit/audit/build/diff PASS. Local inventory tetap0 active/no ADC/config/budget;
+real Google calls0. Actual default benchmark BLOCKED/metrics=null. Real outputs,
+audited held-out labels/protocol/thresholds tetap owner cloud operator/annotation lead.
+D1/D2/D3, frozen1.0.0/readiness false dipertahankan; B03/Phase7 in_progress/B04 planned.
+
 ### Phase 8 — Gemini Intent, Orchestration, Association, dan Memory
 
-**Status:** `planned` · **Owner:** pihak B · **Dependency:** Phase 7 (B), frozen context/evidence/geometry ports; Gemini access untuk real smoke. Platform ports memakai fake adapters sampai Phase 10.
+B04 continuation9 Oktober2026: private intent/association/memory/loops, bounded
+Interactions adapter, analysis.0003 dan transcript dependency binding implemented.
+[Evidence B04](../docs/testing/b04-evidence.md) memisahkan acceptance MOCK, published
+Google support dan account readiness. Real Gemini/STT calls0; B03 external flag,
+B04 real smoke/held-out benchmark, Phase10 dan semua gates tetap terbuka.
+
+**Status:** `in_progress` (B04 local engineering/standalone MOCK accepted; external acceptance open) · **Owner:** pihak B · **Dependency:** B03 local adapter/lifecycle/D3 accepted, frozen context/evidence/geometry ports; user-authorized exception permits independent B04 engineering before B03 external closure. Gemini access untuk real smoke. Platform ports memakai fake adapters sampai Phase 10.
+
+**Sequencing exception — keputusan pengguna,9 Oktober2026:** pengguna belum memiliki
+akun Google Cloud dan mengizinkan lanjut B04 tanpa menandai B03 selesai.
+Flag **B03_EXTERNAL_ACCEPTANCE_PENDING** dengan alasan **STT_ACCOUNT_LOGIN_REQUIRED**
+dan **AUDITED_BENCHMARK_PENDING**. B03/Phase7 tetap `in_progress`; engineering lokal
+dan scorer telah diverifikasi. Exception hanya mengizinkan B04 local implementation/
+MOCK standalone tests memakai transcript fixtures dan injected frozen ports. Tidak
+menghapus real STT smoke/benchmark, tidak memberi izin paid provider calls, perubahan
+model/provider/kontrak, Phase10 integration, frontend atau penutupan gate. B04 belum
+diimplementasikan pada keputusan ini; status berubah in_progress saat pekerjaan mulai.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
-| 8.1 | Implement provider adapter, request/version policy, structured intent schemas dan feature checks | Gemini intent parser | `planned` |
-| 8.2 | Bounded read-only tools dengan session/run/as-of/permission scope | Core analysis orchestration | `planned` |
-| 8.3 | Callsign/entity alternatives, instruction/readback/report relationships, correction/cancellation | Association candidates dan acceptance validator | `planned` |
-| 8.4 | Accepted memory events, reducer/projections, instruction/readback/movement/reviewer dimensions | Object/runway memory dan open loops | `planned` |
-| 8.5 | Real synthetic smoke dan semantic/error/injection/reconstruction benchmarks | Gemini/memory verification record | `planned` |
+| 8.1 | Implement provider adapter, request/version policy, structured intent schemas dan feature checks | Gemini intent parser | `in_progress`: local engineering/standalone MOCK accepted; external acceptance open |
+| 8.2 | Bounded read-only tools dengan session/run/as-of/permission scope | Core analysis orchestration | `in_progress`: local engineering/standalone MOCK accepted; external acceptance open |
+| 8.3 | Callsign/entity alternatives, instruction/readback/report relationships, correction/cancellation | Association candidates dan acceptance validator | `in_progress`: local engineering/standalone MOCK accepted; external acceptance open |
+| 8.4 | Accepted memory events, reducer/projections, instruction/readback/movement/reviewer dimensions | Object/runway memory dan open loops | `in_progress`: local engineering/standalone MOCK accepted; external acceptance open |
+| 8.5 | Real synthetic smoke dan semantic/error/injection/reconstruction benchmarks | Gemini/memory verification record | `in_progress`: semantic/security/reconstruction MOCK accepted; real smoke/held-out benchmark BLOCKED |
 
 **Scope:** target `gemini-3.8-flash`; transport awal Developer API Interactions, diverifikasi sebelum pemakaian. Session memory dimiliki aplikasi; `store=false` dan bounded request context dipakai sesuai compatibility. Tools minimum membaca entity memory, transcript window, session events, observed tracks, active rules, dan evidence. Tidak ada clearance, arbitrary HTTP, SQL, filesystem, atau command tools.
 
@@ -336,16 +410,16 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 9 — Findings, Options, Review, Debrief, dan Operability
 
-**Status:** `in_progress` (A09.1 platform9.4 done; A09.2 done; A09.3 done; B planned) · **Owner:** B untuk 9.1–9.3/9.5 dan analysis parts 9.4/9.6; A untuk platform parts 9.4/9.6 · **Dependency:** B memakai Phase 8; A memakai Phase 2–6 bagian A. Tidak ada dependency implementasi lintas pihak.
+**Status:** `in_progress` (A09.1 platform9.4 done; A09.2 done; A09.3 done; B05 local/MOCK accepted; external acceptance pending) · **Owner:** B untuk 9.1–9.3/9.5 dan analysis parts 9.4/9.6; A untuk platform parts 9.4/9.6 · **Dependency:** B memakai Phase 8; A memakai Phase 2–6 bagian A. Tidak ada dependency implementasi lintas pihak.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
-| 9.1 | Readback discrepancy, critical-slot uncertainty, open-loop dan movement conformance findings | Evidence-linked finding lifecycle | `planned` |
-| 9.2 | Gemini options/brief dengan preconditions, unknowns, applicability dan bounded evidence | Versioned advisory outputs | `planned` |
-| 9.3 | Human confirm/dismiss/unresolved/relevance, append-only review, invalidation dan reanalysis | Durable review/journal APIs | `planned` |
-| 9.4 | B: JSON/CSV/HTML rendering, evidence/versions, capability redaction dan injection escaping; A: artifact submission/storage/download/expiry, retention/purge/tombstones/audit queries; B mendaftarkan sensitive-data inventory/purge handler | Report renderer B dan artifact lifecycle A yang independently tested | A `done` ([A09.1 evidence](../docs/testing/a091-evidence.md)); B `planned` |
-| 9.5 | P1 contextual query dan communication metrics sesuai disposition | Scoped read-only query/metric APIs | `planned` |
-| 9.6 | A: health/ready/release, log/audit/usage/budget infrastructure, disk/backup/restore dan provider admin profiles; B: provider check handlers, sanitized diagnostics/usage/latency dan analysis readiness | Platform ops A dan provider diagnostics B | `in_progress` (A09.2 done; A09.3 done; B planned; [evidence](../docs/testing/a092-evidence.md)) |
+| 9.1 | Readback discrepancy, critical-slot uncertainty, open-loop dan movement conformance findings | Evidence-linked finding lifecycle | `in_progress`: B05 standalone MOCK accepted; external/domain acceptance open |
+| 9.2 | Gemini options/brief dengan preconditions, unknowns, applicability dan bounded evidence | Versioned advisory outputs | `in_progress`: B05 standalone MOCK accepted; external/domain acceptance open |
+| 9.3 | Human confirm/dismiss/unresolved/relevance, append-only review, invalidation dan reanalysis | Durable review/journal APIs | `in_progress`: B05 standalone MOCK accepted; external/domain acceptance open |
+| 9.4 | B: JSON/CSV/HTML rendering, evidence/versions, capability redaction dan injection escaping; A: artifact submission/storage/download/expiry, retention/purge/tombstones/audit queries; B mendaftarkan sensitive-data inventory/purge handler | Report renderer B dan artifact lifecycle A yang independently tested | A `done` ([A09.1 evidence](../docs/testing/a091-evidence.md)); B local/MOCK accepted; external/domain acceptance pending |
+| 9.5 | P1 contextual query dan communication metrics sesuai disposition | Scoped read-only query/metric APIs | `in_progress`: B05 standalone MOCK accepted; external/domain acceptance open |
+| 9.6 | A: health/ready/release, log/audit/usage/budget infrastructure, disk/backup/restore dan provider admin profiles; B: provider check handlers, sanitized diagnostics/usage/latency dan analysis readiness | Platform ops A dan provider diagnostics B | `in_progress` (A09.2 done; A09.3 done; B diagnostics local; provider acceptance pending; [evidence](../docs/testing/a092-evidence.md)) |
 
 **Scope:** backend menyediakan semua fungsi Sessions/Workspace/Review/Debrief/Settings yang dijanjikan. Opsi tidak dapat dieksekusi; nol opsi dengan `INSUFFICIENT_CONTEXT` valid. Factual brief/query items mempunyai evidence IDs; query tidak mengubah operational memory. Metrik komunikasi tidak menjadi diagnosis. Branch/what-if tetap workflow evaluator opsional, tidak ditambahkan sebagai tool AI atau fitur wajib tanpa disposition.
 
@@ -638,13 +712,10 @@ Perbarui `.agent/sessionHandoff.md` untuk pekerjaan lintas sesi yang substantif,
 
 ## 13. Next Recommended Action
 
-**Scope request A04.3→A06 selesai. A01–A06 done; A07–A10 planned; B belum dimulai. Tidak ada izin melanjutkan fase berikut pada request ini.**
-
-1. Gunakan [packet](../docs/development/backend-packets.md), [A06 workflow](../docs/development/durable-jobs.md), dan [A06 evidence](../docs/testing/a06-evidence.md).
-2. Jika diinstruksikan berikutnya, A07 replay/REST/WS adalah rekomendasi selanjutnya. B tetap independen dengan fake platform sampai integration Phase10.
-3. Jalankan shared contract suite sesuai track. Perubahan breaking mengikuti version policy; jangan mengimpor internals pihak lain.
-4. Tutup credential/model/API/budget readiness sebelum real STT/Gemini smoke. Baseline tidak melakukan provider calls dan tidak menghapus external blocker.
-5. Integrasi implementations A/B hanya Phase 10 setelah seluruh task/acceptance mandiri selesai; G-BE tetap `not_started`. Frontend/container/deployment menunggu gate masing-masing.
+**Current recommendation:** A01–A10 standalone done; lanjutkan external acceptance B03/B04/B05/B06 dan reconcile wiring A/B sebelum actual integrated Phase10. Real STT/Gemini smoke, audited semantic/domain benchmarks dan G-BE tetap terbuka.
+1. Jalankan shared contract suite sesuai track. Perubahan breaking mengikuti version policy; jangan mengimpor internals pihak lain.
+2. Tutup credential/model/API/budget readiness sebelum real STT/Gemini smoke. Baseline tidak melakukan provider calls dan tidak menghapus external blocker.
+3. Integrasi implementations A/B hanya Phase 10 setelah seluruh task/acceptance mandiri selesai; G-BE tetap `not_started`. Frontend/container/deployment menunggu gate masing-masing.
 
 ## 14. Phase 0–1 Completion Record — 8 Oktober 2026
 
@@ -655,10 +726,57 @@ Perbarui `.agent/sessionHandoff.md` untuk pekerjaan lintas sesi yang substantif,
 - Runtime: tests memakai temp SQLite; tidak ada server/worker/container persisten dimulai. Tidak ada cloud inference/provisioning/deployment.
 - Gate impact: baseline memungkinkan A/B mulai independen; tidak memberi G-BE passed.
 
-A09.3 local backup/restore/maintenance done: [workflow](../docs/development/recovery.md), [evidence](../docs/testing/a093-evidence.md). Next A10.1 only; B/Phase10 and release gates remain not_started/planned as applicable.
+A09.3 local backup/restore/maintenance done: [workflow](../docs/development/recovery.md), [evidence](../docs/testing/a093-evidence.md). A10 standalone done; B external acceptance dan Phase10 tetap terbuka; gates not_started.
 
 ## Acceptance mandiri Paket A — A10.1
 
-A10.1 done: [evidence](../docs/testing/a101-evidence.md), [measured baseline](../docs/testing/a101-benchmark.json). Real A API/SQLite + frozen fake B; 715 platform + separate full-size capacity PASS; contracts A/B66each. Input1f88f389; commit membawa evidence. A10.2 done: [verified manifest/handoff](../docs/development/package-a-handoff.md), [final audit](../docs/testing/a10-completion-audit.md); local commits dan final-source checks/measurements tersedia. Persistent goal complete hanya setelah actual post-commit Git audit. Next entry Phase10 setelah B candidate/smoke tersedia. Phase10 planned; G-BE not_started; B/provider/domain/operational validation belum terbukti.
+A10.1 done: [evidence](../docs/testing/a101-evidence.md), [measured baseline](../docs/testing/a101-benchmark.json). Real A API/SQLite + frozen fake B; 715 platform + separate full-size capacity PASS; contracts A/B66each. Input1f88f389; commit membawa evidence. A10.2 done: [verified manifest/handoff](../docs/development/package-a-handoff.md), [final audit](../docs/testing/a10-completion-audit.md); local commits dan final-source checks/measurements tersedia. Persistent goal complete hanya setelah actual post-commit Git audit. Next entry Phase10 setelah B candidate/smoke tersedia. Phase10 planned; G-BE not_started; B local/MOCK available, provider/domain/operational closure belum terbukti.
 
 A10.2 final candidate membawa manifest dan5route collision regression tests plus replay authority/materialization optimization.720platform + separate full-size benchmark1PASS; final p95list175.880/snapshot407.321/seek119.108ms, resync172.089ms pada declared profile. Parent shared phases/gates tidak dinaikkan selesai.
+
+## Historical B05 focus / Phase9 bagian B
+
+B05 `in_progress`: local findings/options/brief/query, append-only review/reanalysis/
+journal, private reports, measured metrics, sanitized diagnostics dan analysis-owned
+retention tersedia. Izin pengguna membolehkan engineering B05 sebelum acceptance
+B03/B04, tanpa mengubah rules.md atau acceptance/gates. Real authority/artifact/
+receipt/public projection composition tetap Phase10. B06 belum dimulai.
+Evidence lokal dan batas semantik: [B05](../docs/testing/b05-evidence.md).
+
+## External acceptance tetap pending — 9 Oktober 2026
+
+**B04_EXTERNAL_ACCEPTANCE_PENDING**
+- GEMINI_ACCOUNT_ACCESS_UNVERIFIED
+- REAL_GEMINI_SMOKE_PENDING
+- AUDITED_SEMANTIC_BENCHMARK_PENDING
+
+B04 / Phase8: `in_progress`; local engineering + standalone MOCK acceptance:
+passed. Real Gemini provider_calls: **0**. Real smoke: **NOT_RUN**.
+Audited semantic benchmark: **BLOCKED**; benchmark metrics: **null**.
+Integrated pipeline readiness: **false**.
+Existing **GEMINI_EXTERNAL_ACCEPTANCE_PENDING** tetap terlihat dan belum ditutup.
+
+**B03_EXTERNAL_ACCEPTANCE_PENDING**
+- STT_ACCOUNT_LOGIN_REQUIRED
+- AUDITED_BENCHMARK_PENDING
+
+B03 / Phase7: `in_progress`; local standalone acceptance dipertahankan.
+Real STT calls: **0**; real smoke **NOT_RUN**; audited benchmark **BLOCKED**,
+metrics **null**. Izin engineering lokal B05 mengubah sequencing saja.
+
+## B06 — acceptance lokal, 9 Oktober 2026
+
+Current focus B06 **in_progress**. Izin pengguna mencakup engineering/acceptance
+lokal sebelum external B03/B04 closure; catatan "B06 belum dimulai" pada rekam
+B05 di atas bersifat historis. `flowlens.testing.acceptance --suite` kini menyediakan
+actual B registration manifest, disposable combined UOW/restart/cancel/purge checks,
+9 standalone harnesses dan shared contracts A/B. Tidak memasang routes/job handlers
+atau mengubah perilaku B03–B05, Paket A, frozen1.0.0 atau locks.
+
+Baseline666 PASS; final676 B/contractsB PASS tanpa skip, contractsA66 PASS.
+Ruff110/scoped B mypy61/Linux-target85/schema/Bandit0/audit/build/diff PASS.
+Native Windows tetap7 POSIX errors Paket A. Evidence/commands/owner/limits:
+[B06](../docs/testing/b06-evidence.md). B06 belum done: real STT/Gemini0,
+smoke NOT_RUN, external benchmark BLOCKED/metrics=null, readiness=false.
+B03_EXTERNAL_ACCEPTANCE_PENDING, B04_EXTERNAL_ACCEPTANCE_PENDING dan
+GEMINI_EXTERNAL_ACCEPTANCE_PENDING dipertahankan; Phase10 dan parent gates terbuka.
