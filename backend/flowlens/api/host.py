@@ -167,6 +167,11 @@ def create_host(
                                 imports=app.state.imports,
                                 callbacks=callbacks,
                                 inventory_namespaces=tuple(namespaces),
+                                inventory_tables=tuple(
+                                    t
+                                    for module in registry.modules
+                                    for t in module.inventory_tables
+                                ),
                             )
                             app.state.retention.recover()
                         app.state.import_commits = ImportCommit(

@@ -260,7 +260,7 @@ Status selesai paket berarti seluruh task wajib milik pihak tersebut dan accepta
 
 ### Phase 4 — Replay Engine, Archive, API, dan WebSocket
 
-**Status:** `done` · **Owner:** pihak A · **Dependency:** Phase 3 (A); A07.1–A07.3/4.1–4.4 done ([snapshot evidence](../docs/testing/a071-evidence.md), [controls evidence](../docs/testing/a072-evidence.md), [transport evidence](../docs/testing/a073-evidence.md)); A08.1–A08.2 done; A08.3/5.3–5.4 done ([evidence](../docs/testing/a083-evidence.md)); A09.1 done; A09.2 done; A09.3 done; A10 standalone done; next explicit A/B composition setelah entry acceptance. Analysis snapshot/events memakai fake module sampai Phase 10.
+**Status:** `done` · **Owner:** pihak A · **Dependency:** Phase 3 (A); A07.1–A07.3/4.1–4.4 done ([snapshot evidence](../docs/testing/a071-evidence.md), [controls evidence](../docs/testing/a072-evidence.md), [transport evidence](../docs/testing/a073-evidence.md)); A08.1–A08.2 done; A08.3/5.3–5.4 done ([evidence](../docs/testing/a083-evidence.md)); A09.1 done; A09.2 done; A09.3 done; A10 standalone done; next explicit A/B composition setelah entry acceptance. Standalone evidence A memakai fake module; local Phase10 composition kini memasang reader B nyata pada host.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
@@ -427,16 +427,21 @@ diimplementasikan pada keputusan ini; status berubah in_progress saat pekerjaan 
 
 ### Phase 10 — Integrasi Akhir, Integrated Backend Verification dan Contract Freeze
 
-**Status:** `planned` · **Owner:** A/B bersama; A lead composition/platform checks, B lead analysis/provider benchmarks · **Dependency:** seluruh task dan acceptance mandiri paket A/B selesai pada frozen contract version yang compatible. Tidak ada integrasi kedua implementasi sebelum fase ini.
+**Status:** `in_progress` · **Owner:** A/B bersama; A lead composition/platform checks, B lead analysis/provider benchmarks · **Dependency:** seluruh task dan acceptance mandiri paket A/B selesai pada frozen contract version yang compatible. Local composition exception: Google/key dan G-BE ditunda secara eksplisit; local normalized API/SQLite/B engineering dapat dikerjakan tanpa menutup entry provider acceptance.
 
 | Subfase | Pekerjaan | Output | Status |
 | --- | --- | --- | --- |
-| 10.1 | Merge paket A/B; pasang module registration/routes/services/migrations/job handlers/snapshot/purge callbacks pada composition root; ganti fake adapters dengan implementations nyata, perbaiki incompatibility dan jalankan API/SQLite/worker/domain flows/failure injections | Backend nyata terintegrasi dan evidence gabungan | `planned` |
+| 10.1 | Merge paket A/B; pasang module registration/routes/services/migrations/job handlers/snapshot/purge callbacks pada composition root; ganti fake adapters dengan implementations nyata, perbaiki incompatibility dan jalankan API/SQLite/worker/domain flows/failure injections | Backend nyata terintegrasi dan evidence gabungan | `in_progress` (local normalized slice tersedia; raw provider/full workflow pending) |
 | 10.2 | Jalankan canonical synthetic scenarios, audio/association cases dan held-out benchmark | Cohort/versioned benchmark report | `planned` |
-| 10.3 | Auth/media/truth/tool negative tests, migration/recovery, performance/usage profiling | Security/durability/performance evidence | `planned` |
-| 10.4 | Freeze OpenAPI/generated client, publish run/env/error/integration guide dan gate record | Backend handoff dan G-BE decision | `planned` |
+| 10.3 | Auth/media/truth/tool negative tests, migration/recovery, performance/usage profiling | Security/durability/performance evidence | `in_progress` (local checks/recovery/purge; joint performance pending) |
+| 10.4 | Freeze OpenAPI/generated client, publish run/env/error/integration guide dan gate record | Backend handoff dan G-BE decision | `in_progress` (local manifest/run guide; client freeze/G-BE deferred) |
 
 **Entry acceptance integrasi akhir:** kedua paket menyerahkan seluruh task/acceptance mandiri, passing shared contract tests, fresh/upgrade repository checks, manifest/config/migration versions dan real-provider smoke B. Mocks tidak membuktikan compatibility runtime gabungan. Sediakan pekerjaan reconciliation/fix/retest dalam Phase 10; merge yang berhasil belum berarti G-BE passed.
+
+Local evidence: [integration guide](../docs/development/backend-integration.md),
+[manifest](../docs/development/backend-integration.json),
+[performed checks](../docs/testing/integration-local-evidence.md). Frozen1.0.0
+unchanged. Local completion tidak mengubah checklist G-BE di bawah.
 
 **G-BE acceptance wajib:**
 
@@ -712,7 +717,7 @@ Perbarui `.agent/sessionHandoff.md` untuk pekerjaan lintas sesi yang substantif,
 
 ## 13. Next Recommended Action
 
-**Current recommendation:** A01–A10 standalone done; lanjutkan external acceptance B03/B04/B05/B06 dan reconcile wiring A/B sebelum actual integrated Phase10. Real STT/Gemini smoke, audited semantic/domain benchmarks dan G-BE tetap terbuka.
+**Current recommendation:** A01–A10 standalone done; local normalized A/B composition tersedia pada feat/backend. Lanjutkan provider/raw/full-workflow acceptance dan joint scenario/quality/capacity/client freeze sebelum menutup Phase10. Real STT/Gemini smoke, audited semantic/domain benchmarks dan G-BE tetap terbuka.
 1. Jalankan shared contract suite sesuai track. Perubahan breaking mengikuti version policy; jangan mengimpor internals pihak lain.
 2. Tutup credential/model/API/budget readiness sebelum real STT/Gemini smoke. Baseline tidak melakukan provider calls dan tidak menghapus external blocker.
 3. Integrasi implementations A/B hanya Phase 10 setelah seluruh task/acceptance mandiri selesai; G-BE tetap `not_started`. Frontend/container/deployment menunggu gate masing-masing.

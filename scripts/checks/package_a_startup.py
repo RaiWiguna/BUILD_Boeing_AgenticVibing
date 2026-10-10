@@ -1,5 +1,6 @@
 """Exercise the documented A launcher on disposable private roots/native loopback."""
 
+import argparse
 import json
 import os
 import socket
@@ -13,6 +14,9 @@ from pathlib import Path
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--expected-ready", type=int, choices=(200, 503), default=503)
+    expected_ready = parser.parse_args().expected_ready
     with tempfile.TemporaryDirectory(prefix="flowlens-startup-") as directory:
         root = Path(directory).resolve()
         with socket.socket() as listener:
@@ -57,20 +61,21 @@ def main():
                 with urllib.request.urlopen(url + "/openapi.json", timeout=2) as response:
                     schema = json.load(response)
                     assert "/api/v1/sessions" in schema["paths"]
-                for path, status in [("/ready", 503), ("/api/v1/sessions", 401)]:
+                for path, status in [("/ready", expected_ready), ("/api/v1/sessions", 401)]:
                     try:
-                        urllib.request.urlopen(url + path, timeout=2)
+                        response = urllib.request.urlopen(url + path, timeout=2)
                     except urllib.error.HTTPError as error:
                         assert error.code == status
                     else:
-                        raise AssertionError("Unexpected readiness/auth result")
+                        assert response.status == status
+                        response.close()
                 print(
                     json.dumps(
                         {
                             "health": 200,
                             "release": 200,
                             "openapi": 200,
-                            "ready": 503,
+                            "ready": expected_ready,
                             "unauthenticated_catalogue": 401,
                             "profile": "development",
                             "provider_verified": False,

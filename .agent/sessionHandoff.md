@@ -1,5 +1,38 @@
 # Session Handoff — ATC FlowLens
 
+## Current — local A/B composition, 10 Oktober 2026
+
+Branch `feat/backend`; input3917b1614be90e990419ab85edbef1d74e6bc155 (merged PR5).
+Candidate ialah commit pembawa docs/development/backend-integration.json.
+Google/Gemini credential dan real-provider execution ditunda; G-BE not_started.
+Local normalized composition tersedia: host/UOW B factories, 23migrations,
+server-bound DEBRIEF policies, actual B audio worker HTTP/FFmpeg, frozen projection
+plus sealed intent codec, B memory/findings/brief snapshot, human review/export,
+exact B sensitive table purge serta B-aware maintenance/backup/restore.
+
+[Run/limitations](../docs/development/backend-integration.md),
+[manifest](../docs/development/backend-integration.json),
+[evidence](../docs/testing/integration-local-evidence.md), ADR0007.
+Local acceptance memakai actual API/SQLite/B logic dengan synthetic/MOCK normalized
+inputs. Raw SDK/correction transport, query/option/source-signal/speaker adapters
+belum diekspos oleh slice ini. Jangan menyebut key saja menutup provider pipeline,
+full Phase10 atau G-BE. Historical A10 capacity bukan measurement joint candidate.
+Production tetap blocked; local readiness200 bukan gate. Provider/domain/operational
+validation belum ada. Tidak ada frontend/container/deployment. Runtime test privat
+bersifat disposable; tidak ada server/worker yang sengaja ditinggalkan berjalan.
+
+Final performed checks:729 platform PASS/1capacity skip,654 analysis PASS,
+83 final affected PASS,66contracts/track, Ruff219/mypy148/schema/manifest/build/
+installed/native API+worker PASS;483tracked/36staged signature scans0findings.
+Local ready200 remains LOCAL_PLATFORM/provider false, not G-BE acceptance.
+
+Next: approved provider profile/transport lalu complete full workflow/scenario/
+quality/capacity/client-freeze dalam pekerjaan G-BE terpisah. Google/key/G-BE
+explicitly deferred; local commit tanpa push branch target pada sesi ini.
+
+## Historical reconciliation handoff
+
+
 ## Current — conflict reconciliation A/B, 10 Oktober 2026
 
 Branch feat/backend-aben. A input0be155589f2362b354fe8463a041f43b67cc6267;

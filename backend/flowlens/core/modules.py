@@ -36,6 +36,7 @@ class ModuleRegistration:
     readiness: Callable[[], bool] | None = None
     config_keys: tuple[str, ...] = ()
     inventory_namespaces: tuple[str, ...] = ()
+    inventory_tables: tuple[str, ...] = ()
 
 
 def order_migrations(migrations: list[MigrationSpec]) -> list[MigrationSpec]:

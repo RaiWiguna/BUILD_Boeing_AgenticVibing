@@ -33,6 +33,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Bootstrap one individual administrator")
     parser.add_argument("--database", type=Path, required=True)
     parser.add_argument("--login", required=True)
+    parser.add_argument(
+        "--integrated", action="store_true", help="Use the joint A/B migration catalog"
+    )
     parser.add_argument("--password-file", type=Path)
     args = parser.parse_args()
     try:
@@ -44,7 +47,12 @@ def main() -> None:
             secret = SecretStr(getpass.getpass("Admin password: "))
             if secret.get_secret_value() != getpass.getpass("Repeat password: "):
                 raise ValueError("Passwords differ.")
-        with Database(args.database) as database:
+        from flowlens.integration.catalog import JOINT_MIGRATIONS
+        from flowlens.storage.sqlite.schema import PLATFORM_MIGRATIONS
+
+        with Database(
+            args.database, migrations=JOINT_MIGRATIONS if args.integrated else PLATFORM_MIGRATIONS
+        ) as database:
             admin = Accounts(database).bootstrap(args.login, secret)
     except Exception:
         raise SystemExit(

@@ -15,6 +15,7 @@ from flowlens.core.errors import ContractError
 from flowlens.imports.inspection import InvalidContent, inspect_audio, strict_json
 from flowlens.imports.metadata import PreparedImport
 from flowlens.imports.staging import FilePreview, ImportFailure
+from flowlens.sources.metadata import Action
 from flowlens.sources.policy import policy
 from flowlens.sources.store import Sources
 from flowlens.storage.sqlite.database import UnitOfWork
@@ -44,12 +45,17 @@ class Assets:
         ).fetchone()
         if row is None:
             raise ContractError("EVIDENCE_UNAVAILABLE")
-        self.sources.require_right(
-            uow,
-            context,
-            UUID(row["source_id"]),
-            "cloud_audio" if "worker" in context.capabilities else "local",
-        )
+        action: Action = "cloud_audio" if "worker" in context.capabilities else "local"
+        if "worker" in context.capabilities:
+            bound = uow.connection.execute(
+                "SELECT j.stage FROM platform_context_receipts c "
+                "JOIN platform_attempt_state a ON a.scope_id=c.scope_id "
+                "JOIN platform_job_state j ON j.id=a.job_id WHERE c.digest=?",
+                (context_digest(context),),
+            ).fetchone()
+            if bound is not None and bound[0] == "AUDIO":
+                action = "local"
+        self.sources.require_right(uow, context, UUID(row["source_id"]), action)
         prepared = PreparedImport.model_validate_json(row["payload"])
         file = next((f for f in prepared.files if f.id == asset_id and f.role == "audio"), None)
         if file is None or file.sha256 != asset.sha256:
@@ -96,6 +102,8 @@ class Assets:
         ) != (context.session_id, context.analysis_run_id, context.input_revision):
             raise ContractError("ACCESS_DENIED")
         if artifact.kind != "AUDIO_DERIVATIVE":
+            if artifact.transform_version == "audio-worker-provenance-1":
+                return self._audio_provenance_authority(uow, context, artifact)
             return self._report_authority(uow, context, artifact)
         if (
             artifact.kind != "AUDIO_DERIVATIVE"
@@ -103,7 +111,7 @@ class Assets:
             or artifact.source_asset_id is None
             or artifact.source_range is None
             or artifact.derivative_range is None
-            or artifact.transform_version not in ("resample-1", "chunk-1")
+            or artifact.transform_version not in ("resample-1", "chunk-1", "pcm16-channel-chunks-1")
         ):
             raise ContractError("INVALID_INPUT")
         parent = self.locate(uow, context, artifact.source_asset_id)
@@ -116,6 +124,33 @@ class Assets:
             "SELECT scope_id FROM platform_context_receipts WHERE digest=?",
             (context_digest(context),),
         ).fetchone()
+        return UUID(proof[0])
+
+    def _audio_provenance_authority(
+        self, uow: UnitOfWork, ctx: RequestContext, spec: ArtifactSubmission
+    ) -> UUID:
+        self.sources.permissions.enforce(uow, ctx)
+        if (
+            spec.kind != "JSON_REPORT"
+            or spec.required_capability != "audio"
+            or spec.source_asset_id is None
+            or spec.source_range is not None
+            or spec.derivative_range is not None
+            or not 0 < spec.size_bytes <= 2 * 1024**2
+        ):
+            raise ContractError("INVALID_INPUT")
+        self.locate(uow, ctx, spec.source_asset_id)
+        proof = uow.connection.execute(
+            "SELECT scope_id FROM platform_context_receipts WHERE digest=?", (context_digest(ctx),)
+        ).fetchone()
+        row = uow.connection.execute(
+            "SELECT j.stage FROM platform_attempt_state a "
+            "JOIN platform_job_state j ON j.id=a.job_id "
+            "WHERE a.scope_id=? AND a.state='ACTIVE'",
+            (proof[0],),
+        ).fetchone()
+        if row is None or row[0] != "AUDIO":
+            raise ContractError("ACCESS_DENIED")
         return UUID(proof[0])
 
     def submit(
@@ -187,7 +222,11 @@ class Assets:
                 if artifact.source_asset_id is None:
                     raise ContractError("INVALID_INPUT")
                 parent = self.locate(uow, context, artifact.source_asset_id)
-                if facts.channels != parent.asset.channels:
+                if facts.channels != (
+                    1
+                    if artifact.transform_version == "pcm16-channel-chunks-1"
+                    else parent.asset.channels
+                ):
                     raise ContractError("INVALID_INPUT")
                 source = uow.connection.execute(
                     "SELECT source_id FROM platform_assets WHERE session_id=? AND id=?",

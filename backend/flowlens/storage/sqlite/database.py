@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from threading import RLock
-from typing import Self
+from typing import Protocol, Self, cast
 from uuid import UUID
 
 from flowlens.contracts.models import Contract, RequestContext
@@ -21,6 +21,11 @@ from flowlens.storage.sqlite.repository import KINDS, PlatformRepository, requir
 from flowlens.storage.sqlite.schema import PLATFORM_MIGRATIONS
 
 RepositoryFactory = Callable[[sqlite3.Connection, Callable[[], None]], Repository]
+
+
+class ScopedInventory(Protocol):
+    def inventory(self, context: RequestContext) -> Sequence[Contract]: ...
+    def purge(self, context: RequestContext) -> None: ...
 
 
 class AuthorizedRepository:
@@ -35,6 +40,14 @@ class AuthorizedRepository:
     def get(self, context: RequestContext, record_id: UUID) -> Contract:
         self.guard(context)
         return self.delegate.get(context, record_id)
+
+    def inventory(self, context: RequestContext) -> Sequence[Contract]:
+        self.guard(context)
+        return cast(ScopedInventory, self.delegate).inventory(context)
+
+    def purge(self, context: RequestContext) -> None:
+        self.guard(context)
+        cast(ScopedInventory, self.delegate).purge(context)
 
 
 class UnitOfWork:
@@ -261,6 +274,7 @@ class Database:
         self.active = False
         self.context_guard: Callable[[UnitOfWork, RequestContext], None] | None = None
         self.repositories = dict(repositories or {})
+        self.specs = tuple(migrations)
         if any(
             namespace in KINDS or not (namespace == "analysis" or namespace.startswith("analysis."))
             for namespace in self.repositories

@@ -44,12 +44,18 @@ class Retention:
         imports: Imports | None = None,
         callbacks: Mapping[str, Callable[[RequestContext, UnitOfWork], None]] | None = None,
         inventory_namespaces: tuple[str, ...] = (),
+        inventory_tables: tuple[str, ...] = (),
     ) -> None:
         self.permissions, self.assets, self.journal = permissions, assets, journal
         self.database = permissions.database
         self.imports = imports
         self.callbacks = callbacks or {}
         self.namespaces = inventory_namespaces
+        self.tables = inventory_tables
+        if len(set(self.tables)) != len(self.tables) or any(
+            not re.fullmatch(r"analysis_[a-z0-9_]+", t) for t in self.tables
+        ):
+            raise ValueError("Code-owned analysis table inventory required")
         if (
             len(set(self.namespaces)) != len(self.namespaces)
             or any(not re.fullmatch(r"analysis(?:\.[a-z0-9_]+)*", n) for n in self.namespaces)
@@ -178,7 +184,7 @@ class Retention:
             "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
         ):
             name = row[0]
-            if not re.fullmatch(r"platform_[a-z0-9_]+", name):
+            if not re.fullmatch(r"platform_[a-z0-9_]+", name) and name not in self.tables:
                 # Frozen inventory namespaces describe repository records, not arbitrary SQL tables.
                 # Fail closed until a module supplies an explicit supported inventory adapter.
                 raise ContractError("NOT_EVALUABLE")

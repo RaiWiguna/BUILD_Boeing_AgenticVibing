@@ -1,0 +1,464 @@
+{
+  "input_sha": "3917b1614be90e990419ab85edbef1d74e6bc155",
+  "candidate": "git log -1 --format=%H -- docs/development/backend-integration.json",
+  "contract_version": "1.0.0",
+  "composition": "LOCAL_A_B_NORMALIZED_PIPELINE",
+  "providers": "NOT_CONFIGURED",
+  "provider_calls": 0,
+  "G_BE": "not_started",
+  "domain": "NOT_DOMAIN_VALIDATED",
+  "sources": {
+    "backend/flowlens/__init__.py": "8efbeb5a798423b3fcfef9ac53bf1e2595dcecedf5dca695512e1fda8f7da576",
+    "backend/flowlens/advisory/__init__.py": "f6479ae9d951cfba8cab24387828301249b1fdc0dda7cac0767450da48f969b3",
+    "backend/flowlens/advisory/diagnostics.py": "067f81bc78adec7b62ad1c0fcdb0c4b1d9a1c02f1d1bd745a9622f863e390fcc",
+    "backend/flowlens/advisory/exports.py": "aac411de20b9d241233a5eca92850ee04d202d61be1a09231428455609f52613",
+    "backend/flowlens/advisory/findings.py": "9fdc0724ac28db5309f13df8bbc5d59017db4a6839397d1bafeebd80d7cd2253",
+    "backend/flowlens/advisory/models.py": "ab744f2d16717ada238e131dd15a6d9fca1626c4b16eeeb6daa7012be0d12045",
+    "backend/flowlens/advisory/provider.py": "a1ae3bdbecbc88eac3cdb94da4e114223ff0b7861e7f933029ea0c61bc882b4c",
+    "backend/flowlens/advisory/retention.py": "3859705a18f932aa59500748504366a8bfd398ba648dbede8f19a63302ec7ea3",
+    "backend/flowlens/advisory/service.py": "1e32df50dd29eb20d7714ed1cac17d75b1d81a2fe286a0d12a5bed7e6e8e1af2",
+    "backend/flowlens/advisory/store.py": "3e1fa484a67451edceb82b8e8bb9062d743c277504e2656a66d23c49e42a5cbd",
+    "backend/flowlens/analysis/__init__.py": "b6824dd01343a88078ed963ecd7aa13346fad85dc3d865b7da4da5f49bebe811",
+    "backend/flowlens/analysis/config.py": "eb6995ff04085a8f2d3b6d57c006ec2949da44133d1ea88b40e51ec6b80f4828",
+    "backend/flowlens/analysis/module.py": "d72748be4e956957630c6c0f93df2a5ae30acf1d4f007252631e308d276d9df0",
+    "backend/flowlens/analysis/repository.py": "fd11f1563d959eca5396b37e4adaa6af6c2da9eb6d2466e04c82e30d290636ba",
+    "backend/flowlens/analysis/schema.py": "0970a63f2211ebb77d7b3511ef5dcad190836b7efd41f1afad6560351f04f42c",
+    "backend/flowlens/analysis/transcript_projection.py": "dd2354a6d00226eecdabfbea5a81a3c19c61fca07a4d5fde80263c4c5b8fd7df",
+    "backend/flowlens/analysis/transcript_records.py": "7c308464aedfab99707add9bf212d8aef3471672367a2b28784987963d0bae1f",
+    "backend/flowlens/analysis/transcript_store.py": "f547fad6caae280be1ad104c6a6e4e41f480c0995b14cedc10aa5ff17ccdc301",
+    "backend/flowlens/analysis/transcripts.py": "1c602f51a22b9349d0634afd2757c2f706d120230f4a6ffe4e2e4b1e29629407",
+    "backend/flowlens/api/app.py": "16c1867ff5feb17fc4c69bf720a607fba2a28a1cd52fb3d74587607194619a27",
+    "backend/flowlens/api/host.py": "5ace61ab7db0115977a1386246f8ba1e6ca311b233373a5ceb121123cc8ae6f8",
+    "backend/flowlens/api/serializers.py": "f03411754f23df92d81c989dfec34237c7ea39b58545b52fd29e69e3c090cb5d",
+    "backend/flowlens/api/serve.py": "ce1ea1b61b99d21e09473e34e1c816b66e9d896cb05c0c9a06a78b6910d4aa20",
+    "backend/flowlens/artifacts/__init__.py": "ccbe9c03fd7d84ca1f5da2d75a079dbde3722414b30e47e48552c42649cc900d",
+    "backend/flowlens/artifacts/lifecycle.py": "53c4c784b624202a799121fd2a66a6622ab99b74ba1e6ac499f62cc12b9f4d0a",
+    "backend/flowlens/artifacts/profiles.py": "777a938604c029fd9c624732d4138f8d3ee8b5e046a6f0c6b9ee3592e2021606",
+    "backend/flowlens/artifacts/routes.py": "95b3679e365248d6d4d468fa342da969c4a916b8085044152ec5a1fc02803b67",
+    "backend/flowlens/assets/access.py": "6312ecc8de6235922048fb4796e2c84a260f9296b225d246a994280121a72a6a",
+    "backend/flowlens/assets/routes.py": "91047635a486b60dcfc1e30a24da7eb24860c1d17f831d4d55afd24cec3061c4",
+    "backend/flowlens/assets/storage.py": "6ce4b8f05b1b1ac5c2c5dc0f14629d01ab407678a0f57e0bdf4319da9df6894f",
+    "backend/flowlens/association/__init__.py": "8576857d1e2645842ad67d29d205b9622f27a9b583ea3c66f461d95071bc6402",
+    "backend/flowlens/audio/__init__.py": "503ae75d38be47dd3f4b0cfe4461c61ac6837481c1aaf3a80e0e007047c7c64f",
+    "backend/flowlens/audio/models.py": "2ee838b94c5de28dce2f232eda3a280684230dc795b65bf0b55078a1deafc12c",
+    "backend/flowlens/audio/planning.py": "349d4d69b845154456bce35c057e5d91a627eadc35f852fe3ca8fe7d4bea8c6b",
+    "backend/flowlens/audio/preparation.py": "dce988961657c8f6502bc48301d57a9d382f23792a71205b8793c41491ebc0de",
+    "backend/flowlens/audio/process.py": "09724058c1ff635766b75e49c9e1a656c1677dfa73b8446ec2bf7b9ec51a3c9b",
+    "backend/flowlens/audio/tools.py": "f6ec0396bdb5ae239b40081521c61eed785577c4fb807d3768183ecb4b531611",
+    "backend/flowlens/auth/accounts.py": "9627802af35217db58c92ba3c3818aedab5ba08939ba0dbaaec9abe429aa6b29",
+    "backend/flowlens/auth/permissions.py": "f7df35aa3b38c5934e7517c5389d8e0d688af66bd7b662f781a0909164bebb6d",
+    "backend/flowlens/auth/routes.py": "b871d45c552ffcdb95ef7b6ab531cb71dd60bdf208436797cb18e556bd38dbdb",
+    "backend/flowlens/auth/sessions.py": "f57a96b03d691566ca2eab6186c4adea03fa6003c9edf2205d9a34ba28c149ee",
+    "backend/flowlens/auth/transport.py": "5f55aeda77ccdfe0a34a2bb33d6961d84b57d2919b93c31bb501ef74372924ec",
+    "backend/flowlens/bindings/__init__.py": "e2d9ee327877e20a67a87b7b9ee32b61d6406ab6ca932857f0c68f1b8c3ed5b6",
+    "backend/flowlens/bindings/intent_memory.py": "dc7afd99ec4ce21964251e3a44c9c96076fb1c275aae2087eddba732bc608970",
+    "backend/flowlens/bindings/stt.py": "a51b01b0dc1e75f5dc15b60cfe61ba374d04cb74acfc71da76187c087bf567f0",
+    "backend/flowlens/cli/bootstrap_admin.py": "4396eb8b70cf3080864d2ef6cd59d469ec9c14972270d67cace9f6b76d9b7ef2",
+    "backend/flowlens/cli/maintenance.py": "1a11d65dd0ec35eede8b21affbe7841ebc880f89df457057234462e22770864b",
+    "backend/flowlens/cli/migrate_archive.py": "55784b0e5f46d00ce3164b252f8320986433ead31f58bce51c28d4163ed3b20b",
+    "backend/flowlens/clocks/normalization.py": "2caf176ba69e8f170ba16bbad0d9d6256400cef1fdafd96a46b86950b40ee094",
+    "backend/flowlens/contracts/generate.py": "99b61913dc1cb23d1b773428294c5816297412ba53cac65d3768f79e0acf5df2",
+    "backend/flowlens/contracts/models.py": "aa034b0d72afc148f0a1456fa87a7c9a394c06d3c00c70f8c06f3fe68ab7ed5c",
+    "backend/flowlens/contracts/ports.py": "932c973b336a8ac8fcb0b696465733ad2846ec23299710eaaf6f53cb5896a229",
+    "backend/flowlens/contracts/results.py": "71d2d04343e1273a5bca80665e168fdf704551e4aec8dd69cb9c5c0adb4bf388",
+    "backend/flowlens/core/config.py": "29c1a0d0a79ec43bbf4cf147a105207263e28a99dad4015ba0eb4e1e91cae58c",
+    "backend/flowlens/core/errors.py": "46ec8075e87286e50d10da1b246ceac23b0d7be05e0480e734076c9496fa4238",
+    "backend/flowlens/core/host_config.py": "4981afb7364277e8c527e131c0c8e2e3d9e24b134f80eb6d2da59bee493fcab8",
+    "backend/flowlens/core/modules.py": "6da365caabaca4f98be6bd100fcfe84781ffeeb8763d89ed4c544aebefcea76f",
+    "backend/flowlens/evidence/registry.py": "b59a70d7753737e0149a3fe4ee47234a1ddc439221135fd954f694598bcbfdc3",
+    "backend/flowlens/geometry/alerts.py": "ca6fc21e2153069c6246b9dae3afa313281284c0739748d15f8b3badafa5a265",
+    "backend/flowlens/geometry/indicators.py": "fd6dfd0e5feccce5e48e7035c70a6da535c5b2ab92ffc66eb920e28fe5e40538",
+    "backend/flowlens/geometry/kernel.py": "a0e043c518e47cc0159f4393baf578831ebc06987f994918fd8750d2d213309a",
+    "backend/flowlens/geometry/occupancy.py": "c1c17461466dd542bec06cb893fad281bba573d3cd53eb552848855e3846d9f8",
+    "backend/flowlens/geometry/route_rules.py": "3184f6d5048d96be2611b876ad56e6fa971e73104d89c0ebdc007d623c6e6908",
+    "backend/flowlens/geometry/routes.py": "217567c265ae72e1b9081041abc1a8aa182b05a26b83ca5d1607afca8ea8530a",
+    "backend/flowlens/geometry/rules.py": "e4f184db76ef10e11bd072ef5d8247c200cf694861e8b30daa6198969c072de7",
+    "backend/flowlens/geometry/service.py": "307b348f5ae755479b9ce32fa20c55f38be1a7efe4c1ba01a314b935db0d1545",
+    "backend/flowlens/imports/commit.py": "7a00b9c875499c9535fb6c1f5a7c8a6328612753dcd0974766754804e82858df",
+    "backend/flowlens/imports/inspection.py": "dbcacc9c4eb53800b5000fe197c4ef20b3e0d3ee894d8a163764534bd9fec996",
+    "backend/flowlens/imports/metadata.py": "caa484e57313b57579e1b1b90bea87e770e914db8fc0ee1cce4174543fe6b662",
+    "backend/flowlens/imports/normalization.py": "ae41fb9c564800a52f1703a296444d9c4c7bdf9b33bdbabac4f09b02d1fc691e",
+    "backend/flowlens/imports/routes.py": "6290dd1e8769d7647f2211a7e714303999cfc4242d563aa9edfd8a72d9d205fd",
+    "backend/flowlens/imports/staging.py": "ef6e2bc9dbda2ed48e88a4c3bec8b3c1207a88223ea6d3bcc9d292994beefc7b",
+    "backend/flowlens/integration/__init__.py": "9903e67e7197e31dca2bd2754a9a0f6014b66faa937a99310f93d938a8495ab5",
+    "backend/flowlens/integration/advisory.py": "ee1111f9a731c51242b4ca3fb06cbe02b6343a0f1d191b9c06064c8205610474",
+    "backend/flowlens/integration/audio.py": "b68da5ad629547fd30d631368e1e70c7658bf23a0f444514bca148ff8ad366c0",
+    "backend/flowlens/integration/catalog.py": "0f3e15eb316d407fe2fe54b005b8c57a091cd316e50159e4f9125815df55f017",
+    "backend/flowlens/integration/engine.py": "b424801141ceed10fc2337fae3c1ea45358dc2e5d9fac88269674674543436fc",
+    "backend/flowlens/integration/store.py": "8f23daedf33d2a75dcf50890be12516edc600ae2db5b76ec8b2988d601fae6b7",
+    "backend/flowlens/intent/__init__.py": "e52272271a82630f0a28bff1c0ed666b77eebf02c04b3cb8dfa304f9a76f0528",
+    "backend/flowlens/intent/models.py": "0893187c1dbc95a69da17dc62b7088c4d057ad757ea331de8fcaf057201558f1",
+    "backend/flowlens/intent/validation.py": "dbda1ec1781ab14d63216543ba97cfbba917bf47f326a1c239cb162dc797f23d",
+    "backend/flowlens/jobs/coordinator.py": "64c49b300e58df3a6a2371ae845652993a48f209d3b45b028b0eb5ee19012f8d",
+    "backend/flowlens/jobs/routes.py": "94468847e6422f0a91c0ac4bc809279f84d73b44e0723c653df1ec9c92186085",
+    "backend/flowlens/loops/__init__.py": "aa1f1e9a5c13e792ee84b0c7578b6d9975d5757d9e0e098cbe7bd1a8a5d853a0",
+    "backend/flowlens/memory/__init__.py": "38630267fb26fd6feaf6022cd78d678e7adba7349b9e2fb3868c1f58398a9e6d",
+    "backend/flowlens/memory/models.py": "f0217f488a33392d57952f78db0cec3b0a6aefcc71290baf3a637268fcf6d76b",
+    "backend/flowlens/memory/reducer.py": "1beb0a3b1774deb363734c4927772315c01aa63df8afee4e1b0e31d52c032268",
+    "backend/flowlens/memory/service.py": "90c26aa8edf7ca8a214af420b4366c38a7100c578c555825a589fc35993e8b86",
+    "backend/flowlens/memory/store.py": "eca1fd534352e8f13d81f3e7a260bbe83e37528c10bce4369f33b0516f29a649",
+    "backend/flowlens/ops/__init__.py": "fac33c1e37c043f83aa03bf0a246c353ce1d4255ceec3c665f435b623715e139",
+    "backend/flowlens/ops/health.py": "cf70355e51660fa555750c482fcf2aa914c4040d4724c036fcd0eacb9dfb04ff",
+    "backend/flowlens/ops/logs.py": "3db493d757b86eea35b18f95864f1307479f51174db392e0a45616a676b06ecb",
+    "backend/flowlens/ops/providers.py": "2b3afd1f2552944f230699e1928e1d7a5dff9eba8d9d10c07ad251b69141e70c",
+    "backend/flowlens/ops/routes.py": "7ffd580f0a51babb4e9eeb075bd4cab0ca5fab2242a9f49baa8f472dbb23fd51",
+    "backend/flowlens/ops/usage.py": "060be9d0f93099d4f0a55ede401a92f38ab547daddbe0b7414ce6714c2ae7b9e",
+    "backend/flowlens/providers/gemini/__init__.py": "dc4b9a3d6245a54547214ea68b4a81551a3133100518899b4c10c69753258a3d",
+    "backend/flowlens/providers/gemini/adapter.py": "b51dd2bd6118a5e0ec5cced5787a2e7de2cbc1178469e8ed8f0ef6bf7a7cbde5",
+    "backend/flowlens/providers/gemini/models.py": "d0eb6a9a1759d5804d385c0cb6ca94a55d689a162f4198a25f4680a59cde8644",
+    "backend/flowlens/providers/gemini/smoke.py": "f40d7ed53ca0b6c2a8196410e60c64cc4c0f97950f27e69bb6239a7f79af3fd1",
+    "backend/flowlens/providers/gemini/tools.py": "5724e20ef618bc606a1c1a78c416ecc7b3a118208bbef2eead6ca833a2c8f5cb",
+    "backend/flowlens/providers/gemini/transport.py": "31b4ac57d7cc1c3c699be48f3edcc75eaf05e966df236340826091359aeebe4b",
+    "backend/flowlens/providers/stt/__init__.py": "5b6060c1223dd75c217bdd82d4fa0aaeb82e085043f4b8cee48f9df4eab3aa4e",
+    "backend/flowlens/providers/stt/adapter.py": "c30d4a4363b27ef1ea1ec08213b28fb08d86f251d4230b2de2c8b679bc2610ca",
+    "backend/flowlens/providers/stt/execution.py": "b1ff8fa8949692531eb6f3d63262bdb592f0b6734385d41abaaac1f13c67c938",
+    "backend/flowlens/providers/stt/models.py": "77a52314f7fc417329aa429c57524c48690f05e785ae55c2fe9532b45b246eb0",
+    "backend/flowlens/providers/stt/provenance.py": "0e1cbd250d2a54e2d903c5f07a824493c722648d69e0cd20850bb199674c5c2e",
+    "backend/flowlens/providers/stt/smoke.py": "a0909fcb67ca53b1b427f3d14457adbe9125c781baa6972c79c55a7d73101284",
+    "backend/flowlens/recovery/__init__.py": "a97ad5d90a186c6055914e9f3f4b040cc5da97da89b64f9670dadcb3853d73df",
+    "backend/flowlens/recovery/candidates.py": "80f1805439695c4178f1b2a8b3621221b7b949b8330029ba4d2e8a89a1c6e89f",
+    "backend/flowlens/recovery/catalog.py": "1c0789018d4599df4bb9d86349201b39a34e65cc5b7076d4d40b21d73ae6bd03",
+    "backend/flowlens/recovery/maintenance.py": "21ba6ca6ff15aa08c1d56390f0c5bf7a46a3d8d23e6af1b85b95c105a85df53c",
+    "backend/flowlens/recovery/snapshots.py": "f0feb7aad651e99cf42cfeb0af68c446a8ff96757667aa2047483e2b77bb6f1e",
+    "backend/flowlens/replay/compatibility.py": "3509971fb740b0bd5721e1e0b367270533fe1234c7ccaac5561832ea84a0b8c4",
+    "backend/flowlens/replay/controls.py": "7f66294b35a489a93ce7f789bd1cea33b18516b0b68ad90b1a80a438dbb1bf7a",
+    "backend/flowlens/replay/routes.py": "19295c01facabe99d2c1f44ae2de8c16e5a1b1a4d43ab991b138579a84e32252",
+    "backend/flowlens/replay/snapshots.py": "39a0d447af8e26553641493a804fc878853ffe3ae1cb9e4aff63a8d024462772",
+    "backend/flowlens/replay/streams.py": "dead272dc9dbf652e00fbd8f5e1a1fc3eecc940bdd58faf5f1fdec249d33220b",
+    "backend/flowlens/replay/views.py": "f463f47a9e532a5a9f483c8e5009e89055f2a77cc5e3d7ef284592134739255a",
+    "backend/flowlens/retention/__init__.py": "07596ed014fe4e8001fecb5a143ab24bd98ae2091315333bb5c9e6bdcf3170a2",
+    "backend/flowlens/retention/coordinator.py": "cfa6ad2beaed9fcf7506eec074a6eb6fca795dfb758469c57b127c87e7f5d002",
+    "backend/flowlens/retention/journal.py": "4846785dd6d6b20f4fcae90d4a39cdd2eaae8c9dbe3ebb38b1b006779af32681",
+    "backend/flowlens/retention/routes.py": "4815e81b6a207c764facb25d2951feeb599b7efe71ffd881c3a7eb697454e895",
+    "backend/flowlens/sources/metadata.py": "4c64523aaf578802efa67acf598942fa3e2172526460a7b324cd020bd6f85a6d",
+    "backend/flowlens/sources/policy.py": "d2090dfb82a5b0f73bd03f31687e1850b2307919ad3f1012ddae3a9c7eb25cc1",
+    "backend/flowlens/sources/store.py": "7b0029a687e4169a42add99cabea5e94d8c763c8533e41b66437ed610e8dad28",
+    "backend/flowlens/storage/sqlite/database.py": "80d8070c3d05d1e4ac77c0d157177f52a825f15e5ca8db5d8e64fc2f83a98986",
+    "backend/flowlens/storage/sqlite/legacy.py": "69b5b17cdddad0c22484cd7477b642beaa0be18a367e34a772530ae4b52a4827",
+    "backend/flowlens/storage/sqlite/migrate.py": "44acc1b64ed0bcd7b72cd2c8ccd8bf955037d3bdde72b4ce669b28dd3f099ccb",
+    "backend/flowlens/storage/sqlite/mutations.py": "f9c0ee935d25fa8c88d185630538e49e546e5636149c8fb23558250946cb6f65",
+    "backend/flowlens/storage/sqlite/repository.py": "2ef14a874e086bfd29ff85dea0fc3b99b47abe484280c5ccb21cb96e277959f1",
+    "backend/flowlens/storage/sqlite/schema.py": "1cae899018c826ee7140a2f92e985b8c08e9097cb5b3834ec652e6a96647b822",
+    "backend/flowlens/testing/__init__.py": "022cdb325121457a6f1db12ce1805ec4c6fd806e3398cead9dd523856bcbbfef",
+    "backend/flowlens/testing/__main__.py": "9030484c498602237cee0c6305e82906fea809d1f158ba04e05d968d0cff4de3",
+    "backend/flowlens/testing/acceptance.py": "b05997898c094b1cc6e2d60fb61ad592464fe5c0192871ac3f722c8a50fd3c0f",
+    "backend/flowlens/testing/advisory.py": "dce5b3600876f26565ba1341a99dec9d4eb24fc879d1e1d7ed9c09921855be39",
+    "backend/flowlens/testing/analysis.py": "c8dac5ce87e7dbb07ed75414836e69fb6405091b951b0f29e0b173cffb2f8cb1",
+    "backend/flowlens/testing/audio_worker.py": "3d41ec4c99247d4ab5f515df143ed146a26d66b168fd74ed76a49f3c1ece7937",
+    "backend/flowlens/testing/harness.py": "04e79ba072d81a871a132ac9eb308214eecd58a00ffa2f9ac6b86ebd4951dfd1",
+    "backend/flowlens/testing/intent_memory.py": "4d1f1951444b6199f998ef0789fb20c0469f1b3c582faa923692c1b9906f9994",
+    "backend/flowlens/testing/stt.py": "4cb96b6750734cea9809f5d17fe66caa64440511ce7a3314b26ff147c8c6798b",
+    "backend/flowlens/testing/stt_worker.py": "e5a2702f33d06b14fd9a5e14e7f5ddb2ad97c7ffb88b07b6a3da57d7a1cd8b9c",
+    "backend/flowlens/testing/transcripts.py": "857a1a5b95714b308439a336e71639bffd0d0b20fc4f3d2385d2d382d600bc2a",
+    "backend/flowlens/workers/__init__.py": "9df8f7e57110c90cef66bf5c070aafcc0fd492d2f3b10a179fe14ee066e3f6e8",
+    "backend/flowlens/workers/audio/__init__.py": "990c95091af01cd621f03d7051252dc3e4242821693f0f257ce2b1ec14e57cdd",
+    "backend/flowlens/workers/audio/__main__.py": "c1ad7d7b26c3a06d9c2d5a07a6d9e25cce9b634be887d40cb7b4d86d1121d0f2",
+    "backend/flowlens/workers/audio/http.py": "77535bf637e7a5d327164a759c2f06938de5779a8c5c5f5c7341140869c0766d",
+    "backend/flowlens/workers/audio/models.py": "201029ea1f1b08a79bb5ba0a3a021a57749f78d63d7a47a2ec762576ba3b0667",
+    "backend/flowlens/workers/audio/worker.py": "c68a1e9d38370d8f0645a0aa87df130df24af55c54fca600f033c36ef47ac03a",
+    "pyproject.toml": "84186b4c37c0924cd75c9141fe7905bde2d4ef81273dd40b5cc1b82dd791444f",
+    "uv.lock": "28ddfb3dc800064541bb394383d27a7c592350abc6ecbaf121be0f084847b5da",
+    "scripts/checks/package_a_startup.py": "e0ab42f12e39e7eaa865910c0af1ec89ede8be0ef4a8b53a403f3fc453261cb5",
+    "scripts/checks/integration_manifest.py": "374ebf4fcccd70d1de4f4f86e9689b197a428e9d3914e4686b18f491a77c24c3",
+    "scripts/checks/integration_worker_startup.py": "533efd653eb8e2c7543a63db2d1e42afc2ca5190424767efff3b43bd784e8141",
+    "tests/platform/test_integration.py": "98a63d510e123d0597366ef6494f28663b212859b843c09477d057fa5d9572b7"
+  },
+  "migrations": [
+    {
+      "id": "platform.0001",
+      "owner": "A",
+      "depends_on": [],
+      "checksum": "0689eccaf37afcba6ba4a33b81f03bd67ced519809bc8ef7d5d1be8ca8730c4f"
+    },
+    {
+      "id": "analysis.0001",
+      "owner": "B",
+      "depends_on": [
+        "platform.0001"
+      ],
+      "checksum": "aff3e1673e4a1fb31afe6ffd48b9e67bcc78bc27224abe71a96043f95c99ba3d"
+    },
+    {
+      "id": "platform.0002",
+      "owner": "A",
+      "depends_on": [
+        "platform.0001"
+      ],
+      "checksum": "1929307175053871c98eddf487b383a332bfda683409adc39721d608fea068c8"
+    },
+    {
+      "id": "analysis.0002",
+      "owner": "B",
+      "depends_on": [
+        "analysis.0001"
+      ],
+      "checksum": "0c1d35a689c2481c5556aeba0865e1899315def80572218d14e917921d7e4d9f"
+    },
+    {
+      "id": "platform.0003",
+      "owner": "A",
+      "depends_on": [
+        "platform.0002"
+      ],
+      "checksum": "1ac711b29132c46a5fb7c7963e0d75e2a5c2ea013f8754c9ebef4cd678fd9dc8"
+    },
+    {
+      "id": "analysis.0003",
+      "owner": "B",
+      "depends_on": [
+        "analysis.0002"
+      ],
+      "checksum": "9b5e3a05203d203c4a21183e40268722c257622c2417e41aeb48facde9612d3e"
+    },
+    {
+      "id": "platform.0004",
+      "owner": "A",
+      "depends_on": [
+        "platform.0003"
+      ],
+      "checksum": "c6b7f238979eb05062743ad0bd2ec5cc9c8c43654c23f379a94f612ff7457018"
+    },
+    {
+      "id": "analysis.0004",
+      "owner": "B",
+      "depends_on": [
+        "analysis.0003"
+      ],
+      "checksum": "73fd90184132c7c856d1e68f588c13ed45f79b43eb8d40933574e9ea882addd0"
+    },
+    {
+      "id": "platform.0005",
+      "owner": "A",
+      "depends_on": [
+        "platform.0004"
+      ],
+      "checksum": "1e7314291a6b72be1f0d19dfbe459d715a0590d16c372e2754a21dafc6b55e0a"
+    },
+    {
+      "id": "platform.0006",
+      "owner": "A",
+      "depends_on": [
+        "platform.0005"
+      ],
+      "checksum": "077b7608e7e1ec1223a81ae2b17f119da14583c8fdd600785fbe892e3ea44ceb"
+    },
+    {
+      "id": "platform.0007",
+      "owner": "A",
+      "depends_on": [
+        "platform.0006"
+      ],
+      "checksum": "713aeb5d405e715f4311f7e981fac9aacf541566b1150cd331c6db0e3d1213c0"
+    },
+    {
+      "id": "platform.0008",
+      "owner": "A",
+      "depends_on": [
+        "platform.0007"
+      ],
+      "checksum": "1daa20a3f4b144cf4ba0e216689280d09105bd45f33bb2d67ac323710e4465d1"
+    },
+    {
+      "id": "platform.0009",
+      "owner": "A",
+      "depends_on": [
+        "platform.0008"
+      ],
+      "checksum": "31b6e81357353603175b8a49e959c3818f78590925e051eacc9c89b81ab0ba7f"
+    },
+    {
+      "id": "platform.0010",
+      "owner": "A",
+      "depends_on": [
+        "platform.0009"
+      ],
+      "checksum": "793468964aaacaa760b28d90fe018b1a65b8f774d3bb2c956bea0f5febf8b403"
+    },
+    {
+      "id": "platform.0011",
+      "owner": "A",
+      "depends_on": [
+        "platform.0010"
+      ],
+      "checksum": "a81ac4729558d76385e1f50a7ae2e3eb86c572613a469b16654c8ee8f6bb0dd5"
+    },
+    {
+      "id": "platform.0012",
+      "owner": "A",
+      "depends_on": [
+        "platform.0011"
+      ],
+      "checksum": "0f67fb1c2c473b0d1357d62e40b99b37e0f2c7c67d0a5c985e77f8d6cdc5b468"
+    },
+    {
+      "id": "platform.0013",
+      "owner": "A",
+      "depends_on": [
+        "platform.0012"
+      ],
+      "checksum": "3193b18aa1b2fcbc9ee5bf664a5cc3e2fa8c071789c79e5634d7cda90ae97743"
+    },
+    {
+      "id": "platform.0014",
+      "owner": "A",
+      "depends_on": [
+        "platform.0013"
+      ],
+      "checksum": "513ab2ec16c74f17913e71025551a3426b7c59690a532cf0c10bce3c0e07b6d0"
+    },
+    {
+      "id": "platform.0015",
+      "owner": "A",
+      "depends_on": [
+        "platform.0014"
+      ],
+      "checksum": "a8d910c0f6aee09010638c782c273eec8268d104814c41ecea517eacf287de60"
+    },
+    {
+      "id": "platform.0016",
+      "owner": "A",
+      "depends_on": [
+        "platform.0015"
+      ],
+      "checksum": "411cbada268ece89b1bf4ebc69f504309017bf4794a61567707361ce88939e07"
+    },
+    {
+      "id": "platform.0017",
+      "owner": "A",
+      "depends_on": [
+        "platform.0016"
+      ],
+      "checksum": "93ce87ecdcf8e7b9c72c35e3a9550d962958d2d26ac6443c5c5cab4496582f35"
+    },
+    {
+      "id": "platform.0018",
+      "owner": "A",
+      "depends_on": [
+        "platform.0017"
+      ],
+      "checksum": "6b7af46a72b2dc84cece6d765c5db33d2b71151f52d46fc94d3c7cd3be7c3372"
+    },
+    {
+      "id": "analysis.0005",
+      "owner": "B",
+      "depends_on": [
+        "analysis.0004",
+        "platform.0018"
+      ],
+      "checksum": "107cd52939b41d6fd26bc6a84eb36fcc9ac264b5ee1c3aa64faa4bbd93feaae4"
+    }
+  ],
+  "repositories": [
+    "analysis.accepted",
+    "analysis.advisory",
+    "analysis.configuration",
+    "analysis.intent.memory",
+    "analysis.transcript.change",
+    "analysis.transcript.dependency",
+    "analysis.transcript.raw",
+    "analysis.transcript.revision",
+    "analysis.transcripts"
+  ],
+  "sensitive_tables": [
+    "analysis_configurations",
+    "analysis_transcript_raw",
+    "analysis_transcript_revisions",
+    "analysis_transcript_dependencies",
+    "analysis_transcript_changes",
+    "analysis_memory_ledger",
+    "analysis_advisory_ledger",
+    "analysis_public_records",
+    "analysis_intent_submissions"
+  ],
+  "routes": [
+    "GET /api/v1/admin/disk",
+    "GET /api/v1/admin/ops-audit",
+    "GET /api/v1/admin/provider-profiles",
+    "GET /api/v1/admin/provider-profiles/{profile_id}/history",
+    "GET /api/v1/admin/sessions/{session_id}/audit",
+    "GET /api/v1/admin/sessions/{session_id}/purge-preview",
+    "GET /api/v1/admin/usage",
+    "GET /api/v1/assets/{asset_id}/audio",
+    "GET /api/v1/auth/session",
+    "GET /api/v1/imports/{import_id}",
+    "GET /api/v1/imports/{import_id}/metadata",
+    "GET /api/v1/integration-status",
+    "GET /api/v1/legacy/sessions/{legacy_id}/history",
+    "GET /api/v1/sessions",
+    "GET /api/v1/sessions/{session_id}/alerts",
+    "GET /api/v1/sessions/{session_id}/alerts/{alert_id}/history",
+    "GET /api/v1/sessions/{session_id}/analysis-runs/{run_id}",
+    "GET /api/v1/sessions/{session_id}/analysis-runs/{run_id}/advisory",
+    "GET /api/v1/sessions/{session_id}/analysis-runs/{run_id}/advisory/{document_id}/report",
+    "GET /api/v1/sessions/{session_id}/analysis-runs/{run_id}/records",
+    "GET /api/v1/sessions/{session_id}/artifacts",
+    "GET /api/v1/sessions/{session_id}/artifacts/{artifact_id}",
+    "GET /api/v1/sessions/{session_id}/artifacts/{artifact_id}/download",
+    "GET /api/v1/sessions/{session_id}/entities/{entity_id}/geometry",
+    "GET /api/v1/sessions/{session_id}/history",
+    "GET /api/v1/sessions/{session_id}/indicators",
+    "GET /api/v1/sessions/{session_id}/legacy-history",
+    "GET /api/v1/sessions/{session_id}/playback",
+    "GET /api/v1/sessions/{session_id}/rules",
+    "GET /api/v1/sessions/{session_id}/snapshot",
+    "GET /api/v1/sessions/{session_id}/sources",
+    "GET /api/v1/sessions/{session_id}/sources/{source_id}",
+    "GET /api/v1/sessions/{session_id}/usage",
+    "GET /health",
+    "GET /internal/assets/{asset_id}/audio",
+    "GET /ready",
+    "GET /release.json",
+    "POST /api/v1/admin/provider-profiles",
+    "POST /api/v1/admin/provider-profiles/{profile_id}/checks",
+    "POST /api/v1/admin/sessions/{session_id}/purge",
+    "POST /api/v1/admin/sessions/{session_id}/purge-resume",
+    "POST /api/v1/auth/login",
+    "POST /api/v1/auth/logout",
+    "POST /api/v1/auth/password",
+    "POST /api/v1/imports",
+    "POST /api/v1/imports/{import_id}/commit",
+    "POST /api/v1/imports/{import_id}/metadata",
+    "POST /api/v1/sessions/{session_id}/alerts/{alert_id}/seen",
+    "POST /api/v1/sessions/{session_id}/analysis-runs",
+    "POST /api/v1/sessions/{session_id}/analysis-runs/{run_id}/advisory/{document_id}/reviews",
+    "POST /api/v1/sessions/{session_id}/analysis-runs/{run_id}/cancel",
+    "POST /api/v1/sessions/{session_id}/playback",
+    "POST /api/v1/sessions/{session_id}/rules/evaluations",
+    "POST /internal/analysis/audio-input",
+    "POST /internal/analysis/intents",
+    "POST /internal/analysis/prepare",
+    "POST /internal/jobs/lease",
+    "POST /internal/jobs/{job_id}/cancelled",
+    "POST /internal/jobs/{job_id}/heartbeat",
+    "POST /internal/jobs/{job_id}/input",
+    "POST /internal/jobs/{job_id}/results",
+    "PUT /internal/artifacts/{artifact_id}"
+  ],
+  "test_analysis_config": {
+    "schema_version": "1.0.0",
+    "model_version": "MOCK",
+    "api_version": "integration-1",
+    "sdk_version": "locked",
+    "prompt_version": "intent-1",
+    "reducer_version": "memory-1",
+    "rule_version": "findings-1"
+  },
+  "snapshot": "AnalysisModule.snapshot -> Engine.snapshot -> B reconstruct/assemble",
+  "purge": "Engine.purge callback + exact session erasure TABLES in A Retention",
+  "entrypoints": [
+    "flowlens.api.serve",
+    "flowlens.workers.audio",
+    "flowlens.cli.bootstrap_admin --integrated",
+    "flowlens.cli.maintenance"
+  ],
+  "sensitive_inventory": {
+    "analysis_transcript": "raw/words/normalized/corrections scoped tables; raw SDK route deferred",
+    "analysis_intent_submissions": "private candidate/quote/provenance per attempt",
+    "analysis_memory_ledger": "accepted intent/association/invalidation metadata/evidence",
+    "analysis_advisory_ledger": "document/review/note metadata, factual text/evidence",
+    "analysis_public_records": "frozen transcript/intent/finding/brief projections",
+    "artifacts": "private audio chunks/frame/clock/hash provenance; no credential"
+  },
+  "limitations_document": "docs/development/backend-integration.md",
+  "evidence_document": "docs/testing/integration-local-evidence.md"
+}

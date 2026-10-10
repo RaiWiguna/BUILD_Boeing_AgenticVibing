@@ -29,6 +29,7 @@ class AudioInput(AudioRecord):
     attempt_id: UUID
     lease_id: UUID
     config_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    audio_config_hash: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     source_id: UUID
     asset: Asset
     size_bytes: int = Field(gt=0, le=512 * 1024**2)

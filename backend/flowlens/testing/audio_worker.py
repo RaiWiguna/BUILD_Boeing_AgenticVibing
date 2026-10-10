@@ -31,6 +31,7 @@ from flowlens.contracts.models import (
     RequestContext,
     SourceManifest,
 )
+from flowlens.contracts.results import result_hash
 from flowlens.core.errors import ContractError
 from flowlens.workers.audio import AudioInput, AudioWorker, WorkerConfig
 from flowlens.workers.audio.worker import epoch_ms
@@ -256,8 +257,8 @@ class MockPlatform:
             self.leased.config_hash,
         ):
             raise ContractError("SOURCE_REVISION_CHANGED")
-        expected_hash = hashlib.sha256(result.model_dump_json(exclude={"output_hash"}).encode())
-        if result.output_hash != expected_hash.hexdigest():
+        expected_hash = result_hash(result)
+        if result.output_hash != expected_hash:
             raise ContractError("INVALID_INPUT")
         if any(
             item.id not in self.staged or self.staged[item.id][0] != item

@@ -206,7 +206,7 @@ class AdvisoryService:
                 id=entry.id,
                 kind=entry.body.kind,
                 session_id=ctx.session_id,
-                run_id=ctx.analysis_run_id,
+                analysis_run_id=ctx.analysis_run_id,
                 revision=ctx.input_revision,
             ),
         )
@@ -414,7 +414,7 @@ class Notice(Contract):
     id: UUID
     kind: str
     session_id: UUID
-    run_id: UUID | None
+    analysis_run_id: UUID | None
     revision: int
 
 

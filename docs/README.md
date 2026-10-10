@@ -73,3 +73,13 @@ A09.3 local backup/restore/maintenance done: [workflow](development/recovery.md)
 Paket A A10 complete: [acceptance](testing/a101-evidence.md), [final benchmark](testing/a102-benchmark.json), [source-generated manifest](development/package-a-manifest.json), [integration handoff](development/package-a-handoff.md), [objective audit](testing/a10-completion-audit.md). B/provider/domain/integrated Phase10 dan G-BE tetap belum selesai.
 
 Source reconciliation A/B: [resolution, checks dan entry integrasi](development/backend-reconciliation.md), [joint manifest](development/backend-reconciliation.json).
+
+## Local A/B integration snapshot — 10 Oktober 2026
+
+- [Run guide/boundaries/limitations](development/backend-integration.md)
+- [Verified source/migration/route manifest](development/backend-integration.json)
+- [Performed local acceptance](testing/integration-local-evidence.md)
+- [ADR0007 API-owned local composition](adr/0007-local-backend-composition.md)
+
+Google/key dan G-BE ditunda; Phase10 penuh belum selesai. Historical reconciliation
+serta standalone A/B evidence tetap berlaku pada candidate masing-masing.

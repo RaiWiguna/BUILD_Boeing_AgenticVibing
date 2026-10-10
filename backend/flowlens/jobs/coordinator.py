@@ -20,12 +20,14 @@ from flowlens.contracts.models import (
     JobLease,
     JobProgress,
     JobResult,
+    Mode,
     RequestContext,
     TranscriptSegment,
     Usage,
 )
 from flowlens.contracts.ports import AnalysisModule
 from flowlens.contracts.ports import UnitOfWork as TransactionPort
+from flowlens.contracts.results import result_hash as result_hash
 from flowlens.core.errors import ContractError
 from flowlens.imports.metadata import PreparedImport
 from flowlens.ops.logs import emit
@@ -43,16 +45,6 @@ def digest(value: object) -> str:
     return hashlib.sha256(
         json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
     ).hexdigest()
-
-
-def result_hash(result: JobResult) -> str:
-    data = result.model_dump(mode="json")
-    return digest(
-        {
-            key: data[key]
-            for key in ("outputs", "evidence", "artifacts", "status", "usage", "failure_code")
-        }
-    )
 
 
 class RunConfig(Contract):
@@ -83,6 +75,7 @@ class StagePolicy:
     concurrency: int = 1
     lease_ms: int = 30000
     max_attempts: int = 3
+    execution_mode: Mode = "AS_KNOWN"
 
     def __post_init__(self) -> None:
         if (
@@ -91,14 +84,15 @@ class StagePolicy:
             or not 1 <= self.concurrency <= 16
             or not 100 <= self.lease_ms <= 120000
             or not 1 <= self.max_attempts <= 3
+            or self.execution_mode not in ("AS_KNOWN", "DEBRIEF")
             or not self.rights
-            or any(r not in ("cloud_audio", "cloud_context") for r in self.rights)
+            or any(r not in ("local", "cloud_audio", "cloud_context") for r in self.rights)
             or any(not ns.startswith("analysis.") for ns in self.outputs.values())
         ):
             raise ValueError("Invalid registered job policy")
         if (
-            self.stage in ("AUDIO", "STT")
-            and "cloud_audio" not in self.rights
+            (self.stage == "STT" and "cloud_audio" not in self.rights)
+            or (self.stage == "AUDIO" and not {"local", "cloud_audio"}.intersection(self.rights))
             or self.stage not in ("AUDIO", "STT")
             and "cloud_context" not in self.rights
         ):
@@ -117,6 +111,11 @@ class StagePolicy:
                 "concurrency": self.concurrency,
                 "lease_ms": self.lease_ms,
                 "max_attempts": self.max_attempts,
+                **(
+                    {"execution_mode": self.execution_mode}
+                    if self.execution_mode != "AS_KNOWN"
+                    else {}
+                ),
             }
         )
 
@@ -152,6 +151,7 @@ class Jobs:
         self.publish: Callable[[UUID, int], None] | None = None
         self.fault: Callable[[str], None] | None = None
         permissions.worker_guard = self.guard
+        permissions.worker_mode = self.worker_mode
         self.recover()
 
     def now(self) -> int:
@@ -743,6 +743,15 @@ class Jobs:
 
     def context(self, token: str, lease: JobLease) -> RequestContext:
         return self.permissions.worker_context(token, self.scope(token, lease))
+
+    def worker_mode(self, uow: UnitOfWork, scope_id: str) -> Mode:
+        row = uow.connection.execute(
+            "SELECT j.stage FROM platform_attempt_state a "
+            "JOIN platform_job_state j ON j.id=a.job_id WHERE a.scope_id=?",
+            (scope_id,),
+        ).fetchone()
+        policy = self.policies.get(row[0]) if row else None
+        return policy.execution_mode if policy else "AS_KNOWN"
 
     def guard(self, uow: UnitOfWork, ctx: RequestContext) -> None:
         if "worker" not in ctx.capabilities:

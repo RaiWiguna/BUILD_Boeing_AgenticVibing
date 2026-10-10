@@ -10,7 +10,7 @@ from uuid import UUID, uuid4
 
 from flowlens.auth.accounts import Account
 from flowlens.auth.sessions import Sessions, token_hash
-from flowlens.contracts.models import Asset, Capability, RequestContext, SourceManifest
+from flowlens.contracts.models import Asset, Capability, Mode, RequestContext, SourceManifest
 from flowlens.core.errors import ContractError
 from flowlens.sources.policy import policy
 from flowlens.storage.sqlite.database import Database, UnitOfWork
@@ -45,6 +45,7 @@ class Permissions:
     def __init__(self, database: Database, sessions: Sessions) -> None:
         self.database = database
         self.sessions = sessions
+        self.worker_mode: Callable[[UnitOfWork, str], Mode] | None = None
         self.worker_guard: Callable[[UnitOfWork, RequestContext], None] | None = None
         self.deny_session: Callable[[UUID], bool] | None = None
 
@@ -368,7 +369,7 @@ class Permissions:
                 input_revision=revision["revision"],
                 input_hash=revision["input_hash"],
                 as_of_ms=scope["as_of_ms"],
-                mode="AS_KNOWN",
+                mode=self.worker_mode(uow, str(scope_id)) if self.worker_mode else "AS_KNOWN",
                 request_id=uuid4(),
             )
             self._receipt(uow, ctx, "WORKER", digest, scope_id)
@@ -408,7 +409,8 @@ class Permissions:
                     context.input_revision,
                     context.as_of_ms,
                 )
-                or context.mode != "AS_KNOWN"
+                or context.mode
+                != (self.worker_mode(uow, str(scope["id"])) if self.worker_mode else "AS_KNOWN")
                 or set(context.capabilities) != {"read", "analysis", "worker"}
             ):
                 raise ContractError("ACCESS_DENIED")

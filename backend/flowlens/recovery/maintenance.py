@@ -1,9 +1,10 @@
-"""Exclusive local owner lifecycle; no provider or B implementation is loaded."""
+"""Exclusive local owner lifecycle with code-owned A/B catalogs; no provider calls."""
 
 import os
+import sqlite3
 import time
 from collections.abc import Callable, Mapping
-from contextlib import ExitStack
+from contextlib import ExitStack, closing
 from pathlib import Path
 from typing import Self
 from uuid import UUID, uuid4
@@ -71,7 +72,24 @@ class Maintenance:
     def __enter__(self) -> Self:
         self.paths.check_paths()
         try:
-            self.database = self.stack.enter_context(Database(self.paths.database))
+            from flowlens.integration.catalog import JOINT_MIGRATIONS, TABLES, repositories
+            from flowlens.storage.sqlite.schema import PLATFORM_MIGRATIONS
+
+            with closing(
+                sqlite3.connect(self.paths.database.as_uri() + "?mode=ro", uri=True)
+            ) as probe:
+                joint = bool(
+                    probe.execute(
+                        "SELECT 1 FROM platform_schema_migrations WHERE id LIKE 'analysis.%'"
+                    ).fetchone()
+                )
+            self.database = self.stack.enter_context(
+                Database(
+                    self.paths.database,
+                    migrations=JOINT_MIGRATIONS if joint else PLATFORM_MIGRATIONS,
+                    repositories=repositories() if joint else None,
+                )
+            )
             self.raw = PrivateFiles(self.paths.raw)
             self.stack.callback(self.raw.close)
             self.artifacts = PrivateFiles(self.paths.artifacts)
@@ -90,7 +108,8 @@ class Maintenance:
                 self.assets,
                 self.journal,
                 imports=self.imports,
-                inventory_namespaces=("analysis",),
+                inventory_namespaces=tuple(repositories()) if joint else ("analysis",),
+                inventory_tables=TABLES if joint else (),
                 callbacks=self.callbacks,
             )
             self.purged = self.retention.recover()

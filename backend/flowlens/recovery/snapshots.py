@@ -304,7 +304,7 @@ class Snapshots:
                     release=Operations(
                         None,
                         HostSettings(profile="test"),
-                        PLATFORM_MIGRATIONS,
+                        self.m.database.specs,
                         profile="OFFLINE_MAINTENANCE",
                     ).release(),
                     current_journal_digest=marker_digest,
@@ -376,8 +376,16 @@ class Snapshots:
             or sum(f.path == "snapshot.sqlite" for f in manifest.files) != 1
         ):
             raise ValueError("Snapshot inventory mismatch")
-        supported = {s.id: checksum(s) for s in PLATFORM_MIGRATIONS}
-        prefix = {s.id for s in PLATFORM_MIGRATIONS[: len(manifest.migration_checksums)]}
+        from flowlens.core.modules import order_migrations
+        from flowlens.integration.catalog import JOINT_MIGRATIONS
+
+        definitions = (
+            order_migrations(list(JOINT_MIGRATIONS))
+            if any(k.startswith("analysis.") for k in manifest.migration_checksums)
+            else list(PLATFORM_MIGRATIONS)
+        )
+        supported = {s.id: checksum(s) for s in definitions}
+        prefix = {s.id for s in definitions[: len(manifest.migration_checksums)]}
         if (
             set(manifest.migration_checksums) != prefix
             or len(prefix) < 16

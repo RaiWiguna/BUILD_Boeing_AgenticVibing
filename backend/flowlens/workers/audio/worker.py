@@ -27,6 +27,7 @@ from flowlens.contracts.models import (
     Usage,
 )
 from flowlens.contracts.ports import AssetAccess, JobClient
+from flowlens.contracts.results import result_hash
 from flowlens.workers.audio.models import AudioInput, InputAccess, WorkerConfig, WorkerOutcome
 
 
@@ -150,10 +151,10 @@ class AudioWorker:
             or (binding.job_id, binding.attempt_id, binding.lease_id)
             != (lease.job_id, lease.attempt_id, lease.lease_id)
             or binding.config_hash != lease.config_hash
-            or binding.config_hash != self.config.audio.digest()
+            or (binding.audio_config_hash or binding.config_hash) != self.config.audio.digest()
             or lease.asset_ids != [binding.asset.id]
             or ctx.actor_id != lease.owner_id
-            or set(ctx.capabilities) != {"worker", "audio"}
+            or set(ctx.capabilities) not in ({"worker", "audio"}, {"worker", "read", "analysis"})
             or binding.asset.fixture_path is not None
             or binding.size_bytes > self.config.audio.max_input_bytes
         ):
@@ -236,10 +237,11 @@ class AudioWorker:
                 metadata = prepared.metadata
                 artifacts: list[ArtifactSubmission] = []
                 for index, chunk in enumerate(metadata.chunks):
-                    start = chunk.plan.derivative_frames.start * 1000 // metadata.output_rate
+                    start = chunk.plan.source_frames.start * 1000 // metadata.probe.sample_rate
                     end = (
-                        chunk.plan.derivative_frames.end * 1000 + metadata.output_rate - 1
-                    ) // metadata.output_rate
+                        chunk.plan.source_frames.end * 1000 + metadata.probe.sample_rate - 1
+                    ) // metadata.probe.sample_rate
+                    end = min(end, binding.asset.duration_ms)
                     artifact = ArtifactSubmission(
                         id=uuid5(binding.attempt_id, f"audio-{index}"),
                         session_id=binding.context.session_id,
@@ -402,13 +404,7 @@ class AudioWorker:
                     ),
                     failure_code="INVALID_AI_OUTPUT" if failure else None,
                 )
-                candidate = candidate.model_copy(
-                    update={
-                        "output_hash": hashlib.sha256(
-                            candidate.model_dump_json(exclude={"output_hash"}).encode()
-                        ).hexdigest()
-                    }
-                )
+                candidate = candidate.model_copy(update={"output_hash": result_hash(candidate)})
                 receipt = self.deliver(candidate, guard)
                 return WorkerOutcome("FAILED" if failure else "RECEIPT", code, receipt)
             finally:

@@ -3,15 +3,15 @@
 from os import environ
 
 import uvicorn
-from flowlens.api.host import create_host
 from flowlens.core.host_config import HostSettings
+from flowlens.integration import create_integrated_host
 from flowlens.ops.logs import configure
 
 
 def main() -> None:
     try:
         settings = HostSettings.from_environment(environ)
-        app = create_host(settings)
+        app = create_integrated_host(settings)
     except ValueError:
         raise SystemExit("Invalid host configuration; check the documented settings.") from None
     configure()
