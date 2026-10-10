@@ -1,5 +1,7 @@
 # Backend foundation workflow
 
+Status9 Oktober2026: A01–A06 done; [import commit](import-commit.md), [assets/evidence](private-assets-evidence.md), [jobs/coordinator](durable-jobs.md) dan [A06 evidence](../testing/a06-evidence.md) adalah current implementation. Catatan unit di bawah mencatat keadaan saat unit tersebut selesai; A07–A10/B/provider belum tersedia. HOST_ONLY readiness503, gates not_started.
+
 Python target: 3.12.x (`>=3.12,<3.13`), dibuktikan pada Python 3.12.14 macOS arm64. Toolchain awal uv 0.12.23; `uv.lock` mengunci resolved direct/transitive packages dan hashes. `pyproject.toml` root membangun package dari `backend/flowlens` dengan Hatchling. Tidak ada package manager sebelumnya yang diganti.
 
 ## Setup
@@ -10,7 +12,7 @@ python3.12 -m venv .venv
 .venv/bin/uv sync --locked
 ```
 
-Gunakan Python 3.12 yang tersedia pada mesin; jangan memakai system Python 3.9. `.venv` lokal di-ignore. Runtime dependencies kini FastAPI/Pydantic/Uvicorn dan argon2-cffi (A02.1). Google SDK, Shapely dan FFmpeg akan ditambahkan oleh owner A/B pada fase implementasinya, dengan lock dan compatibility checks; foundation tidak mengklaim adapter tersebut tersedia.
+Gunakan Python 3.12 yang tersedia pada mesin; jangan memakai system Python 3.9. `.venv` lokal di-ignore. Runtime dependencies kini FastAPI/Pydantic/Uvicorn argon2-cffi (A02.1), soundfile dan python-multipart (A04.1). Google SDK, Shapely dan FFmpeg akan ditambahkan oleh owner A/B pada fase implementasinya, dengan lock dan compatibility checks; foundation tidak mengklaim adapter tersebut tersedia.
 
 ## Checks
 
@@ -62,7 +64,7 @@ Untuk host dengan SQLite privat:
 FLOWLENS_DB_PATH=data/database/flowlens.sqlite3 .venv/bin/python -m flowlens.api.serve
 ```
 
-Setting path bersifat optional: tanpa path, host tetap berjalan tanpa DB. Dengan path, lifespan mengambil POSIX owner lock, memvalidasi/applies immutable migration manifest, membuka WAL/FK/FULL-synchronous runtime dan melepas ownership saat shutdown. Tabel platform tersedia; tidak ada analysis tables atau auth/import/job lifecycle APIs. Existing DB harus mode privat (0600); unversioned archive ditolak sampai A01.3. Jangan memakai DB developer/shared sebagai fixture migration tests.
+Setting path bersifat optional: tanpa path, host tetap berjalan tanpa DB. Dengan path, lifespan mengambil POSIX owner lock, memvalidasi/applies immutable migration manifest, membuka WAL/FK/FULL-synchronous runtime dan melepas ownership saat shutdown. Tabel platform tersedia; tidak ada analysis tables atau committed import/job lifecycle APIs; auth dan private import preview tersedia pada unit berikutnya di bawah. Existing DB harus mode privat (0600); unversioned archive ditolak sampai A01.3. Jangan memakai DB developer/shared sebagai fixture migration tests.
 
 Service/repository memakai `Database.begin()` dan explicit `uow.commit()`; exception/missing commit rollback. Retained repository tidak dapat dipakai setelah UOW selesai. Repository extensions B memakai factory `analysis`/`analysis.*` dengan connection dan guard UOW yang sama; real composition tetap Phase 10. Callbacks dijalankan sesudah durable commit/connection close; publication failure perlu resync, bukan membalik data committed. Jangan menahan UOW selama provider call.
 
@@ -88,3 +90,27 @@ Host dengan DB/individual bootstrap kini memasang login/session/password/logout 
 ```
 
 Fixture builder mempertahankan speech waveform yang ditrack dan menghitung ulang metadata/hash. Generator kontrak hanya mengubah schemas/OpenAPI. Review diff dan jalankan drift tests setelah regeneration. Jangan mengedit generated schemas dengan tangan.
+
+## Authorization — A03.1
+
+Host sekarang memasang live authorization guard untuk UOW/repository, termasuk injected analysis repositories. [Workflow](authorization.md) menjelaskan explicit grants, server-built contexts dan receipts, worker scopes/source/asset allowlists, rights checks serta batas trusted raw SQL. [Evidence](../testing/a031-evidence.md) mencatat negative/restart/upgrade/rollback tests. Tidak ada domain/grant/worker HTTP route baru; transport/serializers A03.2 dan media/replay/jobs pada unit owner. Readiness tetap503.
+
+## Transport/public projection — A03.2
+
+Host kini memasang HTTP principal/Origin/CSRF dan worker-only boundary serta WS principal/origin/safe errors. Handler berikutnya memakai scoped http_context/worker_context/websocket_context dan public_dto dalam guarded UOW. [Workflow](transport-policy.md) menjelaskan prefix/policy/classification serta batas actual media/export/stream; [evidence](../testing/a032-evidence.md) mencatat 71 tests baru dan both-track checks. Tidak ada domain route baru, contract/migration/dependency changes. A03.3 dan A04.1 selesai; A04.3 kini selesai, diikuti A05/A06; readiness tetap503.
+
+## Mutation consistency — A03.3
+
+Host menerima trusted mutation_operations dan menyediakan app.state.mutations dengan default registry kosong. [Workflow](mutation-consistency.md) menjelaskan canonical keys/payload, versions, atomic persisted-result/audit/receipt/event, callback transaction ownership dan publication recovery. platform.0007 menambahkan schema/append-only protections; frozen contracts/ports dan lock tetap. [Evidence](../testing/a033-evidence.md) mencatat 58 tests baru, fresh/upgrade/restart/concurrency/HTTP/fault checks dan both-track suites. A03/Phase2 dan A04.1 done, A04.3 kini selesai, diikuti A05/A06; business pipeline/readiness/G-BE belum selesai.
+
+## Private import preview — A04.1
+
+Optional FLOWLENS_IMPORT_STAGING_PATH memerlukan DB dan private separate local root; host menyediakan app.state.imports serta streaming multipart POST/owner-only GET. platform.0008 menyimpan draft metadata; source/session/assets/jobs/runs belum committed. [Workflow](import-preview.md) memuat profiles, limits, authority, unknown/remediation dan restart cleanup; [evidence](../testing/a041-evidence.md) mencatat35 kasus baru dan checks. Contract1.0.0 tetap, dependency lock menambah decoder/multipart. A04.1/Phase3.1 done; A04/Phase3 in_progress, A04.3 kini selesai, diikuti A05/A06; readiness503 tetap.
+
+## Import metadata — A04.2
+
+Owner admin POST/GET /api/v1/imports/{id}/metadata menyiapkan strict granular provenance/rights/retention/coverage, per-file clock/identity/layout normalization dan immutable draft revisions. GET preview membaca current metadata; raw upload receipt tetap stable. platform.0009 additive; shared1.0.0 projection conservative, no dependency change. [Workflow](import-metadata.md)/[evidence](../testing/a042-evidence.md) memuat profiles, independent time/unit oracles, faults/authority dan compatibility limits. A04.2/Phase3.2–3.3 done, A04.3 kini selesai, diikuti A05/A06; no source/session commit atau real B/provider integration, readiness503 tetap.
+
+## Host composition setelah A06
+
+Optional roots: FLOWLENS_IMPORT_STAGING_PATH, FLOWLENS_RAW_ASSETS_PATH, FLOWLENS_ARTIFACT_STAGING_PATH; database dan masing-masing storage memakai separate private directories. Host menyediakan imports/import_commits/sources/assets/evidence. Trusted AnalysisModule, StagePolicy dan analysis.* RepositoryFactory mengaktifkan app.state.jobs; default registry tetap kosong, fake test profile berlabel MOCK. platform0012; no new dependencies atau real B. [API dan lifecycle](durable-jobs.md).

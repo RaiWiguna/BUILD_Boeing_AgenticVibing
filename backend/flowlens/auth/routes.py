@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from flowlens.auth.sessions import AuthSession, RateLimited, Sessions, csrf_token
 from flowlens.core.errors import ContractError
 from pydantic import BaseModel, ConfigDict, Field, SecretStr
+from starlette.requests import HTTPConnection
 
 COOKIE = "flowlens_session"
 
@@ -41,14 +42,14 @@ class SessionView(BaseModel):
     expires_ms: int
 
 
-def auth_service(request: Request) -> Sessions:
+def auth_service(request: HTTPConnection) -> Sessions:
     service: Sessions | None = request.app.state.sessions
     if service is None:
         raise HTTPException(503)
     return service
 
 
-def require_origin(request: Request) -> None:
+def require_origin(request: HTTPConnection) -> None:
     if (
         request.headers.get("origin") != request.app.state.settings.origin
         or request.headers.get("sec-fetch-site") == "cross-site"
@@ -56,14 +57,14 @@ def require_origin(request: Request) -> None:
         raise ContractError("ACCESS_DENIED")
 
 
-def cookie(request: Request) -> str:
+def cookie(request: HTTPConnection) -> str:
     value = request.cookies.get(COOKIE)
     if value is None:
         raise ContractError("AUTH_REQUIRED")
     return value
 
 
-def require_csrf(request: Request, token: str) -> None:
+def require_csrf(request: HTTPConnection, token: str) -> None:
     provided = request.headers.get("x-csrf-token", "")
     if (
         len(token) > 128

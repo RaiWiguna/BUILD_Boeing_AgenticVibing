@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 from flowlens.providers.stt import smoke
+from flowlens.providers.stt.models import STTFailure
 from flowlens.testing.stt import MockClient, mock_binding, mock_config
 from google.auth.credentials import AnonymousCredentials
 
@@ -124,3 +125,25 @@ def test_changed_waveform_never_creates_client(tmp_path, monkeypatch):
     with pytest.raises(smoke.STTFailure, match="STT_PERMISSION_DENIED"):
         asyncio.run(smoke.run_smoke(profile(), AnonymousCredentials(), tmp_path))
     assert created == []
+
+
+@pytest.mark.parametrize("newline", [b"\n", b"\r\n"])
+def test_synthetic_manifest_line_endings_and_tamper(tmp_path, monkeypatch, newline):
+    audio = tmp_path / "tests/fixtures/audio"
+    manifests = tmp_path / "tests/fixtures/manifests"
+    audio.mkdir(parents=True)
+    manifests.mkdir(parents=True)
+    (audio / "hold-short.wav").write_bytes(
+        (ROOT / "tests/fixtures/audio/hold-short.wav").read_bytes()
+    )
+    original = (ROOT / "tests/fixtures/manifests/synthetic-audio.json").read_bytes()
+    manifest = manifests / "synthetic-audio.json"
+    manifest.write_bytes(original.replace(b"\r\n", b"\n").replace(b"\n", newline))
+    client = MockClient()
+    monkeypatch.setattr(smoke, "GoogleClient", lambda config, credentials: client)
+    asyncio.run(smoke.run_smoke(profile(), AnonymousCredentials(), tmp_path))
+    assert len(client.requests) == 1
+    manifest.write_bytes(manifest.read_bytes() + b" ")
+    with pytest.raises(STTFailure, match="STT_PERMISSION_DENIED"):
+        asyncio.run(smoke.run_smoke(profile(), AnonymousCredentials(), tmp_path))
+    assert len(client.requests) == 1

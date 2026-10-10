@@ -315,7 +315,7 @@ def main() -> int:
         worker = AudioWorker(
             WorkerConfig(
                 worker_id=platform.leased.owner_id,
-                scratch_root=Path(name),
+                scratch_root=Path(name).resolve(),
                 heartbeat_seconds=0.05,
                 audio=limits,
             ),

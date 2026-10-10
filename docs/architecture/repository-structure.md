@@ -1,6 +1,6 @@
 # Struktur Repository ATC FlowLens
 
-Tanggal: 9 Oktober 2026. Status: **Phase 0–1 foundation, host A01.1 dan persistence A01.2 tersedia; account+HTTP auth A02 tersedia; grants/business pipeline belum diimplementasikan**. Tree lengkap di bawah mencatat scaffold awal 7 Oktober; daftar source terkini ada di baseline evidence, [host](../testing/a011-evidence.md), [persistence](../testing/a012-evidence.md) dan workflow.
+Tanggal: 10 Oktober 2026. Status: **A01–A10 standalone done; source B01–B06 tersedia, B03–B06 external acceptance pending; real A/B runtime composition Phase10 planned; provider/domain/operational validation belum terbukti; frontend/deployment belum diimplementasikan**. [Reconciliation dan entry integrasi](../development/backend-reconciliation.md). Tree di bawah adalah snapshot scaffold7 Oktober; inventory aktual tersedia pada manifest A dan reconciliation A/B.
 
 ## Dasar penempatan
 
@@ -22,7 +22,7 @@ Scaffold dibuat sekaligus untuk memperjelas tujuan penempatan. Implementasi teta
 
 ## Tree lengkap
 
-`.git/` tidak ditampilkan. `.gitkeep` berukuran nol mempertahankan folder kosong di Git; hapus ketika folder sudah mempunyai file sebenarnya. Tidak ada executable stubs, manifests, atau dependency versions yang diklaim tersedia.
+`.git/` tidak ditampilkan. `.gitkeep` berukuran nol mempertahankan folder kosong di Git; hapus ketika folder sudah mempunyai file sebenarnya. Snapshot ini menjelaskan layout awal; inventory implementasi terkini dan manifest/toolchain ada pada phase evidence/workflows.
 
 ```text
 BUILD_Boeing_AgenticVibing/
@@ -442,6 +442,14 @@ Compose volumes dan secret provisioning final ditentukan pada delivery stage; di
 Struktur folder, README/map, ADR layout, serta konteks setelah reset tersedia. Semua fase implementasi tetap planned dan G-BE/G-FE/G-DELIVERY belum dijalankan.
 
 Langkah berikutnya adalah Phase 0.1: petakan kontrak/scaffold ke requirement, tetapkan build-new/reuse disposition, fixture/independent-oracle plan dan external dependencies. Backend foundation selanjutnya menyediakan actual package/config/contracts/tests. Frontend dan packaging menunggu gate masing-masing.
+
+Implementasi imports A04.1–A04.3 selesai: `staging.py` mengelola private owner-scoped draft, `inspection.py` memeriksa native audio/canonical sidecars, dan `routes.py` streaming multipart/preview. Rights/clock/identity/layout preparation A04.2 tersedia pada sources/metadata.py, clocks/normalization.py dan imports/{metadata,normalization}.py; source reader/atomic commit A04.3 juga tersedia. [Workflow](../development/import-preview.md).
+
+[Import metadata workflow](../development/import-metadata.md) menjelaskan granular envelope dan conservative frozen-contract projection sebelum domain commit.
+
+A06 menempatkan platform-owned scheduler/internal routes di jobs/, tanpa mengimpor internals B. Typed domain repositories memakai injected analysis.* factories; storage private assets/evidence tersedia sejak A04/A05. [Workflow](../development/durable-jobs.md).
+
+A09.3 local backup/restore/maintenance done: [workflow](../development/recovery.md), [evidence](../testing/a093-evidence.md). A10 standalone selesai; real composition Phase10 dan release gates tetap planned/not_started.
 
 
 ## Analysis advisory implementation — B05

@@ -1,0 +1,941 @@
+{
+  "actual_registrations": {
+    "acceptance_fake": "test-only frozen fake snapshot/AnalysisModule; no production fallback",
+    "default_B_purge_callbacks": [],
+    "default_B_routes_migrations_repositories": [],
+    "default_analysis_module": null,
+    "default_job_policies": [],
+    "default_snapshot_reader": null,
+    "jobs": "explicit analysis_module + StagePolicy + repository_factories; not automatic from ModuleRegistration.job_handlers",
+    "maintenance": "standalone CLI only A migrations; integrated B maintenance composition/reconciliation required in Phase10",
+    "purge": "module.inventory_namespaces required; callback mapped by first namespace; unknown inventory fails closed",
+    "snapshot": "one module.snapshot_reader OR AnalysisModule.snapshot; duplicates rejected"
+  },
+  "candidate": {
+    "acceptance_commit_sha": "eb5205b33cab76b991eea08ca671acd4431c83b3",
+    "handoff_commit_resolution": "git log -1 --format=%H -- docs/development/package-a-manifest.json",
+    "prerequisite_sha": "1f88f38971f1e171fd2421aa8647424e429e26f1",
+    "source_identity": "exact source_sha256 map; handoff commit includes route inventory fix"
+  },
+  "commands_results": {
+    "final_audit": "docs/testing/a10-completion-audit.md",
+    "manifest_check": ".venv/bin/python scripts/checks/package_a_manifest.py --check",
+    "record": "docs/testing/a101-evidence.md"
+  },
+  "config_defaults": {
+    "api_workers": 1,
+    "artifact_staging_path": null,
+    "contract_version": "1.0.0",
+    "database_path": null,
+    "host": "127.0.0.1",
+    "import_staging_path": null,
+    "lock_sha256": null,
+    "minimum_free_bytes": 67108864,
+    "port": 8000,
+    "profile": "development",
+    "public_origin": null,
+    "raw_assets_path": null,
+    "release_sha": null,
+    "retention_journal_path": null
+  },
+  "config_environment_to_field": {
+    "FLOWLENS_API_WORKERS": "api_workers",
+    "FLOWLENS_ARTIFACT_STAGING_PATH": "artifact_staging_path",
+    "FLOWLENS_DB_PATH": "database_path",
+    "FLOWLENS_HOST": "host",
+    "FLOWLENS_IMPORT_STAGING_PATH": "import_staging_path",
+    "FLOWLENS_LOCK_SHA256": "lock_sha256",
+    "FLOWLENS_MINIMUM_FREE_BYTES": "minimum_free_bytes",
+    "FLOWLENS_ORIGIN": "public_origin",
+    "FLOWLENS_PORT": "port",
+    "FLOWLENS_PROFILE": "profile",
+    "FLOWLENS_RAW_ASSETS_PATH": "raw_assets_path",
+    "FLOWLENS_RELEASE_SHA": "release_sha",
+    "FLOWLENS_RETENTION_JOURNAL_PATH": "retention_journal_path"
+  },
+  "dependencies": {
+    "declared_runtime": [
+      "argon2-cffi>=25.1,<26",
+      "fastapi>=0.115,<1",
+      "pydantic>=2.10,<3",
+      "python-multipart>=0.0.20,<0.1",
+      "shapely>=2.2.0",
+      "soundfile>=0.14,<0.15",
+      "uvicorn>=0.54,<1",
+      "wsproto>=1.3.2"
+    ],
+    "locked_packages": {
+      "annotated-doc": "0.0.5",
+      "annotated-types": "0.8.0",
+      "anyio": "4.15.1",
+      "argon2-cffi": "25.1.0",
+      "argon2-cffi-bindings": "26.1.0",
+      "atc-flowlens": "0.1.0",
+      "bandit": "1.9.4",
+      "boolean-py": "5.0",
+      "cachecontrol": "0.14.4",
+      "certifi": "2026.7.22",
+      "cffi": "2.1.1",
+      "charset-normalizer": "3.5.2",
+      "click": "8.5.0",
+      "colorama": "0.4.6",
+      "cyclonedx-python-lib": "11.12.0",
+      "defusedxml": "0.7.1",
+      "fastapi": "0.142.4",
+      "filelock": "4.0.12",
+      "h11": "0.16.0",
+      "httpcore": "1.0.9",
+      "httpcore2": "2.13.1",
+      "httpx": "0.28.1",
+      "httpx2": "2.13.1",
+      "httpx2-jsfetch": "1.0",
+      "idna": "3.20",
+      "iniconfig": "2.3.1",
+      "librt": "0.16.0",
+      "license-expression": "30.4.4",
+      "markdown-it-py": "4.2.0",
+      "mdurl": "0.1.2",
+      "msgpack": "1.2.3",
+      "mypy": "1.20.2",
+      "mypy-extensions": "1.1.0",
+      "numpy": "2.5.3",
+      "opentelemetry-api": "1.45.1",
+      "packageurl-python": "0.17.6",
+      "packaging": "26.3",
+      "pathspec": "1.1.1",
+      "pip": "26.2.1",
+      "pip-api": "0.0.35",
+      "pip-audit": "2.10.1",
+      "pip-requirements-parser": "32.0.1",
+      "platformdirs": "4.12.4",
+      "pluggy": "1.6.0",
+      "py-serializable": "2.1.0",
+      "pycparser": "3.1",
+      "pydantic": "2.13.5",
+      "pydantic-core": "2.46.5",
+      "pygments": "2.21.0",
+      "pyparsing": "3.3.3",
+      "pytest": "9.1.1",
+      "python-multipart": "0.0.32",
+      "pyyaml": "6.0.3",
+      "requests": "2.34.2",
+      "rich": "15.0.0",
+      "ruff": "0.16.10",
+      "shapely": "2.2.0",
+      "sortedcontainers": "2.4.0",
+      "soundfile": "0.14.0",
+      "starlette": "1.7.0",
+      "stevedore": "5.9.1",
+      "tomli": "2.5.0",
+      "tomli-w": "1.2.0",
+      "truststore": "0.10.4",
+      "types-shapely": "2.1.0.20260728",
+      "typing-extensions": "4.16.0",
+      "typing-inspection": "0.4.4",
+      "urllib3": "2.8.0",
+      "uvicorn": "0.54.0",
+      "wsproto": "1.3.2"
+    },
+    "provider_sdks": "google-cloud-speech/google-genai adapters not implemented by A"
+  },
+  "entrypoints": {
+    "bootstrap": "python -m flowlens.cli.bootstrap_admin",
+    "composition": "flowlens.api.host:create_host",
+    "contract_smoke": "python -m flowlens.testing --track A (MOCK only)",
+    "host": "python -m flowlens.api.serve",
+    "legacy_archive": "python -m flowlens.cli.migrate_archive",
+    "maintenance": "python -m flowlens.cli.maintenance"
+  },
+  "frozen_ports": {
+    "AnalysisModule": [
+      "validate",
+      "accept",
+      "snapshot",
+      "purge"
+    ],
+    "AnalysisRepository": [
+      "transcript",
+      "append_review",
+      "associations",
+      "memory",
+      "findings",
+      "briefs"
+    ],
+    "ArtifactLifecycle": [
+      "submit",
+      "download",
+      "inventory",
+      "purge"
+    ],
+    "AssetAccess": [
+      "download",
+      "submit"
+    ],
+    "ContextReader": [
+      "lookup"
+    ],
+    "EvidenceService": [
+      "resolve",
+      "register"
+    ],
+    "GeometryReader": [
+      "observations"
+    ],
+    "JobClient": [
+      "lease",
+      "heartbeat",
+      "result",
+      "cancelled"
+    ],
+    "ProviderAdapter": [
+      "check",
+      "transcribe",
+      "extract"
+    ],
+    "Repository": [
+      "append",
+      "get"
+    ],
+    "SourceReader": [
+      "manifest",
+      "read_events",
+      "tracks"
+    ],
+    "TransactionFactory": [
+      "begin"
+    ],
+    "UnitOfWork": [
+      "repository",
+      "enqueue_event",
+      "audit",
+      "after_commit",
+      "commit",
+      "rollback"
+    ]
+  },
+  "host_parameters": [
+    "settings",
+    "modules",
+    "mutation_operations",
+    "analysis_module",
+    "context_reader",
+    "job_policies",
+    "provider_adapters",
+    "repository_factories"
+  ],
+  "import_limits": {
+    "decoder_timeout": 60,
+    "max_drafts": 100,
+    "max_duration_ms": 7200000,
+    "max_file_bytes": 536870912,
+    "max_files": 4,
+    "max_owner_drafts": 16,
+    "max_rows": 200000,
+    "max_sidecar_bytes": 67108864,
+    "max_total_bytes": 2147483648,
+    "ttl_ms": 86400000
+  },
+  "manifest_version": "package-a-handoff-1",
+  "measured_baseline": {
+    "final_reconfirmation": "docs/testing/a102-benchmark.json",
+    "profile": "100 sessions,20objects,60min replay,60s track cadence,two60min audio channels",
+    "record": "docs/testing/a101-benchmark.json",
+    "timing_transport": "ASGI local; excludes browser/LAN/provider"
+  },
+  "migrations": [
+    {
+      "checksum": "0689eccaf37afcba6ba4a33b81f03bd67ced519809bc8ef7d5d1be8ca8730c4f",
+      "depends_on": [],
+      "id": "platform.0001",
+      "owner": "A"
+    },
+    {
+      "checksum": "1929307175053871c98eddf487b383a332bfda683409adc39721d608fea068c8",
+      "depends_on": [
+        "platform.0001"
+      ],
+      "id": "platform.0002",
+      "owner": "A"
+    },
+    {
+      "checksum": "1ac711b29132c46a5fb7c7963e0d75e2a5c2ea013f8754c9ebef4cd678fd9dc8",
+      "depends_on": [
+        "platform.0002"
+      ],
+      "id": "platform.0003",
+      "owner": "A"
+    },
+    {
+      "checksum": "c6b7f238979eb05062743ad0bd2ec5cc9c8c43654c23f379a94f612ff7457018",
+      "depends_on": [
+        "platform.0003"
+      ],
+      "id": "platform.0004",
+      "owner": "A"
+    },
+    {
+      "checksum": "1e7314291a6b72be1f0d19dfbe459d715a0590d16c372e2754a21dafc6b55e0a",
+      "depends_on": [
+        "platform.0004"
+      ],
+      "id": "platform.0005",
+      "owner": "A"
+    },
+    {
+      "checksum": "077b7608e7e1ec1223a81ae2b17f119da14583c8fdd600785fbe892e3ea44ceb",
+      "depends_on": [
+        "platform.0005"
+      ],
+      "id": "platform.0006",
+      "owner": "A"
+    },
+    {
+      "checksum": "713aeb5d405e715f4311f7e981fac9aacf541566b1150cd331c6db0e3d1213c0",
+      "depends_on": [
+        "platform.0006"
+      ],
+      "id": "platform.0007",
+      "owner": "A"
+    },
+    {
+      "checksum": "1daa20a3f4b144cf4ba0e216689280d09105bd45f33bb2d67ac323710e4465d1",
+      "depends_on": [
+        "platform.0007"
+      ],
+      "id": "platform.0008",
+      "owner": "A"
+    },
+    {
+      "checksum": "31b6e81357353603175b8a49e959c3818f78590925e051eacc9c89b81ab0ba7f",
+      "depends_on": [
+        "platform.0008"
+      ],
+      "id": "platform.0009",
+      "owner": "A"
+    },
+    {
+      "checksum": "793468964aaacaa760b28d90fe018b1a65b8f774d3bb2c956bea0f5febf8b403",
+      "depends_on": [
+        "platform.0009"
+      ],
+      "id": "platform.0010",
+      "owner": "A"
+    },
+    {
+      "checksum": "a81ac4729558d76385e1f50a7ae2e3eb86c572613a469b16654c8ee8f6bb0dd5",
+      "depends_on": [
+        "platform.0010"
+      ],
+      "id": "platform.0011",
+      "owner": "A"
+    },
+    {
+      "checksum": "0f67fb1c2c473b0d1357d62e40b99b37e0f2c7c67d0a5c985e77f8d6cdc5b468",
+      "depends_on": [
+        "platform.0011"
+      ],
+      "id": "platform.0012",
+      "owner": "A"
+    },
+    {
+      "checksum": "3193b18aa1b2fcbc9ee5bf664a5cc3e2fa8c071789c79e5634d7cda90ae97743",
+      "depends_on": [
+        "platform.0012"
+      ],
+      "id": "platform.0013",
+      "owner": "A"
+    },
+    {
+      "checksum": "513ab2ec16c74f17913e71025551a3426b7c59690a532cf0c10bce3c0e07b6d0",
+      "depends_on": [
+        "platform.0013"
+      ],
+      "id": "platform.0014",
+      "owner": "A"
+    },
+    {
+      "checksum": "a8d910c0f6aee09010638c782c273eec8268d104814c41ecea517eacf287de60",
+      "depends_on": [
+        "platform.0014"
+      ],
+      "id": "platform.0015",
+      "owner": "A"
+    },
+    {
+      "checksum": "411cbada268ece89b1bf4ebc69f504309017bf4794a61567707361ce88939e07",
+      "depends_on": [
+        "platform.0015"
+      ],
+      "id": "platform.0016",
+      "owner": "A"
+    },
+    {
+      "checksum": "93ce87ecdcf8e7b9c72c35e3a9550d962958d2d26ac6443c5c5cab4496582f35",
+      "depends_on": [
+        "platform.0016"
+      ],
+      "id": "platform.0017",
+      "owner": "A"
+    },
+    {
+      "checksum": "6b7af46a72b2dc84cece6d765c5db33d2b71151f52d46fc94d3c7cd3be7c3372",
+      "depends_on": [
+        "platform.0017"
+      ],
+      "id": "platform.0018",
+      "owner": "A"
+    }
+  ],
+  "module_registration_fields": [
+    "name",
+    "contract_version",
+    "mock",
+    "routes",
+    "services",
+    "repositories",
+    "migrations",
+    "job_handlers",
+    "snapshot_reader",
+    "purge_handler",
+    "readiness",
+    "config_keys",
+    "inventory_namespaces"
+  ],
+  "remaining_limitations": [
+    "No real B/provider smoke/semantic held-out evaluation or approved partner source",
+    "No browser/VM/high-frequency throughput benchmark; p95 snapshot has narrow margin",
+    "No frontend/container/deployment/off-host encrypted backup or scheduler",
+    "Maintenance CLI rejects non-A migration ledger; B-aware composition must be reconciled",
+    "ModuleRegistration.services/repositories/job_handlers/readiness/config_keys are descriptors; host parameters/policies/adapters require explicit wiring",
+    "Locked FastAPI lazy include route traversal uses its effective_candidates; retest on dependency updates",
+    "Purge inventory declarations describe analysis.* namespaces, not arbitrary SQL tables; custom B table/restore compatibility must be proved at integration"
+  ],
+  "repository_namespaces": {
+    "evidence": [
+      "Evidence"
+    ],
+    "source_events": [
+      "SourceEvent",
+      "Track"
+    ]
+  },
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/disk"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/ops-audit"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/provider-profiles"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/provider-profiles"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/provider-profiles/{profile_id}/checks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/provider-profiles/{profile_id}/history"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/sessions/{session_id}/audit"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/sessions/{session_id}/purge"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/sessions/{session_id}/purge-preview"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/sessions/{session_id}/purge-resume"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/usage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/assets/{asset_id}/audio"
+    },
+    {
+      "method": "HEAD",
+      "path": "/api/v1/assets/{asset_id}/audio"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/logout"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/password"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/imports"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/imports/{import_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/imports/{import_id}/commit"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/imports/{import_id}/metadata"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/imports/{import_id}/metadata"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/legacy/sessions/{legacy_id}/history"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/alerts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/alerts/{alert_id}/history"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/sessions/{session_id}/alerts/{alert_id}/seen"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/sessions/{session_id}/analysis-runs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/analysis-runs/{run_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/sessions/{session_id}/analysis-runs/{run_id}/cancel"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/artifacts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/artifacts/{artifact_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/artifacts/{artifact_id}/download"
+    },
+    {
+      "method": "HEAD",
+      "path": "/api/v1/sessions/{session_id}/artifacts/{artifact_id}/download"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/entities/{entity_id}/geometry"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/history"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/indicators"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/legacy-history"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/playback"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/sessions/{session_id}/playback"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/rules"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/sessions/{session_id}/rules/evaluations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/snapshot"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/sources"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/sources/{source_id}"
+    },
+    {
+      "method": "WEBSOCKET",
+      "path": "/api/v1/sessions/{session_id}/stream"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/sessions/{session_id}/usage"
+    },
+    {
+      "method": "GET",
+      "path": "/docs"
+    },
+    {
+      "method": "HEAD",
+      "path": "/docs"
+    },
+    {
+      "method": "GET",
+      "path": "/docs/oauth2-redirect"
+    },
+    {
+      "method": "HEAD",
+      "path": "/docs/oauth2-redirect"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "PUT",
+      "path": "/internal/artifacts/{artifact_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/internal/assets/{asset_id}/audio"
+    },
+    {
+      "method": "HEAD",
+      "path": "/internal/assets/{asset_id}/audio"
+    },
+    {
+      "method": "POST",
+      "path": "/internal/jobs/lease"
+    },
+    {
+      "method": "POST",
+      "path": "/internal/jobs/{job_id}/cancelled"
+    },
+    {
+      "method": "POST",
+      "path": "/internal/jobs/{job_id}/heartbeat"
+    },
+    {
+      "method": "POST",
+      "path": "/internal/jobs/{job_id}/input"
+    },
+    {
+      "method": "POST",
+      "path": "/internal/jobs/{job_id}/results"
+    },
+    {
+      "method": "GET",
+      "path": "/openapi.json"
+    },
+    {
+      "method": "HEAD",
+      "path": "/openapi.json"
+    },
+    {
+      "method": "GET",
+      "path": "/ready"
+    },
+    {
+      "method": "GET",
+      "path": "/redoc"
+    },
+    {
+      "method": "HEAD",
+      "path": "/redoc"
+    },
+    {
+      "method": "GET",
+      "path": "/release.json"
+    }
+  ],
+  "sensitive_inventory": {
+    "B_inventory": "must declare analysis.* records, transcript/memory/findings/options/reviews/briefs/query/report/provider scratch and purge behavior at integration",
+    "artifact_staging": "pending/accepted derivative audio and reports; current permission/hash/expiry required",
+    "backup": "LOCAL_PRIVATE_UNENCRYPTED snapshot includes sensitive DB/assets; retention prune required",
+    "import_staging": "untrusted uploads plus draft metadata/rights/retention; TTL24h and bounded counts",
+    "logs": "IDs/status/timing/hashes/usage only; no transcript/audio/key/header/provider body",
+    "raw_assets": "immutable uploaded audio and observed sidecars under opaque private storage keys",
+    "sqlite": "accounts/password hashes, cookie and worker token hashes, grants, revisions, source metadata/rights, evidence quotes, jobs/results/usage, audit/receipts, replay caches",
+    "tombstone_journal": "current ledger.jsonl/head.json outside restored roots; minimal deletion authority"
+  },
+  "source_sha256": {
+    "backend/flowlens/__init__.py": "8efbeb5a798423b3fcfef9ac53bf1e2595dcecedf5dca695512e1fda8f7da576",
+    "backend/flowlens/api/app.py": "16c1867ff5feb17fc4c69bf720a607fba2a28a1cd52fb3d74587607194619a27",
+    "backend/flowlens/api/host.py": "86c30ac118a7b3b94ef2472584bbddb5c56ffbe5b78dc5544725cf95f53344c2",
+    "backend/flowlens/api/serializers.py": "f03411754f23df92d81c989dfec34237c7ea39b58545b52fd29e69e3c090cb5d",
+    "backend/flowlens/api/serve.py": "bdbdd46970558f8af87975062c6ad7b24541bc2c2f0b103d34281380ef876d44",
+    "backend/flowlens/artifacts/__init__.py": "ccbe9c03fd7d84ca1f5da2d75a079dbde3722414b30e47e48552c42649cc900d",
+    "backend/flowlens/artifacts/lifecycle.py": "53c4c784b624202a799121fd2a66a6622ab99b74ba1e6ac499f62cc12b9f4d0a",
+    "backend/flowlens/artifacts/profiles.py": "777a938604c029fd9c624732d4138f8d3ee8b5e046a6f0c6b9ee3592e2021606",
+    "backend/flowlens/artifacts/routes.py": "95b3679e365248d6d4d468fa342da969c4a916b8085044152ec5a1fc02803b67",
+    "backend/flowlens/assets/access.py": "001e7c7b6ad10a5a02576a70b766be8b8aba2a4ae7a1beeaa8e40308922fe758",
+    "backend/flowlens/assets/routes.py": "91047635a486b60dcfc1e30a24da7eb24860c1d17f831d4d55afd24cec3061c4",
+    "backend/flowlens/assets/storage.py": "6ce4b8f05b1b1ac5c2c5dc0f14629d01ab407678a0f57e0bdf4319da9df6894f",
+    "backend/flowlens/auth/accounts.py": "9627802af35217db58c92ba3c3818aedab5ba08939ba0dbaaec9abe429aa6b29",
+    "backend/flowlens/auth/permissions.py": "6e124a5cb11e796dd96270affb3523f69f493f1e690846e8b74f6c4fd19130e3",
+    "backend/flowlens/auth/routes.py": "b871d45c552ffcdb95ef7b6ab531cb71dd60bdf208436797cb18e556bd38dbdb",
+    "backend/flowlens/auth/sessions.py": "f57a96b03d691566ca2eab6186c4adea03fa6003c9edf2205d9a34ba28c149ee",
+    "backend/flowlens/auth/transport.py": "5f55aeda77ccdfe0a34a2bb33d6961d84b57d2919b93c31bb501ef74372924ec",
+    "backend/flowlens/cli/bootstrap_admin.py": "1f52727f4c13aa2708cf62fc3ef2a7514fb72e9215a7f884ee9ec05f5382436d",
+    "backend/flowlens/cli/maintenance.py": "1a11d65dd0ec35eede8b21affbe7841ebc880f89df457057234462e22770864b",
+    "backend/flowlens/cli/migrate_archive.py": "55784b0e5f46d00ce3164b252f8320986433ead31f58bce51c28d4163ed3b20b",
+    "backend/flowlens/clocks/normalization.py": "2caf176ba69e8f170ba16bbad0d9d6256400cef1fdafd96a46b86950b40ee094",
+    "backend/flowlens/contracts/generate.py": "99b61913dc1cb23d1b773428294c5816297412ba53cac65d3768f79e0acf5df2",
+    "backend/flowlens/contracts/models.py": "aa034b0d72afc148f0a1456fa87a7c9a394c06d3c00c70f8c06f3fe68ab7ed5c",
+    "backend/flowlens/contracts/ports.py": "932c973b336a8ac8fcb0b696465733ad2846ec23299710eaaf6f53cb5896a229",
+    "backend/flowlens/core/config.py": "29c1a0d0a79ec43bbf4cf147a105207263e28a99dad4015ba0eb4e1e91cae58c",
+    "backend/flowlens/core/errors.py": "46ec8075e87286e50d10da1b246ceac23b0d7be05e0480e734076c9496fa4238",
+    "backend/flowlens/core/host_config.py": "4981afb7364277e8c527e131c0c8e2e3d9e24b134f80eb6d2da59bee493fcab8",
+    "backend/flowlens/core/modules.py": "0e81ce9c601d5072b911cb6933ca0783136dc051ae452d82e1421e8543b87dd5",
+    "backend/flowlens/evidence/registry.py": "b59a70d7753737e0149a3fe4ee47234a1ddc439221135fd954f694598bcbfdc3",
+    "backend/flowlens/geometry/alerts.py": "ca6fc21e2153069c6246b9dae3afa313281284c0739748d15f8b3badafa5a265",
+    "backend/flowlens/geometry/indicators.py": "fd6dfd0e5feccce5e48e7035c70a6da535c5b2ab92ffc66eb920e28fe5e40538",
+    "backend/flowlens/geometry/kernel.py": "a0e043c518e47cc0159f4393baf578831ebc06987f994918fd8750d2d213309a",
+    "backend/flowlens/geometry/occupancy.py": "c1c17461466dd542bec06cb893fad281bba573d3cd53eb552848855e3846d9f8",
+    "backend/flowlens/geometry/route_rules.py": "3184f6d5048d96be2611b876ad56e6fa971e73104d89c0ebdc007d623c6e6908",
+    "backend/flowlens/geometry/routes.py": "217567c265ae72e1b9081041abc1a8aa182b05a26b83ca5d1607afca8ea8530a",
+    "backend/flowlens/geometry/rules.py": "e4f184db76ef10e11bd072ef5d8247c200cf694861e8b30daa6198969c072de7",
+    "backend/flowlens/geometry/service.py": "307b348f5ae755479b9ce32fa20c55f38be1a7efe4c1ba01a314b935db0d1545",
+    "backend/flowlens/imports/commit.py": "7a00b9c875499c9535fb6c1f5a7c8a6328612753dcd0974766754804e82858df",
+    "backend/flowlens/imports/inspection.py": "dbcacc9c4eb53800b5000fe197c4ef20b3e0d3ee894d8a163764534bd9fec996",
+    "backend/flowlens/imports/metadata.py": "caa484e57313b57579e1b1b90bea87e770e914db8fc0ee1cce4174543fe6b662",
+    "backend/flowlens/imports/normalization.py": "ae41fb9c564800a52f1703a296444d9c4c7bdf9b33bdbabac4f09b02d1fc691e",
+    "backend/flowlens/imports/routes.py": "6290dd1e8769d7647f2211a7e714303999cfc4242d563aa9edfd8a72d9d205fd",
+    "backend/flowlens/imports/staging.py": "ef6e2bc9dbda2ed48e88a4c3bec8b3c1207a88223ea6d3bcc9d292994beefc7b",
+    "backend/flowlens/jobs/coordinator.py": "8da0d522edb81a884b004bb0728c72e257e6f14471b2ff2c6b647d1ced4afa33",
+    "backend/flowlens/jobs/routes.py": "94468847e6422f0a91c0ac4bc809279f84d73b44e0723c653df1ec9c92186085",
+    "backend/flowlens/ops/__init__.py": "fac33c1e37c043f83aa03bf0a246c353ce1d4255ceec3c665f435b623715e139",
+    "backend/flowlens/ops/health.py": "cf70355e51660fa555750c482fcf2aa914c4040d4724c036fcd0eacb9dfb04ff",
+    "backend/flowlens/ops/logs.py": "3db493d757b86eea35b18f95864f1307479f51174db392e0a45616a676b06ecb",
+    "backend/flowlens/ops/providers.py": "2b3afd1f2552944f230699e1928e1d7a5dff9eba8d9d10c07ad251b69141e70c",
+    "backend/flowlens/ops/routes.py": "7ffd580f0a51babb4e9eeb075bd4cab0ca5fab2242a9f49baa8f472dbb23fd51",
+    "backend/flowlens/ops/usage.py": "060be9d0f93099d4f0a55ede401a92f38ab547daddbe0b7414ce6714c2ae7b9e",
+    "backend/flowlens/recovery/__init__.py": "a97ad5d90a186c6055914e9f3f4b040cc5da97da89b64f9670dadcb3853d73df",
+    "backend/flowlens/recovery/candidates.py": "80f1805439695c4178f1b2a8b3621221b7b949b8330029ba4d2e8a89a1c6e89f",
+    "backend/flowlens/recovery/catalog.py": "1c0789018d4599df4bb9d86349201b39a34e65cc5b7076d4d40b21d73ae6bd03",
+    "backend/flowlens/recovery/maintenance.py": "84ca8dafbedfb7359813822739c8b40606da9e51fce8ab6db6c81a94e16de4c6",
+    "backend/flowlens/recovery/snapshots.py": "8ca26b98a516fffb1d77a5596646dfd3beb9c28dd19c75b1a06a67db72525fcf",
+    "backend/flowlens/replay/compatibility.py": "3509971fb740b0bd5721e1e0b367270533fe1234c7ccaac5561832ea84a0b8c4",
+    "backend/flowlens/replay/controls.py": "7f66294b35a489a93ce7f789bd1cea33b18516b0b68ad90b1a80a438dbb1bf7a",
+    "backend/flowlens/replay/routes.py": "19295c01facabe99d2c1f44ae2de8c16e5a1b1a4d43ab991b138579a84e32252",
+    "backend/flowlens/replay/snapshots.py": "39a0d447af8e26553641493a804fc878853ffe3ae1cb9e4aff63a8d024462772",
+    "backend/flowlens/replay/streams.py": "dead272dc9dbf652e00fbd8f5e1a1fc3eecc940bdd58faf5f1fdec249d33220b",
+    "backend/flowlens/replay/views.py": "f463f47a9e532a5a9f483c8e5009e89055f2a77cc5e3d7ef284592134739255a",
+    "backend/flowlens/retention/__init__.py": "07596ed014fe4e8001fecb5a143ab24bd98ae2091315333bb5c9e6bdcf3170a2",
+    "backend/flowlens/retention/coordinator.py": "cdb020279f4a771178d06ddc6cfc5d1a83de48db1d3a8d105128062a38396c03",
+    "backend/flowlens/retention/journal.py": "4846785dd6d6b20f4fcae90d4a39cdd2eaae8c9dbe3ebb38b1b006779af32681",
+    "backend/flowlens/retention/routes.py": "4815e81b6a207c764facb25d2951feeb599b7efe71ffd881c3a7eb697454e895",
+    "backend/flowlens/sources/metadata.py": "4c64523aaf578802efa67acf598942fa3e2172526460a7b324cd020bd6f85a6d",
+    "backend/flowlens/sources/policy.py": "d2090dfb82a5b0f73bd03f31687e1850b2307919ad3f1012ddae3a9c7eb25cc1",
+    "backend/flowlens/sources/store.py": "7b0029a687e4169a42add99cabea5e94d8c763c8533e41b66437ed610e8dad28",
+    "backend/flowlens/storage/sqlite/database.py": "081d02760073c71dcc4297c72b6b1cf1d16f028f465c0f58d42ffba9b02bff40",
+    "backend/flowlens/storage/sqlite/legacy.py": "69b5b17cdddad0c22484cd7477b642beaa0be18a367e34a772530ae4b52a4827",
+    "backend/flowlens/storage/sqlite/migrate.py": "44acc1b64ed0bcd7b72cd2c8ccd8bf955037d3bdde72b4ce669b28dd3f099ccb",
+    "backend/flowlens/storage/sqlite/mutations.py": "f9c0ee935d25fa8c88d185630538e49e546e5636149c8fb23558250946cb6f65",
+    "backend/flowlens/storage/sqlite/repository.py": "2ef14a874e086bfd29ff85dea0fc3b99b47abe484280c5ccb21cb96e277959f1",
+    "backend/flowlens/storage/sqlite/schema.py": "1cae899018c826ee7140a2f92e985b8c08e9097cb5b3834ec652e6a96647b822",
+    "backend/flowlens/testing/__init__.py": "022cdb325121457a6f1db12ce1805ec4c6fd806e3398cead9dd523856bcbbfef",
+    "backend/flowlens/testing/__main__.py": "9030484c498602237cee0c6305e82906fea809d1f158ba04e05d968d0cff4de3",
+    "backend/flowlens/testing/harness.py": "b424f0c9545faf82a9816f02572cff0df06dc8700467f1495be1a524a14acc27",
+    "contracts/examples/context.json": "d86034ee447a53c5312f9830e3a82d5a4df8da3326941c1b9fa57fead9cd9b13",
+    "contracts/examples/events.json": "766625dae698f6f47c4f4d759ce137122451819313824ee404625ac2d76c3cfa",
+    "contracts/examples/finding.json": "b28b70795fb76a7ad85e633f62f03e1ce483af297a3ee944a9954bb7833191d9",
+    "contracts/examples/intent.json": "4b67f68f6c4a4e71b9e08312916e882d61c08074214b0efaf415fbe8349cba64",
+    "contracts/examples/invalid/empty_unknown.json": "33e41d5be174cddf390574f076b4cbaf4a52cb812a77eef00ede1feb3d1fa4fc",
+    "contracts/examples/invalid/extra_command.json": "ac25056e330ebc875ecdd0ef31c173a6e433708a26271effdececfaca8524a06",
+    "contracts/examples/invalid/invalid_enum.json": "245b1f3d06fc1b7a5d1557fb956d035ac891baf5a85379dfe1f6530d36d5fd85",
+    "contracts/examples/invalid/invalid_hash.json": "3fd776e297d1d3db71acfbf9fa6ae11045725cced3a550738a67d0276df269f2",
+    "contracts/examples/invalid/invalid_range.json": "03966d2ddb5c03ae63181db19dc238939964915baba5f31a679faad32eb9f3b2",
+    "contracts/examples/invalid/negative_time.json": "86c02c5e2aeff6a3788c24a5cb8c8690c25777e0aacf30f030471882bbb876e1",
+    "contracts/examples/invalid/nonfinite.json": "9569d3f6390f37dc7d1c8984348ad30eb26e9e2307d785a15ab21405ed3c4bbc",
+    "contracts/examples/invalid/wrong_scope.json": "85b17936ae525b7d49aab1463157e367451ffe3b87c58715cc15a5ed722c49a2",
+    "contracts/examples/job_result.json": "ae5a74ec37c512e839eda9b9dc7f186db7b83338b6fdb8d81c8e70d6b860a069",
+    "contracts/examples/manifest.json": "27808af977bad7194b69265280ee0e8cd6a01a91bfacd40ba83a3094df296681",
+    "contracts/examples/option.json": "04541553233ecadddf4ad1ba5e2d48faa2709a9d1154dd5e9ed4c49e51ded396",
+    "contracts/examples/review.json": "a545ac2ae61f920a405dc25bc31ca387f94efda842d90efc3a561b7d47048f2a",
+    "contracts/examples/track.json": "4e376ae1a38ac35e019f872388a7642f55dd6df265be02135a7fc09fe725a07f",
+    "contracts/examples/transcript.json": "83f9e9d39d0e1c3fa4cbdfaa5a1cccaf034f0f4847c72ca6f109624bfa308078",
+    "contracts/json-schema/internal/ArtifactSubmission.json": "d7d69a6de5ee0fe50cf0ca5b3628b0ae34659cb80cdca98a32dabda10f639109",
+    "contracts/json-schema/internal/CommitReceipt.json": "4da53dc42b8da38b8d5b8887d63f8b2b79836d3746c00f77de24e9ef702456eb",
+    "contracts/json-schema/internal/JobLease.json": "65d8d66d697f7fd2528b5ad3e090aa5a134c5eb28d650c1c524225ceb16939c5",
+    "contracts/json-schema/internal/JobResult.json": "8b9dfbcdf3ececfe9cba86c79ae4652356d78334f95e0e7502252549262b48a6",
+    "contracts/json-schema/internal/RequestContext.json": "42c8157ef8df8d88afb04236bcfd8eaccc05e67ffca6d5c0b5c029f42f70b955",
+    "contracts/json-schema/internal/ToolRequest.json": "99ecfb552f470ba61f90cf8f1e96dd163d9ab4c4f632c47c36b0304342c79d08",
+    "contracts/json-schema/internal/Usage.json": "70e477920fb72a0207267ea63c246a0a9ad2be30028457123c7f593a5106d822",
+    "contracts/json-schema/public/AnalysisRun.json": "6654667bc46920596b578af51be738e7e59a0eef846a85c3a8d9cbd4e10de6cf",
+    "contracts/json-schema/public/Association.json": "eaa91c1a8f17254496959ea0c82eb62028b11bb081b0208e0138927a3405a2f2",
+    "contracts/json-schema/public/Brief.json": "ede6684d88b16ddd3cc96ed9562d1bb46db91489c821bef135c060f633d26dda",
+    "contracts/json-schema/public/ClockMapping.json": "c6a61b5733cab4faf8b7e494eedddda11fd329a336b6f64ff086fecc0968af18",
+    "contracts/json-schema/public/Coverage.json": "97e1d004baac8b5b5b6334880fbb904f117fb772da2999ee06f852e6b71997cb",
+    "contracts/json-schema/public/CriticalSlot.json": "50be4f2657c49622f7b92bd2583f7575764f070159ae7844c3f243e79273ce68",
+    "contracts/json-schema/public/Evidence.json": "789b6ceee4723ee775bb22822c735069f18552d73355d8b0df1bd8f58c3c77bb",
+    "contracts/json-schema/public/Finding.json": "73b1dcd555bb437672eff06bbf24e6d182f014cf420bd23ad2f794413093bbef",
+    "contracts/json-schema/public/GeometryResult.json": "d5e9fe5109dd2b57c90bc9a23f8b497ceedd25910b601df0e02b23586e41ba73",
+    "contracts/json-schema/public/Intent.json": "cb2e8f68a671f95faab62d4178e5f81985ed89b273d818fabeed697487f9c1f2",
+    "contracts/json-schema/public/JobProgress.json": "d7e5904b10ac765b15a95537a6c289d8484f691af153004e22f454e15baabc67",
+    "contracts/json-schema/public/MemoryEvent.json": "f5113dc7f28a6360a5a92cce0ec523573e17b05fcf8e664f7d5593a35ad65fe9",
+    "contracts/json-schema/public/OpenLoop.json": "745e280dcf2fb87061ea49d9ff99ac623be7ee3bfbe9d685e71f0b246ea45fcc",
+    "contracts/json-schema/public/Option.json": "8969d0da1d3bea1c001ca100785e920c852934581239fabed9771ff98ff1e0ac",
+    "contracts/json-schema/public/Permissions.json": "3fb39296138a3bf19c4b97bc7b6da3af21c66fbb82f1d215356110b94240929c",
+    "contracts/json-schema/public/PlaybackState.json": "58815a91e522d073d03dd3fb292724c7d283dfd159f7ac7164c8c11ab5abe8f9",
+    "contracts/json-schema/public/ProviderProfile.json": "2e5a81f360cb194c6a81bd62b0e7092dfd6562ffb646ab7212adcc493cd69be8",
+    "contracts/json-schema/public/QueryAnswer.json": "3bfea731e3039e502465d82a23e59d0c142d6ebd6d07398ad5e67db547ce9e57",
+    "contracts/json-schema/public/ResyncRequired.json": "1986dd1abc0cd98c910fcda526b35e92afa5b9126f79e192d907e5677e5c0017",
+    "contracts/json-schema/public/Review.json": "5361308cfc00986026b903583315f99c7721b9948059704fb635935078c4825d",
+    "contracts/json-schema/public/Snapshot.json": "30f5faf6c6a7f29522cb82842a02fcae372812f88511b623b4c3b0fd2a3f0b57",
+    "contracts/json-schema/public/SourceEvent.json": "1592ba42409bc5726b62c379785792ea98d15c841e0694560a488ec7b73c779f",
+    "contracts/json-schema/public/SourceManifest.json": "668c232f7b8b4fbf969ec9f9851896b0e8ee3e8f5814fd8129938e19c51a65e3",
+    "contracts/json-schema/public/SourceQualityChanged.json": "636ebc4d53b2bf0fbd370229a003812b27ad67a46a7e7790bb78f5a4c87c0a79",
+    "contracts/json-schema/public/StreamEvent.json": "ad6640ff5c3e23b9e3093dba61cf0c151e24c18efe97af1e44daed6edb401dd0",
+    "contracts/json-schema/public/TimeRange.json": "5cd2ed7ea1f284d6289fc007490df63918702266ccd9dc7bc150fb42d728bd9b",
+    "contracts/json-schema/public/Track.json": "1c9baad04664812fc654b5b265cd405beb8fb9be2b62a5d68b877bc9c2d0ebd7",
+    "contracts/json-schema/public/TranscriptSegment.json": "be78be72c59ea571b7f4b7c183eb7515b39d34a61113640c51ae8557d0a6552e",
+    "contracts/openapi/baseline.json": "999823ad344da134fcff000de1c777c05356e0bb699242a0c3b575c0b1772bd8",
+    "pyproject.toml": "38da9eb291408049bdc1d8bea85c645c28b6d00c599e598ad782ebe1bff90c27",
+    "uv.lock": "53e09e76e71f8193b06efba9bc02c7b79102907fe4df822cecb4fd892d724e6b"
+  },
+  "stage_policy_fields": [
+    "stage",
+    "version",
+    "rights",
+    "outputs",
+    "handler",
+    "ready",
+    "reservation",
+    "config",
+    "concurrency",
+    "lease_ms",
+    "max_attempts"
+  ],
+  "status": {
+    "A_platform_benchmark": "measured; declared profile only",
+    "A_source": "available",
+    "A_tests_build": "passed; see command evidence",
+    "B_composition": "not_started",
+    "G_BE": "not_started",
+    "Phase10": "planned",
+    "domain": "NOT_DOMAIN_VALIDATED",
+    "operational": "not_validated",
+    "provider_verified": false
+  },
+  "supported_job_stages": [
+    "AUDIO",
+    "STT",
+    "INTENT",
+    "ASSOCIATION",
+    "MEMORY",
+    "FINDINGS",
+    "BRIEF",
+    "QUERY",
+    "EXPORT"
+  ],
+  "tables": [
+    "platform_account_audit",
+    "platform_accounts",
+    "platform_alert_revisions",
+    "platform_alert_seen",
+    "platform_artifact_staging",
+    "platform_artifacts",
+    "platform_assets",
+    "platform_attempt_state",
+    "platform_attempt_timing",
+    "platform_attempts",
+    "platform_audit",
+    "platform_auth_sessions",
+    "platform_context_receipts",
+    "platform_context_state",
+    "platform_control_receipts",
+    "platform_events",
+    "platform_evidence",
+    "platform_grants",
+    "platform_import_commits",
+    "platform_import_drafts",
+    "platform_import_metadata",
+    "platform_job_state",
+    "platform_jobs",
+    "platform_legacy_commands",
+    "platform_legacy_events",
+    "platform_legacy_frames",
+    "platform_legacy_imports",
+    "platform_legacy_private_frames",
+    "platform_legacy_sessions",
+    "platform_login_limits",
+    "platform_mutation_receipts",
+    "platform_mutation_versions",
+    "platform_ops_audit",
+    "platform_ops_probe",
+    "platform_ops_requests",
+    "platform_permission_audit",
+    "platform_playback",
+    "platform_provider_checks",
+    "platform_provider_profiles",
+    "platform_purges",
+    "platform_receipts",
+    "platform_records",
+    "platform_recovery_audit",
+    "platform_replay",
+    "platform_replay_snapshots",
+    "platform_revisions",
+    "platform_rule_heads",
+    "platform_rule_receipts",
+    "platform_run_cancels",
+    "platform_run_requests",
+    "platform_run_state",
+    "platform_runs",
+    "platform_schema_migrations",
+    "platform_security_state",
+    "platform_sessions",
+    "platform_source_packages",
+    "platform_source_rights",
+    "platform_sources",
+    "platform_worker_assets",
+    "platform_worker_scopes",
+    "platform_worker_sources",
+    "platform_workers"
+  ],
+  "versions": {
+    "contracts": "1.0.0",
+    "geometry": "footprint-xy-1",
+    "lab_layout": "fictional-1",
+    "python": ">=3.12,<3.13",
+    "reducer": "observed-replay-1",
+    "rules": "lab-rules-1"
+  }
+}

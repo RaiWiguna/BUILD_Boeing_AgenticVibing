@@ -26,7 +26,11 @@ from google.auth.credentials import Credentials
 from pydantic import Field
 
 FIXTURE_HASH = "cf3baa73bc59e37ddbd16e99e8a5f7493c22057d01c02b4030585b88486ba044"
-MANIFEST_HASH = "37472d982c0591f32fe36897aebca727d56d5b812c82ce8f3a201cd7d24cf008"
+# Exact fixture bytes on LF and CRLF checkouts; arbitrary edits remain rejected.
+MANIFEST_HASHES = {
+    "27808af977bad7194b69265280ee0e8cd6a01a91bfacd40ba83a3094df296681",
+    "37472d982c0591f32fe36897aebca727d56d5b812c82ce8f3a201cd7d24cf008",
+}
 
 
 class SmokeProfile(AudioRecord):
@@ -74,7 +78,7 @@ async def run_smoke(
     manifest_path = root / "tests/fixtures/manifests/synthetic-audio.json"
     if (
         digest(source, max_bytes=1_000_000) != FIXTURE_HASH
-        or digest(manifest_path, max_bytes=65536) != MANIFEST_HASH
+        or digest(manifest_path, max_bytes=65536) not in MANIFEST_HASHES
     ):
         raise STTFailure("STT_PERMISSION_DENIED")
     with manifest_path.open("rb") as stream:

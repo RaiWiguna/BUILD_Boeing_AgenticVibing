@@ -295,6 +295,11 @@ def test_host_exposes_internal_account_service_only_during_lifespan(tmp_path):
     app = create_host(HostSettings(profile="test", database_path=tmp_path / "host.db"))
     with TestClient(app) as client:
         assert app.state.accounts.database is app.state.transactions
-        assert client.post("/api/v1/auth/login", json={}).status_code == 422
+        assert (
+            client.post(
+                "/api/v1/auth/login", json={}, headers={"Origin": app.state.settings.origin}
+            ).status_code
+            == 422
+        )
         assert client.get("/ready").status_code == 503
     assert app.state.accounts is None

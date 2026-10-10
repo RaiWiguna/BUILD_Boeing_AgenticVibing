@@ -234,8 +234,11 @@ def test_legacy_credentials_and_mutating_routes_are_not_restored():
                 json={"key": "synthetic-old-key"},
                 headers={"Authorization": "Bearer synthetic-old-token"},
             )
-            assert response.status_code == 404
+            assert response.status_code == 403
+            assert response.json()["code"] == "ACCESS_DENIED"
             assert "synthetic-old" not in response.text
+            # Host guard rejects legacy credentials before routing; routes remain absent.
+            assert path not in client.get("/openapi.json").json()["paths"]
 
 
 def test_migration_cli_synthetic_smoke_and_sanitized_failure(tmp_path):
