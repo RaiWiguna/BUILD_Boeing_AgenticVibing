@@ -69,7 +69,7 @@ function JobRow({ job, current }: { job: ExportJob; current: boolean }) {
           disabled={download.isPending}
           onClick={() =>
             download.mutate(job.id, {
-              onSuccess: (name) => toast.success('Download started', { description: `${name} · generated locally (MOCK)` }),
+              onSuccess: (name) => toast.success('Download started', { description: name }),
               onError: (e) => toast.error(isApiError(e) ? e.message : 'Download failed.', { description: isApiError(e) ? e.recovery : undefined }),
             })
           }

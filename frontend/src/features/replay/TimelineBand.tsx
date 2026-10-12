@@ -1,4 +1,4 @@
-import { AudioLines, ChevronFirst, ChevronLast, ChevronsDownUp, ChevronsUpDown, Keyboard, ListVideo, LocateFixed, Pause, Play, Settings2, VolumeX, X } from 'lucide-react';
+import { AudioLines, ChevronFirst, ChevronLast, ChevronsDownUp, ChevronsUpDown, Keyboard, ListVideo, Loader2, LocateFixed, Pause, Play, Settings2, TriangleAlert, Volume1, Volume2, VolumeX, X } from 'lucide-react';
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { Link } from 'react-router';
 import type { TimeRange, WaveformView, WorkspaceSnapshot } from '@/api/types';
@@ -13,6 +13,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useStreamState } from '@/hooks/useSessionStream';
 import { clamp, formatClock, formatOffset, parseOffset } from '@/lib/time';
 import { cn } from '@/lib/utils';
+import { useAudio } from './audio';
 import { SPEEDS, useReplay, type Speed } from './store';
 
 type Marker = WorkspaceSnapshot['event_markers'][number];
@@ -66,7 +67,11 @@ export function useReplayShortcuts(markers: Marker[]) {
         }
         case 'f':
         case 'F':
-          r.setView(r.view === 'FOLLOW' ? 'LOCAL' : 'FOLLOW');
+          if (!useAudio.getState().available) r.setView(r.view === 'FOLLOW' ? 'LOCAL' : 'FOLLOW');
+          break;
+        case 'm':
+        case 'M':
+          if (useAudio.getState().available) useAudio.getState().toggleMute();
           break;
         case 'Home':
           r.seek(0);
@@ -209,13 +214,57 @@ const SHORTCUTS: [string, string][] = [
   ['Shift + ← →', 'Seek 1 s'],
   ['[  ]', 'Previous / next event'],
   ['F', 'Follow leader'],
+  ['M', 'Mute audio (demo workspaces)'],
   ['Shift + drag', 'Mark a range'],
   ['Home / End', 'Start / end'],
 ];
 
+/** Volume, mute and buffering state for DEMO audio playback. */
+function AudioControl({ compact }: { compact: boolean }) {
+  const volume = useAudio((s) => s.volume);
+  const muted = useAudio((s) => s.muted);
+  const buffering = useAudio((s) => s.buffering);
+  const failed = useAudio((s) => s.failed);
+  const playing = useReplay((s) => s.status === 'PLAYING');
+  const Icon = muted || volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2;
+  if (failed)
+    return (
+      <span role="status" className="inline-flex h-8 items-center gap-1.5 rounded-full bg-notice-tint px-3 text-[12.5px] font-medium text-notice">
+        <TriangleAlert aria-hidden className="size-3.5" /> Audio unavailable · replay is visual
+      </span>
+    );
+  return (
+    <div className={cn('inline-flex items-center gap-2 rounded-[14px] border border-hairline bg-surface pl-1 pr-3 shadow-control', compact ? 'h-9' : 'h-11')}>
+      <Tooltip content={muted ? 'Unmute (M)' : 'Mute (M)'}>
+        <button type="button" aria-label={muted ? 'Unmute audio' : 'Mute audio'} aria-pressed={muted} onClick={() => useAudio.getState().toggleMute()} className="inline-flex size-8 items-center justify-center rounded-[10px] text-ink hover:bg-sunken">
+          <Icon aria-hidden className="size-[18px]" />
+        </button>
+      </Tooltip>
+      <input
+        type="range"
+        min={0}
+        max={1}
+        step={0.05}
+        value={muted ? 0 : volume}
+        onChange={(e) => useAudio.getState().setVolume(Number(e.target.value))}
+        aria-label="Volume"
+        className="h-1.5 w-20 cursor-pointer accent-[var(--color-data)]"
+      />
+      {buffering && playing ? (
+        <span role="status" className="inline-flex items-center gap-1 text-[12.5px] text-ink-2">
+          <Loader2 aria-hidden className="size-3.5 animate-spin" /> Buffering
+        </span>
+      ) : (
+        <span className="text-[12.5px] font-medium text-ink-2">Audio</span>
+      )}
+    </div>
+  );
+}
+
 /**
  * Replay band (comp 03): transport, speed, follow-leader, multi-channel waveform,
- * gaps, event markers, playhead and evidence range. Visual only — no audio is loaded.
+ * gaps, event markers, playhead and evidence range. Visual only for MOCK sessions;
+ * DEMO workspaces (ADR 0003) play real audio and show a volume control instead.
  */
 export function TimelineBand({ waveforms, gaps, markers, transcriptHref, className }: { waveforms: WaveformView[] | undefined; gaps: TimeRange[]; markers: Marker[]; transcriptHref: string; className?: string }) {
   const cursor = useReplay((s) => s.cursor);
@@ -225,7 +274,10 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
   const view = useReplay((s) => s.view);
   const range = useReplay((s) => s.range);
   const leaderName = useStreamState((s) => s.leaderName);
-  const connected = useStreamState((s) => s.connection === 'CONNECTED');
+  const streamConnected = useStreamState((s) => s.connection === 'CONNECTED');
+  const audio = useAudio((s) => s.available);
+  // Following another reviewer would fight the local audio clock.
+  const connected = streamConnected && !audio;
   const [showMarkers, setShowMarkers] = useState(true);
   // Compact by default below 1000 px tall so the workspace fits the viewport (D-2); the user can expand.
   const isShort = useMediaQuery('(max-height: 999px)');
@@ -365,7 +417,7 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
           className={cn('gap-0.5 rounded-[14px] border border-hairline bg-surface p-[3px] shadow-control [&>button]:min-w-[50px] [&>button]:rounded-[11px] [&>button]:px-3 [&>button]:text-[15px] [&>button]:tabular', compact ? 'h-9 [&>button]:h-[28px]' : 'h-11 [&>button]:h-[36px]')}
           options={SPEEDS.map((s) => ({ value: String(s), label: `${s}×` }))}
         />
-        <Tooltip content={connected ? `Follow ${leaderName}'s replay position (F)` : 'Follow leader is unavailable while disconnected'}>
+        <Tooltip content={connected ? `Follow ${leaderName}'s replay position (F)` : audio ? 'Follow leader is not available while audio plays locally' : 'Follow leader is unavailable while disconnected'}>
           <button
             type="button"
             aria-pressed={following}
@@ -381,9 +433,13 @@ export function TimelineBand({ waveforms, gaps, markers, transcriptHref, classNa
             {following ? `Following ${leaderName.split(' ')[0]}` : 'Follow leader'}
           </button>
         </Tooltip>
-        <span className="inline-flex h-8 items-center gap-1.5 rounded-full bg-track px-3 text-[12.5px] font-medium text-ink-2">
-          <VolumeX aria-hidden className="size-3.5" /> Visual replay · no audio (MOCK)
-        </span>
+        {audio ? (
+          <AudioControl compact={compact} />
+        ) : (
+          <span className="inline-flex h-8 items-center gap-1.5 rounded-full bg-track px-3 text-[12.5px] font-medium text-ink-2">
+            <VolumeX aria-hidden className="size-3.5" /> No audio
+          </span>
+        )}
         <div className="ml-auto flex items-center gap-2">
           <Tooltip content={compact ? 'Expand timeline lanes' : 'Compact timeline lanes'}>
             <button

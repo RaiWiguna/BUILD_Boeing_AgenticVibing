@@ -40,6 +40,18 @@ const PLANE = 'M12 1.6c.9 0 1.5 1 1.5 2.4v5.1l7.8 4.5c.4.2.6.6.6 1v1.1l-8.4-2.4v
 function useProjection(layout: LayoutView | null, width: number, height: number) {
   return useMemo(() => {
     if (!layout || !width || !height) return null;
+    if (layout.focus) {
+      // Airport layout (DEMO): equal scale on both axes, framed on the focus window.
+      const f = layout.focus;
+      const bw = f.max_x - f.min_x;
+      const bh = f.max_y - f.min_y;
+      const k = Math.min((width - PAD.l - PAD.r) / bw, (height - PAD.t - PAD.b) / bh);
+      const ox = PAD.l + (width - PAD.l - PAD.r - bw * k) / 2;
+      const oy = PAD.t + (height - PAD.t - PAD.b - bh * k) / 2;
+      const px = (x: number) => ox + (x - f.min_x) * k;
+      const py = (y: number) => oy + (f.max_y - y) * k;
+      return { px, py, kx: k, ky: k, geo: true, p: (pt: Pt): Pt => [px(pt[0]), py(pt[1])] };
+    }
     const b = layout.bounds;
     // Fit vertically to the drawn content (taxiways, hold lines, runway), not the full bounds.
     const ys = [...layout.taxiways.flatMap((t) => t.path.map((p) => p[1])), ...layout.hold_lines.flatMap((h) => h.points.map((p) => p[1])), ...layout.runways.flatMap((r) => r.polygon.map((p) => p[1]))];
@@ -53,7 +65,7 @@ function useProjection(layout: LayoutView | null, width: number, height: number)
     const oy = PAD.t + (height - PAD.t - PAD.b - bh * ky) / 2;
     const px = (x: number) => PAD.l + (x - b.min_x) * kx;
     const py = (y: number) => oy + (top - y) * ky;
-    return { px, py, kx, ky, p: (pt: Pt): Pt => [px(pt[0]), py(pt[1])] };
+    return { px, py, kx, ky, geo: false, p: (pt: Pt): Pt => [px(pt[0]), py(pt[1])] };
   }, [layout, width, height]);
 }
 
@@ -142,7 +154,7 @@ export function SituationCanvas({
             </linearGradient>
           </defs>
           <rect width={size.width} height={size.height} fill="url(#sit-dots)" />
-          <Layout layout={layout} proj={proj} />
+          {proj.geo ? <AirportLayout layout={layout} proj={proj} /> : <Layout layout={layout} proj={proj} />}
           {objects.map((o) => (
             <Trail key={`trail-${o.info.id}`} o={o} proj={proj} asOf={asOf} selected={o.info.id === selected} />
           ))}
@@ -172,7 +184,9 @@ export function SituationCanvas({
           <CircleDashed aria-hidden className="size-3.5" /> Audio gap {formatClock(inGap.start_ms)}–{formatClock(inGap.end_ms)} · no source coverage
         </div>
       )}
-      <p className="pointer-events-none absolute bottom-2.5 right-3.5 text-[12px] text-ink-3">{layout.caption}</p>
+      <p className={cn('pointer-events-none absolute bottom-2.5 right-3.5 text-[12px] text-ink-3', layout.focus && 'max-w-[55%] truncate text-right')} title={layout.caption}>
+        {layout.caption}
+      </p>
     </div>
   );
 }
@@ -249,18 +263,77 @@ function Layout({ layout, proj }: { layout: LayoutView; proj: Projection }) {
   );
 }
 
+/** True-geometry airport layout (DEMO): every runway as its polygon, taxiways to scale. */
+function AirportLayout({ layout, proj }: { layout: LayoutView; proj: Projection }) {
+  const taxiW = Math.max(7, 18 * proj.kx);
+  return (
+    <g>
+      {layout.taxiways.map((t) => {
+        const d = roundedPath(t.path.map(proj.p), 14);
+        return (
+          <g key={t.id}>
+            <path d={d} fill="none" stroke="#d9dee5" strokeWidth={taxiW + 3} strokeLinecap="round" strokeLinejoin="round" />
+            <path d={d} fill="none" stroke="#e8ebf0" strokeWidth={taxiW} strokeLinecap="round" strokeLinejoin="round" />
+            <path d={d} fill="none" stroke="#c9b67a" strokeOpacity={0.6} strokeWidth={1} strokeDasharray="6 6" />
+          </g>
+        );
+      })}
+      {layout.runways.map((r) => {
+        const poly = r.polygon.map(proj.p);
+        const [a, b] = r.centerline.map(proj.p) as [Pt, Pt];
+        const len = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+        const ux = (b[0] - a[0]) / len;
+        const uy = (b[1] - a[1]) / len;
+        const angle = (Math.atan2(uy, ux) * 180) / Math.PI;
+        const inset = Math.min(46, len / 6);
+        return (
+          <g key={r.id}>
+            <polygon points={poly.map((pt) => pt.join(',')).join(' ')} fill="url(#sit-rwy)" stroke="#5d636c" strokeWidth={0.6} />
+            <line x1={a[0] + ux * inset} y1={a[1] + uy * inset} x2={b[0] - ux * inset} y2={b[1] - uy * inset} stroke="#fff" strokeOpacity={0.85} strokeWidth={1.2} strokeDasharray="10 8" />
+            {[0, 1].map((i) => {
+              const [x, y] = i === 0 ? [a[0] + ux * 18, a[1] + uy * 18] : [b[0] - ux * 18, b[1] - uy * 18];
+              const rot = i === 0 ? angle + 90 : angle - 90;
+              return (
+                <text key={i} x={x} y={y} transform={`rotate(${rot} ${x} ${y})`} textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={700} fill="#fff">
+                  {r.ends[i]}
+                </text>
+              );
+            })}
+          </g>
+        );
+      })}
+      {layout.taxiways.map((t) => (
+        <text key={`${t.id}-l`} x={proj.px(t.label_at[0])} y={proj.py(t.label_at[1])} textAnchor="middle" fontSize={11} fontWeight={600} fill="#7a8494" letterSpacing="0.04em">
+          {t.label}
+        </text>
+      ))}
+    </g>
+  );
+}
+
+/** Split a trail where the feed reported nothing for more than 5 s (coverage gap). */
+function splitOnGaps<T extends { t: number }>(points: T[], maxGapMs = 5000) {
+  const out: T[][] = [];
+  for (const p of points) {
+    const cur = out[out.length - 1];
+    if (cur && p.t - cur[cur.length - 1]!.t <= maxGapMs) cur.push(p);
+    else out.push([p]);
+  }
+  return out;
+}
+
 function Trail({ o, proj, asOf, selected }: { o: CanvasEntity; proj: Projection; asOf: number; selected: boolean }) {
   const s = o.series;
   if (!s || !s.points.length) return null;
   const stale = o.state?.track_status === 'STALE';
   const pts = s.points.filter((p) => p.t >= asOf - TRAIL_MS && p.t <= asOf);
   const color = selected ? '#2563eb' : '#5b84e0';
-  const observed = pts.map((p) => proj.p([p.x, p.y]));
+  const runs = splitOnGaps(pts).map((run) => run.map((p) => proj.p([p.x, p.y])));
   const predicted = s.predicted.map((p) => proj.p([p.x, p.y]));
   const beads = pts.filter((p, i) => i > 0 && i < pts.length - 1 && Math.round(p.t / 1000) % 30 === 0);
   return (
     <g opacity={stale ? 0.4 : selected ? 1 : 0.75}>
-      {observed.length > 1 && <path d={roundedPath(observed, 10)} fill="none" stroke={color} strokeWidth={selected ? 2.6 : 2} strokeLinecap="round" strokeLinejoin="round" />}
+      {runs.map((observed, i) => observed.length > 1 && <path key={i} d={roundedPath(observed, 10)} fill="none" stroke={color} strokeWidth={selected ? 2.6 : 2} strokeLinecap="round" strokeLinejoin="round" />)}
       {!stale && predicted.length > 1 && <path d={roundedPath(predicted, 10)} fill="none" stroke={color} strokeWidth={1.6} strokeDasharray="5 5" strokeLinecap="round" />}
       {!stale && predicted.length > 1 && <circle cx={predicted[predicted.length - 1]![0]} cy={predicted[predicted.length - 1]![1]} r={4} fill="#fff" stroke={color} strokeWidth={1.6} />}
       {beads.map((p) => {

@@ -1,4 +1,4 @@
-import { AudioLines, Ear, Eye, Keyboard, Layers, MessageSquareQuote, ShieldOff } from 'lucide-react';
+import { Ear, Eye, Keyboard, Layers, MessageSquareQuote } from 'lucide-react';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { StatusPill } from '@/components/domain/primitives';
@@ -10,7 +10,6 @@ import { SettingsCard } from './SettingsLayout';
 const CATEGORY_DETAIL: Record<string, string> = {
   CRITICAL_SLOT_UNCERTAIN: 'A critical value (runway, callsign, hold point) could not be heard or read with confidence.',
   READBACK_DISCREPANCY: 'The readback candidate names a different value than the instruction it is paired with.',
-  OPEN_LOOP: 'An expected follow-up — a report, readback or response — is not observed in stored coverage.',
   SPEECH_RECORD_DISCREPANCY: 'What was said differs from a recorded system entry for the same object.',
   MOVEMENT_DIVERGENCE: 'Observed movement differs from the active instruction. Needs position data with a footprint.',
   QUALITY_GAP: 'Audio, track or clock coverage is missing; the interval is unknown, never assumed normal.',
@@ -21,7 +20,6 @@ const GLOSSARY: [string, string][] = [
   ['Debrief', 'Post-hoc view with everything recorded, including information that arrived later.'],
   ['Evidence', 'A time range of audio, transcript, track or event that supports a statement. Labelled E-nn.'],
   ['Finding', 'A candidate issue for a reviewer to assess. Labelled F-nn. Not a fact until reviewed.'],
-  ['Open loop', 'An expected follow-up that has not been observed yet.'],
   ['NOT_EVALUABLE', 'Not enough data to assess. Shown grey — never as consistent or safe.'],
   ['Run', 'One analysis pass over a source revision. Runs are never switched automatically.'],
   ['Revision', 'Reviews, corrections and briefs append new revisions; earlier ones stay in the record.'],
@@ -122,9 +120,8 @@ export function HelpPage() {
               {[
                 ['Source revision', 'Which import revision the run analysed.'],
                 ['Run', 'Analysis pass label (e.g. #03) and input revision.'],
-                ['Model · prompt · rule · schema', 'Versions used to produce the item. MOCK in this build.'],
+                ['Model · prompt · rule · schema', 'Versions used to produce the item.'],
                 ['Event vs available time', 'When it happened vs when it was known — As-known uses the latter.'],
-                ['Labels', 'SYNTHETIC, MOCK, NOT_DOMAIN_VALIDATED travel with the data and exports.'],
                 ['Revisions', 'Corrections and reviews supersede, never overwrite.'],
               ].map(([k, v]) => (
                 <li key={k} className="flex gap-3 rounded-[14px] bg-sunken px-4 py-3">
@@ -163,16 +160,6 @@ export function HelpPage() {
               <p className="mt-3 flex items-center gap-2 text-[12.5px] text-ink-3">
                 <Keyboard aria-hidden className="size-4" /> All controls are reachable by keyboard.
               </p>
-            </SettingsCard>
-            <SettingsCard title="This build">
-              <ul className="space-y-2.5 text-[14px] text-ink-2">
-                <li className="flex gap-2.5">
-                  <AudioLines aria-hidden className="mt-0.5 size-4 shrink-0 text-ink-3" /> Replay is visual only — no audio files are bundled.
-                </li>
-                <li className="flex gap-2.5">
-                  <ShieldOff aria-hidden className="mt-0.5 size-4 shrink-0 text-ink-3" /> All data is SYNTHETIC and served by an in-browser MOCK adapter. No backend or provider is called.
-                </li>
-              </ul>
             </SettingsCard>
           </div>
         </div>

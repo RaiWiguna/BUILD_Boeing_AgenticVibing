@@ -15,6 +15,9 @@ interface ReplayState {
   view: ReplayView;
   /** Evidence range highlighted on the timeline (not a selection of truth). */
   range: { start: number; end: number } | null;
+  /** Pause automatically when the cursor reaches this time (listen to an evidence range). */
+  stopAt: number | null;
+  playRange: (r: { start: number; end: number }) => void;
   setRange: (r: { start: number; end: number } | null) => void;
   init: (sessionId: string, duration: number, cursor: number) => void;
   play: () => void;
@@ -27,7 +30,8 @@ interface ReplayState {
 }
 
 /**
- * Local replay clock (visual-only — no audio is loaded, decision D-3).
+ * Local replay clock. MOCK sessions replay visually (no audio, decision D-3); DEMO
+ * workspaces (ADR 0003) drive it from a real audio element (see audio.tsx).
  * Seeking never triggers analysis; queries read the bucketed as-of.
  */
 export const useReplay = create<ReplayState>((set, get) => ({
@@ -38,6 +42,13 @@ export const useReplay = create<ReplayState>((set, get) => ({
   speed: 1,
   view: 'LOCAL',
   range: null,
+  stopAt: null,
+  playRange: (r) => {
+    get().setRange(r);
+    const { duration } = get();
+    const start = Math.max(0, Math.min(r.start, duration));
+    set({ cursor: start, status: 'PLAYING', view: 'LOCAL', stopAt: Math.min(duration, Math.max(r.end, start + 500)) });
+  },
   setRange: (r) => {
     if (!r) return set({ range: null });
     const { duration } = get();
@@ -47,26 +58,27 @@ export const useReplay = create<ReplayState>((set, get) => ({
   },
   init: (sessionId, duration, cursor) => {
     if (get().sessionId === sessionId && get().duration === duration) return;
-    set({ sessionId, duration, cursor: Math.min(Math.max(0, cursor), duration), status: 'PAUSED', view: 'LOCAL', range: null });
+    set({ sessionId, duration, cursor: Math.min(Math.max(0, cursor), duration), status: 'PAUSED', view: 'LOCAL', range: null, stopAt: null });
   },
   play: () => {
     const { cursor, duration } = get();
     set({ status: 'PLAYING', cursor: cursor >= duration ? 0 : cursor, view: get().view });
   },
-  pause: () => set({ status: 'PAUSED' }),
+  pause: () => set({ status: 'PAUSED', stopAt: null }),
   toggle: () => (get().status === 'PLAYING' ? get().pause() : get().play()),
   seek: (ms) => {
     const { duration, status } = get();
     const cursor = Math.min(Math.max(0, Math.round(ms)), duration);
-    set({ cursor, status: status === 'ENDED' && cursor < duration ? 'PAUSED' : status, view: 'LOCAL' });
+    set({ cursor, status: status === 'ENDED' && cursor < duration ? 'PAUSED' : status, view: 'LOCAL', stopAt: null });
   },
   setSpeed: (speed) => set({ speed }),
   setView: (view) => set({ view }),
   tick: (dt) => {
-    const { cursor, duration, speed, status } = get();
+    const { cursor, duration, speed, status, stopAt } = get();
     if (status !== 'PLAYING') return;
     const next = cursor + dt * speed;
-    if (next >= duration) set({ cursor: duration, status: 'ENDED' });
+    if (stopAt != null && next >= stopAt) set({ cursor: stopAt, status: 'PAUSED', stopAt: null });
+    else if (next >= duration) set({ cursor: duration, status: 'ENDED' });
     else set({ cursor: next });
   },
 }));
@@ -77,10 +89,10 @@ export function useQueryAsOf() {
 }
 
 /** Drives the local replay clock with requestAnimationFrame while playing (in FOLLOW view the stream re-anchors it every second). */
-export function useReplayDriver() {
+export function useReplayDriver(enabled = true) {
   const status = useReplay((s) => s.status);
   useEffect(() => {
-    if (status !== 'PLAYING') return;
+    if (!enabled || status !== 'PLAYING') return;
     let raf = 0;
     let last = performance.now();
     const update = () => {
@@ -101,5 +113,5 @@ export function useReplayDriver() {
       cancelAnimationFrame(raf);
       clearInterval(iv);
     };
-  }, [status]);
+  }, [status, enabled]);
 }

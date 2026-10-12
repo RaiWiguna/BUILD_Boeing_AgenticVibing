@@ -77,7 +77,7 @@ export function AccountPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="flex max-w-[60ch] items-start gap-2.5 text-[14px] text-ink-2">
             <ShieldCheck aria-hidden className="mt-0.5 size-[18px] shrink-0 text-ready" />
-            {a.must_change_password ? 'An administrator reset your password. You will be asked to choose a new one at next sign-in.' : 'Password changes are handled by an administrator in this MOCK build.'}
+            {a.must_change_password ? 'An administrator reset your password. You will be asked to choose a new one at next sign-in.' : 'Password changes are handled by an administrator.'}
           </p>
           <Button
             variant="secondary"

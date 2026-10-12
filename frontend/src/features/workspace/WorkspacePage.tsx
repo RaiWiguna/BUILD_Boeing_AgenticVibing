@@ -1,4 +1,4 @@
-import { EyeOff, MonitorSmartphone } from 'lucide-react';
+import { MonitorSmartphone } from 'lucide-react';
 import { useEffect, useMemo, useRef } from 'react';
 import type { FindingView } from '@/api/types';
 import { TimelineBand } from '@/features/replay/TimelineBand';
@@ -6,11 +6,11 @@ import { useReplay } from '@/features/replay/store';
 import { Card, MoreButton } from '@/components/domain/primitives';
 import { ErrorState, LoadingRows } from '@/components/domain/states';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/menu';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSessionScope } from '@/hooks/useSessionScope';
-import { formatOffset } from '@/lib/time';
+import { cn } from '@/lib/utils';
 import { AttentionRail } from './AttentionRail';
+import { LiveTranscript, useRecentlyAvailable } from './LiveTranscript';
 import { MemoryStrip } from './MemoryStrips';
 import { useFindings, useSelectedEntity, useSnapshot, useWaveforms } from './queries';
 import { ScopeBanners, SessionHeader } from './SessionHeader';
@@ -24,26 +24,31 @@ function rangeOf(f: FindingView) {
 }
 
 export function WorkspacePage() {
-  const { detail, run, sid, carry, mode, asOf, setMode, label } = useSessionScope();
+  const { detail, run, sid, carry, mode, asOf } = useSessionScope();
   const snapshot = useSnapshot();
   const findings = useFindings();
   const waves = useWaveforms();
   const [selected, select] = useSelectedEntity();
   const setRange = useReplay((s) => s.setRange);
+  const playRange = useReplay((s) => s.playRange);
   const range = useReplay((s) => s.range);
+  const playing = useReplay((s) => s.status === 'PLAYING');
+  const media = detail?.media ?? null;
+  const recent = useRecentlyAvailable(media && findings.data ? findings.data.map((f) => f.finding.id) : null);
 
   const entities = useMemo(() => detail?.entities ?? [], [detail?.entities]);
   const selectedId = selected ?? entities[0]?.id ?? null;
   const href = (path: string) => `/s/${sid}/${path}${carry ? `${path.includes('?') ? '&' : '?'}${carry}` : ''}`;
 
-  // Default evidence range: first attention finding (comp: 05:12 – 05:19).
+  // Default evidence range: first attention finding (comp: 05:12 – 05:19). Not in the
+  // DEMO live view, where findings arrive while the audio plays.
   const seeded = useRef(false);
   useEffect(() => {
-    if (seeded.current || range || !findings.data?.length) return;
+    if (media || seeded.current || range || !findings.data?.length) return;
     const first = findings.data.find((f) => f.finding.priority === 'ATTENTION') ?? findings.data[0]!;
     seeded.current = true;
     setRange(rangeOf(first));
-  }, [findings.data, range, setRange]);
+  }, [findings.data, range, setRange, media]);
 
   if (!detail) return null;
   if (!run)
@@ -57,7 +62,6 @@ export function WorkspacePage() {
     );
 
   const snap = snapshot.data;
-  const hidden = snap?.hidden_after_as_of ?? 0;
 
   return (
     // ≥ xl and ≥ 720 px tall the workspace fits the viewport (D-2): panels scroll inside, the timeline is a grid row.
@@ -68,8 +72,13 @@ export function WorkspacePage() {
         <MonitorSmartphone aria-hidden className="size-4 shrink-0 text-ink-3" /> Open on a larger screen for the full workspace. This view is read-only.
       </p>
 
-      {/* Grid: [Situation | Attention] → Memory strips (full width) → Timeline. */}
-      <div className="grid flex-1 grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(300px,330px)] 2xl:grid-cols-[minmax(0,1fr)_minmax(330px,380px)] fit:min-h-0 fit:grid-rows-[minmax(0,1fr)_auto] fit:items-stretch fit:gap-4">
+      {/* Grid: [Situation | Attention] → Memory strips (full width) → Timeline. DEMO: [Transcript + Attention] spans both rows. */}
+      <div
+        className={cn(
+          'grid flex-1 grid-cols-1 items-start gap-5 fit:min-h-0 fit:grid-rows-[minmax(0,1fr)_auto] fit:items-stretch fit:gap-4',
+          media ? 'xl:grid-cols-[minmax(0,1fr)_minmax(340px,400px)] 2xl:grid-cols-[minmax(0,1fr)_minmax(380px,440px)]' : 'xl:grid-cols-[minmax(0,1fr)_minmax(300px,330px)] 2xl:grid-cols-[minmax(0,1fr)_minmax(330px,380px)]',
+        )}
+      >
         <Card aria-labelledby="situation-heading" className="@container p-5 fit:flex fit:min-h-0 fit:flex-col fit:p-4 xl:col-start-1 xl:row-start-1">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <h2 id="situation-heading" className="text-[23px] font-semibold tracking-[-0.025em] text-ink fit:text-[20px]">
@@ -101,20 +110,9 @@ export function WorkspacePage() {
             <SituationCanvas className="mt-4 fit:h-auto! fit:min-h-[110px] fit:flex-[1_1_0] fit:mt-3" layout={detail.layout} snapshot={snap} entities={entities} selected={selectedId} onSelect={select} asOf={asOf} />
           )}
 
-          {mode === 'AS_KNOWN' && hidden > 0 && (
-            <div className="mt-3 flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 rounded-[14px] bg-sunken px-4 py-2.5 text-[13.5px] text-ink-2">
-              <EyeOff aria-hidden className="size-4 text-ink-3" />
-              <span className="flex-1">
-                {hidden} {hidden === 1 ? 'item' : 'items'} recorded before {formatOffset(asOf)} became available later and {hidden === 1 ? 'is' : 'are'} hidden in As-known.
-              </span>
-              <Button size="xs" variant="ghost" onClick={() => setMode('DEBRIEF')}>
-                Show in Debrief
-              </Button>
-            </div>
-          )}
         </Card>
 
-        <section aria-label="Memory strips" className="@container min-w-0 xl:col-span-2 xl:row-start-2 fit:max-h-[min(300px,40dvh)] fit:short:max-h-[27dvh] fit:min-h-0 fit:flex fit:flex-col">
+        <section aria-label="Memory strips" className={cn('@container min-w-0 xl:row-start-2 fit:min-h-0 fit:flex fit:flex-col', media ? 'xl:col-start-1 fit:max-h-[min(190px,22dvh)]' : 'xl:col-span-2 fit:max-h-[min(300px,40dvh)] fit:short:max-h-[27dvh]')}>
           {!snap && snapshot.isPending ? (
             <LoadingRows rows={3} />
           ) : (
@@ -126,23 +124,29 @@ export function WorkspacePage() {
           )}
         </section>
 
-        <AttentionRail
-          className="xl:sticky xl:top-6 xl:col-start-2 xl:row-start-1 fit:static fit:min-h-0 fit:p-4"
+        <div className={cn('flex min-w-0 flex-col gap-5 xl:col-start-2 xl:row-start-1 fit:min-h-0 fit:gap-4', media ? 'xl:row-span-2' : 'xl:sticky xl:top-6 fit:static')}>
+          {media && <LiveTranscript media={media} transcriptHref={(segId) => href(`review/transcript?segment=${segId}`)} className="shrink-0 fit:p-4" />}
+          <AttentionRail
+          className={cn('fit:min-h-0 fit:p-4', media ? 'xl:max-h-[calc(100dvh-260px)] fit:max-h-none fit:flex-1' : 'fit:flex-1')}
           findings={findings.data}
           loading={findings.isPending}
           error={findings.isError ? findings.error : null}
           onRetry={() => findings.refetch()}
-          loops={snap?.open_loops ?? []}
-          entities={entities}
           asOf={asOf}
           reviewBase={href}
-          label={label}
           onFocusRange={(f) => {
             setRange(rangeOf(f));
             const e = entities.find((x) => x.callsign === f.entity_label);
             if (e && e.id !== selectedId) select(e.id);
           }}
+          checking={!!media && playing}
+          startUtc={detail.recorded_at}
+          reminders={snap?.reminders}
+          live={mode === 'AS_KNOWN'}
+          recent={recent}
+          onListen={media ? (f) => playRange(rangeOf(f)) : undefined}
         />
+        </div>
       </div>
 
       <div className="mt-5 shrink-0 fit:mt-4">

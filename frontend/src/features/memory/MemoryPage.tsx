@@ -1,9 +1,9 @@
 import { AudioWaveform, Car, ChevronRight, Clock3, Eye, FileText, Layers, Link2, Pause, Play, Plane, VolumeX } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link, Navigate, NavLink, useParams } from 'react-router';
-import type { EntityInfo, EntityMemoryView, HistoryItem, OpenLoop } from '@/api/types';
+import type { EntityInfo, EntityMemoryView, HistoryItem } from '@/api/types';
 import { useReplay } from '@/features/replay/store';
-import { useEntityMemory, useRunwayMemory, useSnapshot } from '@/features/workspace/queries';
+import { useEntityMemory, useRunwayMemory } from '@/features/workspace/queries';
 import { LensSummary, ModeToggle, RunSelector, ScopeBanners } from '@/features/workspace/SessionHeader';
 import { LayoutMini } from '@/components/domain/LayoutMini';
 import { Card, CardHeader, CodeChip, MoreButton } from '@/components/domain/primitives';
@@ -15,7 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Tooltip } from '@/components/ui/tooltip';
 import { useEvidence } from '@/hooks/useEvidence';
 import { useSessionScope } from '@/hooks/useSessionScope';
-import { LOOP_KIND_LABEL, STATUS, type Tone } from '@/lib/status';
+import { STATUS, type Tone } from '@/lib/status';
 import { clamp, formatClock, formatDate, formatDateTimeUtc, formatDuration, formatOffset } from '@/lib/time';
 import { cn } from '@/lib/utils';
 import { RunwayTab } from './RunwayTab';
@@ -37,12 +37,6 @@ function MemoryHeader({ title, entity, onOpenEvidence }: { title: string; entity
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <h1 className="text-[40px] font-medium leading-none tracking-[-0.045em] text-ink xl:text-[48px]">{title}</h1>
-            <div className="flex items-center gap-2">
-              <CodeChip>{detail.source_kind}</CodeChip>
-              <CodeChip tone="neutral" className="bg-[#fff1e8] text-[#a2470f]">
-                Mock
-              </CodeChip>
-            </div>
           </div>
           <p className="mt-2.5 flex flex-wrap items-center gap-x-2 text-[18px] text-ink-2 tabular">
             {run ? <RunSelector /> : 'No run'}
@@ -312,46 +306,6 @@ function RunwayCard() {
   );
 }
 
-function StillOpen({ loops, entities }: { loops: OpenLoop[]; entities: EntityInfo[] }) {
-  const { open } = useEvidence();
-  const { asOf } = useSessionScope();
-  return (
-    <Card aria-labelledby="still-open" className="p-5">
-      <CardHeader id="still-open" title="Still open" subtitle="Items to verify for this object" />
-      {loops.length === 0 ? (
-        <p className="mt-4 rounded-[14px] bg-sunken px-4 py-3 text-[14px] text-ink-2">No open loops for this object at this as-of.</p>
-      ) : (
-        <ul className="mt-3 divide-y divide-hairline-soft">
-          {loops.map((l) => {
-            const ent = l.entity_ids.map((id) => entities.find((e) => e.id === id)?.callsign).filter(Boolean).join(', ');
-            const elapsed = Math.max(0, asOf - l.started_ms);
-            const overdue = l.expected_window_ms != null && elapsed > l.expected_window_ms;
-            const isReadback = l.kind === 'READBACK_EXPECTED';
-            return (
-              <li key={l.id}>
-                <button type="button" onClick={() => l.evidence[0] && open(l.evidence[0].id)} className="group flex w-full items-center gap-3.5 py-3 text-left">
-                  <span aria-hidden className={cn('inline-flex size-11 shrink-0 items-center justify-center rounded-full', isReadback ? 'bg-discrepancy-tint text-discrepancy' : 'bg-notice-tint text-notice')}>
-                    <Clock3 className="size-5" strokeWidth={1.9} />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[15px] font-medium text-ink">{isReadback ? 'Matching readback' : `${LOOP_KIND_LABEL[l.kind] ?? l.kind} · ${ent}`}</span>
-                    <span className="block text-[13.5px] text-ink-2">
-                      {isReadback ? `Readback confirming the instruction from ${formatClock(l.started_ms)}.` : `Awaiting since ${formatClock(l.started_ms)}.`}
-                      {overdue && <span className="text-notice"> Window passed.</span>}
-                    </span>
-                  </span>
-                  <span className="hidden shrink-0 text-[12.5px] text-ink-3 sm:block">{l.timer_profile_version}</span>
-                  <ChevronRight aria-hidden className="size-[18px] shrink-0 text-ink-2 transition-transform group-hover:translate-x-0.5" />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </Card>
-  );
-}
-
 function Provenance({ mem }: { mem: EntityMemoryView }) {
   const { label, run } = useSessionScope();
   const { open } = useEvidence();
@@ -428,7 +382,7 @@ export function MiniPlayer({ className }: { className?: string }) {
           <span className="font-semibold text-ink">{formatOffset(cursor)}</span> / {formatDuration(duration)}
         </p>
       </div>
-      <Tooltip content="Visual replay only — audio is not loaded in MOCK mode">
+      <Tooltip content="No audio for this session">
         <span tabIndex={0} className="inline-flex size-9 items-center justify-center rounded-full text-ink-3">
           <VolumeX aria-hidden className="size-[18px]" />
           <span className="sr-only">Audio not loaded</span>
@@ -444,13 +398,11 @@ export function MemoryObjectPage() {
   const { entityId = '' } = useParams();
   const { detail } = useSessionScope();
   const mem = useEntityMemory(entityId);
-  const snapshot = useSnapshot();
   const { open } = useEvidence();
   const entity = detail?.entities.find((e) => e.id === entityId) ?? null;
   if (!detail) return null;
   if (!entity) return <Navigate to={`../memory/${detail.entities[0]?.id ?? ''}`} replace />;
   const evidence = mem.data?.heard?.evidence_id ?? mem.data?.said?.evidence_id ?? null;
-  const loops = (snapshot.data?.open_loops ?? []).filter((l) => l.entity_ids.includes(entity.id) && (l.status === 'OPEN' || l.status === 'PARTIAL'));
 
   return (
     <div>
@@ -478,7 +430,6 @@ export function MemoryObjectPage() {
           </div>
           <div className="space-y-5 xl:sticky xl:top-6">
             <RunwayCard />
-            <StillOpen loops={loops} entities={detail.entities} />
             <Provenance mem={mem.data} />
             <MiniPlayer />
           </div>

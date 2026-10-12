@@ -39,7 +39,7 @@ export function SettingsLayout() {
   const admin = can('admin.manage');
   return (
     <div>
-      <PageHeader title="Settings" subtitle={admin ? 'Account and workspace administration · MOCK data' : 'Your account · MOCK data'} />
+      <PageHeader title="Settings" subtitle={admin ? 'Account and workspace administration' : 'Your account'} />
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[230px_minmax(0,1fr)]">
         <nav aria-label="Settings sections" className="card p-2.5 lg:sticky lg:top-6">
           <p className="px-3 pb-1.5 pt-2 text-[12px] font-medium uppercase tracking-[0.06em] text-ink-3">You</p>

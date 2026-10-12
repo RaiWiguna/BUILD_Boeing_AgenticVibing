@@ -1,0 +1,67 @@
+# Local demo stack: PostgreSQL + demo workspace API (MOCK processing).
+# Usage (from repo root):
+#   docker compose -f deploy/compose/local/compose.demo.yml up -d --build
+#   docker compose -f deploy/compose/local/compose.demo.yml --profile test run --rm api-test
+# The frontend runs on the host (`npm run dev` in frontend/) and proxies /api/demo to 127.0.0.1:8000.
+name: flowlens-demo
+
+x-db-env: &db-env
+  POSTGRES_USER: flowlens
+  POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:-flowlens-local-only}
+  POSTGRES_DB: flowlens_demo
+
+services:
+  db:
+    image: postgres:16.9-alpine
+    environment: *db-env
+    volumes:
+      - demo-pgdata:/var/lib/postgresql/data
+      - ./demo-initdb.sql:/docker-entrypoint-initdb.d/10-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowlens -d flowlens_demo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    # Not published to the host: only the API reaches the database.
+
+  api:
+    build:
+      context: ../../..
+      dockerfile: deploy/docker/backend/Dockerfile.demo
+    environment:
+      DEMO_DATABASE_URL: postgresql://flowlens:${DEMO_DB_PASSWORD:-flowlens-local-only}@db:5432/flowlens_demo
+      DEMO_SCENARIO_ROOT: /scenarios
+      DEMO_PROCESSING_SCALE: ${DEMO_PROCESSING_SCALE:-1.0}
+    volumes:
+      - ../../../data/demo-scenarios:/scenarios:ro
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    mem_limit: 512m
+
+  api-test:
+    profiles: ["test"]
+    build:
+      context: ../../..
+      dockerfile: deploy/docker/backend/Dockerfile.demo
+      args:
+        DEV: "1"
+    environment:
+      DEMO_TEST_DATABASE_URL: postgresql://flowlens:${DEMO_DB_PASSWORD:-flowlens-local-only}@db:5432/flowlens_demo_test
+      DEMO_SCENARIO_ROOT: /scenarios
+    volumes:
+      - ../../../data/demo-scenarios:/scenarios:ro
+      - ../../../tests/demo_backend:/app/tests:ro
+      - ../../../backend/flowlens_demo:/app/flowlens_demo:ro
+    working_dir: /app
+    command: ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  demo-pgdata:

@@ -42,9 +42,8 @@ export const HOLD_SHORT_VEHICLE: ScenarioSpec = {
     { entity: 'FLN530', footprint: true, waypoints: [['03:50', 1400, 0], ['04:40', -300, 0], ['05:00', -300, 150], ['06:10', -1250, 300]] },
   ],
   findings: [
-    { key: 'F-01', category: 'MOVEMENT_DIVERGENCE', priority: 'ATTENTION', status: 'OPEN', entity: 'VEH07', t: '03:38', available: '03:40', title: 'Movement beyond hold line', statement: 'Readback matched, but the observed footprint crossed the RWY 27 hold line.', evidence: ['T-03', 'T-04'], quality: 'SUPPORTED', unknowns: [], movement: 'DIVERGENCE_CANDIDATE', sourceAlert: { status: 'PRESENT', severity: 'Source alert · RWY incursion candidate', note: 'Recorded by the synthetic simulator; shown unchanged.' }, trackNote: 'Fresh aligned track with footprint (age 0.8 s). Divergence is a candidate, not a confirmed crossing.' },
+    { key: 'F-01', category: 'MOVEMENT_DIVERGENCE', priority: 'ATTENTION', status: 'OPEN', entity: 'VEH07', t: '03:38', available: '03:40', title: 'Movement beyond hold line', statement: 'Readback matched, but the observed footprint crossed the RWY 27 hold line.', live: { title: 'Past RWY 27 hold line', text: 'Readback matched. Footprint past the RWY 27 hold line at 10:05:38Z.' }, evidence: ['T-03', 'T-04'], quality: 'SUPPORTED', unknowns: [], movement: 'DIVERGENCE_CANDIDATE', sourceAlert: { status: 'PRESENT', severity: 'Source alert · RWY incursion candidate', note: 'Recorded by the source system; shown unchanged.' }, trackNote: 'Fresh aligned track with footprint (age 0.8 s). Divergence is a candidate, not a confirmed crossing.' },
   ],
-  loops: [{ key: 'L-01', kind: 'REQUEST_RESPONSE', entity: 'VEH07', origin: 'T-05', windowMs: 10000, status: 'OPEN', coverageKnown: true, title: 'Confirm holding · VEH07', detail: 'Response to the confirmation request not observed.' }],
   options: [
     { key: 'Option 1', title: 'Compare footprint timing with the readback', question: 'Was the hold line crossed before or after the readback?', statement: 'Hypothetical alternative: review the track interval 03:30–03:45 against E-04.', rationale: 'Readback matched but footprint crossed the hold line 52 s later.', evidence: ['T-04', 'F-01'], preconditions: ['Fresh aligned track', 'Layout fictional-2'], unknowns: ['Driver awareness of the hold line'], consequences: ['Hypothesis: clarifies sequence; does not establish cause.'], asOf: '03:40', available: '03:40' },
   ],
@@ -52,17 +51,17 @@ export const HOLD_SHORT_VEHICLE: ScenarioSpec = {
   notices: [{ tone: 'discrepancy', title: 'Movement divergence candidate', detail: 'VEH07 · footprint beyond hold line' }],
 };
 
-/** S3 · Report clear · Open loop — E2E-02. */
+/** S3 · Report clear · Coverage gap — E2E-02. */
 export const REPORT_CLEAR: ScenarioSpec = {
   key: 'reportclear',
-  title: 'Report clear · Open loop',
+  title: 'Report clear · Coverage gap',
   context: 'En route · Class A',
   lifecycle: 'READY',
   analysis: 'COMPLETED',
   durationMs: at('21:08'),
   recordedAt: '2026-10-05T15:44:00Z',
   updatedAt: '2026-10-05T16:05:00Z',
-  sourceLabel: 'Synthetic open-loop scenario v1',
+  sourceLabel: 'Synthetic coverage-gap scenario v1',
   channels: TOWER_GROUND,
   entities: [
     { callsign: 'FLN771', kind: 'AIRCRAFT', type: 'E190', role: 'Arrival', aliases: ['Flow lens seven seven one'] },
@@ -89,13 +88,11 @@ export const REPORT_CLEAR: ScenarioSpec = {
   ],
   tracks: [],
   findings: [
-    { key: 'F-01', category: 'OPEN_LOOP', priority: 'NOTICE', status: 'OPEN', entity: 'FLN771', t: '08:42', available: '08:42', title: 'Report clear awaited', statement: 'Report runway clear from FLN771 not observed in the stored coverage. Another aircraft speaking does not close it.', evidence: ['T-01', 'T-02'], quality: 'SUPPORTED', unknowns: ['communication during 09:30–10:10 gap'], movement: 'NOT_EVALUABLE', sourceAlert: { status: 'NOT_AVAILABLE', severity: null, note: 'No source alert recorded.' } },
-    { key: 'F-02', category: 'QUALITY_GAP', priority: 'INFO', status: 'OPEN', entity: 'FLN771', t: '09:30', available: '10:10', title: 'Audio gap 09:30–10:10', statement: 'Coverage gap; a report in this interval would not be observed.', evidence: ['T-01'], quality: 'MISSING', unknowns: ['communication during gap'], movement: 'NOT_EVALUABLE' },
+    { key: 'F-02', category: 'QUALITY_GAP', priority: 'INFO', status: 'OPEN', entity: 'FLN771', t: '09:30', available: '10:10', title: 'Audio gap 09:30–10:10', statement: 'Coverage gap; a report in this interval would not be observed.', live: { title: 'Audio lost 40 s', text: 'No audio 15:53:30–15:54:10Z. A report in that window would be missed.', attention: false }, evidence: ['T-01'], quality: 'MISSING', unknowns: ['communication during gap'], movement: 'NOT_EVALUABLE' },
   ],
-  loops: [{ key: 'L-01', kind: 'REPORT_EXPECTED', entity: 'FLN771', origin: 'T-01', windowMs: 30000, status: 'OPEN', coverageKnown: false, title: 'Report clear · FLN771', detail: 'Coverage gap 09:30–10:10 means absence of the report is uncertain.' }],
   options: [],
   insufficient: [{ entity: 'FLN771', needed: ['Complete audio coverage', 'Track or source event for runway exit'], reason: 'No options can be shown for FLN771.' }],
-  notices: [{ tone: 'notice', title: 'Open loop with coverage gap', detail: 'FLN771 · report clear not observed' }],
+  notices: [{ tone: 'notice', title: 'Coverage gap 09:30–10:10', detail: 'FLN771 · communication in the gap is unknown' }],
 };
 
 /** S4 · Audio-only · Tower — E2E-04: STT succeeded, Gemini unavailable → PARTIAL. */
@@ -134,9 +131,8 @@ export const AUDIO_ONLY: ScenarioSpec = {
   ],
   tracks: [],
   findings: [
-    { key: 'F-01', category: 'QUALITY_GAP', priority: 'NOTICE', status: 'OPEN', entity: 'FLN905', t: '12:03', available: '12:03', title: 'Segment 12:03–14:30 not analysed', statement: 'Analysis is partial: transcript available until 12:03; intent, findings and options were not produced.', evidence: ['T-04'], quality: 'MISSING', unknowns: ['intent', 'association'], movement: 'NOT_EVALUABLE' },
+    { key: 'F-01', category: 'QUALITY_GAP', priority: 'NOTICE', status: 'OPEN', entity: 'FLN905', t: '12:03', available: '12:03', title: 'Segment 12:03–14:30 not analysed', statement: 'Analysis is partial: transcript available until 12:03; intent, findings and options were not produced.', live: { title: 'No alerts after 09:32:03Z', text: 'Transcript stops at 09:32:03Z. Nothing after that is checked.' }, evidence: ['T-04'], quality: 'MISSING', unknowns: ['intent', 'association'], movement: 'NOT_EVALUABLE' },
   ],
-  loops: [],
   options: [],
   insufficient: [],
   notices: [{ tone: 'notice', title: 'Partial analysis', detail: 'Segment 12:03 – 14:30 not analysed' }],
@@ -177,9 +173,8 @@ export const CALLSIGN_AMBIGUITY: ScenarioSpec = {
   ],
   tracks: [],
   findings: [
-    { key: 'F-01', category: 'CRITICAL_SLOT_UNCERTAIN', priority: 'NOTICE', status: 'UNDER_REVIEW', entity: 'FLN241', t: '01:29', available: '01:33', title: 'Similar callsigns', statement: 'Readback callsign is ambiguous between FLN241 and FLN214; pairing kept unresolved.', evidence: ['T-01', 'T-02', 'T-03'], quality: 'AMBIGUOUS', unknowns: ['callsign'], movement: 'NOT_EVALUABLE', slots: [{ slot: 'CALLSIGN', said: 'Flow lens two four one', heard: 'two one... four one', status: 'AMBIGUOUS' }] },
+    { key: 'F-01', category: 'CRITICAL_SLOT_UNCERTAIN', priority: 'NOTICE', status: 'UNDER_REVIEW', entity: 'FLN241', t: '01:29', available: '01:33', title: 'Similar callsigns', statement: 'Readback callsign is ambiguous between FLN241 and FLN214; pairing kept unresolved.', live: { title: 'Similar callsigns FLN241 / FLN214', text: 'Readback callsign could be FLN241 or FLN214.' }, evidence: ['T-01', 'T-02', 'T-03'], quality: 'AMBIGUOUS', unknowns: ['callsign'], movement: 'NOT_EVALUABLE', slots: [{ slot: 'CALLSIGN', said: 'Flow lens two four one', heard: 'two one... four one', status: 'AMBIGUOUS' }] },
   ],
-  loops: [],
   options: [],
   insufficient: [{ entity: 'FLN214', needed: ['Resolved callsign pairing'], reason: 'Options wait for the ambiguous pairing to be reviewed.' }],
   notices: [],
@@ -234,7 +229,6 @@ export const DRAFT_IMPORT: ScenarioSpec = {
   movements: [],
   tracks: [],
   findings: [],
-  loops: [],
   options: [],
   insufficient: [],
   notices: [{ tone: 'notice', title: 'Cloud permission incomplete', detail: 'Cloud audio is undetermined' }],

@@ -19,7 +19,7 @@ export const ROLE_LABEL: Record<Role, string> = {
 export const DEMO_PASSWORD = 'flowlens-demo';
 
 export const ACCOUNTS: Account[] = [
-  { id: mid('acct:dana'), name: 'Dana Whitfield', email: 'evaluator@flowlens.test', role: 'EVALUATOR', active: true, last_login_at: '2026-10-08T13:40:00Z', must_change_password: false },
+  { id: mid('acct:khalfani'), name: 'Khalfani Shaquille', email: 'evaluator@flowlens.test', role: 'EVALUATOR', active: true, last_login_at: '2026-10-08T13:40:00Z', must_change_password: false },
   { id: mid('acct:sam'), name: 'Sam Ortiz', email: 'controller@flowlens.test', role: 'CONTROLLER_REVIEW', active: true, last_login_at: '2026-10-07T09:12:00Z', must_change_password: false },
   { id: mid('acct:ira'), name: 'Ira Santoso', email: 'observer@flowlens.test', role: 'OBSERVER', active: true, last_login_at: '2026-10-06T16:30:00Z', must_change_password: false },
   { id: mid('acct:nizam'), name: 'Nizam Rahman', email: 'admin@flowlens.test', role: 'ADMIN', active: true, last_login_at: '2026-10-08T08:02:00Z', must_change_password: false },

@@ -60,6 +60,11 @@ export function formatTimeUtc(iso: string) {
   return `${timeFmt.format(new Date(iso))} UTC`;
 }
 
+/** Wall-clock UTC of an offset into a recording that started at `startIso`: "19:02:10Z". */
+export function formatUtcAt(startIso: string, ms: number) {
+  return `${new Date(Date.parse(startIso) + ms).toISOString().slice(11, 19)}Z`;
+}
+
 export function formatDateTimeUtc(iso: string) {
   return `${formatDate(iso)}, ${formatTimeUtc(iso)}`;
 }

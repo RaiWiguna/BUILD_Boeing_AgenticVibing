@@ -35,8 +35,7 @@ describe('MOCK UI journeys (component level)', () => {
     const user = userEvent.setup();
     const { container } = await renderApp(`/s/${S1}/debrief`);
     expect(await screen.findByText('Key item to review', undefined, { timeout: 4000 })).toBeInTheDocument();
-    expect(screen.getByText(/AI interpretation · Mock/i)).toBeInTheDocument();
-    expect(screen.getAllByText('SYNTHETIC').length).toBeGreaterThan(0);
+    expect(screen.getByText(/^AI interpretation$/i)).toBeInTheDocument();
 
     // Export options live in a sheet opened from the header (decision D-4).
     await user.click(screen.getByRole('button', { name: 'Export report' }));

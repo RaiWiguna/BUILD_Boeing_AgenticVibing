@@ -85,7 +85,7 @@ export function LoginPage() {
 
           <div className="mt-10 rounded-[20px] border border-dashed border-[#f3d2bd] bg-[#fffaf6] p-4">
             <p className="flex items-center gap-2 text-[13px] font-semibold text-[#a2470f]">
-              <FlaskConical className="size-4" /> MOCK demo accounts
+              <FlaskConical className="size-4" /> Demo accounts
             </p>
             <p className="mt-1 text-[12.5px] text-ink-2">
               Password for every demo account: <code className="rounded bg-white px-1.5 py-0.5 text-[12px] text-ink">{DEMO_ACCOUNT_PASSWORD}</code>
@@ -109,7 +109,6 @@ export function LoginPage() {
             </div>
           </div>
         </div>
-        <p className="text-[12.5px] text-ink-3">SYNTHETIC data · Replay offline · NOT_DOMAIN_VALIDATED</p>
       </div>
 
       <div className="relative hidden overflow-hidden p-4 lg:block">

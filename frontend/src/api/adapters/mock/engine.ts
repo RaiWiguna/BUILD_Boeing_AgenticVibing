@@ -54,6 +54,9 @@ import type {
   TranscriptView,
   WaveformView,
   WorkspaceSnapshot,
+  ReminderView,
+  DemoMedia,
+  LayoutView,
   BriefSection,
   ExportFormat,
 } from '../../types';
@@ -74,7 +77,6 @@ import {
   gapsFor,
   geometryFor,
   intentFor,
-  loopFor,
   memoryEvents,
   optionFor,
   segAvailable,
@@ -107,6 +109,16 @@ interface SessionState {
   exports: ExportJob[];
   providerAvailable: boolean;
   updatedAt: string;
+  /** DEMO track: session registered from the demo backend (not seeded). */
+  external?: ExternalSession;
+}
+
+/** What the demo backend contributes beyond the ScenarioSpec. */
+export interface ExternalSession {
+  sessionId: string;
+  layout: LayoutView | null;
+  peaks: { bucket_ms: number; values: number[] } | null;
+  media: DemoMedia;
 }
 
 interface IdempotencyRecord {
@@ -141,6 +153,7 @@ export class MockApiClient implements ApiClient {
   private jobs: JobView[] = [];
   private profiles: ProviderProfile[] = [];
   private retention = new Map<string, RetentionPolicy['purge_status']>();
+  private external = new Map<string, { spec: ScenarioSpec; extras: ExternalSession }>();
   private idempotency = new Map<string, IdempotencyRecord>();
   private currentAccountId: string | null = null;
 
@@ -156,6 +169,7 @@ export class MockApiClient implements ApiClient {
         nonce = s.resetDataNonce;
         const keep = this.currentAccountId;
         this.seed();
+        for (const { spec, extras } of this.external.values()) this.mountExternal(spec, extras);
         this.currentAccountId = keep;
       }
     });
@@ -216,11 +230,11 @@ export class MockApiClient implements ApiClient {
       { id: mid('job:2'), session_id: mid('session:audioonly'), session_title: 'Audio-only · Tower', run_label: '#01', stage: 'INTENT', status: 'FAILED', attempt: 3, completed_units: 41, total_units: 58, updated_at: '2026-10-04T09:41:00Z', failure: 'PROVIDER_UNAVAILABLE · retries exhausted' },
       { id: mid('job:3'), session_id: mid('session:audioonly'), session_title: 'Audio-only · Tower', run_label: '#01', stage: 'STT', status: 'SUCCEEDED', attempt: 1, completed_units: 18, total_units: 18, updated_at: '2026-10-04T09:30:00Z', failure: null },
       { id: mid('job:4'), session_id: mid('session:holdshort'), session_title: 'Hold short · Vehicle', run_label: '#01', stage: 'FINDINGS', status: 'SUCCEEDED', attempt: 1, completed_units: 1, total_units: 1, updated_at: '2026-10-07T10:18:00Z', failure: null },
-      { id: mid('job:5'), session_id: mid('session:reportclear'), session_title: 'Report clear · Open loop', run_label: '#01', stage: 'BRIEF', status: 'RETRY_WAIT', attempt: 2, completed_units: 0, total_units: 1, updated_at: '2026-10-08T12:02:00Z', failure: 'PROVIDER_QUOTA_EXCEEDED · retry in 4 min' },
+      { id: mid('job:5'), session_id: mid('session:reportclear'), session_title: 'Report clear · Coverage gap', run_label: '#01', stage: 'BRIEF', status: 'RETRY_WAIT', attempt: 2, completed_units: 0, total_units: 1, updated_at: '2026-10-08T12:02:00Z', failure: 'PROVIDER_QUOTA_EXCEEDED · retry in 4 min' },
     ];
 
     const actions = ['session.open', 'evidence.read', 'finding.review', 'export.create', 'auth.login', 'grant.update', 'transcript.correct', 'analysis.create', 'provider.check', 'export.download'];
-    const actors = ['Dana Whitfield', 'Sam Ortiz', 'Ira Santoso', 'Nizam Rahman'];
+    const actors = ['Khalfani Shaquille', 'Sam Ortiz', 'Ira Santoso', 'Nizam Rahman'];
     this.audit = Array.from({ length: 84 }, (_, i) => {
       const sid = this.order[i % this.order.length]!;
       const action = actions[(i * 7) % actions.length]!;
@@ -240,8 +254,61 @@ export class MockApiClient implements ApiClient {
     });
   }
 
-  private addSession(spec: ScenarioSpec) {
-    const world = buildWorld(spec);
+  /**
+   * DEMO track (ADR 0003): register a workspace from the demo backend so every
+   * session screen reads it through this engine. Idempotent per session ID; the
+   * playback cursor is refreshed on re-registration.
+   */
+  registerExternal(spec: ScenarioSpec, extras: ExternalSession) {
+    const known = this.external.get(extras.sessionId);
+    // Reprocessed on the backend (e.g. a recording was added): rebuild the session.
+    if (known && known.spec.updatedAt !== spec.updatedAt) this.unregisterExternal(extras.sessionId);
+    else if (known) this.external.set(extras.sessionId, { spec, extras });
+    if (known && this.sessions.has(extras.sessionId)) {
+      this.sessions.get(extras.sessionId)!.external = extras;
+      return extras.sessionId;
+    }
+    this.external.set(extras.sessionId, { spec, extras });
+    return this.mountExternal(spec, extras);
+  }
+
+  /** Drop a backend workspace (it is processing again or no longer exists). */
+  unregisterExternal(sessionId: string) {
+    if (!this.external.delete(sessionId)) return;
+    this.sessions.delete(sessionId);
+    this.grants = this.grants.filter((g) => g.session_id !== sessionId);
+  }
+
+  hasExternal(sessionId: string) {
+    return this.external.has(sessionId);
+  }
+
+  /** True when the engine holds this session (seeded, imported or external). */
+  hasSession(sessionId: string) {
+    return this.sessions.has(sessionId);
+  }
+
+  /** Keep the saved DEMO playback position so a reopened workspace resumes there. */
+  setExternalCursor(sessionId: string, cursorMs: number) {
+    const ext = this.external.get(sessionId);
+    if (!ext) return;
+    ext.extras.media = { ...ext.extras.media, playback_cursor_ms: cursorMs };
+    const s = this.sessions.get(sessionId);
+    if (s) s.external = ext.extras;
+  }
+
+  private mountExternal(spec: ScenarioSpec, extras: ExternalSession) {
+    const id = this.addSession(spec, extras.sessionId);
+    this.sessions.get(id)!.external = extras;
+    for (const acc of this.accounts) {
+      if (acc.role === 'ADMIN' || !acc.active) continue;
+      this.grants.push({ id: mid(`grant:${id}:${acc.id}`), session_id: id, account_id: acc.id, capabilities: ROLE_CAPABILITIES[acc.role], granted_by: 'Demo workspace import', granted_at: spec.updatedAt });
+    }
+    return id;
+  }
+
+  private addSession(spec: ScenarioSpec, sessionId?: string) {
+    const world = buildWorld(spec, sessionId);
     this.sessions.set(world.sessionId, {
       world,
       lifecycle: spec.lifecycle,
@@ -395,12 +462,12 @@ export class MockApiClient implements ApiClient {
     const latest = this.latestRun(s);
     const openFindings = latest ? this.findingViews(s, latest.run.id, 'DEBRIEF', spec.durationMs).filter((f) => ['OPEN', 'UNDER_REVIEW'].includes(f.finding.status)).length : 0;
     const notices = spec.notices.map((n, i) => ({ ...n, id: `${spec.key}:notice:${i}` }));
-    if (s.permissions.cloud_audio.state !== 'ALLOWED' && !notices.some((n) => n.title.startsWith('Cloud'))) notices.push({ id: `${spec.key}:notice:cloud`, tone: 'notice', title: 'Cloud permission incomplete', detail: 'Cloud audio is undetermined' });
+    if (!s.external && s.permissions.cloud_audio.state !== 'ALLOWED' && !notices.some((n) => n.title.startsWith('Cloud'))) notices.push({ id: `${spec.key}:notice:cloud`, tone: 'notice', title: 'Cloud permission incomplete', detail: 'Cloud audio is undetermined' });
     return {
       id: s.world.sessionId,
       title: spec.title,
       context: spec.context,
-      source_kind: 'SYNTHETIC',
+      source_kind: spec.sourceKind ?? 'SYNTHETIC',
       lifecycle: s.lifecycle,
       duration_ms: spec.durationMs,
       recorded_at: spec.recordedAt,
@@ -411,11 +478,12 @@ export class MockApiClient implements ApiClient {
       channels: spec.channels,
       has_tracks: spec.hasTracks,
       has_layout: spec.hasLayout,
-      layout_label: spec.hasLayout ? (spec.hasTracks ? 'Taxi + Runway 27' : 'Layout only') : null,
+      layout_label: s.external?.layout ? 'KAGC' : spec.hasLayout ? (spec.hasTracks ? 'Taxi + Runway 27' : 'Layout only') : null,
       latest_run_id: latest?.run.id ?? null,
       latest_run_label: latest ? `${latest.label} · revision ${latest.input_revision}` : null,
       open_findings: openFindings,
       notices,
+      origin: s.external ? 'DEMO_BACKEND' : 'MOCK',
     };
   }
 
@@ -438,19 +506,24 @@ export class MockApiClient implements ApiClient {
       permissions: s.permissions,
       runs: s.runs,
       entities: s.world.entities,
-      layout: s.world.spec.hasLayout ? FICTIONAL_LAYOUT : null,
+      layout: s.external ? s.external.layout : s.world.spec.hasLayout ? FICTIONAL_LAYOUT : null,
       provider_profile_ids: this.profiles.map((p) => p.id),
       default_as_of_ms: (() => {
+        if (s.external) return Math.min(s.world.spec.durationMs, s.external.media.playback_cursor_ms);
         const f = s.world.spec.findings.find((x) => x.priority === 'ATTENTION') ?? s.world.spec.findings[0];
         return f ? Math.min(s.world.spec.durationMs, at(f.available)) : 0;
       })(),
       labels: s.world.labels,
+      media: s.external?.media ?? null,
     };
   }
 
   async getWaveforms(sessionId: string): Promise<WaveformView[]> {
     await delay();
-    return waveformsFor(this.session(sessionId).world);
+    const s = this.session(sessionId);
+    const peaks = s.external?.peaks;
+    if (peaks) return s.world.spec.channels.map((c) => ({ channel: c.index, label: c.label, bucket_ms: peaks.bucket_ms, peaks: peaks.values }));
+    return waveformsFor(s.world);
   }
 
   /* ── Imports ─────────────────────────────────────────────────────── */
@@ -688,7 +761,7 @@ export class MockApiClient implements ApiClient {
         return;
       }
       if (!s.world.spec.segments.length) {
-        // Newly imported MOCK session: attach the synthetic open-loop scenario content.
+        // Newly imported MOCK session: attach the synthetic coverage-gap scenario content.
         const filled = { ...REPORT_CLEAR, key: s.world.spec.key, title: s.world.spec.title, durationMs: Math.max(s.world.spec.durationMs, at('12:00')), permissions: s.permissions, runs: [] };
         // Same scenario key → same deterministic session ID; labels are carried over.
         const labels = s.world.labels;
@@ -766,11 +839,11 @@ export class MockApiClient implements ApiClient {
       entities: entityStates(w, asOf.mode, asOf.asOfMs, forceStale, (c) => this.reviewerOf(s, c)),
       tracks: tracksFor(w, runId, asOf.asOfMs, forceStale),
       series: seriesFor(w, asOf.asOfMs, forceStale),
-      open_loops: w.spec.loops.map((l) => loopFor(w, l, runId, asOf.mode, asOf.asOfMs)).filter((l): l is NonNullable<typeof l> => !!l),
       geometry: geometryFor(w, runId, asOf.asOfMs, forceStale),
       gaps: gapsFor(w),
       event_markers: markers.sort((a, b) => a.t - b.t),
       hidden_after_as_of: this.hiddenCount(s, asOf.mode, asOf.asOfMs),
+      ...(w.spec.reminders ? { reminders: remindersAt(w, asOf.mode, asOf.asOfMs) } : {}),
     };
   }
 
@@ -808,7 +881,6 @@ export class MockApiClient implements ApiClient {
       heard: lastHeard ? { quote: lastHeard.text, evidence_id: w.evIds.get(lastHeard.key)!, readback: state.readback.state, interpretation: interp(lastHeard), reviewer, highlight: lastHeard.highlight ?? null, speaker: lastHeard.entity ? `Candidate · ${lastHeard.entity}` : 'Candidate · unknown' } : null,
       observed: { movement: state.movement.state, statement: state.movement.state === 'NOT_EVALUABLE' ? 'Position not available; movement conformance cannot be assessed yet.' : (state.movement.summary ?? 'Unknown'), reason: state.movement.reason, interpretation: state.track_status === 'MISSING' ? 'CANDIDATE' : 'SUPPORTED', reviewer },
       history,
-      open_loops: snap.open_loops.filter((l) => l.entity_ids.includes(entityId)),
       provenance: { input_revision: this.run(s, scope.runId).input_revision, reducer_version: 'reducer-v1', rule_version: 'lab-1', evidence_ids: ids, updated_at: s.updatedAt },
       hidden_after_as_of: segs.filter((x) => segStart(x) <= asOf.asOfMs && !visible(asOf.mode, asOf.asOfMs, segStart(x), segAvailable(x))).length + segs.filter((x) => segStart(x) > asOf.asOfMs).length,
     };
@@ -839,7 +911,6 @@ export class MockApiClient implements ApiClient {
           : [];
         return { entity_id: e.id, intervals, status: g.status, reason: g.reason };
       }),
-      open_loops: snap.open_loops,
       gaps: w.spec.gaps,
     };
   }
@@ -973,6 +1044,10 @@ export class MockApiClient implements ApiClient {
           movement: f.movement,
           reviews,
           correction_note: f.correctionNote && (mode === 'DEBRIEF' || asOf >= at('05:26')) ? f.correctionNote : null,
+          live: f.live
+            ? { title: f.live.title, text: f.live.text, attention: f.live.attention, until_ms: f.live.until ? at(f.live.until) : undefined, resolved: f.live.resolved, facts: f.live.facts }
+            : { title: f.title, text: f.statement },
+          slots: f.slots ?? [],
         };
       })
       .sort((a, b) => {
@@ -1177,7 +1252,6 @@ export class MockApiClient implements ApiClient {
     const mode: ReplayMode = 'DEBRIEF';
     const states = entityStates(w, mode, asOf, false, (c) => this.reviewerOf(s, c));
     const findings = this.findingViews(s, runId, mode, asOf);
-    const loops = w.spec.loops.map((l) => loopFor(w, l, runId, mode, asOf)).filter((l): l is NonNullable<typeof l> => !!l);
     const label = (id: string) => w.labels[id] ?? 'E-?';
     type Item = BriefView['sections'][number]['items'][number];
     const item = (statement: string, ids: string[], detail: string | null, unknowns: string[] = []): Item => ({ statement, evidence_ids: (ids.length ? ids : [w.manifest.id]) as [string, ...string[]], unknowns, detail, evidence_labels: ids.map(label) });
@@ -1190,10 +1264,6 @@ export class MockApiClient implements ApiClient {
     const push = (section: BriefSection, title: string, items: Item[]) => items.length && sections.push({ section, title, items });
     push('KNOWN_SITUATION', 'Known situation', known.slice(0, 3));
     push('CONTEXT_CHANGES', 'Context changes', w.spec.segments.filter((x) => x.act === 'CORRECTION' && segStart(x) <= asOf).map((x) => item(`Later correction names RWY ${x.runway}.`, [w.evIds.get(x.key)!], `Occurred at ${x.t} after the initial readback.`)));
-    push('OPEN_LOOPS', 'Still open', loops.filter((l) => l.status === 'OPEN').map((l) => {
-      const spec = w.spec.loops.find((x) => w.loopIds.get(x.key) === l.id)!;
-      return item(`${spec.detail.replace(/\.$/, '')} — not observed in stored coverage.`, [l.evidence[0].id], 'Additional data is needed to complete the context.', l.coverage_known ? [] : ['coverage gap']);
-    }));
     push('FINDINGS', 'Findings', findings.filter((f) => f.finding.status !== 'DISMISSED').map((f) => item(`${f.label} · ${f.title}: ${f.finding.statement}`, f.finding.evidence.map((e) => e.id), `Priority ${f.finding.priority} · ${f.finding.status.replace('_', ' ').toLowerCase()}`, f.finding.unknowns)));
     push('REVIEW_STATUS', 'Review status', findings.slice(0, 1).map((f) => item(f.reviews.length ? `${f.reviews.length} reviewer decision(s) recorded for ${f.label}.` : `No reviewer decision recorded for ${f.label}.`, [f.finding.evidence[0].id], 'Review records are append-only.')));
     const unknown: Item[] = states.filter((st) => st.movement.state === 'NOT_EVALUABLE').map((st) => {
@@ -1302,7 +1372,7 @@ export class MockApiClient implements ApiClient {
       const brief = s.briefs.find((b) => b.brief.id === job.brief_id) ?? s.briefs[s.briefs.length - 1];
       const run = s.runs.find((r) => r.run.id === job.run_id);
       const base = `flowlens-${s.world.spec.key}-${run?.label.replace('#', 'run') ?? 'run'}-${job.format.toLowerCase()}`;
-      const header = { source_kind: 'SYNTHETIC', labels: ['MOCK', 'NOT_DOMAIN_VALIDATED'], session: s.world.spec.title, run: run?.label, input_revision: run?.input_revision, model_version: 'MOCK', prompt_version: 'prompt-v1', rule_version: 'lab-1', schema_version: '1.0.0', timebase: 'session_time_ms (relative)', redacted: job.redacted, generated_at: nowIso() };
+      const header = { source_kind: s.world.spec.sourceKind ?? 'SYNTHETIC', labels: s.external ? s.external.media.labels : ['MOCK', 'NOT_DOMAIN_VALIDATED'], session: s.world.spec.title, run: run?.label, input_revision: run?.input_revision, model_version: 'MOCK', prompt_version: 'prompt-v1', rule_version: 'lab-1', schema_version: '1.0.0', timebase: 'session_time_ms (relative)', redacted: job.redacted, generated_at: nowIso() };
       const rows = brief?.sections.flatMap((sec) => sec.items.map((i) => ({ section: sec.title, statement: i.statement, evidence: i.evidence_labels.join(' '), unknowns: i.unknowns.join('; ') }))) ?? [];
       this.log(acc, 'export.create', 'export.download', 'OK', s.world.spec.title);
       if (job.format === 'JSON') return { filename: `${base}.json`, mime: 'application/json', content: JSON.stringify({ provenance: header, brief: brief?.brief ?? null, items: rows }, null, 2) };
@@ -1339,16 +1409,13 @@ export class MockApiClient implements ApiClient {
     }, null);
     const counts = new Map<string, number>();
     w.spec.findings.forEach((f) => counts.set(f.category, (counts.get(f.category) ?? 0) + 1));
-    const LABEL: Record<string, string> = { READBACK_DISCREPANCY: 'Readback discrepancy', OPEN_LOOP: 'Open loop', QUALITY_GAP: 'Source / quality gap', CRITICAL_SLOT_UNCERTAIN: 'Critical slot uncertain', MOVEMENT_DIVERGENCE: 'Movement divergence', SPEECH_RECORD_DISCREPANCY: 'Speech–record discrepancy' };
+    const LABEL: Record<string, string> = { READBACK_DISCREPANCY: 'Readback discrepancy', QUALITY_GAP: 'Source / quality gap', CRITICAL_SLOT_UNCERTAIN: 'Critical slot uncertain', MOVEMENT_DIVERGENCE: 'Movement divergence', SPEECH_RECORD_DISCREPANCY: 'Speech–record discrepancy' };
     const active = visibleSegs.reduce((sum, x) => sum + Math.min(asOfMs, segEnd(x)) - segStart(x), 0);
     const hasPrev = s.runs.length > 1;
-    const loops = w.spec.loops.map((l) => loopFor(w, l, scope.runId, 'DEBRIEF', asOfMs)).filter((l) => l && l.status === 'OPEN').length;
     return {
       experimental: true,
       active_audio_ms: active,
       previous_active_audio_ms: hasPrev ? Math.round(active * 0.94) : null,
-      open_loops_at_as_of: loops,
-      previous_open_loops: hasPrev ? loops + 1 : null,
       object_switches: switches,
       previous_object_switches: hasPrev ? switches : null,
       per_minute: perMinute,
@@ -1380,9 +1447,6 @@ export class MockApiClient implements ApiClient {
         const items: QueryResultView['items'] = [];
         if (st.instruction.evidence_id) items.push({ statement: `Last instruction: ${st.instruction.summary} (${st.instruction.state}).`, evidence_ids: [st.instruction.evidence_id], evidence_labels: [lbl(st.instruction.evidence_id)], unknowns: [] });
         if (st.readback.evidence_id) items.push({ statement: `Readback state: ${st.readback.summary ?? st.readback.state}.`, evidence_ids: [st.readback.evidence_id], evidence_labels: [lbl(st.readback.evidence_id)], unknowns: [] });
-        for (const l of snap.open_loops.filter((x) => x.entity_ids.includes(entity.id) && x.status === 'OPEN')) {
-          items.push({ statement: `Still pending: ${w.spec.loops.find((x) => w.loopIds.get(x.key) === l.id)?.detail ?? l.kind} Not observed in stored coverage.`, evidence_ids: [l.evidence[0].id], evidence_labels: [lbl(l.evidence[0].id)], unknowns: l.coverage_known ? [] : ['coverage gap'] });
-        }
         items.push({ statement: `Movement: ${st.movement.state}${st.movement.reason ? ` — ${st.movement.reason}` : ''}.`, evidence_ids: [], evidence_labels: [], unknowns: st.movement.state === 'NOT_EVALUABLE' ? ['movement'] : [] });
         return { ...base, status: items.length > 1 ? 'COMPLETE' : 'PARTIAL', items, note: null };
       }
@@ -1562,7 +1626,7 @@ export class MockApiClient implements ApiClient {
     this.require('admin.manage', 'admin.retention');
     return this.order.map((id) => {
       const s = this.sessions.get(id)!;
-      return { session_id: id, session_title: s.world.spec.title, source_kind: 'SYNTHETIC', retention_days: s.world.spec.retentionDays, basis: 'Synthetic data created for this project.', purge_status: this.retention.get(id) ?? 'NONE' };
+      return { session_id: id, session_title: s.world.spec.title, source_kind: s.world.spec.sourceKind ?? 'SYNTHETIC', retention_days: s.world.spec.retentionDays, basis: s.external ? s.world.spec.sourceLabel : 'Synthetic data created for this project.', purge_status: this.retention.get(id) ?? 'NONE' };
     });
   }
 
@@ -1575,4 +1639,32 @@ export class MockApiClient implements ApiClient {
       return (await this.listRetention()).find((r) => r.session_id === sessionId)!;
     });
   }
+}
+
+/** Standing items at the as-of: the latest step known so far, done once `until` has passed. */
+function remindersAt(w: World, mode: ReplayMode, asOf: number): ReminderView[] {
+  const out: ReminderView[] = [];
+  for (const r of w.spec.reminders ?? []) {
+    const known = r.steps.filter((x) => mode === 'DEBRIEF' || at(x.available) <= asOf);
+    const cur = known[known.length - 1];
+    if (!cur) continue;
+    const prev = known[known.length - 2];
+    const doneAt = r.until ? at(r.until) : null;
+    const done = doneAt != null && doneAt <= asOf;
+    out.push({
+      id: r.key,
+      entity_label: r.entity,
+      kind: r.kind,
+      source: cur.source,
+      title: cur.title,
+      text: cur.text,
+      event_time_ms: at(cur.t),
+      previous: prev ? { title: prev.title, event_time_ms: at(prev.t) } : null,
+      state: done ? 'DONE' : 'ACTIVE',
+      done_time_ms: done ? doneAt : null,
+      done_text: done ? (r.done ?? null) : null,
+      evidence: r.evidence.map((k) => w.evIds.get(k)).filter((x): x is string => !!x),
+    });
+  }
+  return out.sort((a, b) => b.event_time_ms - a.event_time_ms);
 }

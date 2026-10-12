@@ -33,3 +33,9 @@ strict = true
 mypy_path = "backend"
 files = ["backend/flowlens"]
 
+
+[tool.ruff.lint.per-file-ignores]
+# Demo track: long user-facing copy strings; FastAPI File()/Form() defaults.
+"backend/flowlens_demo/*" = ["E501", "B008"]
+"scripts/demo/*" = ["E501"]
+"tests/demo_backend/*" = ["E501"]

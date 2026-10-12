@@ -13,15 +13,15 @@ import type {
   FindingStatus,
   InstructionState,
   InterpretationState,
+  LiveFact,
   MovementState,
   Notice,
-  OpenLoopKind,
-  OpenLoopStatus,
   PermissionMatrix,
   Quality,
   ReadbackState,
   RoleCandidate,
   SessionLifecycle,
+  SourceKind,
   SlotComparisonRow,
   SpeechAct,
   TimeRange,
@@ -72,9 +72,14 @@ export interface TrackSpec {
   entity: string;
   footprint: boolean;
   staleAfter?: string; // clock after which no updates arrive
-  waypoints: [string, number, number][]; // [clock, x, y]
+  /** [clock, x, y] or, from real/synthetic feeds, [clock, x, y, heading_deg, speed_kt]. */
+  waypoints: Waypoint[];
   predicted?: [string, number, number][];
+  /** Coverage gaps ([from, to] clocks): no position is reported inside them. */
+  gaps?: [string, string][];
 }
+
+export type Waypoint = [string, number, number] | [string, number, number, number, number];
 
 export interface FindingSpec {
   key: string; // "F-03"
@@ -84,8 +89,12 @@ export interface FindingSpec {
   entity: string;
   t: string;
   available: string;
+  /** When analysis of this finding visibly starts (DEMO live view); defaults to `available`. */
+  pending?: string;
   title: string;
   statement: string;
+  /** Live highlight wording: what the controller needs to know, times in UTC. */
+  live?: { title: string; text: string; attention?: boolean; until?: string; resolved?: string; facts?: LiveFact[] };
   evidence: string[]; // segment keys
   quality: Quality;
   unknowns: string[];
@@ -96,17 +105,23 @@ export interface FindingSpec {
   correctionNote?: string;
 }
 
-export interface LoopSpec {
-  key: string;
-  kind: OpenLoopKind;
-  entity: string;
-  origin: string; // segment key
-  windowMs: number | null;
-  status: OpenLoopStatus;
-  closing?: string; // segment key
-  coverageKnown: boolean;
+export interface ReminderStepSpec {
+  t: string;
+  available: string;
   title: string;
-  detail: string;
+  text: string;
+  source: 'ATC' | 'PILOT' | null;
+}
+
+/** A standing item to keep in mind; each step replaces the previous one. */
+export interface ReminderSpec {
+  key: string;
+  entity: string;
+  kind: 'LIMIT' | 'TRAFFIC' | 'INTENT';
+  steps: ReminderStepSpec[];
+  until?: string;
+  done?: string;
+  evidence: string[]; // segment keys
 }
 
 export interface OptionSpec {
@@ -133,6 +148,10 @@ export interface ScenarioSpec {
   recordedAt: string;
   updatedAt: string;
   sourceLabel: string;
+  /** Defaults to SYNTHETIC. */
+  sourceKind?: SourceKind;
+  /** Defaults to the fictional layout version. */
+  layoutVersion?: string;
   channels: ChannelInfo[];
   entities: (Omit<EntityInfo, 'id'> & { initialMovement?: MovementState })[];
   hasTracks: boolean;
@@ -146,7 +165,7 @@ export interface ScenarioSpec {
   movements: MovementSpec[];
   tracks: TrackSpec[];
   findings: FindingSpec[];
-  loops: LoopSpec[];
+  reminders?: ReminderSpec[];
   options: OptionSpec[];
   insufficient: { entity: string; needed: string[]; reason: string }[];
   notices: Omit<Notice, 'id'>[];

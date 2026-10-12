@@ -148,7 +148,7 @@ function RangePlayer({ bundle }: { bundle: EvidenceBundle }) {
           </>
         ) : (
           <>
-            <VolumeX aria-hidden className="size-3.5" /> Visual replay only — audio is not loaded in MOCK mode.
+            <VolumeX aria-hidden className="size-3.5" /> No audio for this session.
           </>
         )}
       </p>

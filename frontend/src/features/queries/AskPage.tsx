@@ -198,7 +198,6 @@ export function AskPage() {
           </ul>
           <div className="mt-4 flex flex-wrap gap-1.5 border-t border-hairline-soft pt-4">
             <CodeChip>{mode === 'DEBRIEF' ? 'DEBRIEF' : 'AS_KNOWN'}</CodeChip>
-            <CodeChip tone="muted">MODEL · MOCK</CodeChip>
           </div>
         </aside>
       </div>

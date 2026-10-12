@@ -96,14 +96,6 @@ export const STATUS = {
     REJECTED: m('Rejected', 'muted', XCircle, 'REJECTED'),
     SUPERSEDED: m('Superseded', 'muted', RefreshCcw, 'SUPERSEDED'),
   },
-  loop: {
-    OPEN: m('Open', 'notice', Clock3, 'OPEN'),
-    PARTIAL: m('Partial', 'notice', MinusCircle, 'PARTIAL'),
-    CLOSED_WITH_EVIDENCE: m('Closed with evidence', 'ready', CheckCircle2, 'CLOSED_WITH_EVIDENCE'),
-    CANCELLED: m('Cancelled', 'muted', Ban, 'CANCELLED'),
-    SUPERSEDED: m('Superseded', 'muted', RefreshCcw, 'SUPERSEDED'),
-    UNKNOWN: m('Unknown', 'muted', CircleHelp, 'UNKNOWN'),
-  },
   optionReview: {
     UNREVIEWED: m('Unreviewed', 'muted', CircleDashed, 'UNREVIEWED'),
     RELEVANT: m('Relevant', 'ready', CheckCircle2, 'RELEVANT'),
@@ -178,15 +170,8 @@ export const TONE_TILE: Record<Tone, string> = {
 export const CATEGORY_LABEL: Record<string, string> = {
   CRITICAL_SLOT_UNCERTAIN: 'Critical slot uncertain',
   READBACK_DISCREPANCY: 'Readback discrepancy',
-  OPEN_LOOP: 'Open loop',
   SPEECH_RECORD_DISCREPANCY: 'Speech–record discrepancy',
   MOVEMENT_DIVERGENCE: 'Instruction–movement divergence',
   QUALITY_GAP: 'Source / quality gap',
 };
 
-export const LOOP_KIND_LABEL: Record<string, string> = {
-  REQUEST_RESPONSE: 'Response to request',
-  REPORT_EXPECTED: 'Report expected',
-  COORDINATION_PENDING: 'Coordination pending',
-  READBACK_EXPECTED: 'Readback expected',
-};

@@ -5,9 +5,9 @@ import { useReplay } from '@/features/replay/store';
 import { EvidenceChip } from '@/components/domain/evidence';
 import { LayoutMini } from '@/components/domain/LayoutMini';
 import { Card, CardHeader, StatusPill } from '@/components/domain/primitives';
-import { Callout, EmptyState, ErrorState, LoadingRows } from '@/components/domain/states';
+import { Callout, ErrorState, LoadingRows } from '@/components/domain/states';
 import { useSessionScope } from '@/hooks/useSessionScope';
-import { LOOP_KIND_LABEL, STATUS } from '@/lib/status';
+import { STATUS } from '@/lib/status';
 import { formatClock } from '@/lib/time';
 import { cn } from '@/lib/utils';
 
@@ -144,28 +144,6 @@ export function RunwayTab() {
           )}
         </Card>
 
-        <Card aria-labelledby="rw-loops" className="p-5">
-          <CardHeader id="rw-loops" title="Open loops" />
-          {data.open_loops.filter((l) => l.status === 'OPEN' || l.status === 'PARTIAL').length === 0 ? (
-            <EmptyState className="py-6" title="No open loops">
-              Loops close only with evidence.
-            </EmptyState>
-          ) : (
-            <ul className="mt-3 space-y-2">
-              {data.open_loops
-                .filter((l) => l.status === 'OPEN' || l.status === 'PARTIAL')
-                .map((l) => (
-                  <li key={l.id} className="flex items-center justify-between gap-3 rounded-[14px] bg-sunken px-3.5 py-2.5">
-                    <span className="text-[14.5px] text-ink">
-                      <span className="font-semibold">{l.entity_ids.map(callsign).join(', ')}</span> · {LOOP_KIND_LABEL[l.kind] ?? l.kind}
-                      <span className="block text-[12.5px] text-ink-2 tabular">since {formatClock(l.started_ms)}</span>
-                    </span>
-                    <StatusPill size="sm" meta={STATUS.loop[l.status]} />
-                  </li>
-                ))}
-            </ul>
-          )}
-        </Card>
       </div>
     </div>
   );

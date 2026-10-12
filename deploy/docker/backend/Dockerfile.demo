@@ -1,0 +1,17 @@
+# Demo workspace API (MOCK processing). Local Compose only; not a release image.
+FROM python:3.12.10-slim-bookworm
+
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+WORKDIR /app
+
+ARG DEV=0
+COPY backend/flowlens_demo/requirements.txt backend/flowlens_demo/requirements-dev.txt /app/
+RUN if [ "$DEV" = "1" ]; then pip install -r requirements-dev.txt; else pip install -r requirements.txt; fi
+
+COPY backend/flowlens_demo /app/flowlens_demo
+RUN useradd --system --uid 10001 demo
+USER demo
+
+EXPOSE 8000
+HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/demo/health').status == 200 else 1)"
+CMD ["uvicorn", "flowlens_demo.app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

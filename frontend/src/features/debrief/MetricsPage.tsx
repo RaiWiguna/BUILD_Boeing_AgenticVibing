@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ArrowLeftRight, AudioLines, CircleDot, FlaskConical, Info } from 'lucide-react';
+import { ArrowLeftRight, AudioLines, FlaskConical, Info } from 'lucide-react';
 import { Link } from 'react-router';
 import { qk } from '@/api/queryKeys';
 import type { MetricsView } from '@/api/types';
@@ -214,9 +214,8 @@ export function MetricsPage() {
         </div>
       ) : (
         <div className="space-y-5">
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <Kpi icon={AudioLines} label="Measured active audio" value={formatClock(m.active_audio_ms)} delta={m.previous_active_audio_ms == null ? null : secs(m.active_audio_ms - m.previous_active_audio_ms)} deltaUnit=" s" hint="Sum of voice segments up to as-of across channels." />
-            <Kpi icon={CircleDot} label="Open loops at as-of" value={m.open_loops_at_as_of} delta={m.previous_open_loops == null ? null : m.open_loops_at_as_of - m.previous_open_loops} hint="Expected follow-ups not yet observed in stored coverage." />
             <Kpi icon={ArrowLeftRight} label="Object switches" value={m.object_switches} delta={m.previous_object_switches == null ? null : m.object_switches - m.previous_object_switches} hint="Times consecutive transmissions addressed a different object." />
           </div>
           <div className="grid grid-cols-1 items-start gap-5 2xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">

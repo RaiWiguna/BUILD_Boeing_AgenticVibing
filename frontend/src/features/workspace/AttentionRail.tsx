@@ -1,15 +1,14 @@
-import { AlarmClock, AlertTriangle, CheckCircle2, ChevronRight, Clock3, Info, ListChecks, Play, type LucideIcon } from 'lucide-react';
+import { AlarmClock, AlertTriangle, CheckCircle2, ChevronRight, CircleHelp, Clock3, Flag, Info, ListChecks, Loader2, MessageSquareText, MinusCircle, Play, Plane, type LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
-import type { EntityInfo, FindingView, OpenLoop } from '@/api/types';
-import { Card, HatchedBar, MoreButton, StatusPill } from '@/components/domain/primitives';
+import type { FindingView, LiveFact, ReminderView, SlotComparisonRow } from '@/api/types';
+import { Card, MoreButton, StatusPill } from '@/components/domain/primitives';
 import { EmptyState, ErrorState, LoadingRows } from '@/components/domain/states';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/menu';
-import { PillTabsList, PillTabsTrigger, Tabs, TabsContent } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEvidence } from '@/hooks/useEvidence';
-import { LOOP_KIND_LABEL, STATUS } from '@/lib/status';
-import { formatClock } from '@/lib/time';
+import { STATUS } from '@/lib/status';
+import { formatClock, formatUtcAt } from '@/lib/time';
 import { cn } from '@/lib/utils';
 
 const PRIORITY_STYLE: Record<FindingView['finding']['priority'], { bg: string; tile: string; icon: LucideIcon }> = {
@@ -18,18 +17,87 @@ const PRIORITY_STYLE: Record<FindingView['finding']['priority'], { bg: string; t
   INFO: { bg: 'bg-sunken hover:bg-track/70', tile: 'bg-track text-ink-2', icon: Info },
 };
 
+const SLOT_LABEL: Record<SlotComparisonRow['slot'], string> = { CALLSIGN: 'Callsign', RUNWAY: 'Runway', ACTION: 'Instruction', CONDITION: 'Condition', NEGATION: 'Negation' };
+const SLOT_STATE: Record<SlotComparisonRow['status'], { label: string; icon: LucideIcon; tone: string }> = {
+  MATCHED: { label: 'Match', icon: CheckCircle2, tone: 'text-ready' },
+  MISMATCH: { label: 'Differs', icon: AlertTriangle, tone: 'text-discrepancy' },
+  MISSING: { label: 'Not heard', icon: MinusCircle, tone: 'text-ink-3' },
+  AMBIGUOUS: { label: 'Unclear', icon: CircleHelp, tone: 'text-notice' },
+};
+
+/** Said vs heard per critical slot, compact enough for the rail. */
+function SlotRows({ slots }: { slots: SlotComparisonRow[] }) {
+  return (
+    <table className="mt-2.5 w-full table-fixed overflow-hidden rounded-[12px] bg-surface/70 text-left text-[12.5px] leading-snug">
+      <caption className="sr-only">Said and heard per slot</caption>
+      <thead className="text-[11px] uppercase tracking-[0.05em] text-ink-3">
+        <tr>
+          <th scope="col" className="w-[76px] px-2.5 pb-1 pt-2 font-medium">
+            <span className="sr-only">Slot</span>
+          </th>
+          <th scope="col" className="px-1.5 pb-1 pt-2 font-medium">
+            Said
+          </th>
+          <th scope="col" className="px-1.5 pb-1 pt-2 font-medium">
+            Heard
+          </th>
+          <th scope="col" className="w-7 pb-1 pt-2">
+            <span className="sr-only">Compare</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {slots.map((r) => {
+          const st = SLOT_STATE[r.status];
+          const Icon = st.icon;
+          return (
+            <tr key={r.slot} className={cn('border-t border-hairline-soft align-top', r.status === 'MISMATCH' && 'bg-discrepancy-tint/60')}>
+              <th scope="row" className="px-2.5 py-1.5 font-medium text-ink-2">
+                {SLOT_LABEL[r.slot]}
+              </th>
+              <td className={cn('break-words px-1.5 py-1.5', r.said ? 'text-ink' : 'text-ink-3')}>{r.said ?? '—'}</td>
+              <td className={cn('break-words px-1.5 py-1.5', r.heard ? (r.status === 'MISMATCH' ? 'font-semibold text-discrepancy' : 'text-ink') : 'text-ink-3')}>{r.heard ?? '—'}</td>
+              <td className="py-1.5 pr-2">
+                <span role="img" aria-label={st.label} title={st.label} className="inline-flex">
+                  <Icon aria-hidden className={cn('size-4', st.tone)} />
+                </span>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
+
+/** Fact rows for highlights that are not a readback comparison (position, traffic, confirmation). */
+function FactRows({ facts }: { facts: LiveFact[] }) {
+  return (
+    <dl className="mt-2.5 grid grid-cols-[96px_minmax(0,1fr)] overflow-hidden rounded-[12px] bg-surface/70 text-[12.5px] leading-snug">
+      {facts.map((x, i) => (
+        <div key={x.label} className={cn('contents', i > 0 && '[&>*]:border-t [&>*]:border-hairline-soft')}>
+          <dt className="px-2.5 py-1.5 font-medium text-ink-2">{x.label}</dt>
+          <dd className={cn('break-words px-1.5 py-1.5', x.tone === 'attention' ? 'font-semibold text-discrepancy' : x.tone === 'notice' ? 'text-notice' : 'text-ink')}>{x.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** How long a resolved highlight or a done reminder stays (dimmed) in the live rail. */
+const LINGER_MS = 30_000;
+
 /**
  * Clicking a card selects its object and highlights its evidence range on the timeline;
  * it never moves the as-of. "Review" opens the finding in Review (full-session lens).
  */
-function FindingCard({ f, reviewHref, onFocusRange }: { f: FindingView; reviewHref: string; onFocusRange: (f: FindingView) => void }) {
+function FindingCard({ f, reviewHref, onFocusRange, onListen, isNew, clock, resolved }: { f: FindingView; reviewHref: string; onFocusRange: (f: FindingView) => void; onListen?: (f: FindingView) => void; isNew?: boolean; clock: (ms: number) => string; resolved?: boolean }) {
   const { open } = useEvidence();
-  const style = PRIORITY_STYLE[f.finding.priority];
+  const style = resolved ? PRIORITY_STYLE.INFO : PRIORITY_STYLE[f.finding.priority];
   const Icon = style.icon;
-  const quote = f.finding.evidence.length > 1 ? f.finding.evidence[f.finding.evidence.length - 1]!.quote : null;
   const reviewed = f.finding.status !== 'OPEN';
   return (
-    <li className={cn('group relative rounded-[20px] p-3.5 transition-colors duration-[140ms]', style.bg)} onClick={() => onFocusRange(f)} onFocus={() => onFocusRange(f)}>
+    <li className={cn('group relative rounded-[20px] p-3.5 transition-colors duration-[140ms]', style.bg, resolved && 'opacity-70', isNew && 'animate-in fade-in slide-in-from-top-2 ring-2 ring-data/40 duration-500')} onClick={() => onFocusRange(f)} onFocus={() => onFocusRange(f)}>
       <div className="flex items-start gap-3">
         <span aria-hidden className={cn('mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full', style.tile)}>
           <Icon className="size-[18px]" strokeWidth={2} />
@@ -37,19 +105,35 @@ function FindingCard({ f, reviewHref, onFocusRange }: { f: FindingView; reviewHr
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <h3 className="text-[15px] font-semibold leading-snug tracking-[-0.01em] text-ink">
-              {f.entity_label} · {f.title}
+              {f.entity_label} · {f.live.title}
             </h3>
-            <span className="shrink-0 pt-px text-[13px] text-ink-2 tabular">{formatClock(f.finding.event_time_ms)}</span>
+            <span className="flex shrink-0 items-center gap-1.5 pt-px text-[13px] text-ink-2 tabular">
+              {clock(f.finding.event_time_ms)}
+            </span>
           </div>
-          <p className="mt-0.5 text-[13.5px] leading-snug text-ink-2">{f.finding.statement}</p>
-          {quote && <p className="mt-1 text-[13.5px] text-ink-2 [quotes:'“'_'”']"><q>{quote}</q></p>}
+          {resolved && f.live.resolved ? (
+            <p className="mt-0.5 flex items-start gap-1.5 text-[13.5px] leading-snug text-ink-2">
+              <CheckCircle2 aria-hidden className="mt-0.5 size-3.5 shrink-0 text-ready" />
+              <span>
+                <span className="font-medium text-ink">Resolved</span> · {f.live.resolved}
+              </span>
+            </p>
+          ) : (
+            <p className="mt-0.5 text-[13.5px] leading-snug text-ink-2">{f.live.text}</p>
+          )}
+          {!resolved && f.slots.length > 0 && <SlotRows slots={f.slots} />}
+          {!resolved && f.live.facts && f.live.facts.length > 0 && <FactRows facts={f.live.facts} />}
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => open(f.finding.id)}
+              onClick={(e) => {
+                if (!onListen) return open(f.finding.id);
+                e.stopPropagation();
+                onListen(f);
+              }}
               className="inline-flex h-9 items-center gap-2 rounded-[11px] bg-surface px-3.5 text-[14px] font-medium text-ink shadow-control transition-shadow hover:shadow-pop"
             >
-              <Play aria-hidden className="size-3.5 fill-current" /> Listen to evidence
+              <Play aria-hidden className="size-3.5 fill-current" /> {onListen ? 'Listen' : 'View evidence'}
             </button>
             <Link to={reviewHref} onClick={(e) => e.stopPropagation()} className="inline-flex h-9 items-center gap-1.5 rounded-[11px] px-3 text-[14px] font-medium text-ink transition-colors hover:bg-surface/70">
               <ListChecks aria-hidden className="size-4 text-ink-2" /> Review
@@ -63,75 +147,107 @@ function FindingCard({ f, reviewHref, onFocusRange }: { f: FindingView; reviewHr
   );
 }
 
-function LoopRow({ loop, entities, asOf, label }: { loop: OpenLoop; entities: EntityInfo[]; asOf: number; label: (id: string) => string }) {
-  const { open } = useEvidence();
-  const ents = loop.entity_ids.map((id) => entities.find((e) => e.id === id)?.callsign ?? 'Unknown').join(', ');
-  const elapsed = Math.max(0, asOf - loop.started_ms);
-  const window = loop.expected_window_ms;
-  const overdue = window != null && elapsed > window;
-  const meta = STATUS.loop[loop.status];
-  const origin = loop.evidence[0];
-  return (
-    <li className="rounded-[18px] border border-hairline-soft bg-surface p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[15px] font-semibold text-ink">
-            {ents} · {LOOP_KIND_LABEL[loop.kind] ?? loop.kind}
-          </p>
-          <p className="mt-0.5 text-[13.5px] text-ink-2 tabular">
-            Since {formatClock(loop.started_ms)} · {window != null ? `window ${Math.round(window / 1000)} s` : 'no timer'}
-          </p>
-        </div>
-        <StatusPill size="sm" meta={meta} />
-      </div>
-      {window != null && loop.status === 'OPEN' && (
-        <div className="mt-3">
-          <HatchedBar value={Math.min(elapsed, window)} max={window} variant={overdue ? 'notice' : 'data'} height={8} label={`${Math.round(elapsed / 1000)} of ${Math.round(window / 1000)} seconds elapsed`} />
-          <p className="mt-1.5 text-[12.5px] text-ink-3 tabular">
-            {overdue ? `Expected window passed ${Math.round((elapsed - window) / 1000)} s ago` : `${Math.round((window - elapsed) / 1000)} s left in window`} · {loop.timer_profile_version}
-          </p>
-        </div>
-      )}
-      {!loop.coverage_known && <p className="mt-2 text-[13px] text-notice">Coverage unknown — closure may be outside the stored audio.</p>}
-      {origin && (
-        <button type="button" onClick={() => open(origin.id)} className="mt-3 inline-flex h-8 items-center gap-1.5 rounded-full bg-data-tint px-3 text-[13px] font-semibold text-data-strong hover:bg-data-soft">
-          <Play aria-hidden className="size-3 fill-current" /> {label(origin.id)}
+const REMINDER_ICON: Record<ReminderView['kind'], LucideIcon> = { LIMIT: Flag, TRAFFIC: Plane, INTENT: MessageSquareText };
+const SOURCE_LABEL = { ATC: 'ATC', PILOT: 'Pilot' } as const;
+
+/** One standing item: the current clearance limit, traffic advised, or what the pilot said they will do. */
+function ReminderRow({ r, clock, onOpen }: { r: ReminderView; clock: (ms: number) => string; onOpen: (r: ReminderView) => void }) {
+  const Icon = REMINDER_ICON[r.kind];
+  const done = r.state === 'DONE';
+  const when = (
+    <span className="shrink-0 text-[12.5px] text-ink-3 tabular">
+      {r.source ? `${SOURCE_LABEL[r.source]} ` : ''}
+      {clock(r.event_time_ms)}
+    </span>
+  );
+  if (done)
+    return (
+      <li>
+        <button type="button" onClick={() => onOpen(r)} title={r.done_text ?? undefined} className="flex w-full items-center gap-2.5 rounded-[12px] px-2.5 py-1 text-left opacity-60 transition-colors hover:bg-sunken">
+          <CheckCircle2 aria-hidden className="size-4 shrink-0 text-ink-3" />
+          <span className="min-w-0 flex-1 truncate text-[13px] text-ink-2">
+            <span className="line-through decoration-ink-3">
+              {r.entity_label} · {r.title}
+            </span>{' '}
+            · Done{r.done_text ? ` · ${r.done_text}` : ''}
+          </span>
         </button>
-      )}
+      </li>
+    );
+  return (
+    <li>
+      <button type="button" onClick={() => onOpen(r)} className="flex w-full items-start gap-2.5 rounded-[12px] px-2.5 py-1.5 text-left transition-colors hover:bg-sunken">
+        <span aria-hidden className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-data-tint text-data">
+          <Icon className={cn('size-3.5', r.kind === 'TRAFFIC' && '-rotate-45')} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-baseline justify-between gap-2">
+            <span className="min-w-0 text-[14px] font-semibold leading-snug text-ink">
+              {r.entity_label} · {r.title}
+            </span>
+            {when}
+          </span>
+          <span className="block text-[13px] leading-snug text-ink-2">
+            {r.text}
+            {r.previous && <span className="text-ink-3"> Was: {r.previous.title}.</span>}
+          </span>
+        </span>
+      </button>
     </li>
   );
 }
 
-/** "Needs attention" rail (comp 03): findings and open loops at the current as-of. */
+/** "Needs attention" rail (comp 03): findings available at the current as-of. */
 export function AttentionRail({
   findings,
   loading,
   error,
   onRetry,
-  loops,
-  entities,
   asOf,
   reviewBase,
-  label,
   onFocusRange,
+  checking = false,
+  recent,
+  onListen,
+  startUtc,
+  reminders,
+  live = true,
   className,
 }: {
   findings: FindingView[] | undefined;
   loading: boolean;
   error: unknown;
   onRetry: () => void;
-  loops: OpenLoop[];
-  entities: EntityInfo[];
   asOf: number;
   reviewBase: (path: string) => string;
-  label: (id: string) => string;
   onFocusRange: (f: FindingView) => void;
+  /** Live view: the system is checking each transmission as it completes (shown while playing). */
+  checking?: boolean;
+  /** DEMO live view: finding IDs that just became available. */
+  recent?: Set<string>;
+  /** DEMO live view: play the evidence range instead of opening the drawer. */
+  onListen?: (f: FindingView) => void;
+  /** Recording start; times show as UTC wall clock when known. */
+  startUtc?: string;
+  /** Standing items to keep in mind (clearance limits, traffic advised, stated intentions). */
+  reminders?: ReminderView[];
+  /** As-known replay: resolved items fade out shortly after they end. */
+  live?: boolean;
   className?: string;
 }) {
-  const [tab, setTab] = useState('findings');
+  const { open } = useEvidence();
+  const clock = (ms: number) => (startUtc ? formatUtcAt(startUtc, ms) : formatClock(ms));
   const [priority, setPriority] = useState<'ALL' | 'ATTENTION' | 'NOTICE' | 'INFO'>('ALL');
-  const list = (findings ?? []).filter((f) => priority === 'ALL' || f.finding.priority === priority);
-  const openLoops = loops.filter((l) => l.status === 'OPEN' || l.status === 'PARTIAL');
+  // Lost or unreadable audio is shown in the transcript and timeline, not as a highlight.
+  const highlights = (findings ?? []).filter((f) => f.live.attention !== false);
+  const isResolved = (f: FindingView) => f.live.until_ms != null && f.live.until_ms <= asOf;
+  const lingering = (until: number | null | undefined) => !live || until == null || asOf - until < LINGER_MS;
+  const shown = highlights.filter((f) => !isResolved(f) || lingering(f.live.until_ms));
+  const active = highlights.filter((f) => !isResolved(f));
+  const filtered = shown.filter((f) => priority === 'ALL' || f.finding.priority === priority);
+  const keep = (reminders ?? []).filter((r) => r.state === 'ACTIVE' || lingering(r.done_time_ms));
+  // Live view: newest first so a finding that just arrived is in sight.
+  const list = onListen ? [...filtered].sort((a, b) => (b.finding.available_time_ms ?? 0) - (a.finding.available_time_ms ?? 0)) : filtered;
   return (
     <Card as="aside" aria-labelledby="attention-title" className={cn('flex flex-col p-5', className)}>
       <div className="flex items-center justify-between gap-3">
@@ -158,46 +274,49 @@ export function AttentionRail({
           </DropdownMenu>
         </div>
       </div>
-      <Tabs value={tab} onValueChange={setTab} className="mt-4 flex min-h-0 flex-1 flex-col fit:mt-3">
-        <PillTabsList className="bg-transparent p-0 [&>button]:h-10 fit:[&>button]:h-9 [&>button]:text-[15px] [&>button[data-state=active]]:bg-data-tint [&>button[data-state=active]]:text-data-strong [&>button[data-state=active]]:shadow-none">
-          <PillTabsTrigger value="findings">
-            Findings <span className="tabular opacity-80">{findings?.length ?? '–'}</span>
-          </PillTabsTrigger>
-          <PillTabsTrigger value="loops">
-            Open loops <span className="tabular opacity-80">{openLoops.length}</span>
-          </PillTabsTrigger>
-        </PillTabsList>
-        <TabsContent value="findings" className="mt-4 flex-1 fit:mt-3 fit:flex fit:min-h-0 fit:flex-col">
-          {loading && !findings ? (
-            <LoadingRows rows={3} />
-          ) : error ? (
-            <ErrorState compact error={error} onRetry={onRetry} />
-          ) : list.length === 0 ? (
-            <EmptyState icon={CheckCircle2} title="Nothing available yet" className="py-8">
-              No findings are available at {formatClock(asOf)} in this view. This does not mean the situation is safe or complete.
+      <div className="mt-3 flex items-center justify-between gap-3 text-[14px] text-ink-3">
+        <p>
+          <span className="tabular">{findings ? active.length : '–'}</span> active · <span className="tabular">{clock(asOf)}</span>
+        </p>
+        {checking && (
+          <span role="status" className="inline-flex items-center gap-1.5 text-[13px] font-medium text-data">
+            <Loader2 aria-hidden className="size-3.5 animate-spin" /> Checking
+          </span>
+        )}
+      </div>
+      <div className="mt-3 flex min-h-0 flex-1 flex-col">
+      {loading && !findings ? (
+        <LoadingRows rows={3} />
+      ) : error ? (
+        <ErrorState compact error={error} onRetry={onRetry} />
+      ) : (
+        <ScrollArea className="-mx-1 px-1 fit:min-h-0 fit:flex-1">
+          {keep.length > 0 && (
+            <section aria-labelledby="keep-in-mind" className="mb-3 border-b border-hairline-soft pb-2">
+              <h3 id="keep-in-mind" className="px-1 text-[12.5px] font-medium uppercase tracking-[0.06em] text-ink-3">
+                Keep in mind
+              </h3>
+              <ul className="mt-1.5 space-y-0.5">
+                {keep.map((r) => (
+                  <ReminderRow key={r.id} r={r} clock={clock} onOpen={(x) => x.evidence[0] && open(x.evidence[0])} />
+                ))}
+              </ul>
+            </section>
+          )}
+          {list.length === 0 ? (
+            <EmptyState icon={CheckCircle2} title="Nothing flagged" className="py-8">
+              No alerts at {clock(asOf)}. Not a safety confirmation.
             </EmptyState>
           ) : (
-            <ScrollArea as="ul" aria-label="Findings at this as-of" className="-mx-1 space-y-3 px-1 fit:min-h-0 fit:flex-1">
+            <ul aria-label="Active highlights" className="space-y-3">
               {list.map((f) => (
-                <FindingCard key={f.finding.id} f={f} reviewHref={reviewBase(`review/findings?finding=${f.finding.id}`)} onFocusRange={onFocusRange} />
+                <FindingCard key={f.finding.id} f={f} reviewHref={reviewBase(`review/findings?finding=${f.finding.id}`)} onFocusRange={onFocusRange} onListen={onListen} isNew={recent?.has(f.finding.id)} clock={clock} resolved={isResolved(f)} />
               ))}
-            </ScrollArea>
+            </ul>
           )}
-        </TabsContent>
-        <TabsContent value="loops" className="mt-4 flex-1 fit:mt-3 fit:flex fit:min-h-0 fit:flex-col">
-          {openLoops.length === 0 ? (
-            <EmptyState icon={ListChecks} title="No open loops at this as-of" className="py-8">
-              Loops close only with evidence; unknown coverage keeps them open.
-            </EmptyState>
-          ) : (
-            <ScrollArea as="ul" aria-label="Open loops at this as-of" className="-mx-1 space-y-3 px-1 fit:min-h-0 fit:flex-1">
-              {openLoops.map((l) => (
-                <LoopRow key={l.id} loop={l} entities={entities} asOf={asOf} label={label} />
-              ))}
-            </ScrollArea>
-          )}
-        </TabsContent>
-      </Tabs>
+        </ScrollArea>
+      )}
+      </div>
     </Card>
   );
 }

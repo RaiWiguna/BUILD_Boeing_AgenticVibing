@@ -72,7 +72,7 @@ export function SessionSwitcher({ collapsed, currentId, area }: { collapsed: boo
                 <>
                   <span title={current.title} className="block truncate text-[14px] font-semibold text-ink">{current.title}</span>
                   <span className="mt-0.5 block truncate text-[12px] text-ink-2">
-                    {current.latest_run_label ? `Run ${current.latest_run_label.split(' ')[0]}` : 'Not analysed'} · <span className="font-semibold uppercase tracking-[0.04em] text-[10.5px]">{current.source_kind}</span>
+                    {current.latest_run_label ? `Run ${current.latest_run_label.split(' ')[0]}` : 'Not analysed'}
                   </span>
                 </>
               ) : (

@@ -1,10 +1,12 @@
-import { ChevronLeft, ChevronRight, CircleHelp, Filter, Flag, Loader2, MoreHorizontal, Pause, Play, RefreshCw, Search, Sparkles, VolumeX, WifiOff } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CircleHelp, Filter, Flag, Loader2, MoreHorizontal, Pause, Play, RefreshCw, Search, Sparkles, Volume2, VolumeX, WifiOff } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import { hasCode, isApiError } from '@/api/errors';
 import type { TranscriptRow, WaveformView } from '@/api/types';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { useAudio } from '@/features/replay/audio';
+import { useReplay } from '@/features/replay/store';
 import { useFindings, useWaveforms } from '@/features/workspace/queries';
 import { MoreButton, StatusPill } from '@/components/domain/primitives';
 import { Callout, DesktopOnly, EmptyState, ErrorState, LoadingRows } from '@/components/domain/states';
@@ -54,10 +56,16 @@ function SegmentWave({ row, waves }: { row: TranscriptRow; waves: WaveformView[]
   const from = Math.max(0, start - pad);
   const to = end + pad;
   const total = to - from;
-  const [pos, setPos] = useState(0);
-  const [playing, setPlaying] = useState(false);
+  const [localPos, setPos] = useState(0);
+  const [localPlaying, setPlaying] = useState(false);
+  // DEMO workspaces (ADR 0003): play the real recording through the replay clock.
+  const audio = useAudio((s) => s.available);
+  const cursor = useReplay((s) => Math.floor(s.cursor / 50) * 50);
+  const replayPlaying = useReplay((s) => s.status === 'PLAYING');
+  const pos = audio ? Math.min(total, Math.max(0, cursor - from)) : localPos;
+  const playing = audio ? replayPlaying && cursor >= from && cursor <= to : localPlaying;
   useEffect(() => {
-    if (!playing) return;
+    if (audio || !localPlaying) return;
     let last = performance.now();
     const iv = setInterval(() => {
       const now = performance.now();
@@ -72,7 +80,7 @@ function SegmentWave({ row, waves }: { row: TranscriptRow; waves: WaveformView[]
       last = now;
     }, 50);
     return () => clearInterval(iv);
-  }, [playing, total]);
+  }, [audio, localPlaying, total]);
   const n = 120;
   const lanes = (waves ?? []).map((w) => ({
     label: w.label,
@@ -90,10 +98,10 @@ function SegmentWave({ row, waves }: { row: TranscriptRow; waves: WaveformView[]
           <span className="text-[15px] text-ink tabular">
             {formatClock(start)} – {formatClock(end)}
           </span>
-          <Tooltip content="Visual replay only — audio is not loaded in MOCK mode">
+          <Tooltip content={audio ? 'Play recording' : 'No audio for this session'}>
             <span tabIndex={0} className="inline-flex size-9 items-center justify-center rounded-full border border-hairline text-ink-2">
-              <VolumeX aria-hidden className="size-4" />
-              <span className="sr-only">Audio not loaded</span>
+              {audio ? <Volume2 aria-hidden className="size-4" /> : <VolumeX aria-hidden className="size-4" />}
+              <span className="sr-only">{audio ? 'Audio available' : 'Audio not loaded'}</span>
             </span>
           </Tooltip>
         </div>
@@ -123,10 +131,16 @@ function SegmentWave({ row, waves }: { row: TranscriptRow; waves: WaveformView[]
         <button
           type="button"
           onClick={() => {
+            if (audio) {
+              const r = useReplay.getState();
+              if (playing) r.pause();
+              else r.playRange({ start, end });
+              return;
+            }
             if (pos >= total) setPos(0);
             setPlaying((p) => !p);
           }}
-          aria-label={playing ? 'Pause segment' : 'Play segment (visual only)'}
+          aria-label={playing ? 'Pause segment' : audio ? 'Play segment' : 'Play segment (visual only)'}
           className="inline-flex size-11 items-center justify-center rounded-full bg-data text-white shadow-[0_6px_16px_-6px_rgba(37,99,235,0.6)] hover:bg-data-strong"
         >
           {playing ? <Pause aria-hidden className="size-[18px] fill-current" /> : <Play aria-hidden className="ml-0.5 size-[18px] fill-current" />}
@@ -134,7 +148,7 @@ function SegmentWave({ row, waves }: { row: TranscriptRow; waves: WaveformView[]
         <span className="w-[92px] text-[13px] text-ink-2 tabular">
           {formatClock(pos)} / {formatClock(total)}
         </span>
-        <input type="range" min={0} max={total} step={100} value={Math.round(pos)} onChange={(e) => setPos(Number(e.target.value))} aria-label="Segment position" className="h-1.5 flex-1 cursor-pointer accent-[#2563eb]" />
+        <input type="range" min={0} max={total} step={100} value={Math.round(pos)} onChange={(e) => (audio ? useReplay.getState().seek(from + Number(e.target.value)) : setPos(Number(e.target.value)))} aria-label="Segment position" className="h-1.5 flex-1 cursor-pointer accent-[#2563eb]" />
         <span className="inline-flex h-8 items-center rounded-[10px] border border-hairline px-2.5 text-[13px] font-medium text-ink">1×</span>
       </div>
     </section>

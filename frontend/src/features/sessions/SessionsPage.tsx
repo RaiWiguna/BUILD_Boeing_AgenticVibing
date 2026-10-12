@@ -15,6 +15,7 @@ import {
   Link2,
   NotebookText,
   Search,
+  ServerOff,
   ShieldAlert,
   TriangleAlert,
   Upload,
@@ -26,14 +27,15 @@ import { sessionHref, type SessionArea } from '@/lib/links';
 import { lastArea, lastSession } from '@/hooks/useSessionScope';
 import { toast } from 'sonner';
 import { qk } from '@/api/queryKeys';
+import { useDemoBackend } from '@/api/demo';
 import type { Notice, SessionSummary } from '@/api/types';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { LayoutMini } from '@/components/domain/LayoutMini';
-import { Card, CodeChip, Dot, IconTile, MoreButton } from '@/components/domain/primitives';
+import { Card, Dot, IconTile, MoreButton } from '@/components/domain/primitives';
 import { EmptyState, ErrorState, LoadingRows } from '@/components/domain/states';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
-import { Select, Skeleton } from '@/components/ui/controls';
+import { Progress, Select, Skeleton } from '@/components/ui/controls';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/menu';
 import { PillTabsList, PillTabsTrigger, Tabs } from '@/components/ui/tabs';
@@ -52,7 +54,9 @@ export function SessionsPage() {
   const [tab, setTab] = useState<TabKey>('all');
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('ALL');
-  const sessions = useQuery({ queryKey: qk.sessions, queryFn: () => api.listSessions() });
+  // DEMO track: poll while a demo workspace is still processing so it turns ready in place.
+  const sessions = useQuery({ queryKey: qk.sessions, queryFn: () => api.listSessions(), refetchInterval: (q) => (q.state.data?.some(isProcessing) ? 1500 : false) });
+  const demoStatus = useDemoBackend((d) => d.status);
   const all = useMemo(() => sessions.data ?? [], [sessions.data]);
   const selectedId = params.get('selected') ?? all.find((s) => s.latest_run_id)?.id ?? all[0]?.id ?? null;
 
@@ -142,6 +146,11 @@ export function SessionsPage() {
             </div>
           </div>
 
+          {demoStatus === 'OFFLINE' && (
+            <p className="mt-3 flex items-center gap-2 rounded-[12px] bg-sunken px-3 py-2 text-[13px] text-ink-2">
+              <ServerOff aria-hidden className="size-4 shrink-0 text-ink-3" /> Server offline. Imported sessions are hidden until it is back.
+            </p>
+          )}
           <div className="mt-4">
             {sessions.isPending ? (
               <LoadingRows rows={6} />
@@ -168,7 +177,12 @@ export function SessionsPage() {
               <Skeleton className="mt-6 h-40 w-full" />
             </Card>
           ) : (
-            selectedId && all.some((s) => s.id === selectedId) && <SessionDetailRail id={selectedId} />
+            selectedId &&
+            (() => {
+              const sel = all.find((s) => s.id === selectedId);
+              if (!sel) return null;
+              return isProcessing(sel) ? <ProcessingRail s={sel} /> : <SessionDetailRail id={selectedId} />;
+            })()
           )}
           <NeedsChecking sessions={all} onSelect={select} />
         </div>
@@ -257,6 +271,39 @@ function AnalysisCell({ s }: { s: SessionSummary }) {
   );
 }
 
+/** DEMO track: a backend workspace whose MOCK processing has not finished. */
+function isProcessing(s: SessionSummary) {
+  return s.origin === 'DEMO_BACKEND' && s.lifecycle === 'PREPARING';
+}
+
+const progressHref = (s: SessionSummary) => `/sessions/import?workspace=${s.id}`;
+
+function ProcessingRail({ s }: { s: SessionSummary }) {
+  const note = s.notices[0];
+  const pct = Number(/(\d+)%/.exec(note?.title ?? '')?.[1] ?? 0);
+  return (
+    <Card className="p-6" aria-labelledby="session-detail-title">
+      <h2 id="session-detail-title" className="text-[22px] font-semibold leading-tight tracking-[-0.02em] text-ink">
+        {s.title}
+      </h2>
+      <p className="mt-1 text-[13px] text-ink-2">Demo workspace · processing</p>
+      <div className="mt-5">
+        <div className="flex items-center justify-between text-[14px]">
+          <span className="font-medium text-ink">{note?.detail ?? 'Processing'}</span>
+          <span className="tabular text-ink-2">{pct}%</span>
+        </div>
+        <Progress className="mt-2" value={pct} label="Processing progress" />
+      </div>
+      <Button asChild variant="primary" className="mt-5 w-full">
+        <Link to={progressHref(s)}>
+          View progress <ChevronRight />
+        </Link>
+      </Button>
+      <p className="mt-2 text-center text-[13px] text-ink-2">The workspace opens when processing finishes.</p>
+    </Card>
+  );
+}
+
 function SessionTable({ rows, selectedId, onSelect }: { rows: SessionSummary[]; selectedId: string | null; onSelect: (id: string) => void }) {
   const navigate = useNavigate();
   return (
@@ -283,7 +330,11 @@ function SessionTable({ rows, selectedId, onSelect }: { rows: SessionSummary[]; 
                   {selected && <span aria-hidden className="absolute inset-y-1 left-0 w-[3px] rounded-full bg-data" />}
                   {/* The title opens the workspace (Enter on focus); clicking elsewhere in the row selects. */}
                   <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                    {s.latest_run_id ? (
+                    {isProcessing(s) ? (
+                      <Link to={progressHref(s)} onClick={(e) => e.stopPropagation()} className="text-[16px] font-semibold tracking-[-0.01em] text-ink underline-offset-4 hover:underline focus-visible:outline-offset-4">
+                        {s.title}
+                      </Link>
+                    ) : s.latest_run_id ? (
                       <Link to={sessionHref('workspace', { sid: s.id, run: s.latest_run_id })} onClick={(e) => e.stopPropagation()} className="text-[16px] font-semibold tracking-[-0.01em] text-ink underline-offset-4 hover:underline focus-visible:outline-offset-4">
                         {s.title}
                       </Link>
@@ -296,7 +347,6 @@ function SessionTable({ rows, selectedId, onSelect }: { rows: SessionSummary[]; 
                   </span>
                   <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-ink-2">
                     {s.context}
-                    <CodeChip className="h-5 px-2 text-[10.5px]">{s.source_kind}</CodeChip>
                   </span>
                 </td>
                 <td className={cn('border-t border-hairline px-3 py-3.5 text-[15px] text-ink tabular group-first:border-t-0', selected && 'border-transparent')}>{formatDuration(s.duration_ms)}</td>
@@ -460,11 +510,8 @@ function SessionDetailRail({ id }: { id: string }) {
             <LayoutMini layout={s.layout} />
           </div>
           <figcaption className="flex items-center justify-between gap-2 bg-surface px-3 py-2 text-[12px] text-ink-2">
-            <span>Illustrative · fictional layout</span>
-            <span className="flex gap-1.5">
-              <CodeChip className="h-5 text-[10px]">SYNTHETIC</CodeChip>
-              <span className="inline-flex h-5 items-center rounded-full bg-track px-2 text-[11px] text-ink-2">Replay offline</span>
-            </span>
+            <span className="truncate">{s.layout.caption}</span>
+            {s.media && <span className="inline-flex h-5 items-center rounded-full bg-track px-2 text-[11px] text-ink-2">{s.media.recordings.length > 1 ? `${s.media.recordings.length} recordings` : 'Audio'}</span>}
           </figcaption>
         </figure>
       )}
@@ -483,7 +530,7 @@ function FactRow({ icon: Icon, label, value }: { icon: typeof FileText; label: s
 }
 
 /**
- * Where a notice is resolved: findings to Review, open loops and divergence to the
+ * Where a notice is resolved: findings to Review, divergence and gaps to the
  * Workspace attention rail; permission and partial-analysis notices stay on Sessions,
  * where the detail rail explains them.
  */
@@ -491,7 +538,7 @@ function noticeHref(s: SessionSummary, n: Notice): string | null {
   if (!s.latest_run_id) return null;
   const scope = { sid: s.id, run: s.latest_run_id };
   if (/finding/i.test(n.title)) return sessionHref('review/findings', scope);
-  if (/loop|divergence|discrepan/i.test(n.title)) return sessionHref('workspace', scope);
+  if (/divergence|discrepan|gap/i.test(n.title)) return sessionHref('workspace', scope);
   return null;
 }
 

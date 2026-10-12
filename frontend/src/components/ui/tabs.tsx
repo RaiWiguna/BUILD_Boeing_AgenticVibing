@@ -26,7 +26,7 @@ export const TabsTrigger = React.forwardRef<HTMLButtonElement, React.ComponentPr
 ));
 TabsTrigger.displayName = 'TabsTrigger';
 
-/** Pill tabs inside a tinted track (Findings 3 / Open loops 2). */
+/** Pill tabs inside a tinted track (e.g. Findings 3 / Transcript 7). */
 export const PillTabsList = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>>(({ className, ...props }, ref) => (
   <TabsPrimitive.List ref={ref} className={cn('grid auto-cols-fr grid-flow-col gap-1 rounded-[14px] bg-track p-1', className)} {...props} />
 ));

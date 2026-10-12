@@ -186,6 +186,8 @@ export interface SessionSummary {
   latest_run_label: string | null;
   open_findings: number;
   notices: Notice[];
+  /** DEMO track: where the session lives. Absent for in-browser MOCK sessions. */
+  origin?: 'MOCK' | 'DEMO_BACKEND';
 }
 
 export interface RunView {
@@ -206,6 +208,66 @@ export interface LayoutView {
   hold_lines: { id: string; label: string; runway: string; points: [number, number][] }[];
   taxiways: { id: string; label: string; path: [number, number][]; label_at: [number, number] }[];
   bounds: { min_x: number; max_x: number; min_y: number; max_y: number };
+  /** Optional initial viewport inside `bounds` (DEMO layouts span whole airports). */
+  focus?: { min_x: number; max_x: number; min_y: number; max_y: number };
+}
+
+/* ── DEMO track (ADR 0003): real audio + live transcript for backend workspaces ── */
+export interface DemoWord {
+  text: string;
+  start_ms: number;
+  end_ms: number;
+}
+
+export interface DemoLiveSegment {
+  /** Segment key ("T-03"); maps to the transcript segment via `labels`. */
+  key: string;
+  segment_id: string;
+  confidence: number | null;
+  speaker: string;
+  /** Recogniser chunk ordinal (0-based); the STT ran in fixed-length chunks. */
+  chunk: number;
+  /** Recording the segment belongs to ("87", "88"). */
+  recording: string;
+  start_ms: number;
+  end_ms: number;
+  /** When the final text is shown (segment end + modelled STT latency). */
+  final_ms: number;
+  words: DemoWord[];
+}
+
+export interface DemoPendingFinding {
+  finding_id: string;
+  key: string;
+  title: string;
+  priority: 'ATTENTION' | 'NOTICE' | 'INFO';
+  pending_ms: number;
+  available_ms: number;
+}
+
+/** One audio file placed on the session timeline. Gaps between recordings are silent. */
+export interface DemoRecording {
+  part: string;
+  name: string;
+  url: string;
+  offset_ms: number;
+  duration_ms: number;
+  recorded_at: string;
+}
+
+export interface DemoMedia {
+  workspace_id: string;
+  audio_url: string;
+  audio_media_type: string;
+  recordings: DemoRecording[];
+  /** Provenance labels shown wherever the media is shown. */
+  labels: string[];
+  attribution: string;
+  stt_label: string;
+  segments: DemoLiveSegment[];
+  chunk_boundaries_ms: number[];
+  findings: DemoPendingFinding[];
+  playback_cursor_ms: number;
 }
 
 export interface SessionDetail extends SessionSummary {
@@ -219,6 +281,8 @@ export interface SessionDetail extends SessionSummary {
   default_as_of_ms: number;
   /** Display labels for contract UUIDs (e.g. evidence "E-12"). */
   labels: Record<string, string>;
+  /** DEMO track only: playable audio and live transcript timing. */
+  media?: DemoMedia | null;
 }
 
 /* ── PROPOSED_CONTRACT: imports ────────────────────────────────────── */
@@ -304,6 +368,42 @@ export interface TrackSeries {
   predicted: TrackPoint[];
 }
 
+/** One fact row on a live highlight (position, distance, what was said). */
+export interface LiveFact {
+  label: string;
+  value: string;
+  tone?: 'attention' | 'notice';
+}
+
+/** Live highlight wording: what the controller needs to know, times in UTC. */
+export interface LiveHighlight {
+  title: string;
+  text: string;
+  /** false: shown in the transcript and timeline only. */
+  attention?: boolean;
+  /** The situation ends here (ms); the card then shows `resolved`. */
+  until_ms?: number;
+  resolved?: string;
+  facts?: LiveFact[];
+}
+
+/** A standing item to keep in mind: a clearance limit, traffic advised, or a stated intention. */
+export interface ReminderView {
+  id: string;
+  entity_label: string;
+  kind: 'LIMIT' | 'TRAFFIC' | 'INTENT';
+  source: 'ATC' | 'PILOT' | null;
+  title: string;
+  text: string;
+  event_time_ms: number;
+  /** The step this one replaced (e.g. the previous clearance limit). */
+  previous: { title: string; event_time_ms: number } | null;
+  state: 'ACTIVE' | 'DONE';
+  done_time_ms: number | null;
+  done_text: string | null;
+  evidence: string[];
+}
+
 export interface WorkspaceSnapshot {
   snapshot: Snapshot;
   as_of_ms: number;
@@ -311,11 +411,12 @@ export interface WorkspaceSnapshot {
   entities: EntityStateView[];
   tracks: Track[];
   series: TrackSeries[];
-  open_loops: OpenLoop[];
   geometry: GeometryResult[];
   gaps: TimeRange[];
   event_markers: { id: string; t: number; kind: 'INSTRUCTION' | 'READBACK' | 'REPORT' | 'CORRECTION' | 'FINDING'; label: string }[];
   hidden_after_as_of: number;
+  /** DEMO: standing items at the as-of (absent when the session has none). */
+  reminders?: ReminderView[];
 }
 
 export interface WaveformView {
@@ -363,7 +464,6 @@ export interface EntityMemoryView {
   heard: { quote: string | null; evidence_id: string | null; readback: ReadbackState; interpretation: InterpretationState; reviewer: ReviewerState; highlight: string | null; speaker: string } | null;
   observed: { movement: MovementState; statement: string; reason: string | null; interpretation: InterpretationState; reviewer: ReviewerState };
   history: HistoryItem[];
-  open_loops: OpenLoop[];
   provenance: { input_revision: number; reducer_version: string; rule_version: string; evidence_ids: string[]; updated_at: string };
   hidden_after_as_of: number;
 }
@@ -374,7 +474,6 @@ export interface RunwayMemoryView {
   objects: { entity: EntityInfo; state: EntityStateView }[];
   active_instructions: { entity_id: string; summary: string; evidence_id: string | null; t: number }[];
   occupancy: { entity_id: string; intervals: TimeRange[]; status: GeometryResult['status']; reason: string | null }[];
-  open_loops: OpenLoop[];
   gaps: TimeRange[];
 }
 
@@ -422,6 +521,9 @@ export interface FindingView {
   movement: MovementState;
   reviews: Review[];
   correction_note: string | null;
+  /** Operational wording for the live highlight; falls back to title/statement. */
+  live: LiveHighlight;
+  slots: SlotComparisonRow[];
 }
 
 export interface OptionView {
@@ -441,7 +543,7 @@ export interface OptionSetView {
 }
 
 /* ── PROPOSED_CONTRACT: debrief / brief / export ───────────────────── */
-export type BriefSection = 'KNOWN_SITUATION' | 'ACTIVE_RESTRICTIONS' | 'CONTEXT_CHANGES' | 'OPEN_LOOPS' | 'FINDINGS' | 'REVIEW_STATUS' | 'UNKNOWN_COVERAGE';
+export type BriefSection = 'KNOWN_SITUATION' | 'ACTIVE_RESTRICTIONS' | 'CONTEXT_CHANGES' | 'FINDINGS' | 'REVIEW_STATUS' | 'UNKNOWN_COVERAGE';
 
 export interface BriefView {
   brief: Brief;
@@ -493,8 +595,6 @@ export interface MetricsView {
   experimental: true;
   active_audio_ms: number;
   previous_active_audio_ms: number | null;
-  open_loops_at_as_of: number;
-  previous_open_loops: number | null;
   object_switches: number;
   previous_object_switches: number | null;
   per_minute: { minute: number; occupied_ms: number; gap: boolean }[];

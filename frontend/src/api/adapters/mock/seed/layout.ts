@@ -7,7 +7,7 @@ import type { LayoutView } from '../../../types';
 export const FICTIONAL_LAYOUT: LayoutView = {
   version: 'fictional-2',
   units: 'm',
-  caption: 'Fictional layout · metres · not an operational chart',
+  caption: 'Scale in metres',
   runways: [
     {
       id: '09/27',

@@ -50,3 +50,12 @@ Folder yang belum memiliki isi hanya berisi `.gitkeep`. Jangan menganggap kebera
 ## Ketepatan status
 
 Bedakan planned, source tersedia, build berhasil, berjalan, tests lulus, provider benchmark, domain review, dan operational validation. Angka target pada PRD bukan hasil pengukuran. Dokumen historis dapat dibaca dari Git bila diperlukan, tetapi tidak otomatis menjadi aturan aktif atau file yang harus direstore.
+
+## Riset corpus TartanAviation — 11 Oktober 2026
+
+[Feasibility ADS-B untuk map/runway/taxi view](data/tartanAdsbFeasibility.md) memuat inventory, pengukuran dua CSV KAGC, audit raw/processed, keterbatasan ground coverage dan kecocokan frontend. Status RESEARCH_ONLY / NOT_DOMAIN_VALIDATED; tidak menutup gate atau mengimplementasikan adapter. Memory 50 transkrip dan hasil ADS-B ada di [handoff](../.agent/sessionHandoff.md).
+
+## Demo workspace (MOCK) — 12 Oktober 2026
+
+[Panduan demo workspace](development/demoWorkspace.md) menjalankan import dua file (audio + ADS-B) ke backend Python + PostgreSQL lokal dengan playback audio, transcript bertahap dan findings progresif. Keputusan dan batasnya ada di [ADR 0003](adr/0003-demo-workspace-track.md); rencana di [demoWorkspacePlan.md](development/demoWorkspacePlan.md). Status MOCK / NOT_DOMAIN_VALIDATED; bukan G-BE.
+

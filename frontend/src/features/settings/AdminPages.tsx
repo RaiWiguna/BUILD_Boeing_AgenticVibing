@@ -313,7 +313,7 @@ function ProvidersInner() {
   const providers = useProviders();
   const check = useCheckProvider();
   return (
-    <SettingsCard title="Provider profiles" description="Server-side profiles. Credentials never reach the browser; this MOCK build sends no provider requests.">
+    <SettingsCard title="Provider profiles" description="Server-side profiles. Credentials never reach the browser.">
       <Loading q={providers}>
         {(list) => (
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
@@ -411,7 +411,7 @@ function JobsInner() {
                   </p>
                   <Progress value={ratio * 100} tone={ratio > 0.8 ? 'notice' : 'data'} label="Budget used" className="mt-3 h-2.5" />
                   <p className="mt-2 text-[12.5px] text-ink-3 tabular">
-                    {(b.spent_microunits / 1e6).toFixed(1)} of {(b.limit_microunits / 1e6).toFixed(0)} units · MOCK
+                    {(b.spent_microunits / 1e6).toFixed(1)} of {(b.limit_microunits / 1e6).toFixed(0)} units
                   </p>
                 </div>
                 <div className="rounded-[16px] bg-sunken p-4">
@@ -690,7 +690,7 @@ export function RetentionPage() {
 function RetentionInner() {
   const retention = useRetention();
   return (
-    <SettingsCard title="Retention" description="Retention follows the source’s data basis. Purge is a two-step request; this MOCK build never deletes data.">
+    <SettingsCard title="Retention" description="Retention follows the source’s data basis. Purge is a two-step request.">
       <Loading q={retention}>
         {(list) => (
           <ul className="divide-y divide-hairline-soft">

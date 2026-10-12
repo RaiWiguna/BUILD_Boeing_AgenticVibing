@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Check, ChevronDown, Database, EyeOff, FlaskConical, History, Loader2, RefreshCw, ServerOff, Timer, WifiOff } from 'lucide-react';
+import { AudioLines, Check, ChevronDown, Clock, EyeOff, History, Loader2, RefreshCw, WifiOff } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { qk } from '@/api/queryKeys';
 import { useApi } from '@/hooks/useApi';
@@ -13,7 +13,7 @@ import { Tooltip } from '@/components/ui/tooltip';
 import { useSessionScope } from '@/hooks/useSessionScope';
 import { useStreamState } from '@/hooks/useSessionStream';
 import { STATUS } from '@/lib/status';
-import { formatDate, formatDateTimeUtc, formatDuration, formatOffset } from '@/lib/time';
+import { formatDate, formatDateTimeUtc, formatDuration, formatOffset, formatUtcAt } from '@/lib/time';
 import { cn } from '@/lib/utils';
 
 const CONNECTION = {
@@ -23,29 +23,28 @@ const CONNECTION = {
   OFFLINE: { label: 'Offline', dot: 'bg-[#a3aab5]' },
 } as const;
 
-/**
- * "05:22.0 · ● Connected" — the as-of clock plus one status button whose popover
- * explains the connection, where results come from, and that no provider is called.
- */
+/** "19:02:33Z · ● Connected" — the running UTC clock plus one connection status button. */
 export function ClockConnectionPill() {
+  const start = useSessionScope().detail?.recorded_at;
   const cursor = useReplay((s) => s.cursor);
   const playing = useReplay((s) => s.status === 'PLAYING');
   const connection = useStreamState((s) => s.connection);
   const seq = useStreamState((s) => s.lastSequence);
   const c = CONNECTION[connection];
   const shown = playing ? Math.floor(cursor / 100) * 100 : cursor;
+  const time = start ? formatUtcAt(start, shown) : formatOffset(shown);
   return (
     <div className="inline-flex h-11 items-center rounded-[14px] border border-hairline bg-surface text-[15px] font-medium text-ink shadow-control">
-      <Tooltip content="As-of position on the replay clock (session offset, not wall-clock time).">
-        <span tabIndex={0} className="inline-flex h-full items-center gap-2 rounded-l-[14px] pl-3.5 pr-3 tabular" aria-label={`As of ${formatOffset(shown)}`}>
-          <Timer aria-hidden className="size-[18px] text-ink-2" />
-          {formatOffset(shown)}
+      <Tooltip content={start ? 'Time (UTC)' : 'Session time'}>
+        <span tabIndex={0} className="inline-flex h-full items-center gap-2 rounded-l-[14px] pl-3.5 pr-3 tabular" aria-label={start ? `Time ${time}` : `As of ${time}`}>
+          <Clock aria-hidden className="size-[18px] text-ink-2" />
+          {time}
         </span>
       </Tooltip>
       <span aria-hidden className="h-5 w-px bg-hairline" />
       <Popover>
         <PopoverTrigger asChild>
-          <button type="button" aria-label={`Status: ${c.label}, cached results. Show details`} className="inline-flex h-full items-center gap-2 rounded-r-[14px] pl-3 pr-3 transition-colors hover:bg-sunken data-[state=open]:bg-sunken">
+          <button type="button" aria-label={`Status: ${c.label}. Show details`} className="inline-flex h-full items-center gap-2 rounded-r-[14px] pl-3 pr-3 transition-colors hover:bg-sunken data-[state=open]:bg-sunken">
             <span aria-hidden className={cn('size-2.5 rounded-full', c.dot, connection !== 'CONNECTED' && 'animate-pulse')} />
             <span role="status" aria-live="polite">
               {c.label}
@@ -53,27 +52,13 @@ export function ClockConnectionPill() {
             <ChevronDown aria-hidden className="size-3.5 text-ink-2" />
           </button>
         </PopoverTrigger>
-        <PopoverContent align="end" className="w-[320px] p-4">
-          <dl className="space-y-3.5 text-[13.5px]">
+        <PopoverContent align="end" className="w-[280px] p-4">
+          <dl className="text-[13.5px]">
             <div className="flex gap-3">
               <span aria-hidden className={cn('mt-1.5 size-2.5 shrink-0 rounded-full', c.dot)} />
               <div>
-                <dt className="font-semibold text-ink">Server stream · {c.label}</dt>
-                <dd className="text-ink-2">FlowLens server, sequence {seq}. While disconnected, review changes pause and nothing is queued.</dd>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <Database aria-hidden className="mt-0.5 size-4 shrink-0 text-ink-2" />
-              <div>
-                <dt className="font-semibold text-ink">Cached results</dt>
-                <dd className="text-ink-2">Results come from stored analysis. Seeking or switching the lens never calls a provider.</dd>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <ServerOff aria-hidden className="mt-0.5 size-4 shrink-0 text-ink-2" />
-              <div>
-                <dt className="font-semibold text-ink">Analysis provider · not called</dt>
-                <dd className="text-ink-2">Replay is offline. Provider status is shown in Settings › Providers.</dd>
+                <dt className="font-semibold text-ink">{c.label}</dt>
+                <dd className="text-ink-2">{connection === 'CONNECTED' ? `Up to date · update ${seq}` : 'Review changes pause until the connection is back.'}</dd>
               </div>
             </div>
           </dl>
@@ -142,15 +127,13 @@ export function SessionLabels({ className }: { className?: string }) {
   if (!detail) return null;
   return (
     <div className={cn('flex flex-wrap items-center gap-2', className)}>
-      <CodeChip title="Source kind — not validated for operations">{detail.source_kind}</CodeChip>
-      <Tooltip content="Served by the in-browser MOCK adapter. No backend or provider was called.">
-        <span tabIndex={0} className="inline-flex h-6 items-center gap-1.5 rounded-full bg-[#fff1e8] px-2.5 text-[11.5px] font-semibold uppercase tracking-[0.045em] text-[#a2470f]">
-          <FlaskConical aria-hidden className="size-3" /> Mock
-        </span>
-      </Tooltip>
-      <span className="inline-flex h-[30px] items-center gap-1.5 rounded-[10px] bg-data-tint px-2.5 text-[14px] font-medium text-data-strong">
-        <ServerOff aria-hidden className="size-[15px]" /> Replay offline
-      </span>
+      {detail.media && (
+        <Tooltip content={detail.media.recordings.map((r) => r.name).join(' · ')}>
+            <span tabIndex={0} className="inline-flex h-[30px] items-center gap-1.5 rounded-[10px] bg-data-tint px-2.5 text-[14px] font-medium text-data-strong">
+              <AudioLines aria-hidden className="size-[15px]" /> {detail.media.recordings.length > 1 ? `${detail.media.recordings.length} recordings` : 'Audio'}
+            </span>
+        </Tooltip>
+      )}
       {detail.lifecycle === 'ARCHIVED' && <CodeChip tone="muted">Archived · read-only</CodeChip>}
     </div>
   );

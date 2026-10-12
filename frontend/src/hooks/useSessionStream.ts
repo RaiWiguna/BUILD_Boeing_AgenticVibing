@@ -15,7 +15,7 @@ interface StreamState {
   set: (p: Partial<StreamState>) => void;
 }
 
-export const useStreamState = create<StreamState>((set) => ({ connection: 'CONNECTED', lastSequence: 0, leaderCursor: null, leaderName: 'Dana Whitfield', set: (p) => set(p) }));
+export const useStreamState = create<StreamState>((set) => ({ connection: 'CONNECTED', lastSequence: 0, leaderCursor: null, leaderName: 'Khalfani Shaquille', set: (p) => set(p) }));
 
 /**
  * Subscribes to the session stream. Events are applied in sequence order; duplicates

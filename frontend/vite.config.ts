@@ -9,8 +9,9 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve(import.meta.dirname, 'src') },
   },
-  server: { host: 'localhost', port: 5173 },
-  preview: { host: 'localhost', port: 4173 },
+  // DEMO track: the demo backend from deploy/compose/local/compose.demo.yml.
+  server: { host: 'localhost', port: 5173, proxy: { '/api/demo': { target: 'http://127.0.0.1:8000', changeOrigin: false } } },
+  preview: { host: 'localhost', port: 4173, proxy: { '/api/demo': { target: 'http://127.0.0.1:8000', changeOrigin: false } } },
   test: {
     environment: 'jsdom',
     globals: true,

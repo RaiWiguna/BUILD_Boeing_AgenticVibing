@@ -3,7 +3,6 @@ import {
   ArrowRight,
   CalendarClock,
   ChevronRight,
-  CircleDot,
   Download,
   FileDiff,
   FilePlus2,
@@ -47,7 +46,6 @@ const SECTION_STYLE: Record<BriefSection, { icon: typeof FileText; tone: 'data' 
   KNOWN_SITUATION: { icon: FileText, tone: 'data', accent: 'before:bg-data', wash: '' },
   ACTIVE_RESTRICTIONS: { icon: FileText, tone: 'data', accent: 'before:bg-data', wash: '' },
   CONTEXT_CHANGES: { icon: FileDiff, tone: 'data', accent: 'before:bg-data', wash: '' },
-  OPEN_LOOPS: { icon: CircleDot, tone: 'discrepancy', accent: 'before:bg-discrepancy', wash: 'bg-gradient-to-r from-discrepancy-tint/60 to-transparent' },
   FINDINGS: { icon: Flag, tone: 'discrepancy', accent: 'before:bg-discrepancy', wash: '' },
   REVIEW_STATUS: { icon: History, tone: 'muted', accent: 'before:bg-[#c3c8cf]', wash: '' },
   UNKNOWN_COVERAGE: { icon: AlertTriangle, tone: 'muted', accent: '', wash: '' },
@@ -158,7 +156,7 @@ function Spotlight({ brief }: { brief: BriefView }) {
       <div className="flex items-start justify-between gap-3">
         <p className="text-[14px] font-medium text-white/90">Key item to review</p>
         <span className="inline-flex h-6 items-center gap-1.5 rounded-full bg-white/20 px-2.5 text-[11.5px] font-semibold uppercase tracking-[0.05em] text-white backdrop-blur-sm">
-          <Sparkles aria-hidden className="size-3" /> AI interpretation · Mock
+          <Sparkles aria-hidden className="size-3" /> AI interpretation
         </span>
       </div>
       <div className="mt-3 flex flex-wrap items-end gap-x-5 gap-y-2">
@@ -232,7 +230,7 @@ function SummarySection({ section }: { section: BriefView['sections'][number] })
 function Summary({ brief, latest, onOpenLatest }: { brief: BriefView; latest: BriefView | null; onOpenLatest: () => void }) {
   const { open } = useEvidence();
   const firstEvidence = brief.brief.evidence[0]?.id;
-  const order: BriefSection[] = ['KNOWN_SITUATION', 'ACTIVE_RESTRICTIONS', 'CONTEXT_CHANGES', 'OPEN_LOOPS', 'FINDINGS', 'REVIEW_STATUS', 'UNKNOWN_COVERAGE'];
+  const order: BriefSection[] = ['KNOWN_SITUATION', 'ACTIVE_RESTRICTIONS', 'CONTEXT_CHANGES', 'FINDINGS', 'REVIEW_STATUS', 'UNKNOWN_COVERAGE'];
   const sections = [...brief.sections].sort((a, b) => order.indexOf(a.section) - order.indexOf(b.section));
   return (
     <section aria-labelledby="summary-title" className="card p-5">
@@ -417,7 +415,7 @@ export function DebriefPage() {
                     <Download /> Export report
                   </Button>
                 </SheetTrigger>
-                <SheetContent title="Export report" description={`${selected.label} · as of ${formatClock(selected.brief.as_of_ms)} · generated locally by the MOCK adapter; original sources stay stored.`}>
+                <SheetContent title="Export report" description={`${selected.label} · as of ${formatClock(selected.brief.as_of_ms)}`}>
                   <ExportPanel brief={selected} sid={sid} />
                 </SheetContent>
               </Sheet>

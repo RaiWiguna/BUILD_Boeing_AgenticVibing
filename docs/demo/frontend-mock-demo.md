@@ -31,7 +31,7 @@ Halaman `/login` menampilkan kartu **MOCK demo accounts**. Klik salah satu kartu
 
 | Akun | Email | Role | Kegunaan di demo |
 | --- | --- | --- | --- |
-| Dana Whitfield | `evaluator@flowlens.test` | Evaluator | Alur utama: review, debrief, export |
+| Khalfani Shaquille | `evaluator@flowlens.test` | Evaluator | Alur utama: review, debrief, export |
 | Sam Ortiz | `controller@flowlens.test` | Controller review | Review tanpa export |
 | Ira Santoso | `observer@flowlens.test` | Observer | Menunjukkan akses read-only |
 | Nizam Rahman | `admin@flowlens.test` | Administrator | Settings/admin |

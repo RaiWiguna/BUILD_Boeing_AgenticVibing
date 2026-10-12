@@ -4,7 +4,7 @@ import { STANDARD_PERMISSIONS, TOWER_GROUND, type ScenarioSpec } from './spec';
 /**
  * S1 · Runway 27 · Readback — canonical MOCK scenario (E2E-01, E2E-05).
  * FLN214: hold-short instruction for RWY 27, candidate readback says 09, later corrected.
- * FLN402: arrival taxiing on B; "report runway vacated" is never observed (open loop).
+ * FLN402: arrival taxiing on B; the requested "runway vacated" report is not in the recording.
  * VEH03: follow-me vehicle without position data (movement NOT_EVALUABLE).
  */
 export const RUNWAY27: ScenarioSpec = {
@@ -113,6 +113,7 @@ export const RUNWAY27: ScenarioSpec = {
       available: '05:22',
       title: 'Runway mismatch',
       statement: 'Runway in the instruction and the candidate readback differ.',
+      live: { title: 'Runway mismatch', text: 'Instructed hold short RWY 27; read back RWY 09.' },
       evidence: ['T-09', 'T-10'],
       quality: 'SUPPORTED',
       unknowns: ['speaker identity'],
@@ -128,23 +129,6 @@ export const RUNWAY27: ScenarioSpec = {
       correctionNote: 'A later correction (E-14, 05:24) names runway 27. This finding stays reviewable.',
     },
     {
-      key: 'F-04',
-      category: 'OPEN_LOOP',
-      priority: 'NOTICE',
-      status: 'OPEN',
-      entity: 'FLN402',
-      t: '05:21',
-      available: '05:21',
-      title: 'Report vacated awaited',
-      statement: 'Report runway vacated not observed in the stored coverage.',
-      evidence: ['T-08'],
-      quality: 'SUPPORTED',
-      unknowns: ['whether the report was made off-frequency'],
-      movement: 'CONSISTENT',
-      sourceAlert: { status: 'NOT_AVAILABLE', severity: null, note: 'No source alert was recorded for this interval.' },
-      trackNote: 'Observed footprint left the runway polygon at 05:02. A track is not a pilot report.',
-    },
-    {
       key: 'F-05',
       category: 'QUALITY_GAP',
       priority: 'INFO',
@@ -154,6 +138,7 @@ export const RUNWAY27: ScenarioSpec = {
       available: '05:18',
       title: 'Track not available',
       statement: 'No position data for this vehicle; movement cannot be assessed.',
+      live: { title: 'No position', text: 'VEH03 position not available.' },
       evidence: ['T-12'],
       quality: 'MISSING',
       unknowns: ['vehicle position'],
@@ -171,6 +156,7 @@ export const RUNWAY27: ScenarioSpec = {
       available: '07:05',
       title: 'Callsign missing',
       statement: 'Readback without callsign; the addressee cannot be determined.',
+      live: { title: 'Readback without callsign', text: '"Holding" at 14:27:02Z with no callsign. Addressee unknown.' },
       evidence: ['T-14'],
       quality: 'AMBIGUOUS',
       unknowns: ['callsign', 'speaker identity'],
@@ -191,17 +177,13 @@ export const RUNWAY27: ScenarioSpec = {
       available: '14:05',
       title: 'Audio gap 13:20–14:05',
       statement: 'Both channels have no audio for 45 s; communication in this interval is unknown.',
+      live: { title: 'Audio lost 45 s', text: 'No audio on both channels 14:33:20–14:34:05Z. Transmissions in that window unknown.', attention: false },
       evidence: ['T-17'],
       quality: 'MISSING',
       unknowns: ['communication during gap'],
       movement: 'NOT_EVALUABLE',
       sourceAlert: { status: 'NOT_AVAILABLE', severity: null, note: 'Gap detected from source coverage metadata.' },
     },
-  ],
-  loops: [
-    { key: 'L-01', kind: 'REPORT_EXPECTED', entity: 'FLN402', origin: 'T-08', windowMs: 13000, status: 'OPEN', coverageKnown: true, title: 'Report vacated · FLN402', detail: 'Awaiting report runway vacated from FLN402.' },
-    { key: 'L-02', kind: 'READBACK_EXPECTED', entity: 'FLN214', origin: 'T-09', windowMs: 10000, status: 'CLOSED_WITH_EVIDENCE', closing: 'T-11', coverageKnown: true, title: 'Matching readback · FLN214', detail: 'Confirmation of runway 27 in the readback.' },
-    { key: 'L-03', kind: 'REPORT_EXPECTED', entity: 'VEH03', origin: 'T-17', windowMs: 120000, status: 'CLOSED_WITH_EVIDENCE', closing: 'T-19', coverageKnown: true, title: 'Report vacated · VEH03', detail: 'Crossing completion report.' },
   ],
   options: [
     {

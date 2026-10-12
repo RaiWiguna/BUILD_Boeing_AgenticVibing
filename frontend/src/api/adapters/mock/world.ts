@@ -13,7 +13,6 @@ import type {
   GeometryResult,
   Intent,
   MemoryEvent,
-  OpenLoop,
   Option,
   ReplayMode,
   RunView,
@@ -27,9 +26,14 @@ import type {
   WaveformView,
 } from '../../types';
 import { at, mid, rand, sha } from './ids';
-import type { FindingSpec, LoopSpec, OptionSpec, ScenarioSpec, SegmentSpec } from './seed/spec';
+import type { FindingSpec, OptionSpec, ScenarioSpec, SegmentSpec, TrackSpec, Waypoint } from './seed/spec';
 
 export const DEFAULT_LATENCY = 2500;
+export const FICTIONAL_LAYOUT_VERSION = 'fictional-2';
+
+export function layoutVersionOf(spec: ScenarioSpec) {
+  return spec.hasLayout ? (spec.layoutVersion ?? FICTIONAL_LAYOUT_VERSION) : null;
+}
 
 export interface World {
   spec: ScenarioSpec;
@@ -42,13 +46,12 @@ export interface World {
   evIds: Map<string, string>;
   findingIds: Map<string, string>;
   optionIds: Map<string, string>;
-  loopIds: Map<string, string>;
   labels: Record<string, string>;
   manifest: SourceManifest;
 }
 
-export function buildWorld(spec: ScenarioSpec): World {
-  const sessionId = mid(`session:${spec.key}`);
+/** `sessionId` overrides the derived ID (DEMO workspaces keep their backend UUID). */
+export function buildWorld(spec: ScenarioSpec, sessionId = mid(`session:${spec.key}`)): World {
   const assetIds = spec.channels.map((c) => mid(`${spec.key}:asset:${c.index}`));
   const entities = spec.entities.map((e) => ({ ...e, id: mid(`${spec.key}:entity:${e.callsign}`) }));
   const entityByCallsign = new Map(entities.map((e) => [e.callsign, e]));
@@ -65,10 +68,8 @@ export function buildWorld(spec: ScenarioSpec): World {
   }
   const findingIds = new Map(spec.findings.map((f) => [f.key, mid(`${spec.key}:finding:${f.key}`)]));
   const optionIds = new Map(spec.options.map((o) => [o.key, mid(`${spec.key}:option:${o.key}`)]));
-  const loopIds = new Map(spec.loops.map((l) => [l.key, mid(`${spec.key}:loop:${l.key}`)]));
   findingIds.forEach((id, key) => (labels[id] = key));
   optionIds.forEach((id, key) => (labels[id] = key));
-  loopIds.forEach((id, key) => (labels[id] = key));
   entities.forEach((e) => (labels[e.id] = e.callsign));
 
   const runs: RunView[] = spec.runs.map((r, i) => {
@@ -106,13 +107,13 @@ export function buildWorld(spec: ScenarioSpec): World {
     id: mid(`${spec.key}:manifest`),
     session_id: sessionId,
     revision: 1,
-    source_kind: 'SYNTHETIC',
+    source_kind: spec.sourceKind ?? 'SYNTHETIC',
     source_label: spec.sourceLabel,
     source_hash: sha(`${spec.key}:manifest`),
     domain_validation: 'NOT_DOMAIN_VALIDATED',
-    coordinate_system: spec.hasLayout ? 'FICTIONAL_LOCAL_XY' : 'NONE',
+    coordinate_system: !spec.hasLayout ? 'NONE' : spec.layoutVersion ? 'AIRPORT_LOCAL_XY' : 'FICTIONAL_LOCAL_XY',
     units: 'm',
-    layout_version: spec.hasLayout ? 'fictional-2' : null,
+    layout_version: layoutVersionOf(spec),
     clock: { offset_ms: 0, timezone: 'UTC', uncertainty_ms: 40, mapping_version: 'clock-1' },
     coverage: {
       audio: true,
@@ -127,7 +128,7 @@ export function buildWorld(spec: ScenarioSpec): World {
       cloud: spec.permissions.cloud_audio.state === 'ALLOWED' && spec.permissions.cloud_transcript.state === 'ALLOWED',
       export: spec.permissions.report_export.state === 'ALLOWED',
       audio_export: spec.permissions.audio_export.state === 'ALLOWED',
-      basis: 'Synthetic data created for this project (SYNTHETIC).',
+      basis: (spec.sourceKind ?? 'SYNTHETIC') === 'SYNTHETIC' ? 'Synthetic data created for this project (SYNTHETIC).' : spec.sourceLabel,
       retention_days: spec.retentionDays,
     },
     assets: spec.channels.map((c, i) => ({
@@ -141,7 +142,7 @@ export function buildWorld(spec: ScenarioSpec): World {
     })),
   };
 
-  return { spec, sessionId, assetIds, entities, entityByCallsign, runs, segIds, evIds, findingIds, optionIds, loopIds, labels, manifest };
+  return { spec, sessionId, assetIds, entities, entityByCallsign, runs, segIds, evIds, findingIds, optionIds, labels, manifest };
 }
 
 /* ── Time helpers ──────────────────────────────────────────────────── */
@@ -306,32 +307,6 @@ export function optionFor(w: World, o: OptionSpec, runId: string | null): Option
   };
 }
 
-export function loopFor(w: World, l: LoopSpec, runId: string | null, mode: ReplayMode, asOf: number): OpenLoop | null {
-  const origin = w.spec.segments.find((s) => s.key === l.origin)!;
-  if (!visible(mode, asOf, segStart(origin), segAvailable(origin))) return null;
-  const closing = l.closing ? w.spec.segments.find((s) => s.key === l.closing) : undefined;
-  const closed = closing && visible(mode, asOf, segStart(closing), segAvailable(closing));
-  return {
-    id: w.loopIds.get(l.key)!,
-    session_id: w.sessionId,
-    analysis_run_id: runId,
-    revision: 1,
-    originating_id: w.segIds.get(l.origin)!,
-    entity_ids: [w.entityByCallsign.get(l.entity)!.id],
-    kind: l.kind,
-    status: closed ? l.status : 'OPEN',
-    started_ms: segStart(origin),
-    expected_window_ms: l.windowMs,
-    coverage_known: l.coverageKnown,
-    closing_evidence_ids: closed && closing ? [w.evIds.get(closing.key)!] : [],
-    timer_profile_version: 'lab-timer-v1',
-    evidence: [evidenceFor(w, origin, runId)],
-    event_time_ms: segStart(origin),
-    available_time_ms: segAvailable(origin),
-    recorded_at: w.spec.updatedAt,
-  };
-}
-
 /* ── Projections ───────────────────────────────────────────────────── */
 
 export function movementAt(w: World, callsign: string, asOf: number) {
@@ -339,7 +314,15 @@ export function movementAt(w: World, callsign: string, asOf: number) {
   return list[list.length - 1] ?? null;
 }
 
-function interp(points: [string, number, number][], t: number): { x: number; y: number; moving: boolean } | null {
+interface Fix {
+  x: number;
+  y: number;
+  moving: boolean;
+  heading: number | null;
+  speedKt: number | null;
+}
+
+function interp(points: Waypoint[] | [string, number, number][], t: number): Fix | null {
   if (!points.length) return null;
   const first = points[0]!;
   if (t < at(first[0])) return null;
@@ -350,11 +333,32 @@ function interp(points: [string, number, number][], t: number): { x: number; y: 
     const tb = at(b[0]);
     if (t >= ta && t <= tb) {
       const k = tb === ta ? 0 : (t - ta) / (tb - ta);
-      return { x: a[1] + (b[1] - a[1]) * k, y: a[2] + (b[2] - a[2]) * k, moving: a[1] !== b[1] || a[2] !== b[2] };
+      const speedKt = a.length === 5 && b.length === 5 ? a[4] + (b[4] - a[4]) * k : null;
+      return {
+        x: a[1] + (b[1] - a[1]) * k,
+        y: a[2] + (b[2] - a[2]) * k,
+        moving: speedKt != null ? speedKt > 0.5 : a[1] !== b[1] || a[2] !== b[2],
+        heading: a.length === 5 ? a[3] : null,
+        speedKt,
+      };
     }
   }
   const last = points[points.length - 1]!;
-  return { x: last[1], y: last[2], moving: false };
+  return { x: last[1], y: last[2], moving: false, heading: last.length === 5 ? last[3] : null, speedKt: last.length === 5 ? 0 : null };
+}
+
+/** Coverage gap containing `t`, if any (a feed reports nothing inside it). */
+function gapAt(spec: TrackSpec, t: number) {
+  const g = spec.gaps?.find(([a, b]) => t >= at(a) && t < at(b));
+  return g ? { start: at(g[0]), end: at(g[1]) } : null;
+}
+
+/** Latest reported fix at or before `t`: inside a gap the last fix before it, aged. */
+function reportedFix(spec: TrackSpec, t: number): (Fix & { t: number }) | null {
+  const gap = gapAt(spec, t);
+  const ref = gap ? gap.start : t;
+  const p = interp(spec.waypoints, ref);
+  return p ? { ...p, t: ref } : null;
 }
 
 export function trackStatus(w: World, callsign: string, asOf: number, forceStale: boolean): EntityStateView['track_status'] {
@@ -364,6 +368,8 @@ export function trackStatus(w: World, callsign: string, asOf: number, forceStale
   const first = at(spec.waypoints[0]![0]);
   if (asOf < first) return 'MISSING';
   if (spec.staleAfter && asOf > at(spec.staleAfter)) return 'STALE';
+  const gap = gapAt(spec, asOf);
+  if (gap && asOf - gap.start > 5000) return 'STALE';
   return spec.footprint ? 'FRESH' : 'POINT_ONLY';
 }
 
@@ -371,6 +377,9 @@ export function sourceAge(w: World, callsign: string, asOf: number, forceStale: 
   const spec = w.spec.tracks.find((t) => t.entity === callsign);
   if (!spec || asOf < at(spec.waypoints[0]![0])) return null;
   if (forceStale) return 38_000;
+  const gap = gapAt(spec, asOf);
+  if (gap) return Math.max(1000, Math.round((asOf - gap.start) / 1000) * 1000);
+  if (spec.staleAfter && asOf > at(spec.staleAfter)) return Math.round((asOf - at(spec.staleAfter)) / 1000) * 1000;
   const last = at(spec.waypoints[spec.waypoints.length - 1]![0]);
   if (asOf > last + 10_000) return 12_000;
   return 1000 + Math.floor(rand(`${callsign}:${Math.floor(asOf / 1000)}`) * 2) * 1000;
@@ -382,11 +391,14 @@ export function seriesFor(w: World, asOf: number, forceStale: boolean): TrackSer
     if (!entity) return [];
     const points: TrackPoint[] = [];
     const end = forceStale ? Math.min(asOf, asOf - 38_000) : asOf;
-    for (let t = at(spec.waypoints[0]![0]); t <= end; t += 2000) {
+    const stop = spec.staleAfter ? Math.min(end, at(spec.staleAfter)) : end;
+    for (let t = at(spec.waypoints[0]![0]); t <= stop; t += 2000) {
+      if (gapAt(spec, t)) continue;
       const p = interp(spec.waypoints, t);
       if (p) points.push({ t, x: p.x, y: p.y });
     }
-    const cur = interp(spec.waypoints, end);
+    const fix = reportedFix(spec, stop);
+    const cur = fix && !gapAt(spec, stop) ? fix : null;
     if (cur && points.length && points[points.length - 1]!.t !== end) points.push({ t: end, x: cur.x, y: cur.y });
     const predicted: TrackPoint[] = (spec.predicted ?? [])
       .filter(([c]) => Math.abs(at(c) - asOf) < 40_000 || at(c) > asOf)
@@ -400,9 +412,11 @@ export function seriesFor(w: World, asOf: number, forceStale: boolean): TrackSer
 export function tracksFor(w: World, runId: string | null, asOf: number, forceStale: boolean): Track[] {
   return w.spec.tracks.flatMap((spec) => {
     const entity = w.entityByCallsign.get(spec.entity);
-    const t = forceStale ? asOf - 38_000 : asOf;
-    const p = interp(spec.waypoints, t);
+    const want = forceStale ? asOf - 38_000 : spec.staleAfter ? Math.min(asOf, at(spec.staleAfter)) : asOf;
+    const p = reportedFix(spec, want);
     if (!entity || !p) return [];
+    const t = p.t;
+    const age = forceStale ? 38_000 : Math.max(1000, asOf - t);
     return [
       {
         id: mid(`${w.spec.key}:track:${spec.entity}:${Math.floor(t / 1000)}`),
@@ -416,12 +430,12 @@ export function tracksFor(w: World, runId: string | null, asOf: number, forceSta
         kind: 'TRACK',
         x_m: Math.round(p.x),
         y_m: Math.round(p.y),
-        heading_deg: 270,
-        speed_mps: p.moving ? 8 : 0,
+        heading_deg: p.heading ?? 270,
+        speed_mps: p.speedKt != null ? Math.round(p.speedKt * 0.514444 * 10) / 10 : p.moving ? 8 : 0,
         length_m: entity.kind === 'VEHICLE' ? 5 : 38,
         width_m: entity.kind === 'VEHICLE' ? 2 : 35,
-        age_ms: forceStale ? 38_000 : 1000,
-        layout_version: 'fictional-2',
+        age_ms: age,
+        layout_version: layoutVersionOf(w.spec) ?? FICTIONAL_LAYOUT_VERSION,
         quality: spec.footprint ? 'SUPPORTED' : 'AMBIGUOUS',
         statement: spec.footprint ? 'Observed position with footprint' : 'Observed centre point only; footprint not available',
         event_time_ms: t,
@@ -442,7 +456,7 @@ export function geometryFor(w: World, runId: string | null, asOf: number, forceS
       : status === 'POINT_ONLY'
         ? 'Footprint not available (centre point only)'
         : status === 'STALE'
-          ? 'Track stale (age 38 s); last movement status is not carried forward'
+          ? `Track stale (age ${Math.round((sourceAge(w, e.callsign, asOf, forceStale) ?? 38_000) / 1000)} s); last movement status is not carried forward`
           : (mv?.reason ?? 'No position data');
     return {
       session_id: w.sessionId,
@@ -452,7 +466,7 @@ export function geometryFor(w: World, runId: string | null, asOf: number, forceS
       status: evaluable ? 'EVALUATED' : 'NOT_EVALUABLE',
       occupied: evaluable ? false : null,
       intervals: [],
-      layout_version: w.spec.hasLayout ? 'fictional-2' : null,
+      layout_version: layoutVersionOf(w.spec),
       rule_version: 'lab-1',
       reason,
       uncertainty_ms: evaluable ? 400 : null,
@@ -476,7 +490,7 @@ export function entityStates(w: World, mode: ReplayMode, asOf: number, forceStal
     const status = trackStatus(w, e.callsign, asOf, forceStale);
     const mv = movementAt(w, e.callsign, asOf);
     let movement: EntityStateView['movement'] = mv ? { state: mv.state, summary: mv.summary, reason: mv.reason } : { state: 'UNKNOWN', summary: 'Unknown', reason: null };
-    if (status === 'STALE') movement = { state: 'NOT_EVALUABLE', summary: 'NOT_EVALUABLE', reason: 'Track stale (age 38 s)' };
+    if (status === 'STALE') movement = { state: 'NOT_EVALUABLE', summary: 'NOT_EVALUABLE', reason: `Track stale (age ${Math.round((sourceAge(w, e.callsign, asOf, forceStale) ?? 38_000) / 1000)} s)` };
     if (status === 'MISSING' && w.spec.hasTracks && w.spec.tracks.some((t) => t.entity === e.callsign)) movement = { state: 'NOT_EVALUABLE', summary: 'NOT_EVALUABLE', reason: 'No position yet at this as-of' };
     return {
       entity_id: e.id,

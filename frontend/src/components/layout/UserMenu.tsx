@@ -28,7 +28,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
   const switchTo = async (email: string) => {
     try {
       const next = await login(email, DEMO_PASSWORD);
-      toast.success(`Signed in as ${ROLE_LABEL[next.account.role]}`, { description: 'Cached session data was cleared for the new account.' });
+      toast.success(`Signed in as ${ROLE_LABEL[next.account.role]}`);
       navigate('/sessions');
     } catch (e) {
       toast.error('Could not switch account', { description: e instanceof Error ? e.message : undefined });
@@ -57,7 +57,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="flex items-center gap-1.5">
-          <FlaskConical className="size-3" /> Switch role · MOCK demo
+          <FlaskConical className="size-3" /> Switch role
         </DropdownMenuLabel>
         {(demo.data ?? []).map((d) => (
           <DropdownMenuItem key={d.email} onSelect={() => d.email !== account.email && switchTo(d.email)}>

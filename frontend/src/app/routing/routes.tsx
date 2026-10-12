@@ -27,13 +27,22 @@ const account = () => import('@/features/settings/AccountPage');
 const admin = () => import('@/features/settings/AdminPages');
 const help = () => import('@/features/settings/HelpPage');
 
+/** Developer scenario controls stay out of the UI unless enabled for this browser. */
+function devtoolsEnabled() {
+  try {
+    return localStorage.getItem('flowlens.devtools') === '1';
+  } catch {
+    return false;
+  }
+}
+
 export const routes: RouteObject[] = [
   { path: '/login', element: <LoginPage />, errorElement: <RouteError /> },
   {
     path: '/',
     element: (
       <RequireAuth>
-        <AppShell devtools={(collapsed) => <MockControlPanel collapsed={collapsed} />} />
+        <AppShell devtools={devtoolsEnabled() ? (collapsed) => <MockControlPanel collapsed={collapsed} /> : undefined} />
       </RequireAuth>
     ),
     errorElement: <RouteError />,
