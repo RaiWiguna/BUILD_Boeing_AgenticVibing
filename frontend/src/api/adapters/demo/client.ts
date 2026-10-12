@@ -95,7 +95,7 @@ export const demoApi: Omit<DemoPort, 'registerWorkspace' | 'rememberPlayback'> &
       headers: { 'Content-Type': 'application/json' },
     }),
 
-  createWorkspace: (name: string, files: PlacedFile[], onProgress: (loaded: number, total: number) => void, signal?: AbortSignal) => send('/workspaces', 201, { name }, files, onProgress, signal),
+  createWorkspace: (name: string, files: PlacedFile[], onProgress: (loaded: number, total: number) => void, signal?: AbortSignal, scenarioId?: string) => send('/workspaces', 201, { name, ...(scenarioId ? { scenario_id: scenarioId } : {}) }, files, onProgress, signal),
 };
 
 /** Multipart upload with byte progress (fetch cannot report upload progress). */

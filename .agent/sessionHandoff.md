@@ -2,11 +2,11 @@
 
 | Atribut | Nilai |
 | --- | --- |
-| Tanggal pembaruan handoff | 12 Oktober 2026 (Asia/Jakarta), akhir sesi demo workspace + materi pitch |
-| Objective terkini | Demo workspace KAGC siap dipresentasikan: import multi-rekaman, processing realistis, highlight gaya live ATC (Needs attention + Keep in mind), layout KAGC dibangun ulang; materi pitch (arsitektur pipeline, slide dataset, teks bisnis) |
+| Tanggal pembaruan handoff | 13 Oktober 2026 (Asia/Jakarta), dokumentasi attention dan delivery branch |
+| Objective terkini | Lima case demo tambahan diimplementasikan dan diverifikasi lokal; skenario 87/88 tetap dibekukan |
 | Status | Demo workspace selesai dan terverifikasi lokal (track demo, ADR 0003). Riset transkrip/ADS-B tetap RESEARCH_ONLY / NOT_DOMAIN_VALIDATED. Foundation contract 1.0.0 tidak berubah |
-| Candidate | Branch `feat/fe-init`, di-commit dan di-push atas permintaan pengguna (lihat bagian "Ringkasan akhir sesi") |
-| Next focus | Latihan demo (momen krusial di bawah); tentukan harga lisensi untuk TAM/SAM/SOM; skenario kedua atau ADS-B nyata bila diinginkan |
+| Candidate | Baseline e325f7e; expansion dikirim pada branch `feat/fe-init` sesuai instruksi pengguna; candidate SHA tersedia melalui `git log` |
+| Next focus | Gunakan Import → Case untuk 50/51/47/156/123; before50 opsional bagi51. Rebuild Docker bersih setelah DNS tersedia; source critical slots tetap unreviewed |
 | Gate | Riset corpus tidak mengubah G-BE/G-FE/G-DELIVERY; G-FE tetap blocked pada track MOCK |
 
 ## Deliverables dan decisions foundation — historis 8 Oktober 2026
@@ -411,3 +411,52 @@ OrbStack + stack Compose `flowlens-demo` (`db`, `api` 127.0.0.1:8000) dan Vite d
 - Host research VM dan path private key **tidak** dicatat di repo. `scripts/demo/fetch_scenario.sh` sekarang mewajibkan `VM=<user@host>` dan `SSH_KEY=<path>` dari environment.
 - `.claude/launch.json` tetap untracked.
 
+
+
+## Rencana lima case demo tambahan — 12 Oktober 2026
+
+Permintaan terbaru: baca ulang konteks dan lakukan analisis mendalam/full plan menambah hingga lima tracks, standalone atau maksimal satu before dan satu after. Steering eksplisit: **jangan sentuh 87/88**. Hasil: [demoScenarioExpansionPlan.md](../docs/development/demoScenarioExpansionPlan.md), status ANALYSIS_COMPLETE / IMPLEMENTATION_PLANNED. Source aplikasi, assets, CSV, scenario/build/variant/timing/highlight 87/88, layout, stored workspace, runtime dan gate tidak diubah.
+
+Interpretasi kerja “tracks” adalah rekaman/case demo; klarifikasi audio-case versus map-objects sudah diajukan, belum dijawab eksplisit. Plan membatasi physical source ke lima WAV baru: **50, 51, 47, 156, 123**. Semuanya standalone; 50 juga eligible sebagai satu before pada 51. Tidak membutuhkan after. Hasil target: lima cases baru, enam skenario demo total bersama existing 88; tujuh seed sessions lama tetap terpisah. 24 (touch-and-go) dan 15 (short-approach) adalah reserve, bukan WAV keenam/ketujuh.
+
+| Case | Demo value dan highlight candidate |
+| --- | --- |
+| 50 | Multi-object Tower; downwind 13 + Duchess backtaxi advised; departure Alpha terpisah dari arrival Quebec |
+| 51 | Landing 13/readback; departure-roll voice report; turnout Alpha tidak merge landing Quebec; optional before 50 |
+| 47 | Ready/holding-short report → takeoff 13 dengan backtaxi **if needed**; tidak membuat readback/mismatch yang tidak terekam |
+| 156 | Maintain 3,000/squawk 4131; assigned altitude terpisah dari future expectation FL180 yang belum reviewed; source date 11 September |
+| 123 | Contact 119.35/readback frequency; heading/callsign ambiguous; separate later exchange tidak otomatis menutup contact |
+
+Total unique source duration **441.628934 s**. Cached transcript words dan metadata diperiksa lewat SSH, tanpa raw download baru/provider call. Ignored evidence: `outputs/tartan-research/mock-case-candidates.json` (10 kandidat dibandingkan, selected 5). Human listening/domain review belum dilakukan pada sesi planning; candidate card copy bukan accepted detector output. Sebelum implementasi card, audit critical spans dan preserve per-slot uncertainty. Tidak mewajibkan hazard/mismatch tiap kasus; positive facts INFO dan standing memory tetap bernilai. Noise/unreadable tetap di Review/transcript, `live.attention=false`; open-loop UI tidak ditambah.
+
+Blocker teknis yang ditemukan di source: registry `by_file_name()` first global match dan RecordingSlots `.find(name)`/first main. 50 dipakai sebagai main case 50 dan before case 51; perlu optional `scenario_id`, additive per-case catalogue/files/limits, matching entire file-set dan scoped validation. Case baru cap before 1/after 1/max 3 recordings; defaults/import legacy 87/88 tetap. Ada tujuh variants baru (C2 tiga, empat case lain masing-masing satu); variants existing tidak diubah. Gunakan new-only builders/fetch scripts, jangan invoke/refactor existing build_scenario.py, synth_adsb.py atau fetch_scenario.sh yang menarget 87/88. Asset source melalui SSH; provenance cloud/source kinds tetap tercatat walaupun label UI demo dihapus sesuai keputusan terdahulu.
+
+Timing context 50→51: metadata gap **54.982178 s**; source-start offset **120.002886 s**; decoded 50 duration **64.931995 s** → playback gap **55.070891 s**. Pertahankan residual/uncertainty; gap tidak dirapatkan/diisi hidden instructions. Slot DSL belum mempunyai FREQUENCY/ALTITUDE/SQUAWK; gunakan `live.facts` atau optional demo-specific typed extension, bukan memakai RUNWAY slot atau mengubah generated contract.
+
+Urutan: E0 protected baseline → E1 case/evidence packets → E2 new-only assets/build → E3 scoped registry/API → E4 import client/caps → E5 authored highlight/reminder data → E6 disposable tests/browser/legacy regression. Detailed exit criteria, file map dan validation ada di laporan. Implementation dan application tests belum dijalankan untuk expansion; angka 21 pytest/58 Vitest/17 journeys tetap historical demo evidence. Tidak restart/delete/reprocess workspace pengguna; tidak commit/push/deploy. Plan memakai boundary ADR 0003, tidak mengubah production PRD atau G-BE/G-FE.
+
+Performed checks planning: lima selected source SHA/duration cocok dengan cache 50; word offsets bounded; total duration terverifikasi; local document links/credential patterns/`git diff --check` PASS. Changed files hanya dokumen rencana, docs index dan handoff; `.claude/` tetap untracked dan tidak disentuh. Protected asset fingerprints dan application regression suites adalah acceptance rencana, belum diklaim PASS.
+
+
+## Implementasi lima case tambahan — 12 Oktober 2026
+
+Instruksi `proceed` melanjutkan [rencana expansion](../docs/development/demoScenarioExpansionPlan.md), dengan batas eksplisit **87/88 tidak disentuh**. Lima new cases (50/51/47/156/123) dan tujuh variants tersedia lokal; 51 menerima satu before 50 dengan/ tanpa CSV 50. Case lain standalone; tidak membutuhkan after. Raw sources diambil dari VM lewat SSH, lima SHA cocok dengan cache; tidak ada provider call atau transkripsi ulang.
+
+Deliverables: three new-only helpers di `scripts/demo/` (fetch/build/synth additional scenarios), ignored five packages `data/demo-scenarios/kagc-2022-09-10-{50,51,47,123}` dan `kagc-2022-09-11-156`. Registry/catalogue/API memakai optional scenario_id dan full-file-set inference; source filename50 main versus before tidak memakai first global match. Frontend Import mempunyai Case selector, scoped filenames, no silent overwrite, caps satu before/after untuk new cases. Legacy 87/88 defaults dan variants tetap. Shared generated contracts tidak berubah. Usage: [demoWorkspace.md](../docs/development/demoWorkspace.md); demo boundary tetap ADR0003.
+
+Data: cached raw STT tidak diubah; speaker/identity/intent annotations authored candidates. Readback candidate bukan whole-transmission MATCHED; slots AMBIGUOUS dan frequency/altitude/squawk memakai fact rows. Turnout Alpha terpisah dari landing; ready report bukan readback; maintain3,000 tidak diganti FL180; frequency readback tidak berarti contact completed. Instruction memory ACTIVE tetap mempunyai interpretation AMBIGUOUS. Keep in mind dan INFO highlights memakai evidence; tidak membuat hazard/mismatch demi jumlah cards. Prior-clip entities berlabel[50] dan terpisah dari main, track stale sesudah coverage berakhir; gap55.071s dipertahankan.
+
+Seluruh case mempunyai authored centre-point map fixtures (SYNTHETIC), footprint=false, prediction kosong, movement findings NOT_EVALUABLE. CSV altitude/heading/speed merupakan assumed fixture values dengan timestamp granularity1s; tidak diklaim real paired September ADS-B, flight physics atau calibrated surface occupancy. Labels ringkas berakhiran? menandai identity candidate; tidak mengubah layout Kagc-2 atau data/flight events87/88. Source timezone masih unverified; UTC dipakai sebagai interpretation demo pada manifest. Human/domain review belum dilakukan.
+
+Checks akhir: **28 backend pytest**, **61 Vitest**, typecheck/lint/check:types/check:copy/build PASS; Ruff format/check new scripts + backend, mypy backend changed files PASS. Browser: enam new import journeys (lima standalone +51before50), audio206, cards/reminders, registered workspace, console-error/overflow checks; final replay End→Home tidak membocorkan future highlights, source actors/stale/memory assertions; screenshot inspection termasuk visual follow-up C51+before50 pada1280×720. Existing legacy backend/unit suites termasuk dalam pass. Seluruh **13 protected fingerprints** raw/derived/CSV/scenario dan old generator/layout cocok baseline. Bukti private di `outputs/demo-expansion/`: baseline hashes, backend/frontend logs, browser-import-matrix/replay-matrix/final-browser-results, screenshots dan cleanup records.
+
+Normal Compose image build terhenti DNS `auth.docker.io`. Local API dijalankan dengan incremental image dari immutable cached existing image; tidak mengubah Dockerfile.demo atau dependencies. Container app.py/scenarios.py SHA cocok source workspace. Clean Docker Hub build belum verified (catat limitation, bukan PASS). API localhost8000 dan Vite localhost5173 tetap berjalan; frontend dimulai ulang (exec session33664) karena5173 sebelumnya tidak aktif. Backend di-restart untuk reload new registry/assets; DB volume tidak dihapus.
+
+QA hanya membuat tujuh temporary workspaces (enam matrix +satu visual), dibersihkan lewat validated UUID+`E2E expansion` prefix. User workspaces tidak dihapus/di-reprocess secara sengaja; assets/build87/88 unchanged. Browser processes test ditutup; ignored browser venv/evidence/fixtures dipertahankan. Tidak commit/push/deploy ke VM, tidak mengubah G-BE/G-FE/G-DELIVERY atau production stack. `.claude/` tetap untracked dan tidak disentuh.
+
+
+## Dokumentasi attention dan delivery branch — 13 Oktober 2026
+
+Per-case attention yang terpasang telah dicocokkan dengan `CARDS`/`REMINDERS` builder dan didokumentasikan pada [demoWorkspace.md](../docs/development/demoWorkspace.md#attention-lima-case-tambahan--13-oktober-2026): tujuh main-case INFO cards, dengan downwind/takeoff (50), landing/turnout (51), conditional backtaxi (47), altitude/squawk (156), dan frequency readback (123). Before 50 menambah konteksnya sendiri pada 51, tanpa merge identity atau menghapus gap. Timing pending +400 ms / available +800 ms berasal dari akhir supporting transmission; bukan provider latency terukur. Tidak ada edit attention 87/88 atau perubahan domain status.
+
+Instruksi delivery mencakup update docs, commit implementation expansion beserta tests/scripts/docs, dan push ke branch aktif `feat/fe-init`. Private WAV/CSV/scenario packages, research cache dan browser evidence tetap ignored; `.claude/launch.json` bukan bagian task dan tidak di-stage. Fresh clone memerlukan cache/source privat sebagaimana panduan setup. Tidak ada merge, PR, deployment, atau perubahan gate. Angka test aplikasi merujuk verifikasi 12 Oktober; edit dokumentasi tidak menjalankan ulang seluruh suite. Delivery checks mencakup diff/whitespace, scoped credential patterns, link/fence dokumentasi, dan protected fingerprints. Hosted CI executable belum tersedia di `.github/workflows`; push bukan bukti CI/release lulus.

@@ -64,7 +64,13 @@ function UploadForm({ onCreated }: { onCreated: (w: DemoWorkspace) => void }) {
   const [upload, setUpload] = useState<{ loaded: number; total: number } | null>(null);
   const [error, setError] = useState<unknown>(null);
   const abort = useRef<AbortController | null>(null);
-  const { offline, known } = useScenarioFiles();
+  const { offline, known: catalogue } = useScenarioFiles();
+  const [caseId, setCaseId] = useState('');
+  const choice = catalogue?.scenarios?.find((x) => x.id === caseId);
+  // Legacy uploads use the existing default case; new cases are explicitly scoped.
+  const legacy = catalogue?.scenarios?.find((x) => !x.limits);
+  const selected = choice ?? legacy;
+  const known = selected ? { files: selected.files, expected_files: selected.files.map((f) => f.name), limits: selected.limits } : catalogue;
   if (known && unplaced.length) {
     const r = place(slots, unplaced, known, 'main');
     setSlots(r.slots);
@@ -93,7 +99,7 @@ function UploadForm({ onCreated }: { onCreated: (w: DemoWorkspace) => void }) {
     abort.current = new AbortController();
     setUpload({ loaded: 0, total: files.reduce((n, f) => n + f.file.size, 0) });
     try {
-      const w = await demoApi.createWorkspace(trimmed, files, (loaded, total) => setUpload({ loaded, total }), abort.current.signal);
+      const w = await demoApi.createWorkspace(trimmed, files, (loaded, total) => setUpload({ loaded, total }), abort.current.signal, selected?.id);
       qc.invalidateQueries({ queryKey: qk.sessions });
       onCreated(w);
     } catch (e) {
@@ -120,6 +126,16 @@ function UploadForm({ onCreated }: { onCreated: (w: DemoWorkspace) => void }) {
           )}
         </div>
 
+        {catalogue?.scenarios && catalogue.scenarios.length > 1 && (
+          <div className="mt-5 space-y-2">
+            <Label htmlFor="imp-case">Case</Label>
+            <select id="imp-case" className="h-11 w-full rounded-[12px] border border-hairline bg-surface px-3 text-[14px]" value={selected?.id ?? ''} disabled={uploading} onChange={(e) => {
+              setCaseId(e.target.value); setSlots(EMPTY_SLOTS); setUnplaced([]); setRejected([]); setError(null);
+            }}>
+              {catalogue.scenarios.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+            </select>
+          </div>
+        )}
         <div className="mt-7 flex flex-wrap items-end justify-between gap-3">
           <h2 className="text-[17px] font-semibold text-ink">Recordings</h2>
           <BulkPicker
@@ -134,7 +150,7 @@ function UploadForm({ onCreated }: { onCreated: (w: DemoWorkspace) => void }) {
         <div className="mt-3">
           <RecordingSlots slots={slots} onChange={change} known={known} disabled={uploading} />
         </div>
-        {rejected.length > 0 && <p className="mt-2 text-[13px] text-discrepancy">Not added: {rejected.join(', ')}. Use .wav or .csv files.</p>}
+        {rejected.length > 0 && <p className="mt-2 text-[13px] text-discrepancy">Not added: {rejected.join(', ')}. Check the selected case, file type, and recording limits.</p>}
 
         {uploading && (
           <div className="mt-5" aria-live="polite">

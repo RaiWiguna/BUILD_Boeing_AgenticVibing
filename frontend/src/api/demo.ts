@@ -64,7 +64,16 @@ export interface DemoHealth {
   version: string;
 }
 
+export interface DemoScenarioChoice {
+  id: string;
+  title: string;
+  files: DemoScenarios["files"];
+  limits?: { before: number; after: number } | null;
+}
+
 export interface DemoScenarios {
+  scenarios?: DemoScenarioChoice[];
+  limits?: { before: number; after: number } | null;
   expected_files: string[];
   files: { name: string; role: FileRole; position: FilePosition; part: string }[];
 }
@@ -75,7 +84,7 @@ export interface DemoPort {
   listWorkspaces(): Promise<DemoWorkspace[]>;
   getWorkspace(id: string): Promise<DemoWorkspace>;
   /** Multipart upload of the session name and files (with their slots), with byte progress. */
-  createWorkspace(name: string, files: PlacedFile[], onProgress: (loaded: number, total: number) => void, signal?: AbortSignal): Promise<DemoWorkspace>;
+  createWorkspace(name: string, files: PlacedFile[], onProgress: (loaded: number, total: number) => void, signal?: AbortSignal, scenarioId?: string): Promise<DemoWorkspace>;
   /** Add recordings before or after an existing session; it is processed again. */
   savePlayback(id: string, cursorMs: number): Promise<{ cursor_ms: number }>;
   /** Make a READY workspace readable through the ApiClient (session screens). */

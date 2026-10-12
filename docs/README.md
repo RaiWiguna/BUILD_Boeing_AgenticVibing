@@ -59,3 +59,7 @@ Bedakan planned, source tersedia, build berhasil, berjalan, tests lulus, provide
 
 [Panduan demo workspace](development/demoWorkspace.md) menjalankan import dua file (audio + ADS-B) ke backend Python + PostgreSQL lokal dengan playback audio, transcript bertahap dan findings progresif. Keputusan dan batasnya ada di [ADR 0003](adr/0003-demo-workspace-track.md); rencana di [demoWorkspacePlan.md](development/demoWorkspacePlan.md). Status MOCK / NOT_DOMAIN_VALIDATED; bukan G-BE.
 
+
+## Rencana expansion demo — 12 Oktober 2026
+
+[Rencana lima case tambahan](development/demoScenarioExpansionPlan.md) menganalisis 50/51/47/156/123, standalone dan before opsional, highlights, scoped import, serta regression checks. Diimplementasikan lokal: lima case/seven variants tambahan, dengan scoped Import dan evidence-backed candidate highlights. Skenario 87/88 dibekukan dan tidak diubah; clean Docker Hub rebuild masih terkendala DNS.

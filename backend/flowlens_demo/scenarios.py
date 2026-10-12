@@ -67,7 +67,12 @@ class Scenario:
 
     def expected(self) -> list[dict[str, str]]:
         return [
-            {"name": meta[role]["name"], "role": role, "position": meta["position"], "part": part}
+            {
+                "name": meta[role]["name"],
+                "role": role,
+                "position": meta["position"],
+                "part": part,
+            }
             for part, meta in self.parts.items()
             for role in ROLES
             if role in meta
@@ -91,10 +96,28 @@ class Registry:
                 continue
             # Stored analyses built from another revision of this file are rebuilt on read.
             data["build"] = hashlib.sha256(raw).hexdigest()[:16]
-            self._by_id[data["scenario_id"]] = Scenario(data["scenario_id"], path.parent, data)
+            self._by_id[data["scenario_id"]] = Scenario(
+                data["scenario_id"], path.parent, data
+            )
 
     def get(self, scenario_id: str) -> Scenario | None:
         return self._by_id.get(scenario_id)
+
+    def candidates(self, names: list[str]) -> list[Scenario]:
+        return [
+            sc for sc in self._by_id.values() if all(sc.file(name) for name in names)
+        ]
+
+    def catalogue(self) -> list[dict[str, Any]]:
+        return [
+            dict(
+                id=sc.id,
+                title=sc.data.get("title", sc.id),
+                files=sc.expected(),
+                limits=sc.data.get("limits"),
+            )
+            for sc in self._by_id.values()
+        ]
 
     def by_file_name(self, name: str) -> tuple[Scenario, FileRef] | None:
         for sc in self._by_id.values():

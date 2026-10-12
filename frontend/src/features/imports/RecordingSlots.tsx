@@ -73,7 +73,14 @@ export function place(slots: Slots, files: File[], known: DemoScenarios | undefi
       rejected.push(f.name);
       continue;
     }
+    if (known?.limits && !positionOf(f)) { rejected.push(f.name); continue; }
     const pos = positionOf(f) ?? (fallback === 'main' && next.main[role] ? 'after' : fallback);
+    if (known?.limits && pos === 'main' && next.main[role] && next.main[role]!.name !== f.name) {
+      rejected.push(f.name); continue;
+    }
+    if (known?.limits && pos !== 'main' && next[pos].length >= known.limits[pos] && !next[pos].some((g) => !g[role])) {
+      rejected.push(f.name); continue;
+    }
     put(next, pos, role, f, known);
   }
   return { slots: next, rejected };
@@ -86,6 +93,10 @@ export function issuesOf(slots: Slots, known: DemoScenarios | undefined) {
   const out: Partial<Record<IssueKey, Issue>> = {};
   const main = known?.files.find((k) => k.position === 'main' && k.role === 'audio')?.name ?? 'the main recording';
   for (const pos of ['before', 'main', 'after'] as FilePosition[]) {
+    if (known?.limits && pos !== 'main' && slots[pos].filter(filled).length > known.limits[pos]) {
+      const g = slots[pos][known.limits[pos]];
+      if (g) out[`${g.id}:audio`] = { tone: 'discrepancy', text: `Only one ${pos} recording is supported` };
+    }
     for (const g of groupsOf(slots, pos)) {
       for (const role of ROLES) {
         const f = g[role];
@@ -154,6 +165,7 @@ export function RecordingSlots({
 
   const side = (s: Side) => {
     const lane = slots[s];
+    if (known?.limits && !known.files.some((f) => f.position === s)) return null;
     if (!lane.length)
       return (
         <AddButton disabled={disabled} onClick={() => edit((next) => void next[s].push(group()))}>
@@ -175,7 +187,7 @@ export function RecordingSlots({
             </li>
           ))}
         </ol>
-        <AddButton compact disabled={disabled} onClick={() => edit((next) => void next[s].push(group()))}>
+        <AddButton compact disabled={disabled || !!(known?.limits && lane.length >= known.limits[s])} onClick={() => edit((next) => void next[s].push(group()))}>
           {SIDE[s].more}
         </AddButton>
       </Lane>

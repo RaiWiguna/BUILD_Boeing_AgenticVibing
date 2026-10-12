@@ -42,3 +42,33 @@ describe('recording slots', () => {
     expect(slotsReady(slots, known)).toBe(false);
   });
 });
+
+
+describe('scoped additional case', () => {
+  const scoped: DemoScenarios = { expected_files: [], limits: { before: 1, after: 1 }, files: [
+    { name: '50.wav', role: 'audio', position: 'before', part: '50' },
+    { name: '50.csv', role: 'adsb', position: 'before', part: '50' },
+    { name: '51.wav', role: 'audio', position: 'main', part: '51' },
+    { name: '51.csv', role: 'adsb', position: 'main', part: '51' },
+  ] };
+  it('uses 50 as before when 51 is the selected case', () => {
+    const r = place(EMPTY_SLOTS, ['50.csv','51.wav','50.wav','51.csv'].map(file), scoped, 'main');
+    expect(r.slots.main.audio?.name).toBe('51.wav');
+    expect(r.slots.before).toHaveLength(1);
+    expect(r.slots.before[0]?.audio?.name).toBe('50.wav');
+    expect(slotsReady(r.slots,scoped)).toBe(true);
+  });
+  it('does not silently replace a filled main', () => {
+    const first=place(EMPTY_SLOTS,[file('51.wav')],scoped,'main');
+    const other={...scoped,files:[...scoped.files,{name:'123.wav',role:'audio' as const,position:'main' as const,part:'123'}]};
+    const r=place(first.slots,[file('123.wav')],other,'main');
+    expect(r.slots.main.audio?.name).toBe('51.wav');
+    expect(r.rejected).toContain('123.wav');
+  });
+  it('rejects a second side recording instead of hiding it', () => {
+    const first=place(EMPTY_SLOTS,[file('50.wav')],scoped,'main');
+    const r=place(first.slots,[file('49.wav')],scoped,'before');
+    expect(r.slots.before).toHaveLength(1);
+    expect(r.rejected).toContain('49.wav');
+  });
+});

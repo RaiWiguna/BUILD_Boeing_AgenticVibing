@@ -69,7 +69,9 @@ def create_app(
     processing_scale: float | None = None,
 ) -> FastAPI:
     db = Database(database_url or os.environ["DEMO_DATABASE_URL"])
-    registry = Registry(Path(scenario_root or os.environ.get("DEMO_SCENARIO_ROOT") or "/scenarios"))
+    registry = Registry(
+        Path(scenario_root or os.environ.get("DEMO_SCENARIO_ROOT") or "/scenarios")
+    )
     scale = (
         processing_scale
         if processing_scale is not None
@@ -81,7 +83,9 @@ def create_app(
         db.migrate()
         yield
 
-    app = FastAPI(title="FlowLens demo workspaces", version=DEMO_VERSION, lifespan=lifespan)
+    app = FastAPI(
+        title="FlowLens demo workspaces", version=DEMO_VERSION, lifespan=lifespan
+    )
 
     @app.exception_handler(ApiError)
     async def _api_error(_: Request, exc: ApiError) -> JSONResponse:
@@ -100,7 +104,9 @@ def create_app(
         """Turn a finished schedule into a stored workspace exactly once."""
         if row["status"] != "PROCESSING":
             return row
-        elapsed = (datetime.now(UTC) - row["processing_started_at"]).total_seconds() * 1000
+        elapsed = (
+            datetime.now(UTC) - row["processing_started_at"]
+        ).total_seconds() * 1000
         if elapsed < total_ms(row["processing_scale"]):
             return row
         sc = registry.get(row["scenario_id"])
@@ -128,7 +134,9 @@ def create_app(
             cur.execute("SELECT * FROM workspaces WHERE id=%s", (row["id"],))
             return cur.fetchone()  # type: ignore[no-any-return]
         spec = analysis["spec"]
-        for seg, live in zip(spec["segments"], analysis["live"]["segments"], strict=True):
+        for seg, live in zip(
+            spec["segments"], analysis["live"]["segments"], strict=True
+        ):
             words = live["words"]
             cur.execute(
                 "INSERT INTO transcript_segments (workspace_id, seg_key, start_ms, end_ms, text, confidence, words) VALUES (%s,%s,%s,%s,%s,%s,%s)",
@@ -167,11 +175,19 @@ def create_app(
                 {**f, "position": sc.position(f["part"]) if sc else "main"}
                 for f in file_rows(cur, row["id"])
             ),
-            key=lambda f: (order.get(f["position"], 1), f["part"], f["role"] != "audio"),
+            key=lambda f: (
+                order.get(f["position"], 1),
+                f["part"],
+                f["role"] != "audio",
+            ),
         )
-        cur.execute("SELECT cursor_ms FROM playback_state WHERE workspace_id=%s", (row["id"],))
+        cur.execute(
+            "SELECT cursor_ms FROM playback_state WHERE workspace_id=%s", (row["id"],)
+        )
         pb = cur.fetchone()
-        elapsed = (datetime.now(UTC) - row["processing_started_at"]).total_seconds() * 1000
+        elapsed = (
+            datetime.now(UTC) - row["processing_started_at"]
+        ).total_seconds() * 1000
         total = total_ms(row["processing_scale"])
         steps = step_states(
             elapsed if row["status"] == "PROCESSING" else total + 1,
@@ -190,7 +206,9 @@ def create_app(
             "progress": 1.0
             if row["status"] == "READY"
             else round(min(0.99, elapsed / total) if total else 0.99, 3),
-            "eta_ms": 0 if row["status"] != "PROCESSING" else max(0, int(total - elapsed)),
+            "eta_ms": 0
+            if row["status"] != "PROCESSING"
+            else max(0, int(total - elapsed)),
             "steps": steps,
             "files": files,
             "labels": sc.data["labels"] if sc else [],
@@ -206,7 +224,9 @@ def create_app(
         cur.execute("SELECT * FROM workspaces WHERE id=%s", (wid,))
         row = cur.fetchone()
         if row is None:
-            raise ApiError(404, "NOT_FOUND", "Workspace not found.", "Return to the session list.")
+            raise ApiError(
+                404, "NOT_FOUND", "Workspace not found.", "Return to the session list."
+            )
         return finalize_if_due(cur, row)
 
     # ── routes ─────────────────────────────────────────────────────────
@@ -224,7 +244,11 @@ def create_app(
     def scenarios() -> dict[str, Any]:
         """File names the demo recognises, with role and position (no hashes or paths)."""
         files = registry.expected()
-        return {"expected_files": [f["name"] for f in files], "files": files}
+        return {
+            "expected_files": [f["name"] for f in files],
+            "files": files,
+            "scenarios": registry.catalogue(),
+        }
 
     @app.get("/api/demo/workspaces")
     def list_workspaces() -> list[dict[str, Any]]:
@@ -239,10 +263,15 @@ def create_app(
             return view(cur, load(cur, workspace_id))
 
     async def read_upload(
-        up: UploadFile, positions: dict[str, str]
+        up: UploadFile, positions: dict[str, str], selected: Scenario | None = None
     ) -> tuple[Scenario, FileRef, dict[str, Any]]:
         fname = Path(up.filename or "").name
-        match = registry.by_file_name(fname)
+        ref_selected = selected.file(fname) if selected else None
+        match = (
+            (selected, ref_selected)
+            if selected and ref_selected
+            else (None if selected else registry.by_file_name(fname))
+        )
         if match is None:
             raise ApiError(
                 422,
@@ -316,6 +345,17 @@ def create_app(
 
     def check_set(sc: Scenario, keys: set[tuple[str, str]]) -> dict[str, Any]:
         main = sc.main_part
+        limits = sc.data.get("limits")
+        if limits:
+            for pos in ("before", "after"):
+                count = len({p for p, _ in keys if sc.position(p) == pos})
+                if count > limits.get(pos, 1):
+                    raise ApiError(
+                        422,
+                        "INVALID_IMPORT",
+                        f"Only one {pos} recording is supported.",
+                        details={"code": "RECORDING_LIMIT"},
+                    )
         if (main, "audio") not in keys or (main, "adsb") not in keys:
             raise ApiError(
                 422,
@@ -343,7 +383,10 @@ def create_app(
         return variant
 
     async def accept(
-        files: list[UploadFile], positions_json: str | None, existing: list[dict[str, Any]]
+        files: list[UploadFile],
+        positions_json: str | None,
+        existing: list[dict[str, Any]],
+        scenario_id: str | None = None,
     ) -> tuple[Scenario, list[dict[str, Any]], dict[str, Any]]:
         if not files or len(files) > MAX_FILES:
             raise ApiError(
@@ -358,10 +401,43 @@ def create_app(
         except (ValueError, AssertionError) as exc:
             raise ApiError(422, "INVALID_INPUT", "Invalid file positions.") from exc
         scenario = registry.get(existing[0]["scenario_id"]) if existing else None
+        if scenario_id:
+            selected = registry.get(scenario_id)
+            if selected is None or (scenario and selected.id != scenario.id):
+                raise ApiError(
+                    422,
+                    "INVALID_IMPORT",
+                    "Choose a supported case.",
+                    details={"code": "SCENARIO_MISMATCH"},
+                )
+            scenario = selected
+        if scenario is None:
+            candidates = registry.candidates(
+                [Path(up.filename or "").name for up in files]
+            )
+            # With no explicit selection, the main recording identifies the case.
+            candidates = [
+                sc
+                for sc in candidates
+                if any(
+                    (ref := sc.file(Path(up.filename or "").name)) is not None
+                    and ref.part == sc.main_part
+                    for up in files
+                )
+            ]
+            if len(candidates) > 1:
+                raise ApiError(
+                    422,
+                    "INVALID_IMPORT",
+                    "Choose the case for these recordings.",
+                    details={"code": "AMBIGUOUS_SCENARIO"},
+                )
+            if len(candidates) == 1:
+                scenario = candidates[0]
         keys = {(f["part"], f["role"]) for f in existing}
         uploads: list[dict[str, Any]] = []
         for up in files:
-            sc, ref, u = await read_upload(up, positions)
+            sc, ref, u = await read_upload(up, positions, scenario)
             if scenario is not None and sc.id != scenario.id:
                 raise ApiError(
                     422,
@@ -412,11 +488,14 @@ def create_app(
         name: str = Form(...),
         files: list[UploadFile] = File(...),
         positions: str | None = Form(None),
+        scenario_id: str | None = Form(None),
     ) -> dict[str, Any]:
         name = name.strip()
         if not NAME_RE.match(name):
-            raise ApiError(422, "INVALID_INPUT", "Session name must be 1–80 printable characters.")
-        scenario, uploads, variant = await accept(files, positions, [])
+            raise ApiError(
+                422, "INVALID_INPUT", "Session name must be 1–80 printable characters."
+            )
+        scenario, uploads, variant = await accept(files, positions, [], scenario_id)
         details = step_details(scenario, variant, uploads, uploads)
         wid = uuid.uuid4()
         with db.tx() as cur:
@@ -460,7 +539,10 @@ def create_app(
                     "This session is still processing.",
                     "Try again when it is ready.",
                 )
-            existing = [{**f, "scenario_id": row["scenario_id"]} for f in file_rows(cur, row["id"])]
+            existing = [
+                {**f, "scenario_id": row["scenario_id"]}
+                for f in file_rows(cur, row["id"])
+            ]
         scenario, uploads, variant = await accept(files, positions, existing)
         all_files = existing + uploads
         details = step_details(scenario, variant, all_files, uploads)
@@ -469,11 +551,17 @@ def create_app(
             offset_of(old, scenario.main_part) if old else 0
         )
         with db.tx() as cur:
-            cur.execute("SELECT status FROM workspaces WHERE id=%s FOR UPDATE", (row["id"],))
+            cur.execute(
+                "SELECT status FROM workspaces WHERE id=%s FOR UPDATE", (row["id"],)
+            )
             locked = cur.fetchone()
             if locked is None or locked["status"] == "PROCESSING":
-                raise ApiError(409, "NOT_READY", "This session is already being updated.")
-            cur.execute("DELETE FROM transcript_segments WHERE workspace_id=%s", (row["id"],))
+                raise ApiError(
+                    409, "NOT_READY", "This session is already being updated."
+                )
+            cur.execute(
+                "DELETE FROM transcript_segments WHERE workspace_id=%s", (row["id"],)
+            )
             cur.execute("DELETE FROM findings WHERE workspace_id=%s", (row["id"],))
             store_files(cur, row["id"], uploads)
             cur.execute(
@@ -510,7 +598,9 @@ def create_app(
             if sc is None or analysis.get("build") != sc.data["build"]:
                 variant = sc.data["variants"].get(row["variant"]) if sc else None
                 if sc is None or variant is None:
-                    raise ApiError(409, "NOT_READY", "This session needs to be imported again.")
+                    raise ApiError(
+                        409, "NOT_READY", "This session needs to be imported again."
+                    )
                 analysis = build_analysis(sc.data, variant, row, row["ready_at"])
                 cur.execute(
                     "UPDATE workspaces SET analysis=%s WHERE id=%s",
@@ -521,7 +611,8 @@ def create_app(
                 "workspace": view(cur, row),
                 **analysis,
                 "recordings": [
-                    {**r, "audio_url": f"{base}/{r['part']}"} for r in analysis["recordings"]
+                    {**r, "audio_url": f"{base}/{r['part']}"}
+                    for r in analysis["recordings"]
                 ],
                 "audio_url": f"{base}/{analysis['recordings'][0]['part']}",
             }
@@ -548,10 +639,16 @@ def create_app(
         sc = registry.get(row["scenario_id"])
         if row["status"] != "READY" or sc is None:
             raise ApiError(409, "NOT_READY", "Audio is available after processing.")
-        parts = [k.split(":")[0] for k in (row["variant"] or "").split(",") if k.endswith(":audio")]
+        parts = [
+            k.split(":")[0]
+            for k in (row["variant"] or "").split(",")
+            if k.endswith(":audio")
+        ]
         part = part or sc.main_part
         if part not in parts:
-            raise ApiError(404, "NOT_FOUND", "This recording is not part of the session.")
+            raise ApiError(
+                404, "NOT_FOUND", "This recording is not part of the session."
+            )
         path = sc.audio_path(part)
         size = path.stat().st_size
         headers = {"Accept-Ranges": "bytes", "Cache-Control": "private, max-age=3600"}
@@ -565,7 +662,9 @@ def create_app(
         else:
             start, end = max(0, size - int(m.group(2))), size - 1
         if start > end or start >= size:
-            return Response(status_code=416, headers={"Content-Range": f"bytes */{size}"})
+            return Response(
+                status_code=416, headers={"Content-Range": f"bytes */{size}"}
+            )
         with path.open("rb") as fh:
             fh.seek(start)
             data = fh.read(end - start + 1)
@@ -592,11 +691,16 @@ def psycopg_json(value: Any) -> Any:
 
 
 def offset_of(variant: dict[str, Any], part: str) -> int:
-    return next((int(r["offset_ms"]) for r in variant["recordings"] if r["part"] == part), 0)
+    return next(
+        (int(r["offset_ms"]) for r in variant["recordings"] if r["part"] == part), 0
+    )
 
 
 def build_analysis(
-    scenario: dict[str, Any], variant: dict[str, Any], row: dict[str, Any], ready_at: datetime
+    scenario: dict[str, Any],
+    variant: dict[str, Any],
+    row: dict[str, Any],
+    ready_at: datetime,
 ) -> dict[str, Any]:
     spec = copy.deepcopy(variant["spec"])
     stamp = _iso(ready_at)

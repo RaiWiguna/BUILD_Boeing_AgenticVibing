@@ -85,7 +85,7 @@ Setiap run e2e menyimpan workspace bernama `E2E demo …` di database lokal.
 
 ## 5. Batasan
 
-- Hanya satu skenario dikenali (nama + SHA-256 + ukuran); file lain ditolak (`UNKNOWN_FILE`, `CHECKSUM_MISMATCH`, `WRONG_POSITION`, `MISSING_AUDIO`, `MISSING_ROLE`, `DUPLICATE_FILE`, `UNSUPPORTED_COMBINATION`). Lane After belum punya rekaman yang dikenali (89 tidak dipakai atas permintaan pengguna).
+- Enam skenario dikenali lewat katalog per case (nama + SHA-256 + ukuran); file lain ditolak (`UNKNOWN_FILE`, `CHECKSUM_MISMATCH`, `WRONG_POSITION`, `MISSING_AUDIO`, `MISSING_ROLE`, `DUPLICATE_FILE`, `UNSUPPORTED_COMBINATION`). Lane After belum punya rekaman yang dikenali (89 tidak dipakai atas permintaan pengguna).
 - Transcript adalah cache hypothesis Google STT dari riset, bukan transkrip terverifikasi. Findings di-author untuk demo, bukan output detector.
 - ADS-B sintetik; layout KAGC: ujung runway dari data publik (13/31 memang memotong 10/28), taxiway skematik mengikuti susunan nyata (OSM) dengan jarak di A dipadatkan. Tidak untuk penggunaan operasional.
 - Tidak ada endpoint delete/rename workspace; bersihkan lewat `psql` di container `db` bila perlu.
@@ -115,3 +115,46 @@ Setiap run e2e menyimpan workspace bernama `E2E demo …` di database lokal.
 - `live.until`/`live.resolved`: kartu berubah menjadi "Resolved · …" dan memudar 30 s setelahnya. `live.facts`: tabel fakta (Position / Instruction / Readback / ATC confirm, atau jarak traffic) untuk item non-readback.
 - Kategori A3 memakai `MOVEMENT_DIVERGENCE` karena enum kontrak belum punya kategori traffic.
 - Jumlah finding: 88 saja 8, 87+88 dengan ADS-B 87 11 (tests diperbarui). Verifikasi: backend 21 passed, ruff bersih, tsc/eslint/vitest 58/check:copy/build OK, Playwright 17/17.
+
+## Lima case tambahan — 12 Oktober 2026
+
+Expansion menambahkan **50, 51, 47, 156, 123** sebagai standalone cases. Di **Import session → Case**, pilih kasus sebelum memilih pasangan WAV + CSV dari folder berikut:
+
+| Case | Folder private `data/demo-scenarios/` | Isi |
+| --- | --- | --- |
+| Multi-object Tower | `kagc-2022-09-10-50` | Downwind/backtaxi traffic dan departure terpisah |
+| Landing readback | `kagc-2022-09-10-51` | Landing 13/readback; optional before 50 |
+| Conditional departure | `kagc-2022-09-10-47` | Takeoff 13; backtaxi **if needed** |
+| Clearance memory | `kagc-2022-09-11-156` | Maintain 3,000 / squawk 4131; FL180 bukan assigned altitude |
+| Departure handoff | `kagc-2022-09-10-123` | Contact 119.35/readback; heading unresolved |
+
+Filename CSV: `kagc_adsb_<tanggal>_<nomor>.csv`. Case 51 juga menerima `50.wav` sebelum main, dengan atau tanpa CSV 50. Default kasus existing 87/88 dan semua assets/variants/timings/highlights mereka dipertahankan. Batas satu before/satu after berlaku hanya bagi case baru; hanya companion yang terdaftar dapat digunakan. Memilih case lain mengosongkan draft pilihan file, bukan workspace tersimpan.
+
+Builder baru: `python3 scripts/demo/build_additional_scenarios.py`. Fetch source yang sudah ada di VM: `VM=<user@host> SSH_KEY=<private-key-path> python3 scripts/demo/fetch_additional_scenarios.py`. Keduanya memerlukan ignored cache penelitian; fresh clone tidak membawa WAV/cache. Builder baru tidak memanggil generator 87/88 atau provider. Seleksi menghasilkan tujuh variants tambahan dan lima WAV unik (441.628934s); 50 reuse sebagai optional before, tanpa concat dan dengan playback gap55.071s.
+
+Semua new tracks adalah **authored centre-point fixtures**, bukan paired historical ADS-B, airborne/surface observation authoritative, atau model penerbangan. Trajectories hanya mengilustrasikan entity context; CSV altitude1252/heading/speed adalah assumed fixture values, timestamp granularity1s. Seluruh finding movement tetap NOT_EVALUABLE, footprint=false dan prediction kosong. Prior-clip entities dalam51+50 tetap terpisah (`[50]`) dan track menjadi stale setelah coverage berakhir; continuity pesawat tidak diklaim terbukti.
+
+Highlights/reminders bersifat cached authored candidates, rawSTT tidak dikoreksi diam-diam, speaker/identity belum human-reviewed. Readback card runway/action menggunakan per-slot AMBIGUOUS; frequency/altitude/squawk memakai fact rows. Tidak membuat mismatch/violation karena readback absent, tidak menampilkan FL180 sebagai climb assignment, dan tidak menganggap frequency readback sebagai contact completed. Instruction memory terpisah dari readback/movement. Laporan rencana/evidence mapping: [expansion plan](demoScenarioExpansionPlan.md).
+
+Verifikasi expansion: backend28pytest, frontend61Vitest, typecheck/lint/generated-type/copy/build, enam browser import journeys (lima standalone +51denganbefore50), final replay/seek-to-zero checks, audio206, scoped matching/scenario rejection, screenshot inspection dan no horizontal overflow1280px. Lima source hashes cocok dengan cache;13 protected fingerprints87/88/generator/layout tidak berubah. Fixture browser yang dibuat untuk QA dibersihkan berdasarkan UUID+prefix khusus; user workspaces tidak dihapus.
+
+Build normal image terhalang DNS `auth.docker.io`. Runtime lokal memakai incremental image dari immutable cached image yang sudah terpasang, dengan source backend terbaru; checksum source di container cocok dengan workspace. Rebuild bersih menggunakan Dockerfile.demo tetap perlu diulang saat Docker Hub tersedia. Ini bukan deployment/release gate. API localhost8000 dan frontend localhost5173 dibiarkan berjalan untuk inspeksi pengguna.
+
+
+## Attention lima case tambahan — 13 Oktober 2026
+
+Tabel berikut mencatat konfigurasi yang terpasang di `CARDS` dan `REMINDERS` pada [builder additional scenarios](../../scripts/demo/build_additional_scenarios.py), bukan hanya usulan pada rencana awal. Seluruh kartu baru berprioritas **INFO**, kategori `CRITICAL_SLOT_UNCERTAIN`, quality `AMBIGUOUS`, dan movement `NOT_EVALUABLE`.
+
+| Main WAV | Needs attention | Keep in mind |
+| --- | --- | --- |
+| 50 | `RWY 13 · Downwind read back`; `Alpha? · Takeoff clearance` | Quebec: midfield left downwind RWY 13; Duchess backtaxi advised dari voice report |
+| 51 | `RWY 13 · Landing clearance read back`; `Alpha? · Turnout exchange` | Quebec: landing clearance RWY 13 |
+| 47 | `RWY 13 · Conditional backtaxi approved` | Takeoff cleared RWY 13; backtaxi **if needed** |
+| 156 | `Clearance · 3,000 ft / 4131` | Julia Charlie: maintain 3,000 ft; squawk 4131 |
+| 123 | `119.35 · Frequency read back` | Contact departure 119.35 |
+
+Setiap kartu merujuk supporting segments/words. `pending` dijadwalkan 400 ms dan `available` 800 ms setelah supporting transmission berakhir, dengan pembulatan clock demo ke 0,1 s. Reminders juga tersedia setelah 800 ms. Replay/seek menghitung ulang state as-of; kartu masa depan tidak ditampilkan pada awal rekaman. Dengan before 50 pada case 51, attention/reminders 50 ikut tersedia sesuai offset sebelum main, dipisahkan dengan identitas `[50]`; source-start offset 120.003 s dan gap playback 55.071 s tetap dipertahankan.
+
+Runway/action readback pada 50 dan 51 tetap `AMBIGUOUS`, bukan whole-clearance `MATCHED`. Case 47 menyatakan readback tidak ada dalam cached clip; case 156 membedakan assigned 3,000 ft dari expectation FL180 yang unresolved; case 123 tidak menyatakan contact selesai. Turnout Alpha tidak digabung dengan landing Quebec. Kartu baru tidak memperoleh resolved verdict dari trajectory sintetis dan tidak menyimpulkan wrong runway, konflik, atau physical conformance. Kebutuhan human listening/domain review tetap terbuka (`NOT_DOMAIN_VALIDATED`).
+
+Renderer attention yang digunakan tetap renderer existing; penyesuaian berada pada evidence, copy, waktu, actor scope, dan reminders setiap case. Konfigurasi attention 87/88 tidak berubah. Verifikasi aplikasi yang tercatat pada 12 Oktober tetap berlaku; pembaruan 13 Oktober ini hanya memperjelas dokumentasi dari source yang diperiksa, tanpa provider call atau benchmark domain baru.
