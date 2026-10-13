@@ -3,10 +3,10 @@
 | Atribut | Nilai |
 | --- | --- |
 | Tanggal pembaruan handoff | 13 Oktober 2026 (Asia/Jakarta), perbaikan pengenalan import dan deployment VM |
-| Objective terkini | Perbaiki pengenalan case baru lewat Choose, push branch aktif dan deploy frontend VM; 87/88 tetap dibekukan |
+| Objective terkini | Fix pengenalan import selesai, pushed dan frontend VM deployed; 87/88 tetap dibekukan |
 | Status | Demo workspace selesai dan terverifikasi lokal (track demo, ADR 0003). Riset transkrip/ADS-B tetap RESEARCH_ONLY / NOT_DOMAIN_VALIDATED. Foundation contract 1.0.0 tidak berubah |
-| Candidate | Baseline e325f7e; expansion dikirim pada branch `feat/fe-init` sesuai instruksi pengguna; candidate SHA tersedia melalui `git log` |
-| Next focus | Gunakan Import → Case untuk 50/51/47/156/123; before50 opsional bagi51. Rebuild Docker bersih setelah DNS tersedia; source critical slots tetap unreviewed |
+| Candidate | Fix import 8437e0a di branch `feat/fe-init`, pushed dan edge VM dibangun dari candidate tersebut; source deployment sebelumnya 3875e2f |
+| Next focus | Import mengenali main WAV/CSV otomatis; Case manual tetap tersedia. Before50 opsional bagi51; source critical slots tetap unreviewed |
 | Gate | Riset corpus tidak mengubah G-BE/G-FE/G-DELIVERY; G-FE tetap blocked pada track MOCK |
 
 ## Deliverables dan decisions foundation — historis 8 Oktober 2026
@@ -478,3 +478,10 @@ Konteks baru dibaca: commits `85f57f4`/`d3762e5`/`3875e2f` menambahkan landing p
 Root cause direproduksi lewat browser VM: default scope88 + individual Choose yang langsung mengisi tile menyebabkan 50 dianggap bukan recording case terpilih. Fix frontend: main kosong dapat menginfer case unik dari WAV/CSV/full draft; kompatibilitas existing choice dipertahankan (50 before51), main terisi/companion lane tidak auto-switch, dan seluruh pick/drop/bulk lewat placement yang sama. Submission memakai inferred `scenario_id`; server checksum/combination validation unchanged. Tidak edit backend/generators/assets87/88.
 
 Checks pre-deploy: 74 Vitest PASS (9 new component regressions), typecheck/lint/check:types/check:copy/build PASS; VM reproduction + 6 browser dry-runs lokal memakai live VM catalogue, POST diintercept tanpa workspace. User mengizinkan push dan deployment VM; scope update image frontend saja, preserve API/DB/volumes dan private assets. Deployment/evidence akhir dicatat pada runbook dan completion handoff; gate dan NOT_DOMAIN_VALIDATED tidak berubah. Vite lokal5173 dimulai untuk browser QA; API lokal tidak berjalan, request QA diproxy oleh test harness ke VM.
+
+
+### Completion deployment import fix
+
+Source fix **8437e0a** pushed dan edge VM dibangun normal dari Dockerfile.edge; image `sha256:44d5c79110df4569c4d622f6ccf69ed4c02c40e8f4fa154aeacd84e94eb852ce`. API/DB container IDs unchanged, Caddy validate + public routes/health PASS, deployed ImportPage bundle SHA cocok build lokal. Sebelum update: private pg_dump custom backup + verified TOC dan rollback edge tag; detail/path/rollback pada [runbook](../docs/operations/vmDemoDeployment.md#perbaikan-import-dan-deployment-frontend--13-oktober-2026).
+
+Enam actual browser imports di VM PASS (lima standalone +51before50), termasuk CSV-first156, READY registration, attention/reminders, audio206, no future highlights saat Home, no pageerror/overflow. Case47 mengalami satu transport read timeout di request harness; independent curl206 dan fresh-browser check existing QA workspace lulus. Resume harness sempat kehilangan login MOCK pada hard navigation dan dikoreksi di helper privat, tanpa source app change. Original logs tetap disimpan; tidak mengklaim seluruh attempts tanpa failure. 13 local protected fingerprints dan 39 VM asset fingerprints unchanged. Enam QA workspaces dibersihkan secara transactional UUID+exact-name, tanpa delete/reprocess workspace pengguna. Evidence private `outputs/import-fix/`; Vite QA session45393 dihentikan. VM tetap berjalan. Follow-up commit hanya menyimpan docs/evidence; image tetap dibangun dari fix8437e0a, source checkout diperbarui ke docs commit. User untracked files tetap tidak disentuh; tidak ada perubahan gate atau klaim domain validation.

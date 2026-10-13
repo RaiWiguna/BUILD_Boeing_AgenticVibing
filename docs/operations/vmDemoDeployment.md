@@ -41,5 +41,23 @@ Lokal: lint, check:types, check:copy, 65 Vitest (4 baru untuk landing/rute), bui
 ## Batasan yang diketahui
 
 - Demo API **tanpa autentikasi server**: siapa pun dapat membuat workspace/upload melalui `/api/demo` (dibatasi ukuran). Login hanya MOCK di browser. Jangan menaruh data non-publik.
-- Tidak ada backup DB, monitoring, image digest pinning, atau rollback otomatis; restart policy `unless-stopped` bukan high availability.
+- Belum ada backup rutin/terenkripsi di luar VM, monitoring, image digest pinning otomatis, atau rollback otomatis; snapshot manual deployment bukan restore rehearsal atau high availability.
 - Label status (MOCK, synthetic ADS-B, NOT_DOMAIN_VALIDATED) tetap berlaku sesuai ADR 0003.
+
+
+## Perbaikan import dan deployment frontend — 13 Oktober 2026
+
+Candidate source **8437e0a** (`feat/fe-init`) memperbaiki auto recognition case saat main kosong dan individual Choose yang sebelumnya melewati scoped placement. Screenshot error 50 berhasil direproduksi sebelum deployment, sementara API sudah memuat enam cases. Rincian perilaku: [panduan import](../development/demoWorkspace.md#perbaikan-pengenalan-import--13-oktober-2026).
+
+Pre-deploy: 74 frontend tests, typecheck/lint/check:types/check:copy/build PASS; enam browser dry-runs frontend lokal dengan live catalogue VM, POST diintercept. Backend tidak berubah, sehingga 28 backend tests dari expansion tetap evidence historis, tidak dilaporkan dijalankan ulang pada fix ini.
+
+Deployment hanya menjalankan `build edge` dan `up -d --no-deps --no-build edge` pada Compose VM setelah fast-forward branch ke candidate. Build normal Dockerfile.edge berhasil; dependency layers dari lockfile tersedia dalam cache build. Container API dan DB mempertahankan ID sebelum deployment; volume DB/sertifikat dan private assets tidak diganti. Image frontend yang berjalan: `sha256:44d5c79110df4569c4d622f6ccf69ed4c02c40e8f4fa154aeacd84e94eb852ce`. Bundle `ImportPage-2WHeTtUR.js` eksternal mempunyai SHA sama dengan build lokal.
+
+Sebelum deployment, snapshot PostgreSQL custom-format dibuat melalui `pg_dump`, TOC diperiksa dengan `pg_restore -l`, dan image edge sebelumnya ditag `flowlens-edge:rollback-import-20261013`. Snapshot/image metadata dan 39 asset fingerprints disimpan privat dalam `~/flowlens-backups/import-fix-20261013-2u5mts/`. Snapshot tidak dicetak/dimasukkan Git; ini backup manual di VM yang sama, tanpa restore rehearsal. Seluruh 39 fingerprints tetap identik setelah deploy, termasuk assets 87/88. Caddy validate, API health (database true, 6 scenarios), `/`, `/login-flow`, `/sessions/import` HTTP 200 PASS.
+
+Rollback frontend bila diperlukan: gunakan image bertag rollback dalam override Compose service `edge`, lalu `up -d --no-deps --no-build edge`. Jangan restore DB untuk rollback frontend ini; tidak ada schema migration atau perubahan data aplikasi dari deployment.
+
+
+Post-deploy: **enam browser journeys nyata PASS** (50, 51, 47, 156, 123 standalone + 51 dengan before50), melalui UI publik tanpa memilih dropdown untuk standalone/batch inference. 156 memakai CSV-first. Semua menghasilkan workspace READY, scoped case benar, audio Range 206, attention/Keep in mind, Home tanpa future highlights, dan tanpa pageerror/overflow 1280 px; context offset 50→51 tetap 120003 ms. Satu request audio 47 dari Playwright mengalami read timeout pada attempt pertama; curl independen menerima 206/128 bytes, health tetap normal, lalu fresh-browser replay workspace yang sama lulus. Harness resume juga diperbaiki agar login MOCK tidak hilang akibat hard navigation; tidak ada perubahan aplikasi tambahan untuk retry ini.
+
+Enam workspace QA bernama prefix unik `E2E importfix` dihapus dalam transaksi dengan UUID + exact-name guards, row-count harus tepat enam. Workspace pengguna tidak dihapus/reprocess. Private evidence lokal: `outputs/import-fix/` (reproduction, dry-run/VM reports, logs/screenshots, cleanup). Vite lokal yang dimulai untuk QA telah dihentikan; stack VM tetap berjalan. Hosted CI executable belum tersedia; hasil di atas scoped demo verification, bukan domain/provider benchmark atau G-DELIVERY.
