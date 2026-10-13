@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight, Check, CircleCheck, FolderUp, Loader2, ServerOff
 import { useEffect, useRef, useState, type DragEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
-import { demoCode, type DemoWorkspace, type ProcessingStep } from '@/api/demo';
+import { demoCode, type DemoWorkspace, type FilePosition, type ProcessingStep } from '@/api/demo';
 import { qk } from '@/api/queryKeys';
 import { Card, SectionLabel } from '@/components/domain/primitives';
 import { Callout, ErrorState } from '@/components/domain/states';
@@ -22,6 +22,7 @@ import { RequireCapability } from '@/app/routing/guards';
 import { formatBytes } from '@/lib/time';
 import { cn } from '@/lib/utils';
 import { EMPTY_SLOTS, place, placedFiles, RecordingSlots, slotsReady, type Slots } from './RecordingSlots';
+import { scenarioForFiles } from './scenarioSelection';
 
 export function ImportPage() {
   return (
@@ -72,7 +73,10 @@ function UploadForm({ onCreated }: { onCreated: (w: DemoWorkspace) => void }) {
   const selected = choice ?? legacy;
   const known = selected ? { files: selected.files, expected_files: selected.files.map((f) => f.name), limits: selected.limits } : catalogue;
   if (known && unplaced.length) {
-    const r = place(slots, unplaced, known, 'main');
+    const inferred = scenarioForFiles(catalogue, selected, slots, unplaced, 'main');
+    const scope = inferred ? { files: inferred.files, expected_files: inferred.files.map((f) => f.name), limits: inferred.limits } : known;
+    const r = place(slots, unplaced, scope, 'main');
+    if (inferred) setCaseId(inferred.id);
     setSlots(r.slots);
     setRejected(r.rejected);
     setUnplaced([]);
@@ -91,6 +95,15 @@ function UploadForm({ onCreated }: { onCreated: (w: DemoWorkspace) => void }) {
     setSlots(next);
     setRejected(bad);
     setError(null);
+  };
+
+  const addFiles = (list: File[], position: FilePosition) => {
+    if (!known) return setUnplaced((u) => [...u, ...list]);
+    const inferred = scenarioForFiles(catalogue, selected, slots, list, position);
+    const scope = inferred ? { files: inferred.files, expected_files: inferred.files.map((f) => f.name), limits: inferred.limits } : known;
+    const r = place(slots, list, scope, position);
+    if (inferred) setCaseId(inferred.id);
+    change(r.slots, r.rejected);
   };
 
   const submit = async () => {
@@ -140,15 +153,11 @@ function UploadForm({ onCreated }: { onCreated: (w: DemoWorkspace) => void }) {
           <h2 className="text-[17px] font-semibold text-ink">Recordings</h2>
           <BulkPicker
             disabled={uploading}
-            onFiles={(list) => {
-              if (!known) return setUnplaced((u) => [...u, ...list]);
-              const r = place(slots, list, known, 'main');
-              change(r.slots, r.rejected);
-            }}
+            onFiles={(list) => addFiles(list, 'main')}
           />
         </div>
         <div className="mt-3">
-          <RecordingSlots slots={slots} onChange={change} known={known} disabled={uploading} />
+          <RecordingSlots slots={slots} onChange={change} onFiles={addFiles} known={known} disabled={uploading} />
         </div>
         {rejected.length > 0 && <p className="mt-2 text-[13px] text-discrepancy">Not added: {rejected.join(', ')}. Check the selected case, file type, and recording limits.</p>}
 

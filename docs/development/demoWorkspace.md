@@ -118,7 +118,7 @@ Setiap run e2e menyimpan workspace bernama `E2E demo …` di database lokal.
 
 ## Lima case tambahan — 12 Oktober 2026
 
-Expansion menambahkan **50, 51, 47, 156, 123** sebagai standalone cases. Di **Import session → Case**, pilih kasus sebelum memilih pasangan WAV + CSV dari folder berikut:
+Expansion menambahkan **50, 51, 47, 156, 123** sebagai standalone cases. Di **Import session**, pilih pasangan WAV + CSV dari folder berikut. Saat main masih kosong, case dikenali otomatis dari file; **Case** tetap dapat dipilih manual:
 
 | Case | Folder private `data/demo-scenarios/` | Isi |
 | --- | --- | --- |
@@ -158,3 +158,14 @@ Setiap kartu merujuk supporting segments/words. `pending` dijadwalkan 400 ms dan
 Runway/action readback pada 50 dan 51 tetap `AMBIGUOUS`, bukan whole-clearance `MATCHED`. Case 47 menyatakan readback tidak ada dalam cached clip; case 156 membedakan assigned 3,000 ft dari expectation FL180 yang unresolved; case 123 tidak menyatakan contact selesai. Turnout Alpha tidak digabung dengan landing Quebec. Kartu baru tidak memperoleh resolved verdict dari trajectory sintetis dan tidak menyimpulkan wrong runway, konflik, atau physical conformance. Kebutuhan human listening/domain review tetap terbuka (`NOT_DOMAIN_VALIDATED`).
 
 Renderer attention yang digunakan tetap renderer existing; penyesuaian berada pada evidence, copy, waktu, actor scope, dan reminders setiap case. Konfigurasi attention 87/88 tidak berubah. Verifikasi aplikasi yang tercatat pada 12 Oktober tetap berlaku; pembaruan 13 Oktober ini hanya memperjelas dokumentasi dari source yang diperiksa, tanpa provider call atau benchmark domain baru.
+
+
+## Perbaikan pengenalan import — 13 Oktober 2026
+
+Gejala pada VM: memilih `50.wav` lewat Choose menampilkan “Not a recording of this scenario”. Katalog API sudah memuat enam cases; form masih memakai default legacy 88 dan individual file picker mengisi tile langsung, melewati placement/scoping yang digunakan bulk/drop. Ini kegagalan pemilihan case di frontend, bukan checksum atau paket audio yang hilang.
+
+`scenarioForFiles` sekarang memilih satu case yang cocok dengan seluruh file draft dan mempunyai incoming main file, ketika main audio belum terisi. WAV-first, CSV-first, dan batch 51 + before 50 didukung. Choice yang sudah kompatibel dipertahankan, sehingga 50 tetap before pada case 51. Main yang terisi atau penambahan melalui lane companion tidak mengubah case secara otomatis. Draft lintas case/ambiguous tetap perlu diperbaiki lewat remove atau pilihan Case manual; tidak ada silent overwrite atau pembuangan file draft.
+
+Individual Choose, bulk Choose files, dan drop melewati placement/validation yang sama. Submission membawa `scenario_id` hasil pilihan tersebut. Server tetap memeriksa filename, SHA, role, position, dan kombinasi; auto recognition bukan bypass validasi. Main WAV + CSV tetap wajib. Tidak ada perubahan generator/data/highlights/timing 87/88 atau backend.
+
+Verifikasi sebelum deployment: reproduksi browser pada `flowlens.site`; 74 Vitest termasuk sembilan regression component tests baru, typecheck/lint/check:types/check:copy/build PASS. Enam browser dry-runs terhadap frontend lokal dengan katalog VM memeriksa lima standalone lewat individual Choose dan 51+50 lewat bulk, case/positions/scoped submission, no console error/overflow. POST dry-run diintercept tanpa membuat workspace. Verifikasi upload nyata setelah deployment dicatat di [runbook VM](../operations/vmDemoDeployment.md).

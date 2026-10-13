@@ -2,8 +2,8 @@
 
 | Atribut | Nilai |
 | --- | --- |
-| Tanggal pembaruan handoff | 13 Oktober 2026 (Asia/Jakarta), dokumentasi attention dan delivery branch |
-| Objective terkini | Lima case demo tambahan diimplementasikan dan diverifikasi lokal; skenario 87/88 tetap dibekukan |
+| Tanggal pembaruan handoff | 13 Oktober 2026 (Asia/Jakarta), perbaikan pengenalan import dan deployment VM |
+| Objective terkini | Perbaiki pengenalan case baru lewat Choose, push branch aktif dan deploy frontend VM; 87/88 tetap dibekukan |
 | Status | Demo workspace selesai dan terverifikasi lokal (track demo, ADR 0003). Riset transkrip/ADS-B tetap RESEARCH_ONLY / NOT_DOMAIN_VALIDATED. Foundation contract 1.0.0 tidak berubah |
 | Candidate | Baseline e325f7e; expansion dikirim pada branch `feat/fe-init` sesuai instruksi pengguna; candidate SHA tersedia melalui `git log` |
 | Next focus | Gunakan Import → Case untuk 50/51/47/156/123; before50 opsional bagi51. Rebuild Docker bersih setelah DNS tersedia; source critical slots tetap unreviewed |
@@ -469,3 +469,12 @@ Permintaan: landing page mobile-first (pengenalan produk, gaya app + referensi M
 - Deploy: `deploy/compose/vm/compose.yml`, `deploy/caddy/Caddyfile`, `deploy/docker/frontend/Dockerfile.edge`, `.dockerignore`. Docker 29.9 + Compose v5.6 dipasang di VM; clone `~/flowlens`; skenario disalin via rsync; `.env` acak dibuat di VM.
 - Checks dan batasan: lihat [runbook](../docs/operations/vmDemoDeployment.md#verifikasi-13-oktober-2026). Playwright Python suite (e2e) tidak dijalankan ulang; conftest diubah ke `/login-flow`.
 - Runtime ditinggalkan: stack `flowlens` di VM (sengaja, publik); Vite dev server lokal 5173 (preview `frontend-mock`). Gate G-BE/G-FE/G-DELIVERY tidak berubah.
+
+
+## Perbaikan import case baru — 13 Oktober 2026
+
+Konteks baru dibaca: commits `85f57f4`/`d3762e5`/`3875e2f` menambahkan landing page, `/login-flow`, polish dan deployment Caddy/Compose `flowlens.site`. Working tree user mempunyai untracked `.agent/memo.md`, `.agent/memo.pdf`, `.agent/pitch.md`, `.claude/`; tidak disentuh/stage. VM `~/flowlens` berada di branch `feat/fe-init`, source 3875e2f, API healthy dengan enam cases dan assets tersedia.
+
+Root cause direproduksi lewat browser VM: default scope88 + individual Choose yang langsung mengisi tile menyebabkan 50 dianggap bukan recording case terpilih. Fix frontend: main kosong dapat menginfer case unik dari WAV/CSV/full draft; kompatibilitas existing choice dipertahankan (50 before51), main terisi/companion lane tidak auto-switch, dan seluruh pick/drop/bulk lewat placement yang sama. Submission memakai inferred `scenario_id`; server checksum/combination validation unchanged. Tidak edit backend/generators/assets87/88.
+
+Checks pre-deploy: 74 Vitest PASS (9 new component regressions), typecheck/lint/check:types/check:copy/build PASS; VM reproduction + 6 browser dry-runs lokal memakai live VM catalogue, POST diintercept tanpa workspace. User mengizinkan push dan deployment VM; scope update image frontend saja, preserve API/DB/volumes dan private assets. Deployment/evidence akhir dicatat pada runbook dan completion handoff; gate dan NOT_DOMAIN_VALIDATED tidak berubah. Vite lokal5173 dimulai untuk browser QA; API lokal tidak berjalan, request QA diproxy oleh test harness ke VM.

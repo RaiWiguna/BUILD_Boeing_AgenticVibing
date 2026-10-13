@@ -119,11 +119,13 @@ export function slotsReady(slots: Slots, known: DemoScenarios | undefined) {
 export function RecordingSlots({
   slots,
   onChange,
+  onFiles,
   known,
   disabled,
 }: {
   slots: Slots;
   onChange: (slots: Slots, rejected: string[]) => void;
+  onFiles?: (files: File[], position: FilePosition) => void;
   known: DemoScenarios | undefined;
   disabled?: boolean;
 }) {
@@ -144,6 +146,7 @@ export function RecordingSlots({
       for (const s of ['before', 'after'] as Side[]) next[s] = next[s].filter((x) => filled(x) || x.id !== id);
     });
   const drop = (pos: FilePosition, files: File[]) => {
+    if (onFiles) return onFiles(files, pos);
     const r = place(slots, files, known, pos);
     onChange(r.slots, r.rejected);
   };
@@ -157,7 +160,7 @@ export function RecordingSlots({
         issue={issues[`${g.id}:${role}`]}
         required={pos === 'main'}
         disabled={disabled}
-        onPick={(file) => (roleOf(file.name) === role ? setFile(g.id, role, file) : drop(pos, [file]))}
+        onPick={(file) => drop(pos, [file])}
         onRemove={() => setFile(g.id, role, undefined)}
         onMove={(to) => move(g.id, role, to)}
       />
