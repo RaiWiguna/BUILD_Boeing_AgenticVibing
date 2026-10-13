@@ -10,7 +10,7 @@ Konteks produk: FlowLens mengubah audio komunikasi Tower/Ground menjadi transcri
 2. **Persetujuan regulator tidak diajukan oleh tim FlowLens.** CASR 172.085 mewajibkan **penyelenggara ATS** melakukan safety assessment untuk "implementasi dari komunikasi yang baru, pengawasan atau sistem peralatan keselamatan penting lainnya, termasuk yang menyediakan fungsi dan/atau kemampuan yang baru" sebelum perubahan dijalankan [P]. FlowLens berposisi sebagai **pemasok**; AirNav adalah **pemohon/sponsor** di hadapan DJPU (Direktorat Navigasi Penerbangan).
 3. **Penghambat teknis-hukum terbesar ada di arsitektur kita sendiri.** PRD memakai Gemini Developer API (`store=false`) yang tidak memberi jaminan lokasi pemrosesan. Di Vertex AI, **Jakarta (asia-southeast2) tidak tercantum** sebagai region dengan jaminan ML processing untuk Gemini 3.8 Flash maupun Chirp; Singapura tercantum [P]. Artinya setiap pemrosesan data nyata = **transfer data ke luar negeri** menurut PP 33/2026, dan berpotensi berbenturan dengan aturan penempatan data atau infrastruktur informasi vital, bergantung klasifikasi AirNav [V].
 4. **Rekaman ATS adalah data sensitif dengan pemilik yang jelas.** CASR 172.115 menempatkan rekaman komunikasi air-ground dan ground-ground dalam sistem kontrol dokumen dan rekaman penyelenggara [P]. Penjelasan Pasal 359 UU 1/2009 mengklasifikasikan rekaman dan transkrip pembicaraan ATS sebagai **informasi rahasia dalam konteks investigasi KNKT** [S]. Akses audio harus melalui perjanjian data dengan AirNav, bukan menangkap frekuensi radio sendiri (UU 36/1999 Pasal 40 melarang penyadapan informasi yang disalurkan melalui jaringan telekomunikasi [S]).
-5. **Advisory real-time dengan LLM generatif belum punya jalur assurance.** EASA NPA 2025-07 (AI Level 1 & 2) secara eksplisit baru mencakup ML berbasis data; AI generatif dan hybrid ditunda ke tahap berikutnya [P/S]. Belum ada regulator penerbangan yang menerbitkan jalur sertifikasi untuk LLM di posisi kerja ATC. Ini penghambat nyata untuk Tier 3 (lihat §2).
+5. **Advisory real-time dengan LLM generatif belum punya jalur assurance.** EASA NPA 2025-07 (AI Level 1 & 2) secara eksplisit baru mencakup ML berbasis data; AI generatif dan hybrid ditunda ke tahap berikutnya [S]. Belum ada regulator penerbangan yang menerbitkan jalur sertifikasi untuk LLM di posisi kerja ATC. Ini penghambat nyata untuk Tier 3 (lihat §2).
 6. **Pendukung kuat ada:** AirNav sudah mengembangkan AI asisten (NOTAM AI Generator, penjadwalan ATCO berbasis fatigue) bersama Telkom University, dengan kerja sama riset baru ditandatangani 8 Oktober 2026 [S]. Ditambah ICAO Annex 19/SMS yang mendorong analisis data keselamatan, preseden SESAR (HAAWAII, ASR TRL6) dan CAAS Singapura, serta kebijakan TKDN yang menguntungkan software lokal.
 
 **Rekomendasi inti:** definisikan "live" secara bertahap. Tahap yang paling realistis dalam 12–18 bulan adalah **Tier 2: QA/safety/training review internal AirNav atas rekaman terbaru, di luar posisi kerja**. Advisory real-time (Tier 3) diposisikan sebagai riset jangka panjang.
@@ -34,7 +34,7 @@ Tier 2 sudah dapat disebut "dipakai di berbagai bandara" tanpa menjadi bagian da
 | **UU 1/2009 Penerbangan** (sebagian dicabut UU 21/2025) | Kerangka navigasi penerbangan; Penjelasan Pasal 359: rekaman/transkrip pembicaraan ATS termasuk "informasi rahasia" hasil investigasi [S] | **Penghambat** untuk publikasi atau ekspor transcript. Pastikan output FlowLens tidak dianggap pengungkapan informasi investigasi; atur di perjanjian |
 | **PP 77/2012 Perum LPPNPI** | AirNav sebagai penyelenggara tunggal navigasi penerbangan sipil [S] | **Pendukung** (satu pintu untuk skala nasional) sekaligus **penghambat** (satu pembeli, tergantung prioritas dan pengadaan AirNav) |
 | **PM 43/2020 — CASR Part 172** (Penyelenggara Pelayanan Lalu Lintas Penerbangan) | 172.075: "fasilitas otomasi" bagian dari fasilitas ATS. 172.080: wajib SMS. **172.085**: safety assessment wajib untuk sistem baru yang menyediakan fungsi baru; implementasi hanya jika risiko dapat diterima; wajib post-implementation monitoring. 172.115: kontrol dokumen dan rekaman, termasuk rekaman komunikasi air-ground dan ground-ground, dan dapat diminta Dirjen [P] | **Penentu jalur Tier 3.** FlowLens wajib menyediakan bahan safety assessment (hazard log, mode kegagalan, mitigasi automation bias). Mekanisme detail persetujuan ke Dirjen diatur peraturan lain [V] |
-| **CASR Part 171** (Penyelenggara Pelayanan Telekomunikasi Penerbangan; KP 528/2015 untuk sertifikasi) | Fasilitas komunikasi, navigasi, dan pengamatan wajib bersertifikat (dirujuk oleh 172.075(b)) [P/S] | Relevan bila FlowLens tersambung langsung ke VCCS/recorder. Apakah software analisis termasuk "fasilitas" yang perlu sertifikat belum jelas [V] |
+| **CASR Part 171** (Penyelenggara Pelayanan Telekomunikasi Penerbangan; KP 528/2015 untuk sertifikasi) | CASR 171 mengatur sertifikasi penyelenggara telekomunikasi penerbangan [S]. Menurut 172.075(b), sertifikat ini hanya diwajibkan untuk fasilitas komunikasi, alat bantu navigasi, dan pengamatan (a.1–a.3); "fasilitas otomasi" (a.6) tidak termasuk [P] | Teks primer mengarah ke kesimpulan bahwa tool analisis/otomasi seperti FlowLens **tidak otomatis** butuh sertifikat CASR 171. Ini bisa berubah bila FlowLens tersambung ke VCCS/recorder sehingga menjadi bagian fasilitas komunikasi. Interpretasi DJPU [V] |
 | **CASR Part 69** (lisensi personel ATC, termasuk English Language Proficiency) | Standar kompetensi dan kemahiran bahasa [V] | **Pendukung** untuk Tier 1: FlowLens dapat dipakai untuk pelatihan phraseology/ELP |
 | **UU 21/2025 Pengelolaan Ruang Udara** (ditetapkan 24 Des 2025) | Pengelolaan ruang udara lintas instansi, termasuk Kemhan; detail teknologi diserahkan ke aturan pelaksana [S] | Netral saat ini. Pantau PP pelaksananya, terutama bila menyentuh data ruang udara |
 | **PM 9/2024 Program Keamanan Nasional** + IAS-CSIRT | Harmonisasi Annex 17 termasuk ancaman siber [S] | Sistem yang tersambung ke jaringan ATS akan diaudit keamanan siber |
@@ -60,7 +60,7 @@ Tier 2 sudah dapat disebut "dipakai di berbagai bandara" tanpa menjadi bagian da
 | Regulasi / kebijakan | Status | Efek bagi FlowLens |
 | --- | --- | --- |
 | **SE Menkominfo 9/2023 Etika AI** | Berlaku, tidak mengikat secara sanksi [V] | Pendukung: rujukan prinsip transparansi dan kendali manusia |
-| **Rancangan Perpres Peta Jalan AI 2026–2029 & Perpres Etika AI** | Menunggu pengesahan Presiden per September 2026; sektor prioritas belum mencakup transportasi [S] | Belum menghambat. Pantau bila terbit, terutama klasifikasi risiko |
+| **Rancangan Perpres Peta Jalan AI 2026–2029 & Perpres Etika AI** | Menunggu pengesahan Presiden per September 2026; daftar sektor yang akan diatur belum terkonfirmasi mencakup transportasi [S][V] | Belum menghambat. Pantau bila terbit, terutama klasifikasi risiko |
 | **Just culture / pemantauan controller** | ICAO Annex 19 App. 3 melindungi data keselamatan dari penggunaan untuk menyalahkan [S]; IFATCA memiliki kebijakan panjang soal penggunaan rekaman [S] | **Penghambat non-hukum terbesar.** Bila FlowLens dipakai menilai kinerja individu, PP 33 menganggapnya "pemantauan sistematis" (wajib DPIA+DPO) dan asosiasi ATCO kemungkinan menolak. Mitigasi: komitmen tertulis **purpose limitation**, yaitu tidak dipakai untuk penilaian individu atau tindakan disipliner, dan output agregat/anonim untuk QA |
 
 ### 3.5 Pengadaan
@@ -76,11 +76,11 @@ Tier 2 sudah dapat disebut "dipakai di berbagai bandara" tanpa menjadi bagian da
 | --- | --- | --- | --- |
 | **ICAO** | Annex 11 | Rekaman ATS otomatis disimpan minimal 30 hari [S] | Retensi FlowLens harus mengikuti, bukan memperpanjang tanpa dasar |
 | | Annex 19 + Doc 9859 (SMM) | SMS, manajemen perubahan, perlindungan data keselamatan [S] | Pendukung: analisis data keselamatan didorong; FlowLens bisa diposisikan sebagai alat SMS |
-| | Assembly ke-42 (2025) | Belasan working paper AI; ICAO menyepakati pendekatan terstruktur untuk mengintegrasikan AI ke pekerjaannya [P] | Belum ada SARPs AI untuk ATM |
+| | Assembly ke-42 (2025) | Belasan working paper AI; ICAO menyepakati pendekatan terstruktur untuk mengintegrasikan AI ke pekerjaannya [S] | Belum ada SARPs AI untuk ATM |
 | **Uni Eropa** | Reg. 2017/373, ATS.OR.205 | Penyedia ATS wajib safety assessment perubahan "functional system" (prosedur, SDM, peralatan termasuk software); otoritas dapat memilih untuk me-review [S] | Paralel dengan CASR 172.085 |
 | | Reg. 2023/1768 & 2023/1769 | Attestation peralatan ATM/ANS: sertifikat, declaration, atau statement of compliance; transisi sampai 13 Sep 2028 [S] | Bila FlowLens masuk sebagai equipment di EU, perlu organisasi desain/produksi yang disetujui |
 | | EU AI Act (Reg. 2024/1689) + Digital Omnibus (Reg. 2026/1744) | Aviation masuk Annex I Section B; kewajiban high-risk diterapkan melalui aturan sektoral EASA (Art. 108); tenggat Annex I mundur ke **2 Agustus 2028** [S] | Bukan tenggat langsung bagi FlowLens, tetapi menentukan isi aturan EASA |
-| | EASA NPA 2025-07 (RMT.0742) | Spesifikasi AI trustworthiness Level 1 (assistance) & Level 2 (human-AI teaming); hanya ML berbasis data; generatif ditunda; NPA lanjutan 2026 [P/S] | **Penghambat Tier 3**: belum ada jalur assurance untuk LLM. Pendukung: kerangka Level 1 cocok untuk positioning "assistance" |
+| | EASA NPA 2025-07 (RMT.0742) | Spesifikasi AI trustworthiness Level 1 (assistance) & Level 2 (human-AI teaming); hanya ML berbasis data; generatif ditunda; NPA lanjutan 2026 [S] | **Penghambat Tier 3**: belum ada jalur assurance untuk LLM. Pendukung: kerangka Level 1 cocok untuk positioning "assistance" |
 | | GDPR | Suara controller sebagai data pribadi; EUROCONTROL menerbitkan privacy statement untuk voice logging [S] | DPIA dan dasar hukum wajib |
 | **Amerika Serikat** | FAA JO 1000.37C (ATO SMS) | SRM wajib untuk perubahan NAS [S] | Paralel safety assessment |
 | | FAA Roadmap AI Safety Assurance (2024) | Prinsip: gunakan proses sertifikasi yang ada, AI sebagai pendukung keselamatan [S] | Pendukung naratif |
@@ -97,7 +97,7 @@ Kolom dibedakan antara **izin/persetujuan** (diberikan pihak lain), **kepatuhan 
 | **AirNav Indonesia (kantor pusat)**: Direktorat Operasi, Keselamatan/QA, Teknik/TI | Pemilik rekaman, penyelenggara ATS, calon pembeli, **pemohon** safety assessment | Persetujuan PoC; keputusan menjadikan FlowLens bagian SMS | — | Data sharing agreement (lingkup, tujuan, retensi, lokasi pemrosesan, larangan penilaian individu), NDA, kontrak pengendali–prosesor PDP | 2, 3 |
 | **Ditjen Perhubungan Udara — Direktorat Navigasi Penerbangan (DNP)** | Regulator ATS/ANS (CASR 171/172) | Menerima/menilai safety assessment AirNav; kemungkinan sertifikasi fasilitas bila tersambung ke sistem ATS [V] | — | — | 3 (diajukan AirNav) |
 | **BPSDM Perhubungan — PPI Curug / Poltekbang** | Lembaga diklat ATC, pemilik simulator | Izin penggunaan simulator dan kurikulum | Consent peserta | MoU riset, perjanjian data rekaman simulator | 1 |
-| **Kementerian Komunikasi dan Digital (Komdigi)** | Registrasi PSE; pengampu UU PDP sampai Badan PDP terbentuk | **Pendaftaran PSE privat via OSS** | — | — | 1–3 |
+| **Kementerian Komunikasi dan Digital (Komdigi)** | Registrasi PSE; kemungkinan pengampu UU PDP sampai Badan PDP terbentuk [V] | **Pendaftaran PSE privat via OSS** | — | — | 1–3 |
 | **Badan PDP (belum terbentuk)** | Pengawas PDP setelah Perpres terbit | — | DPIA, DPO, catatan pemrosesan, prosedur notifikasi 3×24 jam, dasar transfer lintas negara | — | 2, 3 |
 | **BSSN** (+ IAS-CSIRT Kemenhub) | Keamanan siber, IIV | Tergantung penetapan IIV [V] | Standar keamanan, pelaporan insiden | — | 3 |
 | **KNKT** | Investigasi kecelakaan/insiden | — | Aturan agar FlowLens tidak mengganggu atau membuka data investigasi | Prosedur bila rekaman terkait investigasi (freeze, tidak diekspor) | 2, 3 |
@@ -126,7 +126,7 @@ Kolom dibedakan antara **izin/persetujuan** (diberikan pihak lain), **kepatuhan 
 ## 7. Hal yang belum terverifikasi
 
 - Mekanisme formal persetujuan DJPU atas safety assessment perubahan sistem ATS (aturan pelaksana yang dirujuk 172.085(f)).
-- Apakah software analisis rekaman termasuk "fasilitas" yang wajib sertifikat CASR 171.
+- Interpretasi DJPU atas status FlowLens sebagai "fasilitas otomasi" (172.075(a)(6), tidak wajib sertifikat CASR 171 menurut teks) versus bagian fasilitas komunikasi bila tersambung ke VCCS/recorder.
 - Klasifikasi AirNav sebagai PSE lingkup publik atau privat, dan apakah sistem ATS AirNav sudah ditetapkan sebagai IIV.
 - Retensi rekaman ATS yang ditetapkan Indonesia (aturan turunan atau MOS); angka 30 hari di dokumen ini berasal dari ICAO Annex 11.
 - Region Google STT V2 untuk `chirp_3`; tabel data residency yang dibaca adalah tabel Vertex AI generative.
@@ -139,13 +139,15 @@ Kolom dibedakan antara **izin/persetujuan** (diberikan pihak lain), **kepatuhan 
 **Primer [P]**
 - PM 43/2020 — CASR Part 172: [JDIH Kemenko Infra](https://jdih.kemenkoinfra.go.id/id/peraturan-menteri-perhubungan-no-43-tahun-2020) (PDF dibaca langsung: 172.075, 172.080, 172.085, 172.115).
 - [Google Cloud — Vertex AI generative AI data residency](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/data-residency).
+
+**Dokumen resmi yang hanya dibaca lewat ringkasan pencarian [S]**
 - [ICAO A42 working papers tentang AI](https://www.icao.int/sites/default/files/Meetings/a42/Documents/WP/wp_467_en.pdf).
 - [EASA NPA 2025-07](https://www.easa.europa.eu/document-library/notices-of-proposed-amendment/npa-2025-07); [EASA ATM/ANS Equipment Attestation](https://easa.europa.eu/en/domains/air-traffic-management/atmans-equipment-attestation).
 - [FAA Roadmap for AI Safety Assurance](https://www.faa.gov/aircraft/air_cert/step/roadmap_for_AI_safety_assurance); [FAA JO 1000.37C](https://www.faa.gov/documentLibrary/media/Order/JO_1000.37C_CHG1_ATO_Safety_Management_System_(COO).pdf).
-- [UU 21/2025 Pengelolaan Ruang Udara](https://peraturan.go.id/id/uu-no-21-tahun-2025).
+- UU 21/2025 Pengelolaan Ruang Udara: [pasal.id](https://pasal.id/peraturan/uu/uu-no-21-tahun-2025), [peraturan.go.id](https://peraturan.go.id/id/uu-no-21-tahun-2025).
 - [Setkab — Perpres 82/2022 IIV](https://setkab.go.id/presiden-terbitkan-perpres-82-2022-tentang-pelindungan-infrastruktur-informasi-vital/).
 
-**Sekunder [S]**
+**Sekunder lain [S]**
 - PP 33/2026: [Veritask](https://veritask.ai/id/artikel/pengaturan-teknis-pelindungan-data-pribadi-dan-kewajiban-pengendali-serta-prosesor-akhirnya-terbit-lewat-pp-33-2026), [FWP](https://fwp.co.id/pp-33-tahun-2026-pelindungan-data-pribadi/), [Kres](https://www.kres.id/pp-33-2026-aturan-pelaksana-uu-pdp).
 - Badan PDP: [Kompas 27 Jul 2026](https://nasional.kompas.com/read/2026/07/27/15423511/komdigi-ungkap-perpres-pembentukan-badan-perlindungan-data-pribadi-sedang), [CNBC Indonesia 16 Sep 2026](https://www.cnbcindonesia.com/tech/20260916115609-37-768328/lembaga-perlindungan-data-belum-ada-di-ri-padahal-aturannya-sudah-ada).
 - Perpres AI: [Kompas.id](https://www.kompas.id/artikel/program-perpres-2026-ditetapkan-dua-rancangan-atur-etika-dan-peta-jalan-ai-nasional), [JDIH Komdigi](https://jdih.komdigi.go.id/berita/view/113).
