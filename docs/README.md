@@ -59,6 +59,8 @@ Bedakan planned, source tersedia, build berhasil, berjalan, tests lulus, provide
 
 [Panduan demo workspace](development/demoWorkspace.md) menjalankan import dua file (audio + ADS-B) ke backend Python + PostgreSQL lokal dengan playback audio, transcript bertahap dan findings progresif. Keputusan dan batasnya ada di [ADR 0003](adr/0003-demo-workspace-track.md); rencana di [demoWorkspacePlan.md](development/demoWorkspacePlan.md). Status MOCK / NOT_DOMAIN_VALIDATED; bukan G-BE.
 
+[Runbook demo VM](operations/vmDemoDeployment.md) mencatat deployment publik `flowlens.site` (landing di `/`, sign-in di `/login-flow`), operasi dan batasannya.
+
 
 ## Rencana expansion demo — 12 Oktober 2026
 

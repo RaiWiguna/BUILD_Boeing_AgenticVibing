@@ -48,3 +48,7 @@ Menulis demo ke `backend/flowlens` akan mencampur SQLite/contract gate dengan Po
 ## Expansion terpisah — 12 Oktober 2026
 
 Demo catalogue diperluas dengan lima main recordings (50, 51, 47, 156, 123), standalone; 50 eligible sebagai satu before untuk 51. New-only builders/fixtures, scoped scenario selection, per-case side limits dan additive catalogue API digunakan. Shared production contract/database/provider policy tidak berubah. Existing 87/88 assets, build, variants, timing dan findings tidak diregenerasi atau diubah. Case baru memakai cached hypotheses dan authored centre-point tracks, tanpa provider call; physical conformance tetap NOT_EVALUABLE. Detail/evidence: [completion record expansion](../development/demoScenarioExpansionPlan.md) dan [panduan](../development/demoWorkspace.md). Ini local demo, bukan G-BE/G-FE atau domain validation.
+
+## Deployment VM publik — 13 Oktober 2026
+
+Atas instruksi pengguna, track demo dideploy ke satu VM di `flowlens.site` dengan Compose (`edge` Caddy + `api` + `db`), mengikuti stack edge Caddy/Compose pada rules. Landing page publik ditambahkan di `/` dan sign-in dipindah ke `/login-flow`. Konsekuensi: demo API tanpa auth kini terjangkau internet (dibatasi ukuran body di edge); PostgreSQL tetap pengecualian ADR ini. Deployment ini tidak menutup G-BE/G-FE/G-DELIVERY. Runbook: [vmDemoDeployment.md](../operations/vmDemoDeployment.md).
