@@ -16,6 +16,7 @@ Tanggal: 8 Oktober 2026. Tree reset sudah dilengkapi foundation Phase 0–1; imp
 ## Baseline Phase 0–1
 
 - [Audit requirements/source](product/requirement-audit.md) dan [scope/dependencies](product/baseline-scope.md).
+- [Riset regulasi untuk penggunaan live di bandara](product/regulatoryResearch.md): regulasi pendukung/penghambat dan pihak yang harus diurus.
 - [Backend baseline](architecture/backend-baseline.md) dan [ADR 0002](adr/0002-frozen-backend-contracts.md).
 - [Shared contracts](api/shared-contracts.md), [developer workflow](development/backend-foundation.md), dan [A/B packets](development/backend-packets.md).
 - [Evaluation protocol](../evaluation/protocols/baseline.md) dan [checks/evidence](testing/phase01-evidence.md).
