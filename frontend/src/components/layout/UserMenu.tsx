@@ -7,6 +7,7 @@ import { ROLE_LABEL } from '@/lib/roles';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/menu';
 import { useApi } from '@/hooks/useApi';
+import { LOGIN_PATH } from '@/lib/links';
 import { cn } from '@/lib/utils';
 
 export function Avatar({ name, className }: { name: string; className?: string }) {
@@ -73,7 +74,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
         <DropdownMenuItem
           onSelect={async () => {
             await logout();
-            navigate('/login');
+            navigate(LOGIN_PATH);
           }}
         >
           <LogOut /> Sign out

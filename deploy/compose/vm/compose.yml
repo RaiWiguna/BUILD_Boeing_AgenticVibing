@@ -1,0 +1,65 @@
+# FlowLens demo on a single VM: Caddy edge (static frontend + TLS) -> demo API -> PostgreSQL.
+# Usage (from repo root on the VM):
+#   cp deploy/compose/vm/.env.example deploy/compose/vm/.env   # then set a real DEMO_DB_PASSWORD
+#   docker compose -f deploy/compose/vm/compose.yml --env-file deploy/compose/vm/.env up -d --build
+# Scenario packages are private and not in Git: place them in data/demo-scenarios/ before starting.
+name: flowlens
+
+services:
+  db:
+    image: postgres:16.9-alpine
+    environment:
+      POSTGRES_USER: flowlens
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?set DEMO_DB_PASSWORD in deploy/compose/vm/.env}
+      POSTGRES_DB: flowlens_demo
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowlens -d flowlens_demo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    mem_limit: 512m
+    # No published ports: only the API reaches the database.
+
+  api:
+    build:
+      context: ../../..
+      dockerfile: deploy/docker/backend/Dockerfile.demo
+    environment:
+      DEMO_DATABASE_URL: postgresql://flowlens:${DEMO_DB_PASSWORD:?set DEMO_DB_PASSWORD}@db:5432/flowlens_demo
+      DEMO_SCENARIO_ROOT: /scenarios
+      DEMO_PROCESSING_SCALE: ${DEMO_PROCESSING_SCALE:-1.0}
+    volumes:
+      - ../../../data/demo-scenarios:/scenarios:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    mem_limit: 768m
+    # No published ports: reachable only through the edge at /api/demo.
+
+  edge:
+    build:
+      context: ../../..
+      dockerfile: deploy/docker/frontend/Dockerfile.edge
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-flowlens.site}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    mem_limit: 256m
+
+volumes:
+  pgdata:
+  caddy-data:
+  caddy-config:

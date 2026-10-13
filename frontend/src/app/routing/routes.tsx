@@ -3,9 +3,11 @@ import { createBrowserRouter, Navigate, type RouteObject } from 'react-router';
 import { MockControlPanel } from '@/app/devtools/MockControlPanel';
 import { AppShell } from '@/components/layout/AppShell';
 import { LoginPage } from '@/features/auth/LoginPage';
+import { LandingPage } from '@/features/landing/LandingPage';
 import { ChooseSessionPage, SessionsPage } from '@/features/sessions/SessionsPage';
 import { RedirectKeepSearch, RequireAuth, SettingsIndex } from './guards';
 import { NotFound, RouteError } from './RouteError';
+import { LOGIN_PATH } from '@/lib/links';
 
 /** Route-level code splitting: each area loads its own chunk on first visit. */
 function page<M>(load: () => Promise<M>, name: keyof M): Pick<RouteObject, 'lazy'> {
@@ -37,9 +39,13 @@ function devtoolsEnabled() {
 }
 
 export const routes: RouteObject[] = [
-  { path: '/login', element: <LoginPage />, errorElement: <RouteError /> },
+  // Public product introduction. It deliberately carries no link into the sign-in flow.
+  { path: '/', element: <LandingPage />, errorElement: <RouteError /> },
+  { path: LOGIN_PATH, element: <LoginPage />, errorElement: <RouteError /> },
+  // Old sign-in URL keeps working (bookmarks, ?next= links).
+  { path: '/login', element: <RedirectKeepSearch to={LOGIN_PATH} /> },
   {
-    path: '/',
+    // Pathless layout: every app route below requires a session.
     element: (
       <RequireAuth>
         <AppShell devtools={devtoolsEnabled() ? (collapsed) => <MockControlPanel collapsed={collapsed} /> : undefined} />
@@ -47,7 +53,6 @@ export const routes: RouteObject[] = [
     ),
     errorElement: <RouteError />,
     children: [
-      { index: true, element: <Navigate to="/sessions" replace /> },
       { path: 'sessions', element: <SessionsPage /> },
       { path: 'sessions/import', ...page(imports, 'ImportPage') },
       { path: 'choose/:area', element: <ChooseSessionPage /> },

@@ -48,12 +48,12 @@ def base_url() -> str:
 @pytest.fixture
 def login(page, base_url):
     def _login(email: str = "evaluator@flowlens.test", path: str = "/sessions"):
-        page.goto(f"{base_url}/login?next={urllib.parse.quote(path, safe='/')}")
+        page.goto(f"{base_url}/login-flow?next={urllib.parse.quote(path, safe='/')}")
         page.get_by_label("Email").fill(email)
         page.get_by_label("Password", exact=True).fill(DEMO_PASSWORD)
         page.get_by_role("button", name="Sign in").click()
-        # `/login?next=/sessions` also matches a glob on the target path; wait for the redirect itself.
-        page.wait_for_url(lambda url: "/login" not in url)
+        # `/login-flow?next=/sessions` also matches a glob on the target path; wait for the redirect itself.
+        page.wait_for_url(lambda url: "/login-flow" not in url)
         return page
 
     return _login

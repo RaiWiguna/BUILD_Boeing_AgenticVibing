@@ -1,0 +1,45 @@
+# Edge for the FlowLens demo VM: static Vite build, /api/demo reverse proxy, automatic TLS.
+# The API and database are reachable only on the Compose network.
+{
+	admin off
+}
+
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+}
+
+{$SITE_DOMAIN:flowlens.site} {
+	import security_headers
+	encode zstd gzip
+
+	handle /api/demo/* {
+		# Demo import uploads audio and ADS-B files (API caps each file; this caps the request).
+		request_body {
+			max_size 200MB
+		}
+		reverse_proxy api:8000
+	}
+
+	handle {
+		root * /srv
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+		@shell not path /assets/*
+		header @shell Cache-Control "no-cache"
+		# Client-side routes (/, /login-flow, /sessions, ...) all load the SPA shell.
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+www.{$SITE_DOMAIN:flowlens.site} {
+	import security_headers
+	redir https://{$SITE_DOMAIN:flowlens.site}{uri} permanent
+}

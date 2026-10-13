@@ -1,3 +1,6 @@
+/** Sign-in route. The public landing page at `/` never links here; it is reached directly. */
+export const LOGIN_PATH = '/login-flow';
+
 /**
  * Single source for links between session screens. Every link keeps the run and
  * the lens the user chose, so neither changes without an explicit action.

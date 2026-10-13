@@ -15,6 +15,12 @@ export const F03 = mid('runway27:finding:F-03');
 export async function renderApp(path: string, email = 'evaluator@flowlens.test') {
   mockControl.getState().set({ latencyMs: [0, 0] });
   await mockApi.login(email, DEMO_PASSWORD);
+  return renderRoutes(path);
+}
+
+/** Mounts the real routes on the MOCK adapter with whatever session is current (none after logout). */
+export function renderRoutes(path: string) {
+  mockControl.getState().set({ latencyMs: [0, 0] });
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
   const router = createMemoryRouter(routes, { initialEntries: [path] });
   const utils = render(

@@ -1,0 +1,18 @@
+# Build contexts only need source; keep private data, caches and local installs out.
+.git
+.agent
+.claude
+data
+outputs
+artifacts
+evaluation
+docs
+**/node_modules
+**/dist
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+.env
+.env.*

@@ -5,6 +5,7 @@ import { AccessDenied } from '@/components/domain/states';
 import { Card } from '@/components/domain/primitives';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { LogoMark } from '@/components/layout/Logo';
+import { LOGIN_PATH } from '@/lib/links';
 
 export function FullPageLoader() {
   return (
@@ -18,7 +19,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const { session, loading } = useAuth();
   const location = useLocation();
   if (loading) return <FullPageLoader />;
-  if (!session) return <Navigate to={`/login?next=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+  if (!session) return <Navigate to={`${LOGIN_PATH}?next=${encodeURIComponent(location.pathname + location.search)}`} replace />;
   return <>{children}</>;
 }
 

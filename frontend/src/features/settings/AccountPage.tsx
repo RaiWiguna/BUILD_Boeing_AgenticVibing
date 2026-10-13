@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ROLE_LABEL } from '@/lib/roles';
 import { formatDateTimeUtc } from '@/lib/time';
 import { cn } from '@/lib/utils';
+import { LOGIN_PATH } from '@/lib/links';
 import { SettingsCard } from './SettingsLayout';
 
 export const CAPABILITY_INFO: Record<Capability, { label: string; detail: string }> = {
@@ -83,7 +84,7 @@ export function AccountPage() {
             variant="secondary"
             onClick={async () => {
               await logout();
-              navigate('/login', { replace: true });
+              navigate(LOGIN_PATH, { replace: true });
             }}
           >
             <LogOut /> Sign out
